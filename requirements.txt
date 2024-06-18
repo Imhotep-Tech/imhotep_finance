@@ -1,0 +1,9 @@
+cs50==9.3.4
+Flask==2.0.3
+Flask-Session==0.4.0
+gunicorn==20.1.0
+Jinja2==3.1.4
+werkzeug==2.0.3
+redis==4.0.0
+flask_caching==2.3.0
+flask_mail == 0.10.0

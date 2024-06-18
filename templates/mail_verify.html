@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<div class="form-container">
+
+    {% if error %}
+        <div class="error-message">
+            {{ error }}
+        </div>
+    {% endif %}
+    
+    <p class="title">Welcome</p>
+    <form action="/mail_verification" method="post" class="form" onsubmit="return validatePassword()">
+        <input type="name" class="input" placeholder="Verification Code" name="verification_code">
+        <p class="page-link"></p>
+        <button class="form-btn">Verify</button>
+    </form>
+  </div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<div class="form-container">
+
+    {% if error %}
+        <div class="error-message">
+            {{ error }} <a href="/login_page">Sign in</a>
+        </div>
+    {% endif %}
+    
+    <p class="title">Welcome</p>
+    <form action="/register" method="post" class="form" onsubmit="return validatePassword()">
+        <input type="name" class="input" placeholder="Name" name="user_name">
+      <input type="name" class="input" placeholder="Username" name="user_username">
+      <input type="mail" class="input" placeholder="E-Mail" name="user_mail">
+      <input type="password" class="input" placeholder="Password" name="user_password" id="password">
+      <input type="password" class="input" placeholder="Confirm Password" id="confirm_password">
+      <p class="page-link"></p>
+      <button class="form-btn">Sign Up</button>
+    </form>
+  </div>
+
+  <script>
+    function validatePassword() {
+        var password = document.getElementById("password").value;
+        var confirmPassword = document.getElementById("confirm_password").value;
+
+        if (password !== confirmPassword) {
+            alert("Passwords do not match!");
+            return false;
+        }
+        return true;
+    }
+</script>
+{% endblock %}
