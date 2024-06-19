@@ -10,12 +10,17 @@
 <div class="error-message">
   {{ error }}
 </div>
+{% elif error_verify %}
+<div class="error-message">
+  {{ error_verify }} <a href="/manual_mail_verification">Verify Now</a>
+</div>
+
 {% endif %}
 
 <div class="form-container">
     <p class="title">Welcome back</p>
     <form action="/login" method="POST" class="form">
-      <input type="name" class="input" placeholder="Username" name="user_username">
+      <input type="name" class="input" placeholder="Username/ E-Mail" name="user_username_mail">
       <input type="password" class="input" placeholder="Password" name="user_password">
       <p class="page-link">
         <a href="/forget_password">

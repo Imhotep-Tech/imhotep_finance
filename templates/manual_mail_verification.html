@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<div class="form-container">
+
+    {% if error %}
+        <div class="error-message">
+            {{ error }}
+        </div>
+    {% endif %}
+    
+    <p class="title">Welcome</p>
+    <form action="/manual_mail_verification" method="post" class="form">
+        <input type="name" class="input" placeholder="User E-mail" name="user_mail">
+        <p class="page-link"></p>
+        <button class="form-btn">Check</button>
+    </form>
+  </div>
+{% endblock %}
