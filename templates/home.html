@@ -2,4 +2,28 @@
 
 {% block body %}
     {% include 'nav.html' %}
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-12 text-center">
+                <h1>{{ total_favorite_currency }} {{ favorite_currency }}</h1>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-auto">
+                <form action="/deposit">
+                    <button type="submit" class="btn btn-primary">Deposit</button>
+                </form>
+            </div>
+            <div class="col-auto">
+                <form action="/show_networth_details">
+                    <button type="submit" class="btn btn-primary">Show Networth Details</button>
+                </form>
+            </div>
+            <div class="col-auto">
+                <form action="/withdraw">
+                    <button type="submit" class="btn btn-primary">Withdraw</button>
+                </form>
+            </div>
+        </div>
+    </div>
 {% endblock %}

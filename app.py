@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 import secrets
 from sqlalchemy import text
+import requests
 
 app = Flask(__name__)
 
@@ -31,6 +32,31 @@ def send_verification_mail_code(user_mail):
     mail.send(msg)
 
     session["verification_code"] = verification_code
+
+def show_networth():
+    user_id = session.get("user_id")
+    favorite_currency = db.session.execute(
+        text("SELECT favorite_currency FROM users WHERE user_id = :user_id"),
+        {"user_id": user_id}
+    ).fetchone()[0]
+
+    total_db = db.session.execute(
+        text("SELECT currency, total FROM networth WHERE user_id = :user_id"),
+        {"user_id": user_id}
+    ).fetchall()
+
+    total_db_dict = dict(total_db)
+
+    response = requests.get(f"https://v6.exchangerate-api.com/v6/7d7b7d6ff63abda67e3e5cc3/latest/{favorite_currency}")
+    data = response.json()
+    rate = data["conversion_rates"]
+    total_favorite_currency = 0
+
+    for currency, amount in total_db_dict.items():
+        converted_amount = amount / rate[currency]
+        total_favorite_currency += converted_amount
+
+    return total_favorite_currency, favorite_currency
 
 @app.route("/", methods=["GET"])
 def index():
@@ -84,8 +110,8 @@ def register():
     send_verification_mail_code(user_mail)
 
     db.session.execute(
-        text("INSERT INTO users (user_id, user_username, user_password, user_mail, user_mail_verify) VALUES (:user_id, :user_username, :user_password, :user_mail, :user_mail_verify)"),
-        {"user_id": user_id ,"user_username": user_username, "user_password": hashed_password, "user_mail": user_mail, "user_mail_verify": "not_verified"}
+        text("INSERT INTO users (user_id, user_username, user_password, user_mail, user_mail_verify, favorite_currency) VALUES (:user_id, :user_username, :user_password, :user_mail, :user_mail_verify, :favorite_currency)"),
+        {"user_id": user_id ,"user_username": user_username, "user_password": hashed_password, "user_mail": user_mail, "user_mail_verify": "not_verified", "favorite_currency": "USD"}
     )
     db.session.commit()
 
@@ -228,5 +254,127 @@ def home():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
-        return render_template("home.html")
+        total_favorite_currency, favorite_currency = show_networth()
+        total_favorite_currency = f"{total_favorite_currency:,.2f}"
+        return render_template("home.html", total_favorite_currency = total_favorite_currency, favorite_currency=favorite_currency)
+    
+@app.route("/withdraw", methods=["POST", "GET"])
+def withdraw():
+    if not session.get("logged_in"):
+        return redirect("/login_page")
+    else:
+        if request.method == "GET":
+            return render_template("withdraw.html")
+        else:
+            date = request.form.get("date")
+            amount = int(request.form.get("amount"))
+            currency = request.form.get("currency")
+            user_id = session.get("user_id")
+            
+            last_trans_id = db.session.execute(
+                    text("SELECT MAX(trans_id) FROM trans")
+                ).fetchone()[0]
+            trans_id = last_trans_id + 1
 
+            last_networth_id = db.session.execute(
+                    text("SELECT MAX(networth_id) FROM networth")
+                ).fetchone()[0]
+            networth_id = last_networth_id + 1
+
+            db.session.execute(
+                text("INSERT INTO trans (date, amount, currency, user_id, trans_id, trans_status) VALUES (:date, :amount, :currency, :user_id, :trans_id, :trans_status)"),
+                  {"date": date, "amount": amount, "currency": currency, "user_id": user_id, "trans_id": trans_id, "trans_status": "withdraw"}
+            )
+            db.session.commit()
+
+
+            try:
+                networth_db = db.session.execute(
+                    text("SELECT networth_id, total FROM networth WHERE user_id = :user_id AND currency = :currency"),
+                    {"user_id": user_id, "currency": currency}
+                ).fetchone()
+                print(networth_db)
+                networth_id = networth_db[0]
+                total = int(networth_db[1])
+
+                print(total)
+                print(type(total))
+
+                new_total = total - amount
+                db.session.execute(
+                    text("UPDATE networth SET total = :total WHERE networth_id = :networth_id"), 
+                    {"total" :new_total, "networth_id": networth_id}
+                )
+                db.session.commit()
+
+            except:
+                error = "You don't have money from that currency!"
+            return redirect("/home")
+
+@app.route("/deposit", methods=["POST", "GET"])
+def deposit():
+    if not session.get("logged_in"):
+        return redirect("/login_page")
+    else:
+        if request.method == "GET":
+            return render_template("deposit.html")
+        else:
+            date = request.form.get("date")
+            amount = int(request.form.get("amount"))
+            currency = request.form.get("currency")
+            user_id = session.get("user_id")
+            
+            last_trans_id = db.session.execute(
+                    text("SELECT MAX(trans_id) FROM trans")
+                ).fetchone()[0]
+            trans_id = last_trans_id + 1
+
+            last_networth_id = db.session.execute(
+                    text("SELECT MAX(networth_id) FROM networth")
+                ).fetchone()[0]
+            networth_id = last_networth_id + 1
+
+            db.session.execute(
+                text("INSERT INTO trans (date, amount, currency, user_id, trans_id, trans_status) VALUES (:date, :amount, :currency, :user_id, :trans_id, :trans_status)"),
+                  {"date": date, "amount": amount, "currency": currency, "user_id": user_id, "trans_id": trans_id, "trans_status": "deposit"}
+            )
+            db.session.commit()
+
+            networth_db = db.session.execute(
+                text("SELECT networth_id, total FROM networth WHERE user_id = :user_id AND currency = :currency"),
+                {"user_id": user_id, "currency": currency}
+            ).fetchone()
+
+            if networth_db:
+                networth_id = networth_db[0]
+                total = int(networth_db[1])
+
+                new_total = total + amount
+                db.session.execute(
+                    text("UPDATE networth SET total = :total WHERE networth_id = :networth_id"), 
+                    {"total" :new_total, "networth_id": networth_id}
+                )
+                db.session.commit()
+
+            else:
+                db.session.execute(
+                    text("INSERT INTO networth (networth_id,  user_id , currency, total) VALUES (:networth_id,  :user_id , :currency, :total)"),
+                    {"networth_id": networth_id, "user_id": user_id, "currency": currency, "total": amount}
+                )
+                db.session.commit()
+
+            return redirect("/home")
+
+@app.route("/show_networth_details", methods=["GET"])
+def show_networth_details():
+    if not session.get("logged_in"):
+        return redirect("/login_page")
+    else:
+        user_id = session.get("user_id")
+        networth_details_db = db.session.execute(
+            text("SELECT currency, total FROM networth WHERE user_id = :user_id"),
+            {"user_id": user_id}
+        ).fetchall()
+
+        networth_details = dict(networth_details_db)
+        return render_template("networth_details.html", networth_details=networth_details)
