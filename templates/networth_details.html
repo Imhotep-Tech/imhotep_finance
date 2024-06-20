@@ -4,7 +4,7 @@
     {% include 'nav.html' %}
     <ul>
         {% for currency, amount in networth_details.items() %}
-            <h1>{{ amount }} {{ currency }}</h1>
+            <h1>{{ "{:,.2f}".format(amount) }} {{ currency }}</h1>
         {% endfor %}
     </ul>
 {% endblock %}

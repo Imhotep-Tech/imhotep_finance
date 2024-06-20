@@ -270,35 +270,37 @@ def withdraw():
             amount = int(request.form.get("amount"))
             currency = request.form.get("currency")
             user_id = session.get("user_id")
-            
-            last_trans_id = db.session.execute(
-                    text("SELECT MAX(trans_id) FROM trans")
-                ).fetchone()[0]
-            trans_id = last_trans_id + 1
 
-            last_networth_id = db.session.execute(
-                    text("SELECT MAX(networth_id) FROM networth")
-                ).fetchone()[0]
-            networth_id = last_networth_id + 1
+            try:
+                last_trans_id = db.session.execute(
+                        text("SELECT MAX(trans_id) FROM trans WHERE user_id = :user_id"),
+                        {"user_id": user_id}
+                    ).fetchone()[0]
+                trans_id = last_trans_id + 1
+            except:
+                trans_id = 1
+
+            last_trans_key = db.session.execute(
+                text("SELECT MAX(trans_key) FROM trans")
+            ).fetchone()[0]
+            if last_trans_key:
+                trans_key = last_trans_key + 1
+            else:
+                trans_key = 1
 
             db.session.execute(
-                text("INSERT INTO trans (date, amount, currency, user_id, trans_id, trans_status) VALUES (:date, :amount, :currency, :user_id, :trans_id, :trans_status)"),
-                  {"date": date, "amount": amount, "currency": currency, "user_id": user_id, "trans_id": trans_id, "trans_status": "withdraw"}
+                text("INSERT INTO trans (date, trans_key, amount, currency, user_id, trans_id, trans_status) VALUES (:date, :trans_key, :amount, :currency, :user_id, :trans_id, :trans_status)"),
+                  {"date": date,"trans_key":trans_key, "amount": amount, "currency": currency, "user_id": user_id, "trans_id": trans_id, "trans_status": "withdraw"}
             )
             db.session.commit()
-
 
             try:
                 networth_db = db.session.execute(
                     text("SELECT networth_id, total FROM networth WHERE user_id = :user_id AND currency = :currency"),
                     {"user_id": user_id, "currency": currency}
                 ).fetchone()
-                print(networth_db)
                 networth_id = networth_db[0]
                 total = int(networth_db[1])
-
-                print(total)
-                print(type(total))
 
                 new_total = total - amount
                 db.session.execute(
@@ -324,19 +326,34 @@ def deposit():
             currency = request.form.get("currency")
             user_id = session.get("user_id")
             
-            last_trans_id = db.session.execute(
-                    text("SELECT MAX(trans_id) FROM trans")
-                ).fetchone()[0]
-            trans_id = last_trans_id + 1
+            try:
+                last_trans_id = db.session.execute(
+                        text("SELECT MAX(trans_id) FROM trans WHERE user_id = :user_id"),
+                        {"user_id": user_id}
+                    ).fetchone()[0]
+                trans_id = last_trans_id + 1
+            except:
+                trans_id = 1
+
+            last_trans_key = db.session.execute(
+                text("SELECT MAX(trans_key) FROM trans")
+            ).fetchone()[0]
+            if last_trans_key:
+                trans_key = last_trans_key + 1
+            else:
+                trans_key = 1
 
             last_networth_id = db.session.execute(
                     text("SELECT MAX(networth_id) FROM networth")
                 ).fetchone()[0]
-            networth_id = last_networth_id + 1
+            if last_networth_id:
+                networth_id = last_networth_id + 1
+            else:
+                networth_id = 1
 
             db.session.execute(
-                text("INSERT INTO trans (date, amount, currency, user_id, trans_id, trans_status) VALUES (:date, :amount, :currency, :user_id, :trans_id, :trans_status)"),
-                  {"date": date, "amount": amount, "currency": currency, "user_id": user_id, "trans_id": trans_id, "trans_status": "deposit"}
+                text("INSERT INTO trans (date, trans_key, amount, currency, user_id, trans_id, trans_status) VALUES (:date, :trans_key, :amount, :currency, :user_id, :trans_id, :trans_status)"),
+                  {"date": date,"trans_key":trans_key, "amount": amount, "currency": currency, "user_id": user_id, "trans_id": trans_id, "trans_status": "deposit"}
             )
             db.session.commit()
 

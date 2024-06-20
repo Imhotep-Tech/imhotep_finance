@@ -17,7 +17,7 @@
                 <tr>
                     <td>{{ trans.trans_id }}</td>
                     <td>{{ trans.date }}</td>
-                    <td>{{ trans.amount }}</td>
+                    <td>{{ "{:,.2f}".format(trans.amount|float) }}</td>
                     <td>{{ trans.currency }}</td>
                     <td>{{ trans.trans_status }}</td>
                 </tr>
