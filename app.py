@@ -378,3 +378,17 @@ def show_networth_details():
 
         networth_details = dict(networth_details_db)
         return render_template("networth_details.html", networth_details=networth_details)
+
+@app.route("/show_trans", methods=["GET"])
+def show_trans():
+    if not session.get("logged_in"):
+        return redirect("/login_page")
+    else:
+        user_id = session.get("user_id")
+        trans_db = db.session.execute(
+            text("SELECT * FROM trans WHERE user_id = :user_id"),
+            {"user_id": user_id}
+        ).fetchall()
+
+        print(trans_db)
+        return render_template("show_trans.html", trans_db=trans_db)

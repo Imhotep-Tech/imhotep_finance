@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+
+{% block body %}
+    {% include 'nav.html' %}
+    <table class="c">
+        <thead>
+            <tr>
+                <th>Transactions ID</th>
+                <th>Date</th>
+                <th>Amount</th>
+                <th>Currency</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for trans in trans_db %}
+                <tr>
+                    <td>{{ trans.trans_id }}</td>
+                    <td>{{ trans.date }}</td>
+                    <td>{{ trans.amount }}</td>
+                    <td>{{ trans.currency }}</td>
+                    <td>{{ trans.trans_status }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
