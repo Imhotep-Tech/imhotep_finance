@@ -7,19 +7,35 @@
             {{ error }}
         </div>
     {% endif %}
-    <form action="/withdraw" method="post">
-        <input type="date" class="input" placeholder="Date" name="date" required="">
-        <input type="number" min="0" class="input" placeholder="Amount" name="amount" required="">
-
-        <input type="text" id="searchInput1" placeholder="Search Currency" class="input">
-        <select name="currency" id="CurrencySelect1" class="input" required="">
-            <option disabled selected>Currency</option>
-            {% for currency in currency_all %}
-                <option value="{{ currency }}">{{ currency }}</option>
-            {% endfor %}
-        </select>
-        <button class="btn btn-primary" type="submit">Submit</button>
+    <form action="/withdraw" method="post" class="form-container">
+        <div class="form-group">
+            <input type="date" class="input" placeholder="Date" name="date" required="">
+        </div>
+        <div class="form-group">
+            <input type="number" min="0" class="input" placeholder="Amount" name="amount" required="">
+        </div>
+        <div class="form-group">
+            <div class="input-group">
+                <input type="text" id="searchInput1" placeholder="Search Currency" class="input">
+                <select name="currency" id="CurrencySelect1" class="input" required>
+                    <option disabled selected>Currency</option>
+                    {% for currency in currency_all %}
+                        <option value="{{ currency }}">{{ currency }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <input type="text" class="input" placeholder="Details" name="trans_details">
+        </div>
+        <div class="form-group">
+            <input type="text" class="input" placeholder="Link" name="trans_details_link">
+        </div>
+        <div class="form-group">
+            <button class="btn btn-primary" type="submit">Submit</button>
+        </div>
     </form>
+
     <script>
         const searchInput = document.getElementById('searchInput');
         const currencySelect1 = document.getElementById('CurrencySelect1');
@@ -55,5 +71,6 @@
         searchInput1.addEventListener('input', () => {
             filterOptions(searchInput1, currencySelect1, originalOptions1);
         });
+
     </script>
 {% endblock %}

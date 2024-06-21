@@ -9,6 +9,8 @@
                 <th>Date</th>
                 <th>Amount</th>
                 <th>Currency</th>
+                <th>Transaction Details</th>
+                <th>Link</th>
                 <th>Status</th>
             </tr>
         </thead>
@@ -19,6 +21,10 @@
                     <td>{{ trans.date }}</td>
                     <td>{{ "{:,.2f}".format(trans.amount|float) }}</td>
                     <td>{{ trans.currency }}</td>
+                    <td class="details-cell">{{ trans.trans_details }}</td>
+                    <td class="details-cell">
+                        <a href="{{ trans.trans_details_link }}" target="_blank" title="{{ trans.trans_details_link }}">{{ trans.trans_details_link}}</a>
+                    </td>
                     <td>{{ trans.trans_status }}</td>
                 </tr>
             {% endfor %}

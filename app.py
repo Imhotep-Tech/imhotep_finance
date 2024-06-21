@@ -111,10 +111,13 @@ def register():
         error_existing = "Mail is already in use. Please choose another one. or "
         return render_template("register.html", error=error_existing)
 
-    last_user_id = db.session.execute(
-        text("SELECT MAX(user_id) FROM users")
-    ).fetchone()[0]
-    user_id = last_user_id + 1
+    try:
+        last_user_id = db.session.execute(
+            text("SELECT MAX(user_id) FROM users")
+        ).fetchone()[0]
+        user_id = last_user_id + 1
+    except:
+        user_id = 1
 
     session["user_id"] = user_id
     hashed_password = generate_password_hash(user_password)
@@ -282,6 +285,11 @@ def deposit():
             amount = int(request.form.get("amount"))
             currency = request.form.get("currency")
             user_id = session.get("user_id")
+            trans_details = request.form.get("trans_details")
+
+            if currency == None or date == None or amount == None :
+                error = "You have to choose the currency!"
+                return render_template("deposit.html", error = error)
             
             try:
                 last_trans_id = db.session.execute(
@@ -309,8 +317,8 @@ def deposit():
                 networth_id = 1
 
             db.session.execute(
-                text("INSERT INTO trans (date, trans_key, amount, currency, user_id, trans_id, trans_status) VALUES (:date, :trans_key, :amount, :currency, :user_id, :trans_id, :trans_status)"),
-                  {"date": date,"trans_key":trans_key, "amount": amount, "currency": currency, "user_id": user_id, "trans_id": trans_id, "trans_status": "deposit"}
+                text("INSERT INTO trans (date, trans_key, amount, currency, user_id, trans_id, trans_status, trans_details) VALUES (:date, :trans_key, :amount, :currency, :user_id, :trans_id, :trans_status, :trans_details)"),
+                  {"date": date,"trans_key":trans_key, "amount": amount, "currency": currency, "user_id": user_id, "trans_id": trans_id, "trans_status": "deposit", "trans_details": trans_details}
             )
             db.session.commit()
 
@@ -354,7 +362,14 @@ def withdraw():
             amount = int(request.form.get("amount"))
             currency = request.form.get("currency")
             user_id = session.get("user_id")
+            trans_details = request.form.get("trans_details")
+            trans_details_link = request.form.get("trans_details_link")
 
+            if currency == None or date == None or amount == None :
+                error = "You have to choose the currency!"
+                currency_all = select_currencies(user_id)
+                return render_template("withdraw.html", currency_all = currency_all, error = error)
+            
             amount_of_currency = db.session.execute(
                 text("SELECT total FROM networth WHERE user_id = :user_id AND currency = :currency"),
                 {"user_id": user_id, "currency":currency}
@@ -383,8 +398,8 @@ def withdraw():
                 trans_key = 1
 
             db.session.execute(
-                text("INSERT INTO trans (date, trans_key, amount, currency, user_id, trans_id, trans_status) VALUES (:date, :trans_key, :amount, :currency, :user_id, :trans_id, :trans_status)"),
-                  {"date": date,"trans_key":trans_key, "amount": amount, "currency": currency, "user_id": user_id, "trans_id": trans_id, "trans_status": "withdraw"}
+                text("INSERT INTO trans (date, trans_key, amount, currency, user_id, trans_id, trans_status, trans_details, trans_details_link) VALUES (:date, :trans_key, :amount, :currency, :user_id, :trans_id, :trans_status, :trans_details, :trans_details_link)"),
+                  {"date": date,"trans_key":trans_key, "amount": amount, "currency": currency, "user_id": user_id, "trans_id": trans_id, "trans_status": "withdraw", "trans_details": trans_details, "trans_details_link": trans_details_link}
             )
             db.session.commit()
 

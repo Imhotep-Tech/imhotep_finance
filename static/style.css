@@ -250,3 +250,56 @@ table.c {
     transform: translateX(-50%);
     z-index: 1;
 }
+
+.form-container {
+  display: flex;
+  flex-direction: column;
+  border: none; /* To make the container border invisible */
+}
+
+.form-group {
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  border: none;
+}
+
+.input-group {
+  display: flex;
+  flex-grow: 1;
+}
+
+.input, .btn {
+  width: 100%;
+}
+
+.input {
+  margin-right: 0.5rem; /* To add some space between the input and select */
+}
+
+.c {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.c th, .c td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.details-cell {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.details-cell a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.details-cell a:hover {
+  text-decoration: underline;
+}
