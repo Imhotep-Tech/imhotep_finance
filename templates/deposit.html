@@ -3,8 +3,8 @@
 {% block body %}
     {% include 'nav.html' %}
     <form action="/deposit" method="post">
-        <input type="date" class="input" placeholder="Date" name="date">
-        <input type="number" min="0" class="input" placeholder="Amount" name="amount">
+        <input type="date" class="input" placeholder="Date" name="date" required="">
+        <input type="number" min="0" class="input" placeholder="Amount" name="amount" required="">
 
         <input type="text" id="searchInput1" placeholder="Search Currency" class="input">
         <select name="currency" id="CurrencySelect1" class="input" required="">

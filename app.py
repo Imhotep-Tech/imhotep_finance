@@ -58,6 +58,18 @@ def show_networth():
 
     return total_favorite_currency, favorite_currency
 
+def select_currencies(user_id):
+    currency_db = db.session.execute(
+        text("SELECT currency from networth WHERE user_id = :user_id"),
+        {"user_id": user_id}
+    ).fetchall()
+
+    currency_all = []
+    for item in currency_db:
+        currency_all.append(item[0])
+        
+    return(currency_all)
+
 @app.route("/", methods=["GET"])
 def index():
     return render_template("index.html")
@@ -257,61 +269,6 @@ def home():
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         return render_template("home.html", total_favorite_currency = total_favorite_currency, favorite_currency=favorite_currency)
-    
-@app.route("/withdraw", methods=["POST", "GET"])
-def withdraw():
-    if not session.get("logged_in"):
-        return redirect("/login_page")
-    else:
-        if request.method == "GET":
-            return render_template("withdraw.html")
-        else:
-            date = request.form.get("date")
-            amount = int(request.form.get("amount"))
-            currency = request.form.get("currency")
-            user_id = session.get("user_id")
-
-            try:
-                last_trans_id = db.session.execute(
-                        text("SELECT MAX(trans_id) FROM trans WHERE user_id = :user_id"),
-                        {"user_id": user_id}
-                    ).fetchone()[0]
-                trans_id = last_trans_id + 1
-            except:
-                trans_id = 1
-
-            last_trans_key = db.session.execute(
-                text("SELECT MAX(trans_key) FROM trans")
-            ).fetchone()[0]
-            if last_trans_key:
-                trans_key = last_trans_key + 1
-            else:
-                trans_key = 1
-
-            db.session.execute(
-                text("INSERT INTO trans (date, trans_key, amount, currency, user_id, trans_id, trans_status) VALUES (:date, :trans_key, :amount, :currency, :user_id, :trans_id, :trans_status)"),
-                  {"date": date,"trans_key":trans_key, "amount": amount, "currency": currency, "user_id": user_id, "trans_id": trans_id, "trans_status": "withdraw"}
-            )
-            db.session.commit()
-
-            try:
-                networth_db = db.session.execute(
-                    text("SELECT networth_id, total FROM networth WHERE user_id = :user_id AND currency = :currency"),
-                    {"user_id": user_id, "currency": currency}
-                ).fetchone()
-                networth_id = networth_db[0]
-                total = int(networth_db[1])
-
-                new_total = total - amount
-                db.session.execute(
-                    text("UPDATE networth SET total = :total WHERE networth_id = :networth_id"), 
-                    {"total" :new_total, "networth_id": networth_id}
-                )
-                db.session.commit()
-
-            except:
-                error = "You don't have money from that currency!"
-            return redirect("/home")
 
 @app.route("/deposit", methods=["POST", "GET"])
 def deposit():
@@ -382,6 +339,74 @@ def deposit():
 
             return redirect("/home")
 
+@app.route("/withdraw", methods=["POST", "GET"])
+def withdraw():
+    if not session.get("logged_in"):
+        return redirect("/login_page")
+    else:
+        if request.method == "GET":
+            user_id = session.get("user_id")
+            currency_all = select_currencies(user_id)
+            return render_template("withdraw.html", currency_all = currency_all)
+        
+        else:
+            date = request.form.get("date")
+            amount = int(request.form.get("amount"))
+            currency = request.form.get("currency")
+            user_id = session.get("user_id")
+
+            amount_of_currency = db.session.execute(
+                text("SELECT total FROM networth WHERE user_id = :user_id AND currency = :currency"),
+                {"user_id": user_id, "currency":currency}
+            ).fetchone()[0]
+
+            if amount > amount_of_currency:
+                error = "This user doesn't have this amount of this currency"
+                currency_all = select_currencies(user_id)
+                return render_template("withdraw.html", currency_all = currency_all, error=error)
+
+            try:
+                last_trans_id = db.session.execute(
+                        text("SELECT MAX(trans_id) FROM trans WHERE user_id = :user_id"),
+                        {"user_id": user_id}
+                    ).fetchone()[0]
+                trans_id = last_trans_id + 1
+            except:
+                trans_id = 1
+
+            last_trans_key = db.session.execute(
+                text("SELECT MAX(trans_key) FROM trans")
+            ).fetchone()[0]
+            if last_trans_key:
+                trans_key = last_trans_key + 1
+            else:
+                trans_key = 1
+
+            db.session.execute(
+                text("INSERT INTO trans (date, trans_key, amount, currency, user_id, trans_id, trans_status) VALUES (:date, :trans_key, :amount, :currency, :user_id, :trans_id, :trans_status)"),
+                  {"date": date,"trans_key":trans_key, "amount": amount, "currency": currency, "user_id": user_id, "trans_id": trans_id, "trans_status": "withdraw"}
+            )
+            db.session.commit()
+
+            try:
+                networth_db = db.session.execute(
+                    text("SELECT networth_id, total FROM networth WHERE user_id = :user_id AND currency = :currency"),
+                    {"user_id": user_id, "currency": currency}
+                ).fetchone()
+                networth_id = networth_db[0]
+                total = int(networth_db[1])
+
+                new_total = total - amount
+                db.session.execute(
+                    text("UPDATE networth SET total = :total WHERE networth_id = :networth_id"), 
+                    {"total" :new_total, "networth_id": networth_id}
+                )
+                db.session.commit()
+
+            except:
+                error = "You don't have money from that currency!"
+            return redirect("/home")
+        
 @app.route("/show_networth_details", methods=["GET"])
 def show_networth_details():
     if not session.get("logged_in"):
@@ -407,5 +432,4 @@ def show_trans():
             {"user_id": user_id}
         ).fetchall()
 
-        print(trans_db)
         return render_template("show_trans.html", trans_db=trans_db)

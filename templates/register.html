@@ -11,10 +11,10 @@
     
     <p class="title">Welcome</p>
     <form action="/register" method="post" class="form" onsubmit="return validatePassword()">
-      <input type="name" class="input" placeholder="Username" name="user_username">
-      <input type="mail" class="input" placeholder="E-Mail" name="user_mail">
-      <input type="password" class="input" placeholder="Password" name="user_password" id="password">
-      <input type="password" class="input" placeholder="Confirm Password" id="confirm_password">
+      <input type="name" class="input" placeholder="Username" name="user_username" required="">
+      <input type="mail" class="input" placeholder="E-Mail" name="user_mail" required="">
+      <input type="password" class="input" placeholder="Password" name="user_password" id="password" required="">
+      <input type="password" class="input" placeholder="Confirm Password" id="confirm_password" required="">
       <p class="page-link"></p>
       <button class="form-btn">Sign Up</button>
     </form>
