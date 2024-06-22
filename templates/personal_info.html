@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+
+{% block body %}
+    {% include 'nav.html' %}
+    <div class="form-container">
+
+        <div class="error-message-container">
+
+            {% if error %}
+            <div class="error-message">{{ error }}</div>
+            {% endif %}
+
+        </div>
+
+            {% if user_photo_path %}
+            <img src="{{ url_for('static', filename = '/user_photo/'+ user_photo_path) }}" alt="Image" class="user_img">
+
+            <form action="/settings/personal_info/delete_user_photo" method="post" onclick="return confirm('Are you sure you want to delete your image')">
+                <button type="submit" class="btn-orange">Delete</button><br>
+            </form>
+            
+            <form action="/settings/personal_info/upload_user_photo" method="post" enctype="multipart/form-data">
+                <input id="picture" type="file" name="file"><br><br>
+                <button type="submit" class="btn-blue">Upload</button>
+            </form>
+            
+            {% else %}
+            <form action="/settings/personal_info/upload_user_photo" method="post" enctype="multipart/form-data">
+                <input id="picture" type="file" name="file"><br><br>
+                <button type="submit" class="btn-blue">Upload</button>
+            </form>
+            <br>
+            {% endif %}
+
+            <br>
+            <form action="/settings/personal_info" method="post" class="form">
+            <label>Username</label>
+            <input type="name" class="input" placeholder="Username" value="{{ user_username }}" name="user_username" required="">
+            <label>E-mail</label>
+            <input type="mail" class="input" placeholder="E-Mail" value="{{ user_mail }}" name="user_mail" required="">
+            <p class="page-link"></p>
+            <button class="form-btn">Submit</button>
+            </form>
+    </div>
+{% endblock %}

@@ -2,25 +2,18 @@
 
 {% block body %}
     {% include 'nav.html' %}
-    
     <div class="error-message-container">
 
-        {% if error %}
-        <div class="error-message">{{ error }}</div>
+        {% if done %}
+        <div class="done-message">{{ done }}</div>
         {% endif %}
 
     </div>
-    <form action="/deposit" method="post" class="form-container">
-        <div class="form-group">
-            <input type="date" class="input" placeholder="Date" name="date" required="">
-        </div>
-        <div class="form-group">
-            <input type="number" min="0" class="input" placeholder="Amount" name="amount" required="">
-        </div>
+    <form action="/settings/favorite_currency" method="post" class="form-container">
         <div class="form-group">
             <div class="input-group">
                 <input type="text" id="searchInput1" placeholder="Search Currency" class="input">
-                <select name="currency" id="CurrencySelect1" class="input" required>
+                <select name="favorite_currency" id="CurrencySelect1" class="input" required>
                     <option disabled selected>Currency</option>
                     <option value="USD">USD</option>
                     <option value="EGP">EGP</option>
@@ -186,16 +179,10 @@
                 </select>
             </div>
         </div>
-
         <div class="form-group">
-            <input type="text" class="input" placeholder="Details" name="trans_details">
-        </div>
-
-        <div class="form-group">
-            <button class="btn-teal" type="submit">Submit</button>
+            <button  class="btn-teal" type="submit">Submit</button>
         </div>
     </form>
-
     <script>
         const searchInput = document.getElementById('searchInput');
         const currencySelect1 = document.getElementById('CurrencySelect1');
@@ -230,6 +217,21 @@
         // Event listeners for the input fields
         searchInput1.addEventListener('input', () => {
             filterOptions(searchInput1, currencySelect1, originalOptions1);
+        });
+
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const doctorCategory = "{{ favorite_currency }}"; // Fetch the doctor's category
+
+            const selectElement = document.getElementById("CurrencySelect1");
+            const options = selectElement.options;
+
+            for (let i = 0; i < options.length; i++) {
+                if (options[i].value === doctorCategory) {
+                    options[i].selected = true;
+                    break;
+                }
+            }
         });
     </script>
 {% endblock %}

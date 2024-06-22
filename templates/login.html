@@ -1,21 +1,22 @@
 {% extends "layout.html" %}
 
 {% block body %}
+<div class="error-message-container">
+  {% if success %}
+  <div class="done-message">
+      {{ success }}
+  </div>
+  {% elif error %}
+  <div class="error-message">
+    {{ error }}
+  </div>
+  {% elif error_verify %}
+  <div class="error-message">
+    {{ error_verify }} <a href="/manual_mail_verification">Verify Now</a>
+  </div>
 
-{% if success %}
-<div class="done-message">
-    {{ success }}
+  {% endif %}
 </div>
-{% elif error %}
-<div class="error-message">
-  {{ error }}
-</div>
-{% elif error_verify %}
-<div class="error-message">
-  {{ error_verify }} <a href="/manual_mail_verification">Verify Now</a>
-</div>
-
-{% endif %}
 
 <div class="form-container">
     <p class="title">Welcome back</p>

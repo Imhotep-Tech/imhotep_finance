@@ -21,7 +21,7 @@ body {
     margin: 10px 0;
     padding: 10px 20px;
     font-size: 18px;
-    background-color: #4CAF50;
+    background-color: teal;
     color: white;
     border: none;
     border-radius: 4px;
@@ -204,6 +204,16 @@ button.btn-purple {
     color: white;
 }
 
+button.btn-teal {
+  padding: 6px 10px;
+  border-radius: 5px;
+  border: none;
+  background-color: teal;
+  color: white;
+  width: 100%;
+}
+
+
 table.centered {
     text-align: center;
 }
@@ -225,18 +235,6 @@ td {
 table.c {
     table-layout: auto;
     width: 100%;
-}
-
-.error-message {
-    background-color: red;
-    color: white;
-    padding: 10px;
-    border-radius: 5px;
-    position: absolute;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1;
 }
 
 .done-message {
@@ -302,4 +300,35 @@ table.c {
 
 .details-cell a:hover {
   text-decoration: underline;
+}
+
+.error-message-container {
+  position: fixed;
+  top: 0px; /* Adjust the value to align the error message with the navigation bar */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+}
+
+.error-message {
+  background-color: red;
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.user_img {
+  aspect-ratio: 1/1;
+  object-fit: cover;
+  border-radius: 50%;
+  max-width: 100px;
+  max-height: 100px;
+}
+.user_img_nav {
+  aspect-ratio: 1/1;
+  object-fit: cover;
+  border-radius: 50%;
+  max-width: 50px;
+  max-height: 100px;
 }

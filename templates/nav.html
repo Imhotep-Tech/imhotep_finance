@@ -1,17 +1,48 @@
-<ul class="nav nav-underline" style="  position: fixed; top: 0;">
-    <li class="nav-item">
-    <a class="nav-link" href="/home">Home</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="#">Wishlist</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="/show_trans">Transactions</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" href="#">Settings</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="/logout">Logout</a>
-    </li>
-</ul>
+  <nav class="navbar bg-body-tertiary fixed-top">
+    <div class="container-fluid">
+
+        {% if user_photo_path %}
+        <a href="/settings/personal_info">
+          <img src="{{ url_for('static', filename = '/user_photo/'+ user_photo_path) }}" alt="Image" class="user_img_nav">
+        </a>
+        {% else %}
+        <a href="/settings/personal_info">
+          <img src="{{ url_for('static', filename = 'avatar-anonymous-300x300.png') }}" alt="Image" class="user_img_nav">
+        </a>
+        {% endif %}
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+        <div class="offcanvas-header">
+          <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Navigation</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+          <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="/home">Home</a>
+            </li>
+            <a class="nav-link" href="#">Wishlist</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/show_trans">Transactions</a>
+        </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Settings
+              </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/settings/personal_info">Personal Info</a></li>
+                        <li><a class="dropdown-item" href="#">Security</a></li>
+                        <li><a class="dropdown-item" href="/settings/favorite_currency">Favorite Currency</a></li>
+                    </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout">Logout</a>
+                    </li>
+            </ul>
+        </div>
+      </div>
+  </nav>

@@ -2,11 +2,13 @@
 
 {% block body %}
     {% include 'nav.html' %}
-    {% if error %}
-        <div class="error-message">
-            {{ error }}
-        </div>
-    {% endif %}
+    <div class="error-message-container">
+
+        {% if error %}
+        <div class="error-message">{{ error }}</div>
+        {% endif %}
+
+    </div>
     <form action="/withdraw" method="post" class="form-container">
         <div class="form-group">
             <input type="date" class="input" placeholder="Date" name="date" required="">
@@ -32,7 +34,7 @@
             <input type="text" class="input" placeholder="Link" name="trans_details_link">
         </div>
         <div class="form-group">
-            <button class="btn btn-primary" type="submit">Submit</button>
+            <button  class="btn-teal" type="submit">Submit</button>
         </div>
     </form>
 

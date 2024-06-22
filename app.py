@@ -5,6 +5,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import secrets
 from sqlalchemy import text
 import requests
+from werkzeug.utils import secure_filename
+import os
 
 app = Flask(__name__)
 
@@ -21,6 +23,11 @@ app.config['MAIL_USE_SSL'] = True
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://kbassem:2005@localhost/imhotepfinance'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+
+app.config["MAX_CONTENT_LENGTH"] = 3 * 1024 * 1024
+app.config["UPLOAD_FOLDER_PHOTO"] = os.path.join(os.getcwd(), "static", "user_photo")
+ALLOWED_EXTENSIONS = ("png", "jpg", "jpeg")
+
 db = SQLAlchemy(app)
 
 mail = Mail(app)
@@ -35,10 +42,7 @@ def send_verification_mail_code(user_mail):
 
 def show_networth():
     user_id = session.get("user_id")
-    favorite_currency = db.session.execute(
-        text("SELECT favorite_currency FROM users WHERE user_id = :user_id"),
-        {"user_id": user_id}
-    ).fetchone()[0]
+    favorite_currency = select_favorite_currency(user_id)
 
     total_db = db.session.execute(
         text("SELECT currency, total FROM networth WHERE user_id = :user_id"),
@@ -69,6 +73,57 @@ def select_currencies(user_id):
         currency_all.append(item[0])
         
     return(currency_all)
+
+def allowed_file(filename):
+    if "." in filename:
+        filename_check = filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+        return filename_check
+    else:
+        return False
+
+#a function that seperate the file extention form the filename by spliting it after the . and selects the index [1]
+def file_ext(filename):
+        if "." in filename:
+                file_ext = filename.split('.', 1)[1].lower()
+        return file_ext
+
+def select_user_data(user_id):
+        user_info = db.session.execute(
+        text("SELECT user_username, user_mail, user_photo_path FROM users WHERE user_id = :user_id"),
+            {"user_id": user_id}
+        ).fetchall()[0]
+        
+        user_username = user_info[0]
+        user_mail = user_info[1]
+        user_photo_path = user_info[2]
+        return user_username, user_mail, user_photo_path
+
+def select_user_photo():
+    user_id = session.get("user_id")
+    user_photo_path = db.session.execute(
+        text("SELECT user_photo_path FROM users WHERE user_id = :user_id"),
+        {"user_id": user_id}
+    ).fetchone()[0]
+    return user_photo_path
+
+def delete_photo(user_id, photo_path):
+        if os.path.exists(photo_path):
+                os.remove(photo_path)   
+                db.session.execute(
+                    text("UPDATE users SET user_photo_path = NULL WHERE user_id = :user_id"),
+                    {"user_id" :user_id}
+                )
+                db.session.commit()
+        else:
+            error = "No image associated with this doctor to delete."
+            return error
+
+def select_favorite_currency(user_id):
+        favorite_currency = db.session.execute(
+        text("SELECT favorite_currency FROM users WHERE user_id = :user_id"),
+        {"user_id" :user_id}
+        ).fetchone()[0]
+        return favorite_currency
 
 @app.route("/", methods=["GET"])
 def index():
@@ -269,9 +324,10 @@ def home():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        user_photo_path = select_user_photo()
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
-        return render_template("home.html", total_favorite_currency = total_favorite_currency, favorite_currency=favorite_currency)
+        return render_template("home.html", total_favorite_currency = total_favorite_currency, favorite_currency=favorite_currency , user_photo_path=user_photo_path)
 
 @app.route("/deposit", methods=["POST", "GET"])
 def deposit():
@@ -279,8 +335,10 @@ def deposit():
         return redirect("/login_page")
     else:
         if request.method == "GET":
-            return render_template("deposit.html")
+            user_photo_path = select_user_photo()
+            return render_template("deposit.html", user_photo_path=user_photo_path)
         else:
+            user_photo_path = select_user_photo()
             date = request.form.get("date")
             amount = int(request.form.get("amount"))
             currency = request.form.get("currency")
@@ -353,11 +411,13 @@ def withdraw():
         return redirect("/login_page")
     else:
         if request.method == "GET":
+            user_photo_path = select_user_photo()
             user_id = session.get("user_id")
             currency_all = select_currencies(user_id)
-            return render_template("withdraw.html", currency_all = currency_all)
+            return render_template("withdraw.html", currency_all = currency_all, user_photo_path=user_photo_path)
         
         else:
+            user_photo_path = select_user_photo()
             date = request.form.get("date")
             amount = int(request.form.get("amount"))
             currency = request.form.get("currency")
@@ -368,7 +428,8 @@ def withdraw():
             if currency == None or date == None or amount == None :
                 error = "You have to choose the currency!"
                 currency_all = select_currencies(user_id)
-                return render_template("withdraw.html", currency_all = currency_all, error = error)
+                user_photo_path = select_user_photo()
+                return render_template("withdraw.html", currency_all = currency_all, error = error, user_photo_path=user_photo_path)
             
             amount_of_currency = db.session.execute(
                 text("SELECT total FROM networth WHERE user_id = :user_id AND currency = :currency"),
@@ -378,7 +439,8 @@ def withdraw():
             if amount > amount_of_currency:
                 error = "This user doesn't have this amount of this currency"
                 currency_all = select_currencies(user_id)
-                return render_template("withdraw.html", currency_all = currency_all, error=error)
+                user_photo_path = select_user_photo()
+                return render_template("withdraw.html", currency_all = currency_all, error=error, user_photo_path=user_photo_path)
 
             try:
                 last_trans_id = db.session.execute(
@@ -427,6 +489,7 @@ def show_networth_details():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        user_photo_path = select_user_photo()
         user_id = session.get("user_id")
         networth_details_db = db.session.execute(
             text("SELECT currency, total FROM networth WHERE user_id = :user_id"),
@@ -434,17 +497,158 @@ def show_networth_details():
         ).fetchall()
 
         networth_details = dict(networth_details_db)
-        return render_template("networth_details.html", networth_details=networth_details)
+        return render_template("networth_details.html", networth_details=networth_details, user_photo_path=user_photo_path)
 
 @app.route("/show_trans", methods=["GET"])
 def show_trans():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        user_photo_path = select_user_photo()
         user_id = session.get("user_id")
         trans_db = db.session.execute(
             text("SELECT * FROM trans WHERE user_id = :user_id"),
             {"user_id": user_id}
         ).fetchall()
 
-        return render_template("show_trans.html", trans_db=trans_db)
+        return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path)
+    
+@app.route("/settings/personal_info", methods=["GET", "POST"])
+def personal_info():
+    if not session.get("logged_in"):
+        return redirect("/login_page")
+    else:
+        user_id = session.get("user_id") 
+        if request.method == "GET":
+            user_username, user_mail, user_photo_path = select_user_data(user_id)
+            return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path)
+        else:
+            user_username = request.form.get("user_username")
+            user_mail = request.form.get("user_mail")
+            user_photo_path = request.form.get("user_photo_path")
+            
+            user_username_mail_db = db.session.execute(
+                text("SELECT user_mail, user_username FROM users WHERE user_id = :user_id"),
+                {"user_id" :user_id}
+            ).fetchone()
+
+            user_mail_db = user_username_mail_db[0]
+            user_username_db = user_username_mail_db[1]
+
+            if user_mail != user_mail_db:
+                existing_mail = db.session.execute(
+                text("SELECT user_mail FROM users WHERE LOWER(user_mail) = :user_mail"),
+                {"user_mail": user_mail}
+                ).fetchall()
+                if existing_mail:
+                    error_existing = "Mail is already in use. Please choose another one. or "
+                    user_username, user_mail, user_photo_path = select_user_data(user_id)
+                    return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing)
+                
+                db.session.execute(
+                    text("UPDATE users SET user_mail_verify = :user_mail_verify, user_mail = :user_mail WHERE user_id = :user_id"),
+                    {"user_mail_verify" :"not_verified", "user_mail" :user_mail, "user_id":user_id}
+                )
+                db.session.commit()
+
+                send_verification_mail_code(user_mail)
+
+                return render_template("mail_verify.html")
+            
+            if user_username != user_username_db:
+                existing_username = db.session.execute(
+                    text("SELECT user_username FROM users WHERE LOWER(user_username) = :user_username"),
+                    {"user_username": user_username}
+                ).fetchall()
+
+                if existing_username:
+                    error_existing = "Username is already in use. Please choose another one. or "
+                    user_username, user_mail, user_photo_path = select_user_data(user_id)
+                    return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing)
+
+            db.session.execute(
+                text("UPDATE users SET user_username = :user_username WHERE user_id = :user_id"),
+                {"user_username" :user_username, "user_id":user_id}
+            )
+            db.session.commit()
+
+            user_username, user_mail, user_photo_path = select_user_data(user_id)
+            return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path)
+        
+@app.route("/settings/personal_info/upload_user_photo", methods=["POST"])
+def upload_user_photo():
+    if not session.get("logged_in"):
+        return redirect("/login_page")
+    else:
+        user_id = session.get("user_id")
+        if "file" in request.files:
+            file = request.files['file']
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                file_extention = file_ext(filename)
+
+                photo_name = f"{user_id}.{file_extention}"
+                photo_path = os.path.join(app.config['UPLOAD_FOLDER_PHOTO'], photo_name)
+
+                delete_photo(user_id, photo_path)
+
+                file.save(photo_path)
+
+                db.session.execute(
+                    text("UPDATE users SET user_photo_path = :user_photo_path WHERE user_id = :user_id"),
+                    {"user_photo_path": photo_name, "user_id":user_id}
+                )
+                db.session.commit()
+                user_username, user_mail, user_photo_path = select_user_data(user_id)
+                return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path)
+            else:
+                error = "Invalid file format. Allowed formats are: png, jpg, jpeg"
+                user_username, user_mail, user_photo_path = select_user_data(user_id)
+                return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error)
+        else:
+            error = "file upload failed"
+            user_username, user_mail, user_photo_path = select_user_data(user_id)
+            return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error)
+    
+@app.route("/settings/personal_info/delete_user_photo", methods=["POST"])
+def delete_user_photo():
+    if not session.get("logged_in"):
+        return redirect("/login_page")
+    else:
+        user_id = session.get("user_id")
+        photo_name = db.session.execute(
+            text("SELECT user_photo_path FROM users WHERE user_id = :user_id"),
+            {"user_id" :user_id}
+        ).fetchone()[0]
+
+        if photo_name:
+            photo_path = os.path.join(app.config['UPLOAD_FOLDER_PHOTO'], photo_name)
+
+            delete_photo(user_id, photo_path)
+            user_username, user_mail, user_photo_path = select_user_data(user_id)
+            return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path)
+        else:
+            error = "No image associated with this doctor to delete." #if this docotr don't have an image
+            user_username, user_mail, user_photo_path = select_user_data(user_id)
+            return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error)
+
+@app.route("/settings/favorite_currency", methods=["GET", "POST"])
+def favorite_currency():
+    if not session.get("logged_in"):
+        return redirect("/login_page")
+    else:
+        user_id = session.get("user_id")
+        if request.method == "GET":
+            favorite_currency = select_favorite_currency(user_id)
+            return render_template("favorite_currency.html", favorite_currency=favorite_currency)
+        else:
+            favorite_currency = request.form.get("favorite_currency")
+            db.session.execute(
+                text("UPDATE users SET favorite_currency = :favorite_currency WHERE user_id = :user_id"), 
+                {"favorite_currency" :favorite_currency, "user_id" :user_id}
+            )
+            db.session.commit()
+
+            done = f"Your favorite currency is {favorite_currency} now"
+            favorite_currency = select_favorite_currency(user_id)
+            return render_template("favorite_currency.html", done=done, favorite_currency=favorite_currency)

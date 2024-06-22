@@ -2,12 +2,13 @@
 
 {% block body %}
 <div class="form-container">
-
-    {% if error %}
-        <div class="error-message">
-            {{ error }}
-        </div>
-    {% endif %}
+    <div class="error-message-container">
+        {% if error %}
+            <div class="error-message">
+                {{ error }}
+            </div>
+        {% endif %}
+    </div>
     
     <p class="title">Welcome</p>
     <form action="/manual_mail_verification" method="post" class="form">
