@@ -125,6 +125,10 @@ def select_favorite_currency(user_id):
         ).fetchone()[0]
         return favorite_currency
 
+@app.route('/loading')
+def loading():
+    return render_template('loading.html')
+
 @app.route("/", methods=["GET"])
 def index():
     return render_template("index.html")
@@ -186,6 +190,7 @@ def register():
     db.session.commit()
 
     return render_template("mail_verify.html")
+
 @app.route("/mail_verification", methods=["POST", "GET"])
 def mail_verification():
     if request.method == "GET":
@@ -266,17 +271,24 @@ def login():
             error = "Your username is incorrect!"
             return render_template("login.html", error=error)
 
+
 @app.route("/manual_mail_verification", methods=["POST", "GET"])
 def manual_mail_verification():
     if request.method == "GET":
         return render_template("manual_mail_verification.html")
     else: 
         user_mail = (request.form.get("user_mail").strip()).lower()
-        mail_verify_db = db.session.execute(
-            text("SELECT user_id, user_mail_verify FROM users WHERE user_mail = :user_mail"), {"user_mail" : user_mail}
-            ).fetchall()[0]
-        user_id = mail_verify_db[0]
-        mail_verify = mail_verify_db[1]
+
+        try:
+            mail_verify_db = db.session.execute(
+                text("SELECT user_id, user_mail_verify FROM users WHERE user_mail = :user_mail"), {"user_mail" : user_mail}
+                ).fetchall()[0]
+            user_id = mail_verify_db[0]
+            mail_verify = mail_verify_db[1]
+        except:
+            error_not = "This mail isn't used on the webapp!"
+            return render_template("manual_mail_verification.html", error_not = error_not)
+        
         if mail_verify == "verified":
             error = "This Mail is already used and verified"
             return render_template("login.html", error=error)
@@ -358,12 +370,12 @@ def deposit():
             except:
                 trans_id = 1
 
-            last_trans_key = db.session.execute(
-                text("SELECT MAX(trans_key) FROM trans")
-            ).fetchone()[0]
-            if last_trans_key:
+            try:
+                last_trans_key = db.session.execute(
+                    text("SELECT MAX(trans_key) FROM trans")
+                ).fetchone()[0]
                 trans_key = last_trans_key + 1
-            else:
+            except:
                 trans_key = 1
 
             last_networth_id = db.session.execute(
@@ -535,6 +547,39 @@ def personal_info():
             user_mail_db = user_username_mail_db[0]
             user_username_db = user_username_mail_db[1]
 
+            if user_mail != user_mail_db and user_username != user_username_db:
+
+                existing_mail = db.session.execute(
+                text("SELECT user_mail FROM users WHERE LOWER(user_mail) = :user_mail"),
+                {"user_mail": user_mail}
+                ).fetchall()
+
+                existing_username = db.session.execute(
+                    text("SELECT user_username FROM users WHERE LOWER(user_username) = :user_username"),
+                    {"user_username": user_username}
+                ).fetchall()
+
+                if existing_mail:
+                    error_existing = "Mail is already in use. Please choose another one."
+                    user_username, user_mail, user_photo_path = select_user_data(user_id)
+                    return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing)
+                
+                if existing_username:
+                    error_existing = "Username is already in use. Please choose another one."
+                    user_username, user_mail, user_photo_path = select_user_data(user_id)
+                    return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing)
+                
+                db.session.execute(
+                    text("UPDATE users SET user_mail_verify = :user_mail_verify, user_mail = :user_mail, user_username = :user_username WHERE user_id = :user_id"),
+                    {"user_mail_verify" :"not_verified", "user_mail" :user_mail, "user_username": user_username, "user_id":user_id}
+                )
+                db.session.commit()
+
+                send_verification_mail_code(user_mail)
+                session.permanent = False
+                session["logged_in"] = False
+                return redirect("/mail_verification")
+            
             if user_mail != user_mail_db:
                 existing_mail = db.session.execute(
                 text("SELECT user_mail FROM users WHERE LOWER(user_mail) = :user_mail"),
@@ -552,8 +597,9 @@ def personal_info():
                 db.session.commit()
 
                 send_verification_mail_code(user_mail)
-
-                return render_template("mail_verify.html")
+                session.permanent = False
+                session["logged_in"] = False
+                return redirect("/mail_verification")
             
             if user_username != user_username_db:
                 existing_username = db.session.execute(
@@ -571,9 +617,9 @@ def personal_info():
                 {"user_username" :user_username, "user_id":user_id}
             )
             db.session.commit()
-
+            done = "User Name Changed Successfully!"
             user_username, user_mail, user_photo_path = select_user_data(user_id)
-            return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path)
+            return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, done = done)
         
 @app.route("/settings/personal_info/upload_user_photo", methods=["POST"])
 def upload_user_photo():
@@ -637,10 +683,11 @@ def favorite_currency():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        user_photo_path = select_user_photo()
         user_id = session.get("user_id")
         if request.method == "GET":
             favorite_currency = select_favorite_currency(user_id)
-            return render_template("favorite_currency.html", favorite_currency=favorite_currency)
+            return render_template("favorite_currency.html", favorite_currency=favorite_currency, user_photo_path=user_photo_path)
         else:
             favorite_currency = request.form.get("favorite_currency")
             db.session.execute(
@@ -651,4 +698,110 @@ def favorite_currency():
 
             done = f"Your favorite currency is {favorite_currency} now"
             favorite_currency = select_favorite_currency(user_id)
-            return render_template("favorite_currency.html", done=done, favorite_currency=favorite_currency)
+            return render_template("favorite_currency.html", done=done, favorite_currency=favorite_currency, user_photo_path=user_photo_path)
+        
+@app.route("/settings/security_check", methods=["POST", "GET"])
+def security_check():
+    if not session.get("logged_in"):
+        return redirect("/login_page")
+    else:
+        if request.method == "GET":
+            return render_template("check_pass.html")
+        else:
+            user_id = session.get("user_id")
+            check_pass = request.form.get("check_pass")
+            password_db = db.session.execute(
+                text("SELECT user_password FROM users WHERE user_id = :user_id"),
+                {"user_id" :user_id}
+            ).fetchone()[0]
+
+            if check_password_hash(password_db, check_pass):
+                return render_template("change_pass.html")
+            else:
+                error = "This password is incorrect!"
+                return render_template("check_pass.html", error = error)
+
+@app.route("/settings/security", methods=["POST", "GET"])
+def security():
+    if not session.get("logged_in"):
+        return redirect("/login_page")
+    else:
+        user_id = session.get("user_id")
+        new_password = request.form.get("new_password")
+
+        hashed_password = generate_password_hash(new_password)
+        db.session.execute(
+            text("UPDATE users SET user_password = :user_password WHERE user_id = :user_id"),
+            {"user_password" :hashed_password, "user_id" :user_id}
+        )
+        db.session.commit()
+
+        done = "You password has been changed successfully!"
+        user_photo_path = select_user_photo()
+        total_favorite_currency, favorite_currency = show_networth()
+        total_favorite_currency = f"{total_favorite_currency:,.2f}"
+        return render_template("home.html", total_favorite_currency = total_favorite_currency, favorite_currency=favorite_currency , user_photo_path=user_photo_path, done = done)
+
+@app.route("/wishlist", methods=["GET"])
+def wishlist():
+    if not session.get("logged_in"):
+        return redirect("/login_page")
+    else:
+        user_id = session.get("user_id")
+        user_photo_path = select_user_photo()
+
+        wishlist_db = db.session.execute(
+            text("SELECT * FROM wishlist WHERE user_id = :user_id"),
+            {"user_id" :user_id}
+        ).fetchall()
+        return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db)
+            
+@app.route("/add_wish", methods=["GET", "POST"])
+def add_wish():
+    if not session.get("logged_in"):
+        return redirect("/login_page")
+    else:
+        user_id = session.get("user_id")
+        user_photo_path = select_user_photo()
+        if request.method == "GET":
+            return render_template("add_wish.html", user_photo_path=user_photo_path)
+        else:
+            user_id = session.get("user_id")
+            user_photo_path = select_user_photo()
+            price = request.form.get("price")
+            currency = request.form.get("currency")
+            wish_details = request.form.get("details")
+            link = request.form.get("link")
+            year = request.form.get("year")
+            status = "pending"
+
+            try:
+                last_wish_id = db.session.execute(
+                        text("SELECT MAX(wish_id) FROM wishlist WHERE user_id = :user_id"),
+                        {"user_id": user_id}
+                    ).fetchone()[0]
+                wish_id = last_wish_id + 1
+            except:
+                wish_id = 1
+
+            try:
+                last_wish_key = db.session.execute(
+                    text("SELECT MAX(wish_key) FROM wishlist")
+                ).fetchone()[0]
+                wish_key = last_wish_key + 1
+            except:
+                wish_key = 1
+
+            db.session.execute(
+                text("INSERT INTO wishlist (wish_key, wish_id, user_id, price, currency, wish_details, link,year, status) VALUES (:wish_key, :wish_id, :user_id, :price, :currency, :wish_details, :link,:year, :status)"),
+                {"wish_key" :wish_key, "wish_id" :wish_id, "user_id" :user_id, "price" :price, "currency" :currency, "wish_details" :wish_details, "link" :link, "year" :year, "status" :status}
+            )
+            db.session.commit()
+
+            done = "wish added successfully!"
+            wishlist_db = db.session.execute(
+                text("SELECT * FROM wishlist WHERE user_id = :user_id"),
+                {"user_id" :user_id}
+            ).fetchall()
+            return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, done = done)
+

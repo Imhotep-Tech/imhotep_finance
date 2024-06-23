@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+
+{% block body %}
+    {% include 'nav.html' %}
+    <form action="/add_wish" method="get">
+        <button type="submit">Add</button>
+    </form>
+
+    <table class="c">
+        <thead>
+            <tr>
+                <th>Wish ID</th>
+                <th>Date</th>
+                <th>Price</th>
+                <th>Currency</th>
+                <th>Details</th>
+                <th>Link</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for wish in wishlist_db %}
+                <tr>
+                    <td>{{ wish.wish_id }}</td>
+                    <td>{{ wish.date }}</td>
+                    <td>{{ "{:,.2f}".format(wish.price|float) }}</td>
+                    <td>{{ wish.currency }}</td>
+                    <td class="details-cell">{{ wish.wish_details }}</td>
+                    <td class="details-cell">
+                        <a href="{{ wish.link }}" target="_blank" title="{{ wish.link }}">{{ wish.link}}</a>
+                    </td>
+                    <td>{{ wish.status }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

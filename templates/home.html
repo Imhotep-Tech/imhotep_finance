@@ -2,6 +2,15 @@
 
 {% block body %}
     {% include 'nav.html' %}
+
+    <div class="message-container">
+        {% if done %}
+            <div class="done-message">
+                {{ done }}
+            </div>
+        {% endif %}
+    </div>
+
     <div class="container">
         <div class="row align-items-center">
             <div class="col-12 text-center">

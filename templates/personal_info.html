@@ -4,10 +4,12 @@
     {% include 'nav.html' %}
     <div class="form-container">
 
-        <div class="error-message-container">
+        <div class="message-container">
 
             {% if error %}
             <div class="error-message">{{ error }}</div>
+            {% elif done %}
+            <div class="done-message">{{ done }}</div>
             {% endif %}
 
         </div>

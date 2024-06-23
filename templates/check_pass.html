@@ -1,18 +1,19 @@
 {% extends "layout.html" %}
 
 {% block body %}
+
 <div class="form-container">
     <div class="message-container">
         {% if error_not %}
             <div class="error-message">
-                {{ error_not }} <a href="/register_page">Sign Up</a>
+                {{ error }}
             </div>
         {% endif %}
     </div>
     
-    <p class="title">Welcome</p>
-    <form action="/manual_mail_verification" method="post" class="form">
-        <input type="name" class="input" placeholder="User E-mail" name="user_mail" required="">
+    <p class="title">Check Password</p>
+    <form action="/settings/security_check" method="post" class="form">
+        <input type="password" class="input" placeholder="Old Password" name="check_pass" required="">
         <p class="page-link"></p>
         <button class="form-btn">Check</button>
     </form>

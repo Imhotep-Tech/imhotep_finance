@@ -302,7 +302,15 @@ table.c {
   text-decoration: underline;
 }
 
-.error-message-container {
+.message-container {
+  position: fixed;
+  top: 0px; /* Adjust the value to align the error message with the navigation bar */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+}
+
+.message-container1 {
   position: fixed;
   top: 0px; /* Adjust the value to align the error message with the navigation bar */
   left: 50%;
