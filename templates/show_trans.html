@@ -2,32 +2,34 @@
 
 {% block body %}
     {% include 'nav.html' %}
-    <table class="c">
-        <thead>
-            <tr>
-                <th>Transactions ID</th>
-                <th>Date</th>
-                <th>Amount</th>
-                <th>Currency</th>
-                <th>Transaction Details</th>
-                <th>Link</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for trans in trans_db %}
+    <div class="container">
+        <table class="c">
+            <thead>
                 <tr>
-                    <td>{{ trans.trans_id }}</td>
-                    <td>{{ trans.date }}</td>
-                    <td>{{ "{:,.2f}".format(trans.amount|float) }}</td>
-                    <td>{{ trans.currency }}</td>
-                    <td class="details-cell">{{ trans.trans_details }}</td>
-                    <td class="details-cell">
-                        <a href="{{ trans.trans_details_link }}" target="_blank" title="{{ trans.trans_details_link }}">{{ trans.trans_details_link}}</a>
-                    </td>
-                    <td>{{ trans.trans_status }}</td>
+                    <th>Transactions ID</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Currency</th>
+                    <th>Transaction Details</th>
+                    <th>Link</th>
+                    <th>Status</th>
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                {% for trans in trans_db %}
+                    <tr>
+                        <td>{{ trans.trans_id }}</td>
+                        <td>{{ trans.date }}</td>
+                        <td>{{ "{:,.2f}".format(trans.amount|float) }}</td>
+                        <td>{{ trans.currency }}</td>
+                        <td class="details-cell">{{ trans.trans_details }}</td>
+                        <td class="details-cell">
+                            <a href="{{ trans.trans_details_link }}" target="_blank" title="{{ trans.trans_details_link }}">{{ trans.trans_details_link}}</a>
+                        </td>
+                        <td>{{ trans.trans_status }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 {% endblock %}

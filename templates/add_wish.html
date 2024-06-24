@@ -13,9 +13,8 @@
     <form action="/add_wish" method="post" class="form-container">
 
         <div class="form-group">
-            <input type="year" class="input" placeholder="Date" name="date" required="">
+            <select id="yearSelect" name="year" class="input" required></select>
         </div>
-
         <div class="form-group">
             <input type="number" min="0" class="input" placeholder="Price" name="price" required="">
         </div>
@@ -204,39 +203,53 @@
     </form>
 
     <script>
-        const searchInput = document.getElementById('searchInput');
-        const currencySelect1 = document.getElementById('CurrencySelect1');
+document.addEventListener('DOMContentLoaded', function() {
+    const yearSelect = document.getElementById('yearSelect');
+    const currentYear = new Date().getFullYear();
+    const startYear = currentYear - 50;
+    const endYear = currentYear + 50;
 
-        const originalOptions1 = [...currencySelect1.options];
-
-        function filterOptions(searchInput, currencySelect, originalOptions) {
-            const searchText = searchInput.value.toLowerCase();
-            currencySelect.innerHTML = '';
-
-            // Filter from original options
-            const filteredOptions = originalOptions.filter(option => {
-                const optionText = option.textContent.toLowerCase();
-                return optionText.includes(searchText);
-            });
-
-            // Add filtered options to the select dropdown
-            filteredOptions.forEach(option => {
-                currencySelect.appendChild(option);
-            });
-
-            // If no options match the filter, re-add the default disabled option
-            if (filteredOptions.length === 0) {
-                const defaultOption = document.createElement('option');
-                defaultOption.disabled = true;
-                defaultOption.selected = true;
-                defaultOption.textContent = 'No Match';
-                currencySelect.appendChild(defaultOption);
-            }
+    for (let year = startYear; year <= endYear; year++) {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        if (year === currentYear) {
+            option.selected = true;
         }
+        yearSelect.appendChild(option);
+    }
 
-        // Event listeners for the input fields
-        searchInput1.addEventListener('input', () => {
-            filterOptions(searchInput1, currencySelect1, originalOptions1);
+    const searchInput1 = document.getElementById('searchInput1');
+    const currencySelect1 = document.getElementById('CurrencySelect1');
+    const originalOptions1 = [...currencySelect1.options];
+
+    searchInput1.addEventListener('input', function() {
+        filterOptions(searchInput1, currencySelect1, originalOptions1);
+    });
+
+    function filterOptions(searchInput, currencySelect, originalOptions) {
+        const searchText = searchInput.value.toLowerCase();
+        currencySelect.innerHTML = '';
+
+        const filteredOptions = originalOptions.filter(option => {
+            const optionText = option.textContent.toLowerCase();
+            return optionText.includes(searchText);
         });
+
+        filteredOptions.forEach(option => {
+            currencySelect.appendChild(option);
+        });
+
+        if (filteredOptions.length === 0) {
+            const defaultOption = document.createElement('option');
+            defaultOption.disabled = true;
+            defaultOption.selected = true;
+            defaultOption.textContent = 'No Match';
+            currencySelect.appendChild(defaultOption);
+        }
+    }
+});
+
+
     </script>
 {% endblock %}

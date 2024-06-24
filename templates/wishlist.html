@@ -2,36 +2,122 @@
 
 {% block body %}
     {% include 'nav.html' %}
-    <form action="/add_wish" method="get">
-        <button type="submit">Add</button>
-    </form>
+    <div class="container">
+        <div class="message-container">
+            {% if done %}
+                <div class="done-message">{{ done }}</div>
+            {% endif %}
+        </div>
 
-    <table class="c">
-        <thead>
-            <tr>
-                <th>Wish ID</th>
-                <th>Date</th>
-                <th>Price</th>
-                <th>Currency</th>
-                <th>Details</th>
-                <th>Link</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for wish in wishlist_db %}
-                <tr>
-                    <td>{{ wish.wish_id }}</td>
-                    <td>{{ wish.date }}</td>
-                    <td>{{ "{:,.2f}".format(wish.price|float) }}</td>
-                    <td>{{ wish.currency }}</td>
-                    <td class="details-cell">{{ wish.wish_details }}</td>
-                    <td class="details-cell">
-                        <a href="{{ wish.link }}" target="_blank" title="{{ wish.link }}">{{ wish.link}}</a>
-                    </td>
-                    <td>{{ wish.status }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+        <div style=" width: 100%;">
+
+            <div style="text-align: center; width: 100%; max-width: 500px; margin: 0 auto;">
+                <h1 class="centered">{{ year }}</h1>
+
+                <form action="/filter_year_wishlist", method="get">
+                    <input type="text" id="searchInput1" placeholder="Year" class="input">
+                    <select name="year" id="YearSelect" class="input" required>
+                        <option disabled selected>Years</option>
+                        {% for year in all_years %}
+                            <option value="{{ year }}">{{ year }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <button type="submit">Submit</button>
+                </form>
+
+            </div>
+
+            <form action="/add_wish" method="get">
+                <input type="hidden" value="{{ year }}">
+                <button type="submit" style="  background-color: teal; color: white; border: none; padding: 6px 10px; border-radius: 5px;">Add</button>
+            </form>
+
+            <table class="c">
+                <thead>
+                    <tr>
+                        <th>Wish ID</th>
+                        <th>Date</th>
+                        <th>Price</th>
+                        <th>Currency</th>
+                        <th>Details</th>
+                        <th>Link</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for wish in wishlist_db %}
+                        <tr>
+                            <td>{{ wish.wish_id }}</td>
+                            <td>{{ wish.date }}</td>
+                            <td>{{ "{:,.2f}".format(wish.price|float) }}</td>
+                            <td>{{ wish.currency }}</td>
+                            <td class="details-cell">{{ wish.wish_details }}</td>
+                            <td class="details-cell">
+                                <a href="{{ wish.link }}" target="_blank" title="{{ wish.link }}">{{ wish.link}}</a>
+                            </td>
+                            <td>
+                                {% if  wish.status == 'pending' %}
+                                    -
+                                {% elif  wish.status == 'done' %}
+                                    ✓
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        const searchInput = document.getElementById('searchInput');
+        const YearSelect = document.getElementById('YearSelect');
+
+        const originalOptions1 = [...YearSelect.options];
+
+        function filterOptions(searchInput, YearSelect, originalOptions) {
+            const searchText = searchInput.value.toLowerCase();
+            YearSelect.innerHTML = '';
+
+            // Filter from original options
+            const filteredOptions = originalOptions.filter(option => {
+                const optionText = option.textContent.toLowerCase();
+                return optionText.includes(searchText);
+            });
+
+            // Add filtered options to the select dropdown
+            filteredOptions.forEach(option => {
+                YearSelect.appendChild(option);
+            });
+
+            // If no options match the filter, re-add the default disabled option
+            if (filteredOptions.length === 0) {
+                const defaultOption = document.createElement('option');
+                defaultOption.disabled = true;
+                defaultOption.selected = true;
+                defaultOption.textContent = 'No Match';
+                YearSelect.appendChild(defaultOption);
+            }
+        }
+
+        // Event listeners for the input fields
+        searchInput1.addEventListener('input', () => {
+            filterOptions(searchInput1, YearSelect, originalOptions1);
+        });
+
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const doctorCategory = "{{ year }}"; // Fetch the doctor's category
+
+            const selectElement = document.getElementById("YearSelect");
+            const options = selectElement.options;
+
+            for (let i = 0; i < options.length; i++) {
+                if (options[i].value === doctorCategory) {
+                    options[i].selected = true;
+                    break;
+                }
+            }
+        });
+    </script>
 {% endblock %}

@@ -2,13 +2,13 @@
 
 {% block body %}
     {% include 'nav.html' %}
+    
     <div class="message-container">
-
         {% if done %}
-        <div class="done-message">{{ done }}</div>
+            <div class="done-message">{{ done }}</div>
         {% endif %}
-
     </div>
+
     <form action="/settings/favorite_currency" method="post" class="form-container">
         <div class="form-group">
             <div class="input-group">

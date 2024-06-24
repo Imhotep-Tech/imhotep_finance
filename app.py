@@ -7,6 +7,7 @@ from sqlalchemy import text
 import requests
 from werkzeug.utils import secure_filename
 import os
+from datetime import date
 
 app = Flask(__name__)
 
@@ -124,6 +125,18 @@ def select_favorite_currency(user_id):
         {"user_id" :user_id}
         ).fetchone()[0]
         return favorite_currency
+
+def select_years_wishlist(user_id):
+        all_years_db = db.session.execute(
+            text("SELECT DISTINCT(year) FROM wishlist WHERE user_id = :user_id"),
+            {"user_id" :user_id}
+        ).fetchall()
+
+        all_years = []
+        for item in all_years_db:
+            all_years.append(item[0])
+
+        return all_years
 
 @app.route('/loading')
 def loading():
@@ -754,8 +767,32 @@ def wishlist():
             text("SELECT * FROM wishlist WHERE user_id = :user_id"),
             {"user_id" :user_id}
         ).fetchall()
-        return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db)
+
+        year = db.session.execute(
+            text("SELECT MAX(year) FROM wishlist WHERE user_id = :user_id"),
+            {"user_id" :user_id}
+        ).fetchone()[0]
+
+        all_years = select_years_wishlist(user_id)
+        return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years)
+
+@app.route("/filter_year_wishlist", methods=["GET"])
+def filter_year_wishlist():
+        if not session.get("logged_in"):
+            return redirect("/login_page")
+        else:
+            user_id = session.get("user_id")
+            user_photo_path = select_user_photo()
+            year = request.args.get("year")
+            wishlist_db = db.session.execute(
+                        text("SELECT * FROM wishlist WHERE user_id = :user_id and year = :year"),
+                        {"user_id" :user_id, "year" :year}
+                    ).fetchall()
             
+            all_years = select_years_wishlist(user_id)
+    
+            return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years)
+                
 @app.route("/add_wish", methods=["GET", "POST"])
 def add_wish():
     if not session.get("logged_in"):
@@ -764,6 +801,7 @@ def add_wish():
         user_id = session.get("user_id")
         user_photo_path = select_user_photo()
         if request.method == "GET":
+            year = request.form.get("year")
             return render_template("add_wish.html", user_photo_path=user_photo_path)
         else:
             user_id = session.get("user_id")
@@ -800,8 +838,66 @@ def add_wish():
 
             done = "wish added successfully!"
             wishlist_db = db.session.execute(
-                text("SELECT * FROM wishlist WHERE user_id = :user_id"),
-                {"user_id" :user_id}
+                text("SELECT * FROM wishlist WHERE user_id = :user_id and year = :year"),
+                {"user_id" :user_id, "year" :year}
             ).fetchall()
-            return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, done = done)
 
+            all_years = select_years_wishlist(user_id)
+            return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, done = done, year=year, all_years=all_years)
+        
+@app.route("/check_wish", methods=["POST"])
+def check_wish():
+    if not session.get("logged_in"):
+        return redirect("/login_page")
+    else:
+        user_id = session.get("user_id")
+        user_photo_path = select_user_photo()
+        wish_key = request.form.get("wish_key")
+
+        status_db = db.session.execute(
+            text("SELECT status FROM wishlist WHERE wish_key = :wish_key"),
+            {"wish_key" :wish_key}
+        ).fetchone()[0]
+
+        if status_db == "pending":
+            new_status = "done"
+            wishlist_data_db = db.session.execute(
+                text("SELECT * FROM wishlist WHERE wish_key = :wish_key"),
+                {"wish_key" :wish_key}
+            ).fetchone()
+        
+            currency = wishlist_data_db[3]
+            amount = wishlist_data_db[4]
+            wish_details = wishlist_data_db[7]
+            link = wishlist_data_db[6]
+            date = date.today()
+
+            try:
+                last_trans_id = db.session.execute(
+                        text("SELECT MAX(trans_id) FROM trans WHERE user_id = :user_id"),
+                        {"user_id": user_id}
+                    ).fetchone()[0]
+                trans_id = last_trans_id + 1
+            except:
+                trans_id = 1
+
+            try:
+                last_trans_key = db.session.execute(
+                    text("SELECT MAX(trans_key) FROM trans")
+                ).fetchone()[0]
+                trans_key = last_trans_key + 1
+            except:
+                trans_key = 1
+            
+            db.session.execute(
+                text("INSERT INTO trans (currency, amount, trans_details, trans_details_link, user_id, trans_id, trans_key, status, date)"),
+                {"currency" :currency, "amount" :amount, "trans_details" :wish_details, "trans_details_link" :link, "user_id" :user_id, "trans_id" :trans_id, "trans_key" :trans_key, "status" :"withdraw", "date" :date}
+            )
+        elif status_db == "done":
+            new_status = "pending"
+
+        db.session.execute(
+            text("UPDATE wishlist SET status = :status WHERE wish_key = :wish_key"),
+            {"status" :new_status, "wish_key" :wish_key}
+        )
+        db.session.commit()
