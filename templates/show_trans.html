@@ -2,6 +2,14 @@
 
 {% block body %}
     {% include 'nav.html' %}
+        
+    <div class="message-container">
+
+        {% if error %}
+        <div class="error-message">{{ error }}</div>
+        {% endif %}
+
+    </div>
     <div class="container">
         <table class="c">
             <thead>
@@ -13,6 +21,7 @@
                     <th>Transaction Details</th>
                     <th>Link</th>
                     <th>Status</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -27,6 +36,16 @@
                             <a href="{{ trans.trans_details_link }}" target="_blank" title="{{ trans.trans_details_link }}">{{ trans.trans_details_link}}</a>
                         </td>
                         <td>{{ trans.trans_status }}</td>
+                        <td>
+                            <form action="/edit_trans" method="get">
+                                <input type="hidden" name="trans_key" value="{{ trans.trans_key }}">
+                                <button type="submit">Edit</button>
+                            </form>
+                            <form action="/delete_trans" method="post">
+                                <input type="hidden" name="trans_key" value="{{ trans.trans_key }}">
+                                <button type="submit">Delete</button>
+                            </form>
+                        </td>
                     </tr>
                 {% endfor %}
             </tbody>

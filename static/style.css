@@ -8,7 +8,7 @@ body {
 }
 
 .container {
-  padding-top: 80px;
+  margin-top: 80px;
 }
 
 .centered-buttons {
@@ -34,7 +34,7 @@ body {
 
 .form-container {
     width: 350px;
-    height: 500px;
+    height: 550px;
     background-color: #fff;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
     border-radius: 10px;

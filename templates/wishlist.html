@@ -2,14 +2,19 @@
 
 {% block body %}
     {% include 'nav.html' %}
+
     <div class="container">
         <div class="message-container">
             {% if done %}
                 <div class="done-message">{{ done }}</div>
+
+            {% elif error %}
+                <div class="error-message">{{ error }}</div>
             {% endif %}
+
         </div>
 
-        <div style=" width: 100%;">
+        <div style=" width: 100%;" class="container">
 
             <div style="text-align: center; width: 100%; max-width: 500px; margin: 0 auto;">
                 <h1 class="centered">{{ year }}</h1>
@@ -37,7 +42,7 @@
                 <thead>
                     <tr>
                         <th>Wish ID</th>
-                        <th>Date</th>
+                        <th>Year</th>
                         <th>Price</th>
                         <th>Currency</th>
                         <th>Details</th>
@@ -49,7 +54,7 @@
                     {% for wish in wishlist_db %}
                         <tr>
                             <td>{{ wish.wish_id }}</td>
-                            <td>{{ wish.date }}</td>
+                            <td>{{ wish.year }}</td>
                             <td>{{ "{:,.2f}".format(wish.price|float) }}</td>
                             <td>{{ wish.currency }}</td>
                             <td class="details-cell">{{ wish.wish_details }}</td>
@@ -57,11 +62,27 @@
                                 <a href="{{ wish.link }}" target="_blank" title="{{ wish.link }}">{{ wish.link}}</a>
                             </td>
                             <td>
-                                {% if  wish.status == 'pending' %}
-                                    -
-                                {% elif  wish.status == 'done' %}
-                                    ✓
-                                {% endif %}
+                                <form action="/check_wish" method="post">
+                                    <input name="wish_key" type="hidden" value="{{wish.wish_key}}">
+                                    {% if  wish.status == 'pending' %}
+                                        <button type="submit">-</button>
+                                    {% elif  wish.status == 'done' %}
+                                        <button type="submit">✓</button>
+                                        
+                                    {% endif %}
+                                </form>
+                            </td>
+                            {% if wish.status == 'pending' %}
+                            <td>
+                                <form action="/edit_wish" method="get">
+                                    <input type="hidden" name="wish_key" value="{{ wish.wish_key }}">
+                                    <button type="submit">Edit</button>
+                                </form>
+                                <form action="/delete_wish" method="post">
+                                    <input type="hidden" name="wish_key" value="{{ wish.wish_key }}">
+                                    <button type="submit">Delete</button>
+                                </form>
+                            {% endif %}
                             </td>
                         </tr>
                     {% endfor %}
@@ -69,6 +90,7 @@
             </table>
         </div>
     </div>
+    
     <script>
         const searchInput = document.getElementById('searchInput');
         const YearSelect = document.getElementById('YearSelect');

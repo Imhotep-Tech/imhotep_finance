@@ -137,7 +137,18 @@ def select_years_wishlist(user_id):
             all_years.append(item[0])
 
         return all_years
+def wishlist_page(user_id):
+        wishlist_db = db.session.execute(
+            text("SELECT * FROM wishlist WHERE user_id = :user_id ORDER BY year DESC"),
+            {"user_id" :user_id}
+        ).fetchall()
 
+        year = db.session.execute(
+            text("SELECT MAX(year) FROM wishlist WHERE user_id = :user_id"),
+            {"user_id" :user_id}
+        ).fetchone()[0]
+        return year, wishlist_db
+        
 @app.route('/loading')
 def loading():
     return render_template('loading.html')
@@ -538,6 +549,138 @@ def show_trans():
 
         return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path)
     
+@app.route("/edit_trans", methods=["POST", "GET"])
+def edit_trans():
+    if not session.get("logged_in"):
+        return redirect("/login_page")
+    else:
+        user_photo_path = select_user_photo()
+        user_id = session.get("user_id")
+        if request.method == "GET":
+            trans_key = request.args.get("trans_key")
+            trans_db = db.session.execute(
+                text("SELECT * FROM trans WHERE trans_key = :trans_key"),
+                {"trans_key" :trans_key}
+            ).fetchall()[0]
+            return render_template("edit_trans.html", trans_db = trans_db, user_photo_path=user_photo_path)
+        
+        else:
+            trans_key = request.form.get("trans_key")
+            currency = request.form.get("currency")
+            date = request.form.get("date")
+            amount = request.form.get("amount")
+            trans_details = request.form.get("trans_details")
+            trans_details_link = request.form.get("trans_details_link")
+
+            amount_currency_db = db.session.execute(
+                text("SELECT amount, currency, trans_status FROM trans WHERE trans_key = :trans_key"),
+                {"trans_key" :trans_key}
+            ).fetchone()
+
+            amount_db = int(amount_currency_db[0])
+            status_db = amount_currency_db[2]
+
+            total_db = db.session.execute(
+                text("SELECT total from networth WHERE user_id = :user_id and currency = :currency"),
+                {"user_id" :user_id, "currency" :currency}
+            ).fetchone()[0]
+
+            total_db = int(total_db)
+
+            if status_db == "withdraw":
+                total_db += amount_db
+                total = total_db - int(amount)
+
+            elif status_db == "deposit":
+                total_db -= amount_db
+                total = total_db + int(amount)
+
+            if total < 0:
+                error = "you don't have enough money from this currency!"
+                trans_db = db.session.execute(
+                    text("SELECT * FROM trans WHERE trans_key = :trans_key"),
+                    {"trans_key" :trans_key}
+                ).fetchall()[0]
+                return render_template("edit_trans.html", trans_db = trans_db, user_photo_path=user_photo_path, error=error)
+            
+            db.session.execute(
+                text("UPDATE trans SET  date = :date, trans_details = :trans_details, trans_details_link = :trans_details_link, amount = :amount WHERE trans_key = :trans_key"),
+                {"date" :date, "trans_details" :trans_details, "trans_details_link" :trans_details_link, "amount" :amount, "trans_key" :trans_key}
+            )
+            db.session.commit()
+
+            db.session.execute(
+                text("UPDATE networth SET total = :total WHERE user_id = :user_id and currency = :currency"),
+                {"total" :total, "user_id" :user_id, "currency" :currency}
+            )
+            db.session.commit()
+
+            trans_db = db.session.execute(
+                text("SELECT * FROM trans WHERE user_id = :user_id"),
+                {"user_id": user_id}
+            ).fetchall()
+
+            return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path)
+        
+@app.route("/delete_trans", methods=["POST"])
+def delete_trans():
+    if not session.get("logged_in"):
+        return redirect("/login_page")
+    else:
+        user_photo_path = select_user_photo()
+        user_id = session.get("user_id")
+        trans_key = request.form.get("trans_key")
+        trans_db = db.session.execute(
+            text("SELECT amount, currency, trans_status FROM trans WHERE trans_key = :trans_key"),
+            {"trans_key" :trans_key}
+        ).fetchone()
+
+        amount_db = trans_db[0]
+        currency_db = trans_db[1]
+        trans_status_db = trans_db[2]
+
+        total_db = db.session.execute(
+            text("SELECT total FROM networth WHERE user_id = :user_id and currency = :currency"),
+            {"user_id" :user_id, "currency" :currency_db}
+        ).fetchone()[0]
+
+        if trans_status_db == "deposit":
+            total = total_db - int(amount_db)
+            if total < 0:
+                error = "You can't delete this transaction"
+                trans_db = db.session.execute(
+                    text("SELECT * FROM trans WHERE user_id = :user_id"),
+                    {"user_id": user_id}
+                ).fetchall()
+                return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, error = error)
+        
+        elif trans_status_db == "withdraw":
+            total = total_db + int(amount_db)
+
+        db.session.execute(
+            text("DELETE FROM trans WHERE trans_key = :trans_key"),
+            {"trans_key" :trans_key}
+        )
+        db.session.commit()
+
+        db.session.execute(
+            text("UPDATE networth SET total = :total WHERE user_id = :user_id AND currency = :currency"),
+            {"total" :total, "user_id" :user_id, "currency" :currency_db}
+        )
+        db.session.commit()
+
+        db.session.execute(
+            text("UPDATE wishlist SET status = :status WHERE trans_key = :trans_key"),
+            {"status" :"pending", "trans_key" :trans_key}
+        )
+        db.session.commit()
+        
+        trans_db = db.session.execute(
+            text("SELECT * FROM trans WHERE user_id = :user_id"),
+            {"user_id": user_id}
+        ).fetchall()
+
+        return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path)
 @app.route("/settings/personal_info", methods=["GET", "POST"])
 def personal_info():
     if not session.get("logged_in"):
@@ -763,16 +906,7 @@ def wishlist():
         user_id = session.get("user_id")
         user_photo_path = select_user_photo()
 
-        wishlist_db = db.session.execute(
-            text("SELECT * FROM wishlist WHERE user_id = :user_id"),
-            {"user_id" :user_id}
-        ).fetchall()
-
-        year = db.session.execute(
-            text("SELECT MAX(year) FROM wishlist WHERE user_id = :user_id"),
-            {"user_id" :user_id}
-        ).fetchone()[0]
-
+        year, wishlist_db = wishlist_page(user_id)
         all_years = select_years_wishlist(user_id)
         return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years)
 
@@ -785,7 +919,7 @@ def filter_year_wishlist():
             user_photo_path = select_user_photo()
             year = request.args.get("year")
             wishlist_db = db.session.execute(
-                        text("SELECT * FROM wishlist WHERE user_id = :user_id and year = :year"),
+                        text("SELECT * FROM wishlist WHERE user_id = :user_id and year = :year ORDER BY year DESC"),
                         {"user_id" :user_id, "year" :year}
                     ).fetchall()
             
@@ -838,7 +972,7 @@ def add_wish():
 
             done = "wish added successfully!"
             wishlist_db = db.session.execute(
-                text("SELECT * FROM wishlist WHERE user_id = :user_id and year = :year"),
+                text("SELECT * FROM wishlist WHERE user_id = :user_id and year = :year ORDER BY year DESC"),
                 {"user_id" :user_id, "year" :year}
             ).fetchall()
 
@@ -854,50 +988,160 @@ def check_wish():
         user_photo_path = select_user_photo()
         wish_key = request.form.get("wish_key")
 
-        status_db = db.session.execute(
-            text("SELECT status FROM wishlist WHERE wish_key = :wish_key"),
-            {"wish_key" :wish_key}
-        ).fetchone()[0]
-
-        if status_db == "pending":
-            new_status = "done"
-            wishlist_data_db = db.session.execute(
+        wishlist_data_db = db.session.execute(
                 text("SELECT * FROM wishlist WHERE wish_key = :wish_key"),
                 {"wish_key" :wish_key}
             ).fetchone()
         
-            currency = wishlist_data_db[3]
-            amount = wishlist_data_db[4]
-            wish_details = wishlist_data_db[7]
-            link = wishlist_data_db[6]
-            date = date.today()
+        currency = wishlist_data_db[3]
+        amount = wishlist_data_db[4]
+        status = wishlist_data_db[5]
+        wish_details = wishlist_data_db[7]
+        link = wishlist_data_db[6]
+        current_date = date.today()
 
-            try:
-                last_trans_id = db.session.execute(
-                        text("SELECT MAX(trans_id) FROM trans WHERE user_id = :user_id"),
-                        {"user_id": user_id}
+        if currency in select_currencies(user_id):
+
+            total_db = db.session.execute(
+                text("SELECT total FROM networth WHERE user_id = :user_id AND currency = :currency"),
+                {"user_id" :user_id, "currency" :currency}
+            ).fetchone()[0]
+
+            if int(total_db) < int(amount) and status == "pending":
+                error = "You don't have on your balance this currency!"
+                year, wishlist_db = wishlist_page(user_id)
+                all_years = select_years_wishlist(user_id)
+                return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, error = error)
+            else:
+                try:
+                    last_trans_key = db.session.execute(
+                        text("SELECT MAX(trans_key) FROM trans")
                     ).fetchone()[0]
-                trans_id = last_trans_id + 1
-            except:
-                trans_id = 1
+                    trans_key = last_trans_key + 1
+                except:
+                    trans_key = 1
+                
+                if status == "pending":
+                    new_total = int(total_db) - int(amount)
+                    new_status = "done"
 
-            try:
-                last_trans_key = db.session.execute(
-                    text("SELECT MAX(trans_key) FROM trans")
-                ).fetchone()[0]
-                trans_key = last_trans_key + 1
-            except:
-                trans_key = 1
+                    try:
+                        last_trans_id = db.session.execute(
+                                text("SELECT MAX(trans_id) FROM trans WHERE user_id = :user_id"),
+                                {"user_id": user_id}
+                            ).fetchone()[0]
+                        trans_id = last_trans_id + 1
+                    except:
+                        trans_id = 1
+                    
+                    db.session.execute(
+                        text("INSERT INTO trans (currency, amount, trans_details, trans_details_link, user_id, trans_id, trans_key, trans_status, date) VALUES(:currency, :amount, :trans_details, :trans_details_link, :user_id, :trans_id, :trans_key, :trans_status, :date)"),
+                        {"currency" :currency, "amount" :amount, "trans_details" :wish_details, "trans_details_link" :link, "user_id" :user_id, "trans_id" :trans_id, "trans_key" :trans_key, "trans_status" :"withdraw", "date" :current_date}
+                    )
+                    db.session.commit()
+
+                    db.session.execute(
+                        text("UPDATE networth SET total = :total WHERE currency = :currency AND user_id = :user_id"),
+                        {"total" :new_total,"currency" :currency, "user_id" :user_id}
+                    )
+                    db.session.commit()
+
+                    db.session.execute(
+                        text("UPDATE wishlist SET trans_key = :trans_key, status = :status WHERE wish_key = :wish_key"),
+                        {"trans_key" :trans_key,"status" :new_status, "wish_key" :wish_key}
+                    )
+                    db.session.commit()
+
+                    year, wishlist_db = wishlist_page(user_id)
+                    all_years = select_years_wishlist(user_id)
+                    return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years)
+                
+                elif status == "done":
+                    new_status = "pending"
+                    new_total = int(total_db) + int(amount)
+
+                    trans_key = db.session.execute(
+                        text("SELECT trans_key FROM wishlist WHERE wish_key = :wish_key"),
+                        {"wish_key" :wish_key}
+                    ).fetchone()[0]
+
+                    db.session.execute(
+                        text("DELETE FROM trans WHERE trans_key = :trans_key"),
+                        {"trans_key" :trans_key}
+                    )
+                    db.session.commit()
+
+                    db.session.execute(
+                        text("UPDATE networth SET total = :total WHERE currency = :currency AND user_id = :user_id"),
+                        {"total" :new_total,"currency" :currency, "user_id" :user_id}
+                    )
+                    db.session.commit()
+
+                    db.session.execute(
+                        text("UPDATE wishlist SET trans_key = :trans_key, status = :status WHERE wish_key = :wish_key"),
+                        {"trans_key" :trans_key,"status" :new_status, "wish_key" :wish_key}
+                    )
+                    db.session.commit()
+
+                    year, wishlist_db = wishlist_page(user_id)
+                    all_years = select_years_wishlist(user_id)
+                    return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years)
             
+        else:
+            error = "You don't have on your balance enough of this currency!"
+            year, wishlist_db = wishlist_page(user_id)
+            all_years = select_years_wishlist(user_id)
+            return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, error = error)
+        
+
+@app.route("/edit_wish", methods=["GET", "POST"])
+def edit_wish():
+    if not session.get("logged_in"):
+        return redirect("/login_page")
+    else:
+        user_id = session.get("user_id")
+        user_photo_path = select_user_photo()
+        if request.method == "GET":
+            wish_key = request.args.get("wish_key")
+            wish_db = db.session.execute(
+                text("SELECT year, price, currency, wish_details, link, wish_key FROM wishlist WHERE wish_key = :wish_key"),
+                {"wish_key" :wish_key}
+            ).fetchone()
+            return render_template("edit_wish.html", wish_db=wish_db,user_photo_path=user_photo_path)
+        else:
+            wish_key = request.form.get("wish_key")
+            year = request.form.get("year")
+            price = request.form.get("price")
+            currency = request.form.get("currency")
+            details = request.form.get("details")
+            link = request.form.get("link")
+
             db.session.execute(
-                text("INSERT INTO trans (currency, amount, trans_details, trans_details_link, user_id, trans_id, trans_key, status, date)"),
-                {"currency" :currency, "amount" :amount, "trans_details" :wish_details, "trans_details_link" :link, "user_id" :user_id, "trans_id" :trans_id, "trans_key" :trans_key, "status" :"withdraw", "date" :date}
+                text("UPDATE wishlist SET year = :year, price = :price, currency= :currency, wish_details = :wish_details, link = :link WHERE wish_key = :wish_key"),
+                {"year" :year, "price" :price, "currency" :currency, "wish_details" :details, "link" :link, "wish_key" :wish_key}
             )
-        elif status_db == "done":
-            new_status = "pending"
+            db.session.commit()
+
+            year, wishlist_db = wishlist_page(user_id)
+            all_years = select_years_wishlist(user_id)
+            return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years)
+
+@app.route("/delete_wish", methods=["POST"])
+def delete_wish():
+    if not session.get("logged_in"):
+        return redirect("/login_page")
+    else:
+        user_id = session.get("user_id")
+        user_photo_path = select_user_photo()
+        wish_key = request.form.get("wish_key")
 
         db.session.execute(
-            text("UPDATE wishlist SET status = :status WHERE wish_key = :wish_key"),
-            {"status" :new_status, "wish_key" :wish_key}
+            text("DELETE FROM wishlist WHERE wish_key = :wish_key"),
+            {"wish_key" :wish_key}
         )
         db.session.commit()
+
+        year, wishlist_db = wishlist_page(user_id)
+        all_years = select_years_wishlist(user_id)
+        return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years)
+        
