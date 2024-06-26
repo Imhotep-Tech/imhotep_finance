@@ -9,9 +9,9 @@
         {% endif %}
 
     </div>
-    <form action="/withdraw" method="post" class="form-container">
+    <form action="/withdraw" method="post" class="form-container" onsubmit="return confirm('Are you sure you want to withdraw money');">
         <div class="form-group">
-            <input type="date" class="input" placeholder="Date" name="date" required="">
+            <input type="date" class="input" placeholder="Date" name="date" id="dateInput">
         </div>
         <div class="form-group">
             <input type="number" min="0" class="input" placeholder="Amount" name="amount" required="">
@@ -74,5 +74,8 @@
             filterOptions(searchInput1, currencySelect1, originalOptions1);
         });
 
+        // Set today's date as default in the date input
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.value = today;
     </script>
 {% endblock %}

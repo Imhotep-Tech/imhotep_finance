@@ -10,7 +10,8 @@
           <img src="{{ url_for('static', filename = 'avatar-anonymous-300x300.png') }}" alt="Image" class="user_img_nav">
         </a>
         {% endif %}
-
+        
+        <a href="/show_networth_details" style="color: black; text-decoration: none;">Balance: {{ total_favorite_currency }} {{ favorite_currency }}</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -24,7 +25,7 @@
             <li class="nav-item">
               <a class="nav-link active" aria-current="page" href="/home">Home</a>
             </li>
-            <a class="nav-link" href="/wishlist">Wishlist</a>
+            <a class="nav-link" href="/filter_year_wishlist">Wishlist</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="/show_trans">Transactions</a>

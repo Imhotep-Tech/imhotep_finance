@@ -35,7 +35,7 @@
             {% endif %}
 
             <br>
-            <form action="/settings/personal_info" method="post" class="form">
+            <form action="/settings/personal_info" method="post" class="form" onsubmit="return confirm('Are you sure you want to edit this');">
             <label>Username</label>
             <input type="name" class="input" placeholder="Username" value="{{ user_username }}" name="user_username" required="">
             <label>E-mail</label>

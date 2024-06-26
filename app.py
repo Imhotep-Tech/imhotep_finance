@@ -137,16 +137,16 @@ def select_years_wishlist(user_id):
             all_years.append(item[0])
 
         return all_years
+
 def wishlist_page(user_id):
+        today = date.today()
+        year = today.year
+
         wishlist_db = db.session.execute(
-            text("SELECT * FROM wishlist WHERE user_id = :user_id ORDER BY year DESC"),
-            {"user_id" :user_id}
+            text("SELECT * FROM wishlist WHERE user_id = :user_id AND year = :year ORDER BY wish_id"),
+            {"user_id" :user_id , "year" :year}
         ).fetchall()
 
-        year = db.session.execute(
-            text("SELECT MAX(year) FROM wishlist WHERE user_id = :user_id"),
-            {"user_id" :user_id}
-        ).fetchone()[0]
         return year, wishlist_db
         
 @app.route('/loading')
@@ -370,9 +370,11 @@ def deposit():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        total_favorite_currency, favorite_currency = show_networth()
+        total_favorite_currency = f"{total_favorite_currency:,.2f}"
         if request.method == "GET":
             user_photo_path = select_user_photo()
-            return render_template("deposit.html", user_photo_path=user_photo_path)
+            return render_template("deposit.html", user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
         else:
             user_photo_path = select_user_photo()
             date = request.form.get("date")
@@ -381,9 +383,9 @@ def deposit():
             user_id = session.get("user_id")
             trans_details = request.form.get("trans_details")
 
-            if currency == None or date == None or amount == None :
+            if currency is None or amount is None :
                 error = "You have to choose the currency!"
-                return render_template("deposit.html", error = error)
+                return render_template("deposit.html", error = error,total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency,  user_photo_path=user_photo_path)
             
             try:
                 last_trans_id = db.session.execute(
@@ -446,11 +448,13 @@ def withdraw():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        total_favorite_currency, favorite_currency = show_networth()
+        total_favorite_currency = f"{total_favorite_currency:,.2f}"
         if request.method == "GET":
             user_photo_path = select_user_photo()
             user_id = session.get("user_id")
             currency_all = select_currencies(user_id)
-            return render_template("withdraw.html", currency_all = currency_all, user_photo_path=user_photo_path)
+            return render_template("withdraw.html", currency_all = currency_all, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
         
         else:
             user_photo_path = select_user_photo()
@@ -465,7 +469,7 @@ def withdraw():
                 error = "You have to choose the currency!"
                 currency_all = select_currencies(user_id)
                 user_photo_path = select_user_photo()
-                return render_template("withdraw.html", currency_all = currency_all, error = error, user_photo_path=user_photo_path)
+                return render_template("withdraw.html", currency_all = currency_all, error = error, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
             
             amount_of_currency = db.session.execute(
                 text("SELECT total FROM networth WHERE user_id = :user_id AND currency = :currency"),
@@ -476,7 +480,7 @@ def withdraw():
                 error = "This user doesn't have this amount of this currency"
                 currency_all = select_currencies(user_id)
                 user_photo_path = select_user_photo()
-                return render_template("withdraw.html", currency_all = currency_all, error=error, user_photo_path=user_photo_path)
+                return render_template("withdraw.html", currency_all = currency_all, error=error, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
 
             try:
                 last_trans_id = db.session.execute(
@@ -525,6 +529,8 @@ def show_networth_details():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        total_favorite_currency, favorite_currency = show_networth()
+        total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_photo_path = select_user_photo()
         user_id = session.get("user_id")
         networth_details_db = db.session.execute(
@@ -533,21 +539,23 @@ def show_networth_details():
         ).fetchall()
 
         networth_details = dict(networth_details_db)
-        return render_template("networth_details.html", networth_details=networth_details, user_photo_path=user_photo_path)
+        return render_template("networth_details.html", networth_details=networth_details, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
 
 @app.route("/show_trans", methods=["GET"])
 def show_trans():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        total_favorite_currency, favorite_currency = show_networth()
+        total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_photo_path = select_user_photo()
         user_id = session.get("user_id")
         trans_db = db.session.execute(
-            text("SELECT * FROM trans WHERE user_id = :user_id"),
+            text("SELECT * FROM trans WHERE user_id = :user_id ORDER BY trans_id"),
             {"user_id": user_id}
         ).fetchall()
 
-        return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path)
+        return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
     
 @app.route("/edit_trans", methods=["POST", "GET"])
 def edit_trans():
@@ -562,7 +570,9 @@ def edit_trans():
                 text("SELECT * FROM trans WHERE trans_key = :trans_key"),
                 {"trans_key" :trans_key}
             ).fetchall()[0]
-            return render_template("edit_trans.html", trans_db = trans_db, user_photo_path=user_photo_path)
+            total_favorite_currency, favorite_currency = show_networth()
+            total_favorite_currency = f"{total_favorite_currency:,.2f}"
+            return render_template("edit_trans.html", trans_db = trans_db, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
         
         else:
             trans_key = request.form.get("trans_key")
@@ -601,7 +611,9 @@ def edit_trans():
                     text("SELECT * FROM trans WHERE trans_key = :trans_key"),
                     {"trans_key" :trans_key}
                 ).fetchall()[0]
-                return render_template("edit_trans.html", trans_db = trans_db, user_photo_path=user_photo_path, error=error)
+                total_favorite_currency, favorite_currency = show_networth()
+                total_favorite_currency = f"{total_favorite_currency:,.2f}"
+                return render_template("edit_trans.html", trans_db = trans_db, user_photo_path=user_photo_path, error=error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
             
             db.session.execute(
                 text("UPDATE trans SET  date = :date, trans_details = :trans_details, trans_details_link = :trans_details_link, amount = :amount WHERE trans_key = :trans_key"),
@@ -619,14 +631,17 @@ def edit_trans():
                 text("SELECT * FROM trans WHERE user_id = :user_id"),
                 {"user_id": user_id}
             ).fetchall()
-
-            return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path)
+            total_favorite_currency, favorite_currency = show_networth()
+            total_favorite_currency = f"{total_favorite_currency:,.2f}"
+            return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
         
 @app.route("/delete_trans", methods=["POST"])
 def delete_trans():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        total_favorite_currency, favorite_currency = show_networth()
+        total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_photo_path = select_user_photo()
         user_id = session.get("user_id")
         trans_key = request.form.get("trans_key")
@@ -652,7 +667,7 @@ def delete_trans():
                     text("SELECT * FROM trans WHERE user_id = :user_id"),
                     {"user_id": user_id}
                 ).fetchall()
-                return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, error = error)
+                return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, error = error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
         
         elif trans_status_db == "withdraw":
             total = total_db + int(amount_db)
@@ -680,16 +695,18 @@ def delete_trans():
             {"user_id": user_id}
         ).fetchall()
 
-        return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path)
+        return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
 @app.route("/settings/personal_info", methods=["GET", "POST"])
 def personal_info():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        total_favorite_currency, favorite_currency = show_networth()
+        total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id") 
         if request.method == "GET":
             user_username, user_mail, user_photo_path = select_user_data(user_id)
-            return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path)
+            return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
         else:
             user_username = request.form.get("user_username")
             user_mail = request.form.get("user_mail")
@@ -718,12 +735,12 @@ def personal_info():
                 if existing_mail:
                     error_existing = "Mail is already in use. Please choose another one."
                     user_username, user_mail, user_photo_path = select_user_data(user_id)
-                    return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing)
+                    return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
                 
                 if existing_username:
                     error_existing = "Username is already in use. Please choose another one."
                     user_username, user_mail, user_photo_path = select_user_data(user_id)
-                    return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing)
+                    return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
                 
                 db.session.execute(
                     text("UPDATE users SET user_mail_verify = :user_mail_verify, user_mail = :user_mail, user_username = :user_username WHERE user_id = :user_id"),
@@ -744,7 +761,7 @@ def personal_info():
                 if existing_mail:
                     error_existing = "Mail is already in use. Please choose another one. or "
                     user_username, user_mail, user_photo_path = select_user_data(user_id)
-                    return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing)
+                    return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
                 
                 db.session.execute(
                     text("UPDATE users SET user_mail_verify = :user_mail_verify, user_mail = :user_mail WHERE user_id = :user_id"),
@@ -766,7 +783,7 @@ def personal_info():
                 if existing_username:
                     error_existing = "Username is already in use. Please choose another one. or "
                     user_username, user_mail, user_photo_path = select_user_data(user_id)
-                    return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing)
+                    return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
 
             db.session.execute(
                 text("UPDATE users SET user_username = :user_username WHERE user_id = :user_id"),
@@ -775,13 +792,15 @@ def personal_info():
             db.session.commit()
             done = "User Name Changed Successfully!"
             user_username, user_mail, user_photo_path = select_user_data(user_id)
-            return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, done = done)
+            return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, done = done, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
         
 @app.route("/settings/personal_info/upload_user_photo", methods=["POST"])
 def upload_user_photo():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        total_favorite_currency, favorite_currency = show_networth()
+        total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
         if "file" in request.files:
             file = request.files['file']
@@ -802,21 +821,23 @@ def upload_user_photo():
                 )
                 db.session.commit()
                 user_username, user_mail, user_photo_path = select_user_data(user_id)
-                return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path)
+                return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
             else:
                 error = "Invalid file format. Allowed formats are: png, jpg, jpeg"
                 user_username, user_mail, user_photo_path = select_user_data(user_id)
-                return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error)
+                return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
         else:
             error = "file upload failed"
             user_username, user_mail, user_photo_path = select_user_data(user_id)
-            return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error)
+            return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
     
 @app.route("/settings/personal_info/delete_user_photo", methods=["POST"])
 def delete_user_photo():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        total_favorite_currency, favorite_currency = show_networth()
+        total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
         photo_name = db.session.execute(
             text("SELECT user_photo_path FROM users WHERE user_id = :user_id"),
@@ -828,22 +849,24 @@ def delete_user_photo():
 
             delete_photo(user_id, photo_path)
             user_username, user_mail, user_photo_path = select_user_data(user_id)
-            return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path)
+            return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
         else:
-            error = "No image associated with this doctor to delete." #if this docotr don't have an image
+            error = "No image associated with this doctor to delete."
             user_username, user_mail, user_photo_path = select_user_data(user_id)
-            return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error)
+            return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
 
 @app.route("/settings/favorite_currency", methods=["GET", "POST"])
 def favorite_currency():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        total_favorite_currency, favorite_currency = show_networth()
+        total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_photo_path = select_user_photo()
         user_id = session.get("user_id")
         if request.method == "GET":
             favorite_currency = select_favorite_currency(user_id)
-            return render_template("favorite_currency.html", favorite_currency=favorite_currency, user_photo_path=user_photo_path)
+            return render_template("favorite_currency.html", favorite_currency=favorite_currency, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency)
         else:
             favorite_currency = request.form.get("favorite_currency")
             db.session.execute(
@@ -854,13 +877,15 @@ def favorite_currency():
 
             done = f"Your favorite currency is {favorite_currency} now"
             favorite_currency = select_favorite_currency(user_id)
-            return render_template("favorite_currency.html", done=done, favorite_currency=favorite_currency, user_photo_path=user_photo_path)
+            return render_template("favorite_currency.html", done=done, favorite_currency=favorite_currency, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency)
         
 @app.route("/settings/security_check", methods=["POST", "GET"])
 def security_check():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        total_favorite_currency, favorite_currency = show_networth()
+        total_favorite_currency = f"{total_favorite_currency:,.2f}"
         if request.method == "GET":
             return render_template("check_pass.html")
         else:
@@ -882,6 +907,8 @@ def security():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        total_favorite_currency, favorite_currency = show_networth()
+        total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
         new_password = request.form.get("new_password")
 
@@ -898,45 +925,41 @@ def security():
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         return render_template("home.html", total_favorite_currency = total_favorite_currency, favorite_currency=favorite_currency , user_photo_path=user_photo_path, done = done)
 
-@app.route("/wishlist", methods=["GET"])
-def wishlist():
-    if not session.get("logged_in"):
-        return redirect("/login_page")
-    else:
-        user_id = session.get("user_id")
-        user_photo_path = select_user_photo()
-
-        year, wishlist_db = wishlist_page(user_id)
-        all_years = select_years_wishlist(user_id)
-        return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years)
-
 @app.route("/filter_year_wishlist", methods=["GET"])
 def filter_year_wishlist():
         if not session.get("logged_in"):
             return redirect("/login_page")
         else:
+            total_favorite_currency, favorite_currency = show_networth()
+            total_favorite_currency = f"{total_favorite_currency:,.2f}"
             user_id = session.get("user_id")
             user_photo_path = select_user_photo()
             year = request.args.get("year")
+            if year is None:
+                today = date.today()
+                year = today.year
+
             wishlist_db = db.session.execute(
-                        text("SELECT * FROM wishlist WHERE user_id = :user_id and year = :year ORDER BY year DESC"),
+                        text("SELECT * FROM wishlist WHERE user_id = :user_id and year = :year ORDER BY wish_id"),
                         {"user_id" :user_id, "year" :year}
                     ).fetchall()
             
             all_years = select_years_wishlist(user_id)
     
-            return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years)
+            return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
                 
 @app.route("/add_wish", methods=["GET", "POST"])
 def add_wish():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        total_favorite_currency, favorite_currency = show_networth()
+        total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
         user_photo_path = select_user_photo()
         if request.method == "GET":
             year = request.form.get("year")
-            return render_template("add_wish.html", user_photo_path=user_photo_path)
+            return render_template("add_wish.html", user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
         else:
             user_id = session.get("user_id")
             user_photo_path = select_user_photo()
@@ -969,15 +992,15 @@ def add_wish():
                 {"wish_key" :wish_key, "wish_id" :wish_id, "user_id" :user_id, "price" :price, "currency" :currency, "wish_details" :wish_details, "link" :link, "year" :year, "status" :status}
             )
             db.session.commit()
-
             done = "wish added successfully!"
+
             wishlist_db = db.session.execute(
-                text("SELECT * FROM wishlist WHERE user_id = :user_id and year = :year ORDER BY year DESC"),
-                {"user_id" :user_id, "year" :year}
+                text("SELECT * FROM wishlist WHERE user_id = :user_id AND year = :year ORDER BY wish_id"),
+                {"user_id" :user_id , "year" :year}
             ).fetchall()
 
             all_years = select_years_wishlist(user_id)
-            return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, done = done, year=year, all_years=all_years)
+            return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, done = done, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
         
 @app.route("/check_wish", methods=["POST"])
 def check_wish():
@@ -996,8 +1019,9 @@ def check_wish():
         currency = wishlist_data_db[3]
         amount = wishlist_data_db[4]
         status = wishlist_data_db[5]
-        wish_details = wishlist_data_db[7]
         link = wishlist_data_db[6]
+        wish_details = wishlist_data_db[7]
+        year = wishlist_data_db[8]
         current_date = date.today()
 
         if currency in select_currencies(user_id):
@@ -1011,7 +1035,9 @@ def check_wish():
                 error = "You don't have on your balance this currency!"
                 year, wishlist_db = wishlist_page(user_id)
                 all_years = select_years_wishlist(user_id)
-                return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, error = error)
+                total_favorite_currency, favorite_currency = show_networth()
+                total_favorite_currency = f"{total_favorite_currency:,.2f}"
+                return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, error = error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
             else:
                 try:
                     last_trans_key = db.session.execute(
@@ -1052,9 +1078,15 @@ def check_wish():
                     )
                     db.session.commit()
 
-                    year, wishlist_db = wishlist_page(user_id)
+                    wishlist_db = db.session.execute(
+                        text("SELECT * FROM wishlist WHERE user_id = :user_id AND year = :year ORDER BY wish_id"),
+                        {"user_id" :user_id , "year" :year}
+                    ).fetchall()
+
                     all_years = select_years_wishlist(user_id)
-                    return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years)
+                    total_favorite_currency, favorite_currency = show_networth()
+                    total_favorite_currency = f"{total_favorite_currency:,.2f}"
+                    return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
                 
                 elif status == "done":
                     new_status = "pending"
@@ -1079,19 +1111,26 @@ def check_wish():
 
                     db.session.execute(
                         text("UPDATE wishlist SET trans_key = :trans_key, status = :status WHERE wish_key = :wish_key"),
-                        {"trans_key" :trans_key,"status" :new_status, "wish_key" :wish_key}
+                        {"trans_key" :None, "status" :new_status, "wish_key" :wish_key}
                     )
                     db.session.commit()
 
-                    year, wishlist_db = wishlist_page(user_id)
+                    wishlist_db = db.session.execute(
+                        text("SELECT * FROM wishlist WHERE user_id = :user_id AND year = :year ORDER BY wish_id"),
+                        {"user_id" :user_id , "year" :year}
+                    ).fetchall()
                     all_years = select_years_wishlist(user_id)
-                    return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years)
+                    total_favorite_currency, favorite_currency = show_networth()
+                    total_favorite_currency = f"{total_favorite_currency:,.2f}"
+                    return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
             
         else:
             error = "You don't have on your balance enough of this currency!"
             year, wishlist_db = wishlist_page(user_id)
             all_years = select_years_wishlist(user_id)
-            return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, error = error)
+            total_favorite_currency, favorite_currency = show_networth()
+            total_favorite_currency = f"{total_favorite_currency:,.2f}"
+            return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, error = error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
         
 
 @app.route("/edit_wish", methods=["GET", "POST"])
@@ -1099,6 +1138,8 @@ def edit_wish():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        total_favorite_currency, favorite_currency = show_networth()
+        total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
         user_photo_path = select_user_photo()
         if request.method == "GET":
@@ -1107,7 +1148,7 @@ def edit_wish():
                 text("SELECT year, price, currency, wish_details, link, wish_key FROM wishlist WHERE wish_key = :wish_key"),
                 {"wish_key" :wish_key}
             ).fetchone()
-            return render_template("edit_wish.html", wish_db=wish_db,user_photo_path=user_photo_path)
+            return render_template("edit_wish.html", wish_db=wish_db,user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
         else:
             wish_key = request.form.get("wish_key")
             year = request.form.get("year")
@@ -1122,15 +1163,21 @@ def edit_wish():
             )
             db.session.commit()
 
-            year, wishlist_db = wishlist_page(user_id)
+            wishlist_db = db.session.execute(
+                text("SELECT * FROM wishlist WHERE user_id = :user_id AND year = :year ORDER BY wish_id"),
+                {"user_id" :user_id , "year" :year}
+            ).fetchall()
+
             all_years = select_years_wishlist(user_id)
-            return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years)
+            return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
 
 @app.route("/delete_wish", methods=["POST"])
 def delete_wish():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        total_favorite_currency, favorite_currency = show_networth()
+        total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
         user_photo_path = select_user_photo()
         wish_key = request.form.get("wish_key")
@@ -1140,8 +1187,8 @@ def delete_wish():
             {"wish_key" :wish_key}
         )
         db.session.commit()
-
+        
         year, wishlist_db = wishlist_page(user_id)
         all_years = select_years_wishlist(user_id)
-        return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years)
+        return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
         

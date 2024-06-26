@@ -12,7 +12,7 @@
     </div>
     <form action="/deposit" method="post" class="form-container">
         <div class="form-group">
-            <input type="date" class="input" placeholder="Date" name="date" required="">
+            <input type="date" class="input" placeholder="Date" id="dateInput" name="date">
         </div>
         <div class="form-group">
             <input type="number" min="0" class="input" placeholder="Amount" name="amount" required="">
@@ -231,5 +231,9 @@
         searchInput1.addEventListener('input', () => {
             filterOptions(searchInput1, currencySelect1, originalOptions1);
         });
+
+        // Set today's date as default in the date input
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.value = today;
     </script>
 {% endblock %}

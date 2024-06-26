@@ -33,6 +33,7 @@ body {
 }
 
 .form-container {
+    margin-top: 80px;
     width: 350px;
     height: 550px;
     background-color: #fff;
@@ -133,7 +134,7 @@ body {
     gap: 15px;
   }
   
-      .google-login-button {
+  .google-login-button {
     border-radius: 20px;
     box-sizing: border-box;
     padding: 10px 15px;
@@ -309,7 +310,7 @@ table.c {
 
 .message-container {
   position: fixed;
-  top: 0px; /* Adjust the value to align the error message with the navigation bar */
+  top: 10%; /* Adjust the value to align the error message with the navigation bar */
   left: 50%;
   transform: translateX(-50%);
   z-index: 9999;
@@ -317,7 +318,7 @@ table.c {
 
 .message-container1 {
   position: fixed;
-  top: 0px; /* Adjust the value to align the error message with the navigation bar */
+  top: 10%;
   left: 50%;
   transform: translateX(-50%);
   z-index: 9999;
