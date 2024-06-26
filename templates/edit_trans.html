@@ -8,6 +8,7 @@
         <div class="error-message">{{ error }}</div>
         {% endif %}
     </div>
+    {% include 'back.html' %}
     <form action="/edit_trans" method="post" class="form-container" onsubmit="return confirm('Are you sure you want to edit this');">
 
         <input type="hidden" name="trans_key" value="{{ trans_db.trans_key }}">

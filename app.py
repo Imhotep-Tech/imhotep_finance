@@ -24,7 +24,6 @@ app.config['MAIL_USE_SSL'] = True
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://kbassem:2005@localhost/imhotepfinance'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-
 app.config["MAX_CONTENT_LENGTH"] = 3 * 1024 * 1024
 app.config["UPLOAD_FOLDER_PHOTO"] = os.path.join(os.getcwd(), "static", "user_photo")
 ALLOWED_EXTENSIONS = ("png", "jpg", "jpeg")
@@ -52,7 +51,7 @@ def show_networth():
 
     total_db_dict = dict(total_db)
 
-    response = requests.get(f"https://v6.exchangerate-api.com/v6/7d7b7d6ff63abda67e3e5cc3/latest/{favorite_currency}")
+    response = requests.get(f"https://v6.exchangerate-api.com/v6/2a4f75a189d39f96688afc97/latest/{favorite_currency}")
     data = response.json()
     rate = data["conversion_rates"]
     total_favorite_currency = 0
@@ -860,12 +859,12 @@ def favorite_currency():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
-        total_favorite_currency, favorite_currency = show_networth()
-        total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_photo_path = select_user_photo()
         user_id = session.get("user_id")
         if request.method == "GET":
             favorite_currency = select_favorite_currency(user_id)
+            total_favorite_currency, favorite_currency = show_networth()
+            total_favorite_currency = f"{total_favorite_currency:,.2f}"
             return render_template("favorite_currency.html", favorite_currency=favorite_currency, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency)
         else:
             favorite_currency = request.form.get("favorite_currency")
@@ -876,6 +875,8 @@ def favorite_currency():
             db.session.commit()
 
             done = f"Your favorite currency is {favorite_currency} now"
+            total_favorite_currency, favorite_currency = show_networth()
+            total_favorite_currency = f"{total_favorite_currency:,.2f}"
             favorite_currency = select_favorite_currency(user_id)
             return render_template("favorite_currency.html", done=done, favorite_currency=favorite_currency, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency)
         
@@ -897,6 +898,8 @@ def security_check():
             ).fetchone()[0]
 
             if check_password_hash(password_db, check_pass):
+                session.permanent = False
+                session["logged_in"] = False
                 return render_template("change_pass.html")
             else:
                 error = "This password is incorrect!"
@@ -1191,4 +1194,7 @@ def delete_wish():
         year, wishlist_db = wishlist_page(user_id)
         all_years = select_years_wishlist(user_id)
         return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
-        
+
+@app.route("/version")
+def version():
+    return render_template("version.html")

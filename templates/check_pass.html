@@ -1,4 +1,4 @@
-{% extends "layout.html" %}
+{% extends "layout_login.html" %}
 
 {% block body %}
 
@@ -10,7 +10,7 @@
             </div>
         {% endif %}
     </div>
-    
+    {% include 'back.html' %}
     <p class="title">Check Password</p>
     <form action="/settings/security_check" method="post" class="form">
         <input type="password" class="input" placeholder="Old Password" name="check_pass" required="">

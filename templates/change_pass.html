@@ -1,8 +1,7 @@
-{% extends "layout.html" %}
+{% extends "layout_login.html" %}
 
 {% block body %}
 <div class="form-container">
-    
     <p class="title">Welcome</p>
     <form action="/settings/security" method="post" class="form" onsubmit="return confirm('Are you sure you want to change your password!');">
         <input type="password" class="input" placeholder="New Password" name="new_password" id="password" required="">
@@ -22,5 +21,12 @@
         }
         return true;
     }
+
+    window.onload = function() {
+        history.pushState(null, null, location.href);
+        window.onpopstate = function() {
+            history.go(1);
+        };
+    };
 </script>
 {% endblock %}
