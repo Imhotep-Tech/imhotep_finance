@@ -9,4 +9,4 @@ flask_caching==2.3.0
 flask_mail==0.9.1
 Flask-SQLAlchemy==2.5.1
 requests==2.26.0
-SQLAlchemy==1.4.22
+SQLAlchemy==1.4.29 
