@@ -8,8 +8,26 @@ import requests
 from werkzeug.utils import secure_filename
 import os
 from datetime import date
+import psycopg2
 
 app = Flask(__name__)
+
+try:
+  conn = psycopg2.connect(
+      database="neondb",
+      user="neondb_owner",
+      password="B7q4gxEPeScp",
+      host="ep-flat-moon-a2xuihac-pooler.eu-central-1.aws.neon.tech",
+      port="5432",  # Assuming default port
+      sslmode="require"
+  )
+  print("Connection successful!")
+except Exception as e:
+  print("Connection error:", e)
+finally:
+  if conn:
+    conn.close()
+
 
 secret_key = secrets.token_hex(16)
 app.config['SECRET_KEY'] = secret_key
