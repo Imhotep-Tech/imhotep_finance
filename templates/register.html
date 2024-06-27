@@ -17,6 +17,10 @@
       <input type="mail" class="input" placeholder="E-Mail" name="user_mail" required="">
       <input type="password" class="input" placeholder="Password" name="user_password" id="password" required="">
       <input type="password" class="input" placeholder="Confirm Password" id="confirm_password" required="">
+      <label for="password-toggle" class="password-toggle-btn">
+        <input type="checkbox" id="password-toggle" onclick="togglePasswordVisibility_all()">
+        <span class="checkmark">Show password</span>
+      </label>
       <p class="page-link"></p>
       <button class="form-btn">Sign Up</button>
     </form>
@@ -33,5 +37,21 @@
         }
         return true;
     }
+
+function togglePasswordVisibility_all() {
+  var passwordInput = document.getElementById("password");
+  var confirm_passwordInput = document.getElementById("confirm_password");
+  if (passwordInput.type === "password") {
+    passwordInput.type = "text";
+  } else {
+    passwordInput.type = "password";
+  }
+
+  if (confirm_passwordInput.type === "password") {
+    confirm_passwordInput.type = "text";
+  } else {
+    confirm_passwordInput.type = "password";
+  }
+}
 </script>
 {% endblock %}

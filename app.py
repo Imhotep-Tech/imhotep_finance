@@ -51,10 +51,17 @@ def show_networth():
 
     total_db_dict = dict(total_db)
 
-    response = requests.get(f"https://v6.exchangerate-api.com/v6/2a4f75a189d39f96688afc97/latest/{favorite_currency}")
-    data = response.json()
-    rate = data["conversion_rates"]
-    total_favorite_currency = 0
+    try:
+        response = requests.get(f"https://v6.exchangerate-api.com/v6/2a4f75a189d39f96688afc97/latest/{favorite_currency}")
+        data = response.json()
+        rate = data["conversion_rates"]
+        total_favorite_currency = 0
+    except:
+        response = requests.get(f"https://v6.exchangerate-api.com/v6/18c9f74feadb9bea7bf26ce4/latest/{favorite_currency}")
+        data = response.json()
+        rate = data["conversion_rates"]
+        total_favorite_currency = 0
+
 
     for currency, amount in total_db_dict.items():
         converted_amount = amount / rate[currency]
@@ -885,8 +892,6 @@ def security_check():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
-        total_favorite_currency, favorite_currency = show_networth()
-        total_favorite_currency = f"{total_favorite_currency:,.2f}"
         if request.method == "GET":
             return render_template("check_pass.html")
         else:
@@ -898,35 +903,30 @@ def security_check():
             ).fetchone()[0]
 
             if check_password_hash(password_db, check_pass):
-                session.permanent = False
-                session["logged_in"] = False
-                return render_template("change_pass.html")
+
+                return render_template("change_pass.html", user_id = user_id)
             else:
                 error = "This password is incorrect!"
                 return render_template("check_pass.html", error = error)
 
-@app.route("/settings/security", methods=["POST", "GET"])
+@app.route("/settings/security", methods=["POST"])
 def security():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
-        total_favorite_currency, favorite_currency = show_networth()
-        total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
         new_password = request.form.get("new_password")
-
+        print(user_id)
         hashed_password = generate_password_hash(new_password)
         db.session.execute(
             text("UPDATE users SET user_password = :user_password WHERE user_id = :user_id"),
             {"user_password" :hashed_password, "user_id" :user_id}
         )
         db.session.commit()
-
-        done = "You password has been changed successfully!"
-        user_photo_path = select_user_photo()
-        total_favorite_currency, favorite_currency = show_networth()
-        total_favorite_currency = f"{total_favorite_currency:,.2f}"
-        return render_template("home.html", total_favorite_currency = total_favorite_currency, favorite_currency=favorite_currency , user_photo_path=user_photo_path, done = done)
+        session.permanent = False
+        session["logged_in"] = False
+        success = "You password has been changed successfully!"
+        return render_template("login.html", success = success)
 
 @app.route("/filter_year_wishlist", methods=["GET"])
 def filter_year_wishlist():

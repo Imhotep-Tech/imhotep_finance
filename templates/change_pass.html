@@ -6,6 +6,11 @@
     <form action="/settings/security" method="post" class="form" onsubmit="return confirm('Are you sure you want to change your password!');">
         <input type="password" class="input" placeholder="New Password" name="new_password" id="password" required="">
         <input type="password" class="input" placeholder="Confirm New Password" id="confirm_password" required="">
+        <input type="hidden" name="user_id" value="{ user_id }">
+        <label for="password-toggle" class="password-toggle-btn">
+            <input type="checkbox" id="password-toggle" onclick="togglePasswordVisibility_all()">
+            <span class="checkmark">Show password</span>
+          </label>
         <p class="page-link"></p>
         <button class="form-btn">Check</button>
     </form>
@@ -28,5 +33,21 @@
             history.go(1);
         };
     };
+
+    function togglePasswordVisibility_all() {
+  var passwordInput = document.getElementById("password");
+  var confirm_passwordInput = document.getElementById("confirm_password");
+  if (passwordInput.type === "password") {
+    passwordInput.type = "text";
+  } else {
+    passwordInput.type = "password";
+  }
+
+  if (confirm_passwordInput.type === "password") {
+    confirm_passwordInput.type = "text";
+  } else {
+    confirm_passwordInput.type = "password";
+  }
+}
 </script>
 {% endblock %}
