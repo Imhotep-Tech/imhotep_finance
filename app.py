@@ -12,23 +12,6 @@ import psycopg2
 
 app = Flask(__name__)
 
-try:
-  conn = psycopg2.connect(
-      database="neondb",
-      user="neondb_owner",
-      password="B7q4gxEPeScp",
-      host="ep-flat-moon-a2xuihac-pooler.eu-central-1.aws.neon.tech",
-      port="5432",  # Assuming default port
-      sslmode="require"
-  )
-  print("Connection successful!")
-except Exception as e:
-  print("Connection error:", e)
-finally:
-  if conn:
-    conn.close()
-
-
 secret_key = secrets.token_hex(16)
 app.config['SECRET_KEY'] = secret_key
 
@@ -39,8 +22,7 @@ app.config['MAIL_PASSWORD'] = "hrsw vzhz cixd eecs"
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://neondb_owner:B7q4gxEPeScp@ep-flat-moon-a2xuihac.eu-central-1.aws.neon.tech/neondb?sslmode=require'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 
 app.config["MAX_CONTENT_LENGTH"] = 3 * 1024 * 1024
 app.config["UPLOAD_FOLDER_PHOTO"] = os.path.join(os.getcwd(), "static", "user_photo")
