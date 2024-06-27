@@ -8,7 +8,6 @@ import requests
 from werkzeug.utils import secure_filename
 import os
 from datetime import date
-import psycopg2
 
 app = Flask(__name__)
 
