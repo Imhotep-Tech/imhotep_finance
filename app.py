@@ -16,6 +16,8 @@ secret_key = secrets.token_hex(16)
 app.config['SECRET_KEY'] = secret_key
 app.config['SESSION_TYPE'] = 'filesystem'
 
+Session(app)
+
 app.config['MAIL_SERVER']='smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USERNAME'] = 'imhotepfinance@gmail.com'
