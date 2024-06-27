@@ -1,6 +1,7 @@
 from flask import render_template, redirect, Flask, session, request
 from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
+from flask_session import Session
 from werkzeug.security import generate_password_hash, check_password_hash
 import secrets
 from sqlalchemy import text
@@ -8,6 +9,7 @@ import requests
 from werkzeug.utils import secure_filename
 import os
 from datetime import date
+import redis
 
 app = Flask(__name__)
 
@@ -20,6 +22,13 @@ app.config['MAIL_USERNAME'] = 'imhotepfinance@gmail.com'
 app.config['MAIL_PASSWORD'] = "hrsw vzhz cixd eecs"
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
+
+app.config['SESSION_TYPE'] = 'redis'
+app.config['SESSION_REDIS'] = redis.Redis(host='default', port=16467, password='DE1ONtu9SUxB1AJQd8qfKX6QpMnV18is')
+app.config['SESSION_USE_SIGNER'] = True 
+app.config['SESSION_PERMANENT'] = True  
+
+Session(app)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://neondb_owner:B7q4gxEPeScp@ep-restless-waterfall-a2vj6v0w.eu-central-1.aws.neon.tech/neondb?sslmode=require'
 
