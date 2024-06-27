@@ -22,7 +22,7 @@ app.config['MAIL_PASSWORD'] = "hrsw vzhz cixd eecs"
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'psql "postgres://default:vcR2h7JCQjEH@ep-quiet-glitter-a2kzrnd0.eu-central-1.aws.neon.tech:5432/verceldb?sslmode=require"'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://neondb_owner:B7q4gxEPeScp@ep-restless-waterfall-a2vj6v0w-pooler.eu-central-1.aws.neon.tech/neondb?sslmode=require'
 
 app.config["MAX_CONTENT_LENGTH"] = 3 * 1024 * 1024
 app.config["UPLOAD_FOLDER_PHOTO"] = os.path.join(os.getcwd(), "static", "user_photo")
