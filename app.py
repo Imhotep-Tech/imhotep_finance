@@ -21,7 +21,7 @@ app.config['MAIL_PASSWORD'] = "hrsw vzhz cixd eecs"
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://neondb_owner:B7q4gxEPeScp@ep-flat-moon-a2xuihac.eu-central-1.aws.neon.tech/neondb?sslmode=require'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://neondb_owner:B7q4gxEPeScp@ep-flat-moon-a2xuihac-pooler.eu-central-1.aws.neon.tech/neondb?sslmode=require'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.config["MAX_CONTENT_LENGTH"] = 3 * 1024 * 1024
