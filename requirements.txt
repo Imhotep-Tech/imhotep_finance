@@ -9,5 +9,4 @@ flask_caching==2.3.0
 requests==2.26.0
 DateTime==5.5
 psycopg2-binary
-redis
 flask_session
