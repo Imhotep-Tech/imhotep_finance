@@ -1,12 +1,14 @@
-from flask import render_template, redirect, Flask, session, request
+from flask import render_template, redirect, Flask, session, request, make_response, Response
 from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
+from flask_session import Session
 from werkzeug.security import generate_password_hash, check_password_hash
 import secrets
 from sqlalchemy import text
 import requests
 from werkzeug.utils import secure_filename
 import os
+import datetime
 from datetime import date
 
 app = Flask(__name__)
@@ -22,6 +24,7 @@ app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://kbassem:2005@localhost/imhotepfinance'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.config["MAX_CONTENT_LENGTH"] = 3 * 1024 * 1024
 app.config["UPLOAD_FOLDER_PHOTO"] = os.path.join(os.getcwd(), "static", "user_photo")
@@ -1192,3 +1195,21 @@ def delete_wish():
 @app.route("/version")
 def version():
     return render_template("version.html")
+
+@app.route('/sitemap.xml')
+def sitemap():
+    pages = []
+
+    # Static pages
+    ten_days_ago = (datetime.datetime.now() - datetime.timedelta(days=10)).date().isoformat()
+    for rule in app.url_map.iter_rules():
+        if "GET" in rule.methods and len(rule.arguments) == 0:
+            pages.append(
+                ["https://imhotepf.pythonanywhere.com/" + str(rule.rule), ten_days_ago]
+            )
+
+    sitemap_xml = render_template('sitemap.xml', pages=pages)
+    response = make_response(sitemap_xml)
+    response.headers["Content-Type"] = "application/xml"
+
+    return response
