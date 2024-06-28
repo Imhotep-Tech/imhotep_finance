@@ -9,14 +9,16 @@ import requests
 from werkzeug.utils import secure_filename
 import os
 from datetime import date
+from flask_kvsession import KVSessionExtension
 
 app = Flask(__name__)
 
 secret_key = secrets.token_hex(16)
 app.config['SECRET_KEY'] = secret_key
-app.config['SESSION_TYPE'] = 'filesystem'
+app.config['SESSION_TYPE'] = 'redis'  
+app.config['SESSION_REDIS'] = 'redis://default:Aa26AAIncDExZTVlODAwYTM2MTg0MzI1YWM2NjM0M2NiNmI1YjM5YXAxNDQ0NzQ@meet-grouper-44474.upstash.io:6379' 
 
-Session(app)
+kvsession = KVSessionExtension(app)
 
 app.config['MAIL_SERVER']='smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
@@ -34,7 +36,6 @@ ALLOWED_EXTENSIONS = ("png", "jpg", "jpeg")
 db = SQLAlchemy(app)
 
 mail = Mail(app)
-    
 def send_verification_mail_code(user_mail):
     verification_code = secrets.token_hex(4)
     msg = Message('Email Verification', sender='imhotepfinance@gmail.com', recipients=[user_mail])
@@ -170,10 +171,6 @@ def index():
 def login_page():
     if session.get("logged_in"):
         return redirect("/home")
-    elif session.get("logged_in_admin"):
-        return redirect("/admin_home")
-    elif session.get("logged_in_assistant"):
-        return redirect("/assistant_home")
     else:
         return render_template("login.html")
 
