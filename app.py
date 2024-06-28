@@ -8,18 +8,11 @@ import requests
 from werkzeug.utils import secure_filename
 import os
 from datetime import date
-from flask_kvsession import KVSessionExtension
-
 
 app = Flask(__name__)
 
 secret_key = secrets.token_hex(16)
 app.config['SECRET_KEY'] = secret_key
-app.config['SESSION_TYPE'] = 'filesystem'
-app.config['SESSION_KV_NAMESPACE'] = os.environ.get('redis-cli --tls -u redis://default:Aa26AAIncDExZTVlODAwYTM2MTg0MzI1YWM2NjM0M2NiNmI1YjM5YXAxNDQ0NzQ@meet-grouper-44474.upstash.io:6379')
-app.config['SESSION_FILE_DIR'] = app.instance_path
-
-kvsession = KVSessionExtension(app)
 
 app.config['MAIL_SERVER']='smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
@@ -28,7 +21,7 @@ app.config['MAIL_PASSWORD'] = "hrsw vzhz cixd eecs"
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://neondb_owner:B7q4gxEPeScp@ep-restless-waterfall-a2vj6v0w.eu-central-1.aws.neon.tech/neondb?sslmode=require'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://kbassem:2005@localhost/imhotepfinance'
 
 app.config["MAX_CONTENT_LENGTH"] = 3 * 1024 * 1024
 app.config["UPLOAD_FOLDER_PHOTO"] = os.path.join(os.getcwd(), "static", "user_photo")
