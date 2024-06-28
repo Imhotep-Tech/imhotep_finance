@@ -1,7 +1,6 @@
 from flask import render_template, redirect, Flask, session, request
 from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
-from flask_session import Session
 from werkzeug.security import generate_password_hash, check_password_hash
 import secrets
 from sqlalchemy import text
@@ -11,12 +10,14 @@ import os
 from datetime import date
 from flask_kvsession import KVSessionExtension
 
+
 app = Flask(__name__)
 
 secret_key = secrets.token_hex(16)
 app.config['SECRET_KEY'] = secret_key
-app.config['SESSION_TYPE'] = 'redis'  
-app.config['SESSION_REDIS'] = 'redis://default:Aa26AAIncDExZTVlODAwYTM2MTg0MzI1YWM2NjM0M2NiNmI1YjM5YXAxNDQ0NzQ@meet-grouper-44474.upstash.io:6379' 
+app.config['SESSION_TYPE'] = 'filesystem'
+app.config['SESSION_KV_NAMESPACE'] = os.environ.get('redis-cli --tls -u redis://default:Aa26AAIncDExZTVlODAwYTM2MTg0MzI1YWM2NjM0M2NiNmI1YjM5YXAxNDQ0NzQ@meet-grouper-44474.upstash.io:6379')
+app.config['SESSION_FILE_DIR'] = app.instance_path
 
 kvsession = KVSessionExtension(app)
 
