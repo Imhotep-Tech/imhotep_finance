@@ -23,7 +23,7 @@ app.config['MAIL_PASSWORD'] = "hrsw vzhz cixd eecs"
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://kbassem:2005@localhost/imhotepfinance'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://kbassem:kb@localhost/imhotep_finance'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.config["MAX_CONTENT_LENGTH"] = 3 * 1024 * 1024

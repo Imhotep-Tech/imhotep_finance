@@ -1,29 +1,46 @@
-<h1 style="text-align: center;">Imhotep Financial Manager</h1>
-{% include 'back.html' %}
-<h2>Version 1.0</h2>
-<p>
-27/6/2024<br>
-Imhotep Financial Manager
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <meta charset="utf-8">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='imhotep_finance.ico')}}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>Imhotep Financial Manager</title>
+    <style>
+        button.btn-black {
+        padding: 9px 15px;
+        border-radius: 5px;
+        border: none;
+        background-color: #212529;
+        color: white;
+        cursor: pointer;
+    }
+    </style>
+</head>
 
-Imhotep Financial Manager is your comprehensive solution for managing your finances with ease and precision. Our app is designed to help you take control of your money, track your net worth, and manage your transactions efficiently.<br><br>
-<br>
-Key Features:<br>
-<br>
-Personalized Financial Dashboard: Get a holistic view of your financial health, including your net worth, account balances, and recent transactions, all in one place.<br>
-Wishlist Management: Create and manage a wishlist of items you aspire to purchase. Our app helps you prioritize and save towards your financial goals.<br>
-Transaction Tracking: Easily log and categorize your income and expenses to understand your spending patterns and make informed financial decisions.<br>
-Live Currency Conversion: Convert your money in real-time using live currency exchange rates through our integrated API, ensuring you get the most accurate and up-to-date information.<br>
-Secure User Authentication: Protect your sensitive financial data with robust user authentication and profile management features.<br>
-Responsive Design: Enjoy a seamless user experience on any device, thanks to our responsive design powered by Bootstrap's navbar and offcanvas components.<br><br>
-Take charge of your financial future with Imhotep Financial Manager – your trusted partner in achieving financial success.<br>
-</p>
-<style>
-    button.btn-black {
-    padding: 9px 15px;
-    border-radius: 5px;
-    border: none;
-    background-color: #212529;
-    color: white;
-    cursor: pointer;
-}
-</style>
+<body>
+    <h1 style="text-align: center;">Imhotep Financial Manager</h1>
+
+    {% include 'back.html' %}
+    <h2>Version 1.0</h2>
+    <p>
+    27/6/2024<br>
+    Imhotep Financial Manager
+    
+    Imhotep Financial Manager is your comprehensive solution for managing your finances with ease and precision. Our app is designed to help you take control of your money, track your net worth, and manage your transactions efficiently.<br><br>
+    <br>
+    Key Features:<br>
+    <br>
+    Personalized Financial Dashboard: Get a holistic view of your financial health, including your net worth, account balances, and recent transactions, all in one place.<br>
+    Wishlist Management: Create and manage a wishlist of items you aspire to purchase. Our app helps you prioritize and save towards your financial goals.<br>
+    Transaction Tracking: Easily log and categorize your income and expenses to understand your spending patterns and make informed financial decisions.<br>
+    Live Currency Conversion: Convert your money in real-time using live currency exchange rates through our integrated API, ensuring you get the most accurate and up-to-date information.<br>
+    Secure User Authentication: Protect your sensitive financial data with robust user authentication and profile management features.<br>
+    Responsive Design: Enjoy a seamless user experience on any device, thanks to our responsive design powered by Bootstrap's navbar and offcanvas components.<br><br>
+    Take charge of your financial future with Imhotep Financial Manager – your trusted partner in achieving financial success.<br>
+    </p>
+</body>
+</html>

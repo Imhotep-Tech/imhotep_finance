@@ -10,9 +10,9 @@
         {% endif %}
 
     </div>
-    {% include 'back.html' %}
+    
     <form action="/add_wish" method="post" class="form-container">
-
+        {% include 'back.html' %}
         <div class="form-group">
             <select id="yearSelect" name="year" class="input" required></select>
         </div>

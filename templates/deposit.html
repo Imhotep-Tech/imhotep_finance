@@ -10,8 +10,9 @@
         {% endif %}
 
     </div>
-    {% include 'back.html' %}
+    
     <form action="/deposit" method="post" class="form-container">
+        {% include 'back.html' %}
         <div class="form-group">
             <input type="date" class="input" placeholder="Date" id="dateInput" name="date">
         </div>
