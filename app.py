@@ -9,7 +9,8 @@ import requests
 from werkzeug.utils import secure_filename
 import os
 import datetime
-from datetime import date
+from datetime import date, timedelta
+from cryptography.fernet import Fernet
 
 app = Flask(__name__)
 
@@ -33,6 +34,10 @@ ALLOWED_EXTENSIONS = ("png", "jpg", "jpeg")
 db = SQLAlchemy(app)
 
 mail = Mail(app)
+
+key = Fernet.generate_key()
+cipher_suite = Fernet(key)
+
 def send_verification_mail_code(user_mail):
     verification_code = secrets.token_hex(4)
     msg = Message('Email Verification', sender='imhotepfinance@gmail.com', recipients=[user_mail])
@@ -155,7 +160,15 @@ def wishlist_page(user_id):
         ).fetchall()
 
         return year, wishlist_db
-        
+
+def encrypt_data(data):
+    encrypted_data = cipher_suite.encrypt(data.encode())
+    return encrypted_data.decode()
+
+def decrypt_data(encrypted_data):
+    decrypted_data = cipher_suite.decrypt(encrypted_data.encode())
+    return decrypted_data.decode()
+
 @app.route('/loading')
 def loading():
     return render_template('loading.html')
@@ -551,14 +564,25 @@ def show_trans():
     else:
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
+        from_date = request.args.get("from_date")
+        to_date = request.args.get("to_date")
+
+        if to_date is None:
+            to_date = (datetime.datetime.now()).date()
+            
+        if from_date is None:
+            from_date = to_date - (datetime.timedelta(days=30))
+
         user_photo_path = select_user_photo()
         user_id = session.get("user_id")
         trans_db = db.session.execute(
-            text("SELECT * FROM trans WHERE user_id = :user_id ORDER BY trans_id"),
-            {"user_id": user_id}
+            text("SELECT * FROM trans WHERE user_id = :user_id AND date BETWEEN :from_date AND :to_date ORDER BY trans_id"),
+            {"user_id": user_id, "from_date" :from_date, "to_date" :to_date}
         ).fetchall()
 
-        return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+        print(to_date)
+        print(from_date)
+        return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, to_date=to_date, from_date=from_date)
     
 @app.route("/edit_trans", methods=["POST", "GET"])
 def edit_trans():

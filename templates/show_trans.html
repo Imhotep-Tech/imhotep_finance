@@ -10,6 +10,20 @@
                 {% endif %}
             </div>
             <div class="table-container" style="flex-grow: 1; overflow: auto;">
+                <form action="/show_trans" method="get" id="date-form">
+                    <table>
+                        <tr>
+                            <th>
+                                From Date:
+                                <input type="date" name="from_date" value="{{ from_date }}" onchange="this.form.submit()">
+                            </th>
+                            <th>
+                                To Date:
+                                <input type="date" name="to_date" value="{{ to_date }}" onchange="this.form.submit()">
+                            </th>
+                        </tr>
+                    </table>
+                </form>
                 <table class="c">
                     <thead>
                         <tr>
@@ -56,4 +70,5 @@
             </div>
         </div>
     </body>
+    
 {% endblock %}
