@@ -251,6 +251,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+document.addEventListener("DOMContentLoaded", function () {
+            const doctorCategory = "{{ favorite_currency }}"; // Fetch the doctor's category
 
+            const selectElement = document.getElementById("CurrencySelect1");
+            const options = selectElement.options;
+
+            for (let i = 0; i < options.length; i++) {
+                if (options[i].value === doctorCategory) {
+                    options[i].selected = true;
+                    break;
+                }
+            }
+        });
     </script>
 {% endblock %}

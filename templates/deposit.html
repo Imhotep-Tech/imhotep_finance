@@ -13,12 +13,14 @@
     
     <form action="/deposit" method="post" class="form-container">
         {% include 'back.html' %}
+
         <div class="form-group">
             <input type="date" class="input" placeholder="Date" id="dateInput" name="date">
         </div>
         <div class="form-group">
             <input type="number" min="0" class="input" placeholder="Amount" name="amount" required="">
         </div>
+
         <div class="form-group">
             <div class="input-group">
                 <input type="text" id="searchInput1" placeholder="Search Currency" class="input">
@@ -237,5 +239,19 @@
         // Set today's date as default in the date input
         const today = new Date().toISOString().split('T')[0];
         dateInput.value = today;
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const doctorCategory = "{{ favorite_currency }}"; // Fetch the doctor's category
+
+            const selectElement = document.getElementById("CurrencySelect1");
+            const options = selectElement.options;
+
+            for (let i = 0; i < options.length; i++) {
+                if (options[i].value === doctorCategory) {
+                    options[i].selected = true;
+                    break;
+                }
+            }
+        });
     </script>
 {% endblock %}

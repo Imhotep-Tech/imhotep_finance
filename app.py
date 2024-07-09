@@ -1,4 +1,3 @@
-#the test commit for pyanywhere
 from flask import render_template, redirect, Flask, session, request, make_response, Response
 from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
@@ -12,29 +11,30 @@ import os
 import datetime
 from datetime import date, timedelta
 from cryptography.fernet import Fernet
-
+#define the app
 app = Flask(__name__)
-
+#define a secret key with a hexadecimal number of 16 digit
 secret_key = secrets.token_hex(16)
 app.config['SECRET_KEY'] = secret_key
 
+#define the mail to send the verification code and the forget password
 app.config['MAIL_SERVER']='smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USERNAME'] = 'imhotepfinance@gmail.com'
 app.config['MAIL_PASSWORD'] = "hrsw vzhz cixd eecs"
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
+mail = Mail(app)
 
+#connection with the database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://kbassem:kb@localhost/imhotep_finance'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
 
+#define the place to save the 
 app.config["MAX_CONTENT_LENGTH"] = 3 * 1024 * 1024
 app.config["UPLOAD_FOLDER_PHOTO"] = os.path.join(os.getcwd(), "static", "user_photo")
 ALLOWED_EXTENSIONS = ("png", "jpg", "jpeg")
-
-db = SQLAlchemy(app)
-
-mail = Mail(app)
 
 key = Fernet.generate_key()
 cipher_suite = Fernet(key)
@@ -1238,3 +1238,4 @@ def sitemap():
     response.headers["Content-Type"] = "application/xml"
 
     return response
+    
