@@ -1,0 +1,121 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+<style>
+        body {  
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+.centered {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.links {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.links a {
+    color: #986f07;
+    text-decoration: none;
+    padding: 5px;
+}
+
+.links a:hover {
+    text-decoration: underline;
+}
+
+.ios-instructions,
+.android-instructions {
+    display: none;
+    text-align: center;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    margin-top: 20px;
+}
+
+@media (min-width: 600px) {
+    .links {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+}
+
+img {
+    max-width: 80%;
+    height: auto;
+}
+</style>
+{% include 'back.html' %}
+        <div style="text-align:center ;">
+            <a href="https://www.amazon.com/dp/B0D9TVMV3D/ref=apps_sf_sta" style="color: #986f07;">
+                <img src="{{ url_for('static', filename='amazon.png') }}" height="50" width="auto" alt="Android Amazon Download">
+            </a>
+
+            <br>
+
+            <a href="https://github.com/Kbassem10/imhotep_finance_apk/releases/tag/imhotep_finance" style="color: #986f07;">
+                <img src="{{ url_for('static', filename='github.png') }}" height="70" width="auto" alt="Github Apk Download">
+            </a>
+
+            <br>
+
+            <a id="installButton" href="#" style="color: #986f07;">PC PWA Download</a>
+
+            <br>
+            
+            <a id="iosInstall" href="#" style="color: #986f07;">
+                <img src="{{ url_for('static', filename='ios.jpg') }}" height="70" width="auto" alt="Add to Home Screen on iOS">
+            </a>
+        <div class="ios-instructions" id="iosInstructions">
+            <p>To add this app to your home screen on iOS:</p>
+            <ol>
+                <li>Tap the Share button at the bottom of the Safari browser.</li>
+                <li>Select "Add to Home Screen" from the options.</li>
+            </ol>
+        </div>
+    </div>
+    </body>
+    <script>
+        let deferredPrompt;
+
+        // Function to handle PWA installation prompt
+        function setupPWAInstallPrompt() {
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+
+                document.getElementById('installButton').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    deferredPrompt.prompt();
+                    deferredPrompt.userChoice.then((choiceResult) => {
+                        if (choiceResult.outcome === 'accepted') {
+                            console.log('User accepted the A2HS prompt');
+                        } else {
+                            console.log('User dismissed the A2HS prompt');
+                        }
+                        deferredPrompt = null;
+                    });
+                });
+            });
+        }
+
+        // Function to show iOS install instructions
+        function showIOSInstallInstructions() {
+            document.getElementById('iosInstall').addEventListener('click', (e) => {
+                e.preventDefault();
+                document.getElementById('iosInstructions').style.display = 'block';
+            });
+        }
+
+        // Call the functions on page load
+        setupPWAInstallPrompt();
+        showIOSInstallInstructions();
+    </script>
+{% endblock %}

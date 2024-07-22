@@ -59,11 +59,13 @@ def show_networth():
     total_db_dict = dict(total_db)
 
     try:
+        #karimbassemj
         response = requests.get(f"https://v6.exchangerate-api.com/v6/2a4f75a189d39f96688afc97/latest/{favorite_currency}")
         data = response.json()
         rate = data["conversion_rates"]
         total_favorite_currency = 0
     except:
+        #imhotep_finance
         response = requests.get(f"https://v6.exchangerate-api.com/v6/18c9f74feadb9bea7bf26ce4/latest/{favorite_currency}")
         data = response.json()
         rate = data["conversion_rates"]
@@ -1220,6 +1222,13 @@ def delete_wish():
 @app.route("/version")
 def version():
     return render_template("version.html")
+
+@app.route("/download")
+def download():
+    if not session.get("logged_in"):
+        return render_template("download_login.html")
+    else:
+        return render_template("download.html")
 
 @app.route('/sitemap.xml')
 def sitemap():

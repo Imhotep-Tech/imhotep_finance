@@ -339,3 +339,29 @@ table.c {
   max-width: 50px;
   max-height: 100px;
 }
+
+.footer-links {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer-links a {
+  color: #986f07;
+  text-decoration: none;
+  padding: 5px;
+}
+
+.footer-links a:hover {
+  text-decoration: underline;
+}
+
+.ios-instructions,
+.android-instructions {
+  display: none;
+  text-align: center;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  margin-top: 20px;
+}
