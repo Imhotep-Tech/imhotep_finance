@@ -1225,10 +1225,7 @@ def version():
 
 @app.route("/download")
 def download():
-    if not session.get("logged_in"):
-        return render_template("download_login.html")
-    else:
-        return render_template("download.html")
+    return render_template("download.html")
 
 @app.route('/sitemap.xml')
 def sitemap():
