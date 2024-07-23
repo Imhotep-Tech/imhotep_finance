@@ -35,5 +35,47 @@
                 </form>
             </div>
         </div>
+
+        {% if score_txt == "Below Target" %}
+        <div class="row justify-content-center">
+            <div class="col-auto">
+                <br>
+                <h2 style="color: red;">{{ score_txt }}</h2>
+            </div>
+            <div class="col-auto">
+                <br>
+                <h2>{{ score }}</h2>
+            </div>
+        </div>
+        {% elif score_txt == "On Target" %}
+        <div class="row justify-content-center">
+            <div class="col-auto">
+                <br>
+                <h2>{{ score_txt }}</h2>
+            </div>
+            <div class="col-auto">
+                <br>
+                <h2>{{ score }}</h2>
+            </div>
+        </div>
+        {% elif score_txt == "Above Target" %}
+        <div class="row justify-content-center">
+            <div class="col-auto">
+                <br>
+                <h2 style="color: green;">{{ score_txt }}</h2>
+            </div>
+            <div class="col-auto">
+                <br>
+                <h2>{{ score }}</h2>
+            </div>
+        </div>
+        {% else %}
+        {% endif %}
+
+        <div class="row justify-content-center">
+            <div class="col-auto">
+                <a href="/settings/set_target">Target: {{ target }}</a>
+            </div>
+        </div>
     </div>
 {% endblock %}

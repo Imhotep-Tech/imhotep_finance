@@ -78,6 +78,28 @@ def show_networth():
 
     return total_favorite_currency, favorite_currency
 
+def convert_to_fav_currency(dictionary, user_id):
+        favorite_currency = select_favorite_currency(user_id)
+        try:
+            #karimbassemj
+            response = requests.get(f"https://v6.exchangerate-api.com/v6/2a4f75a189d39f96688afc97/latest/{favorite_currency}")
+            data = response.json()
+            rate = data["conversion_rates"]
+            total_favorite_currency = 0
+        except:
+            #imhotep_finance
+            response = requests.get(f"https://v6.exchangerate-api.com/v6/18c9f74feadb9bea7bf26ce4/latest/{favorite_currency}")
+            data = response.json()
+            rate = data["conversion_rates"]
+            total_favorite_currency = 0
+
+
+        for currency, amount in dictionary.items():
+            converted_amount = amount / rate[currency]
+            total_favorite_currency += converted_amount
+        
+        return total_favorite_currency, favorite_currency
+        
 def select_currencies(user_id):
     currency_db = db.session.execute(
         text("SELECT currency from networth WHERE user_id = :user_id"),
@@ -163,14 +185,6 @@ def wishlist_page(user_id):
         ).fetchall()
 
         return year, wishlist_db
-
-def encrypt_data(data):
-    encrypted_data = cipher_suite.encrypt(data.encode())
-    return encrypted_data.decode()
-
-def decrypt_data(encrypted_data):
-    decrypted_data = cipher_suite.decrypt(encrypted_data.encode())
-    return decrypted_data.decode()
 
 @app.route('/loading')
 def loading():
@@ -379,10 +393,95 @@ def home():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        user_id = session.get("user_id")
         user_photo_path = select_user_photo()
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
-        return render_template("home.html", total_favorite_currency = total_favorite_currency, favorite_currency=favorite_currency , user_photo_path=user_photo_path)
+
+        target_db = db.session.execute(
+            text("SELECT * FROM target WHERE user_id = :user_id"),
+            {"user_id": user_id}
+        ).fetchall()
+
+        if target_db:
+            target_db = sorted(target_db, key=lambda x: (x[4], x[3]), reverse=True)
+            target = target_db[0][2]
+            mounth_db = int(target_db[0][3])
+            year_db = int(target_db[0][4])
+            now = datetime.datetime.now()
+            mounth = now.month
+            year = now.year
+
+            if mounth_db != mounth or year_db != year:
+                try:
+                    last_target_id = db.session.execute(
+                            text("SELECT MAX(target_id) FROM target")
+                        ).fetchone()[0]
+                    target_id = last_target_id + 1
+                except:
+                    target_id = 1
+
+                db.session.execute(
+                    text("INSERT INTO target (target_id, user_id, target, mounth, year) VALUES (:target_id, :user_id, :target, :mounth, :year)"),
+                    {"target_id":target_id, "user_id" :user_id, "target": target, "mounth" :mounth, "year" :year}
+                )
+                db.session.commit()
+                
+            first_day_current_month = now.replace(day=1)
+
+            if now.month == 12:
+                first_day_next_month = now.replace(year=now.year + 1, month=1, day=1)
+            else:
+                first_day_next_month = now.replace(month=now.month + 1, day=1)
+                
+            from_date = first_day_current_month.date()
+            to_date = first_day_next_month.date()
+
+            taregt_db_1 = db.session.execute(
+                text("SELECT target FROM target WHERE user_id = :user_id AND mounth = :mounth AND year = :year"),
+                {"user_id": user_id, "mounth": mounth, "year": year}
+            ).fetchone()
+
+            if taregt_db_1:
+                target = taregt_db_1[0]
+                score_deposite = db.session.execute(
+                    text("SELECT amount, currency FROM trans WHERE user_id = :user_id AND date BETWEEN :from_date AND :to_date AND trans_status = :trans_status"),
+                    {"user_id": user_id, "from_date": from_date, "to_date": to_date, "trans_status": "deposit"}
+                ).fetchall()
+
+                score_withdraw = db.session.execute(
+                    text("SELECT amount, currency FROM trans WHERE user_id = :user_id AND date BETWEEN :from_date AND :to_date AND trans_status = :trans_status"),
+                    {"user_id": user_id, "from_date": from_date, "to_date": to_date, "trans_status": "withdraw"}
+                ).fetchall()
+
+                currency_totals_deposite = {}
+                for amount, currency in score_deposite:
+                    amount = float(amount)
+                    if currency in currency_totals_deposite:
+                        currency_totals_deposite[currency] += amount
+                    else:
+                        currency_totals_deposite[currency] = amount
+                total_favorite_currency_deposite, favorite_currency_deposite = convert_to_fav_currency(currency_totals_deposite, user_id)
+
+                currency_totals_withdraw= {}
+                for amount, currency in score_withdraw:
+                    amount = float(amount)
+                    if currency in currency_totals_withdraw:
+                        currency_totals_withdraw[currency] += amount
+                    else:
+                        currency_totals_withdraw[currency] = amount
+                total_favorite_currency_withdraw, favorite_currency_withdraw = convert_to_fav_currency(currency_totals_withdraw, user_id)
+
+                score = (total_favorite_currency_deposite - target) - total_favorite_currency_withdraw
+                if score > 0:
+                    score_txt = "Above Target"
+                elif score < 0:
+                    score_txt = "Below Target"
+                else:
+                    score_txt = "On Target"
+                return render_template("home.html", total_favorite_currency = total_favorite_currency, favorite_currency=favorite_currency , user_photo_path=user_photo_path, score_txt=score_txt, score=score, target = target)
+        else: 
+            return render_template("home.html", total_favorite_currency = total_favorite_currency, favorite_currency=favorite_currency , user_photo_path=user_photo_path)
 
 @app.route("/deposit", methods=["POST", "GET"])
 def deposit():
@@ -565,28 +664,34 @@ def show_trans():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        user_id = session.get("user_id")
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         from_date = request.args.get("from_date")
         to_date = request.args.get("to_date")
 
-        if to_date is None:
-            to_date = (datetime.datetime.now()).date()
-            
+        now = datetime.datetime.now()
+
+        first_day_current_month = now.replace(day=1)
+
+        if now.month == 12:
+            first_day_next_month = now.replace(year=now.year + 1, month=1, day=1)
+        else:
+            first_day_next_month = now.replace(month=now.month + 1, day=1)
+
         if from_date is None:
-            from_date = to_date - (datetime.timedelta(days=30))
+            from_date = first_day_current_month.date()
+
+        if to_date is None:
+            to_date = first_day_next_month.date()
 
         user_photo_path = select_user_photo()
-        user_id = session.get("user_id")
         trans_db = db.session.execute(
             text("SELECT * FROM trans WHERE user_id = :user_id AND date BETWEEN :from_date AND :to_date ORDER BY trans_id"),
             {"user_id": user_id, "from_date" :from_date, "to_date" :to_date}
         ).fetchall()
-
-        print(to_date)
-        print(from_date)
         return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, to_date=to_date, from_date=from_date)
-    
+
 @app.route("/edit_trans", methods=["POST", "GET"])
 def edit_trans():
     if not session.get("logged_in"):
@@ -1226,6 +1331,90 @@ def version():
 @app.route("/download")
 def download():
     return render_template("download.html")
+
+@app.route("/settings/set_target", methods=["GET","POST"])
+def set_target():
+    if not session.get("logged_in"):
+        return redirect("/login_page")
+    else:
+        total_favorite_currency, favorite_currency = show_networth()
+        total_favorite_currency = f"{total_favorite_currency:,.2f}"
+        user_id = session.get("user_id")
+        user_photo_path = select_user_photo()
+        if request.method == "GET":
+            now = datetime.datetime.now()
+            mounth = now.month
+            year = now.year
+            target_db = db.session.execute(
+                text("SELECT * FROM target WHERE user_id = :user_id AND mounth = :mounth AND year = :year"),
+                {"user_id" :user_id, "mounth" : mounth, "year":year}
+            ).fetchall()
+            if target_db:
+                target_db = target_db[0]
+                return render_template("update_target.html", total_favorite_currency=total_favorite_currency,favorite_currency=favorite_currency,user_photo_path=user_photo_path, target_db=target_db)
+            else:
+                return render_template("set_target.html", total_favorite_currency=total_favorite_currency,favorite_currency=favorite_currency,user_photo_path=user_photo_path)
+        else:
+            target = request.form.get("target")
+
+            now = datetime.datetime.now()
+            mounth = now.month
+            year = now.year
+
+            try:
+                last_target_id = db.session.execute(
+                        text("SELECT MAX(target_id) FROM target")
+                    ).fetchone()[0]
+                target_id = last_target_id + 1
+            except:
+                target_id = 1
+
+            db.session.execute(
+                text("INSERT INTO target (target_id, user_id, target, mounth, year) VALUES (:target_id, :user_id, :target, :mounth, :year)"),
+                {"target_id":target_id, "user_id" :user_id, "target": target, "mounth" :mounth, "year" :year}
+            )
+            db.session.commit()
+            done = "Your Target have been set"
+            target_db = db.session.execute(
+                text("SELECT * FROM target WHERE user_id = :user_id AND mounth = :mounth AND year = :year"),
+                {"user_id" :user_id, "mounth" : mounth, "year":year}
+            ).fetchall()[0]
+            return render_template("update_target.html", total_favorite_currency=total_favorite_currency,favorite_currency=favorite_currency, done=done,user_photo_path=user_photo_path, target=target, target_db=target_db)
+
+@app.route("/settings/update_target", methods=["POST"])
+def update_target():
+    if not session.get("logged_in"):
+        return redirect("/login_page")
+    else:
+        total_favorite_currency, favorite_currency = show_networth()
+        total_favorite_currency = f"{total_favorite_currency:,.2f}"
+        user_id = session.get("user_id")
+        user_photo_path = select_user_photo()
+
+        target = request.form.get("target")
+
+        now = datetime.datetime.now()
+        mounth = now.month
+        year = now.year
+
+        target_id = db.session.execute(
+                text("SELECT target_id FROM target WHERE user_id = :user_id AND mounth = :mounth AND year = :year"),
+                {"user_id": user_id, "mounth": mounth, "year":year}
+            ).fetchone()[0]
+
+        db.session.execute(
+            text("UPDATE target SET target = :target WHERE target_id = :target_id"),
+            {"target_id":target_id, "target": target}
+        )
+        db.session.commit()
+
+        target_db = db.session.execute(
+            text("SELECT * FROM target WHERE user_id = :user_id AND mounth = :mounth AND year = :year"),
+            {"user_id" :user_id, "mounth" : mounth, "year":year}
+        ).fetchall()[0]
+        print(target_db)
+        done = "Your Target have been updated"
+        return render_template("update_target.html", total_favorite_currency=total_favorite_currency,favorite_currency=favorite_currency, done=done,user_photo_path=user_photo_path, target_db=target_db)
 
 @app.route('/sitemap.xml')
 def sitemap():
