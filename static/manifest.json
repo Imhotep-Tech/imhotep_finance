@@ -11,5 +11,11 @@
             "sizes": "192x192",
             "type": "image/png"
         }
+    ],
+    "orientation": "natural",
+    "display_override": [
+      "standalone",
+      "browser",
+      "window-controls-overlay"
     ]
 }

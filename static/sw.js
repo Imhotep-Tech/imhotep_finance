@@ -1,25 +1,18 @@
-const CACHE_NAME = 'flask-app-cache-v1';
-const urlsToCache = [
-    '/',
-    '/static/imhotep_finance.ico',
-    '/static/imhotep_finance.jpeg',
-    '/static/manifest.json',
-    '/static/style.css',
-    '/static/avatar-anonymous-300x300.png'
-];
+// This is the "Offline copy of pages" service worker
 
-self.addEventListener('install', event => {
-    event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then(cache => cache.addAll(urlsToCache))
-    );
+const CACHE = "pwabuilder-offline";
+
+importScripts('https://storage.googleapis.com/workbox-cdn/releases/5.1.2/workbox-sw.js');
+
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
 });
 
-self.addEventListener('fetch', event => {
-    event.respondWith(
-        caches.match(event.request)
-            .then(response => {
-                return response || fetch(event.request);
-            })
-    );
-});
+workbox.routing.registerRoute(
+  new RegExp('/*'),
+  new workbox.strategies.StaleWhileRevalidate({
+    cacheName: CACHE
+  })
+);

@@ -186,10 +186,6 @@ def wishlist_page(user_id):
 
         return year, wishlist_db
 
-@app.route('/loading')
-def loading():
-    return render_template('loading.html')
-
 @app.route("/", methods=["GET"])
 def index():
     return render_template("index.html")
@@ -286,10 +282,10 @@ def login():
                     text("SELECT user_id FROM users WHERE LOWER(user_username) = :user_username AND user_password = :user_password"),
                     {"user_username": user_username_mail, "user_password": password_db}
                 ).fetchone()[0]
-                
+
                 session["logged_in"] = True
                 session["user_id"] = user
-                
+
                 return redirect("/home")
             else:
                 error_verify = "Your mail isn't verified"
@@ -300,8 +296,8 @@ def login():
     except:
         try:
             login_db = db.session.execute(
-            text("SELECT user_password, user_mail_verify FROM users WHERE LOWER(user_mail) = :user_mail"),
-            {"user_mail": user_username_mail}
+                text("SELECT user_password, user_mail_verify FROM users WHERE LOWER(user_mail) = :user_mail"),
+                {"user_mail": user_username_mail}
             ).fetchall()[0]
             password_db = login_db[0]
             user_mail_verify = login_db[1]
@@ -312,10 +308,10 @@ def login():
                         text("SELECT user_id FROM users WHERE LOWER(user_mail) = :user_mail AND user_password = :user_password"),
                         {"user_mail": user_username_mail, "user_password": password_db}
                     ).fetchone()[0]
-                    
+
                     session["logged_in"] = True
                     session["user_id"] = user
-                    
+
                     return redirect("/home")
                 else:
                     error_verify = "Your mail isn't verified"
@@ -324,10 +320,8 @@ def login():
                 error = "Your username or password are incorrect!"
                 return render_template("login.html", error=error)
         except:
-            
             error = "Your username is incorrect!"
             return render_template("login.html", error=error)
-
 
 @app.route("/manual_mail_verification", methods=["POST", "GET"])
 def manual_mail_verification():
