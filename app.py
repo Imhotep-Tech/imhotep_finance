@@ -39,6 +39,10 @@ ALLOWED_EXTENSIONS = ("png", "jpg", "jpeg")
 key = Fernet.generate_key()
 cipher_suite = Fernet(key)
 
+app.config['SESSION_COOKIE_SECURE'] = True
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+
 def send_verification_mail_code(user_mail):
     verification_code = secrets.token_hex(4)
     msg = Message('Email Verification', sender='imhotepfinance@gmail.com', recipients=[user_mail])
@@ -192,11 +196,10 @@ def index():
 
 @app.route("/login_page", methods=["GET"])
 def login_page():
-    if session.get("logged_in"):
+    if session.get("logged_in") or request.cookies.get("secret_key"):
         return redirect("/home")
     else:
         return render_template("login.html")
-
 @app.route("/register_page", methods=["GET"])
 def register_page():
     return render_template("register.html")
@@ -282,11 +285,14 @@ def login():
                     text("SELECT user_id FROM users WHERE LOWER(user_username) = :user_username AND user_password = :user_password"),
                     {"user_username": user_username_mail, "user_password": password_db}
                 ).fetchone()[0]
-
+                
                 session["logged_in"] = True
                 session["user_id"] = user
+                
+                response = make_response(redirect("/home"))
+                response.set_cookie("secret_key", secret_key, secure=True, httponly=True, samesite='Lax')
 
-                return redirect("/home")
+                return response
             else:
                 error_verify = "Your mail isn't verified"
                 return render_template("login.html", error_verify=error_verify)
@@ -296,8 +302,8 @@ def login():
     except:
         try:
             login_db = db.session.execute(
-                text("SELECT user_password, user_mail_verify FROM users WHERE LOWER(user_mail) = :user_mail"),
-                {"user_mail": user_username_mail}
+            text("SELECT user_password, user_mail_verify FROM users WHERE LOWER(user_mail) = :user_mail"),
+            {"user_mail": user_username_mail}
             ).fetchall()[0]
             password_db = login_db[0]
             user_mail_verify = login_db[1]
@@ -308,11 +314,14 @@ def login():
                         text("SELECT user_id FROM users WHERE LOWER(user_mail) = :user_mail AND user_password = :user_password"),
                         {"user_mail": user_username_mail, "user_password": password_db}
                     ).fetchone()[0]
-
+                    
                     session["logged_in"] = True
                     session["user_id"] = user
 
-                    return redirect("/home")
+                    response = make_response(redirect("/home"))
+                    response.set_cookie("secret_key", secret_key, secure=True, httponly=True, samesite='Lax')
+
+                    return response
                 else:
                     error_verify = "Your mail isn't verified"
                     return render_template("login.html", error_verify=error_verify)
@@ -320,6 +329,7 @@ def login():
                 error = "Your username or password are incorrect!"
                 return render_template("login.html", error=error)
         except:
+            
             error = "Your username is incorrect!"
             return render_template("login.html", error=error)
 
