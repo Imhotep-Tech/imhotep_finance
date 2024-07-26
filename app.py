@@ -9,6 +9,7 @@ from werkzeug.utils import secure_filename
 import os
 import datetime
 from datetime import date, timedelta
+from sqlalchemy.exc import OperationalError
 
 #define the app
 app = Flask(__name__)
@@ -30,10 +31,6 @@ mail = Mail(app)
 #connection with the database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://kbassem:kb@localhost/imhotep_finance'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-SQLALCHEMY_ENGINE_OPTIONS = {
-    'pool_recycle': 3600, 
-    'pool_timeout': 30,   
-}
 
 db = SQLAlchemy(app)
 
@@ -392,8 +389,13 @@ def home():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        try:
+            user_photo_path = select_user_photo()
+        except OperationalError:
+            error = "Welcome Back"
+            return render_template('error.html', error=error), 500
+        
         user_id = session.get("user_id")
-        user_photo_path = select_user_photo()
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
 
