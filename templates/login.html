@@ -23,7 +23,7 @@
 
 <div class="form-container">
     <p class="title">Welcome back</p>
-    <form id="loginForm" action="/login" method="POST" class="form">
+    <form id="login-form" action="/login" method="POST" class="form">
       <input type="name" class="input" placeholder="Username/ E-Mail" name="user_username_mail" required="">
       <div class="password-container">
         <input type="password" id="password" class="input" placeholder="Password" name="user_password" required=""><br><br>
@@ -46,5 +46,11 @@
     </a>
     <br><br>
 </div>
+
+<script>
+  document.getElementById('login-form').addEventListener('submit', function() {
+      document.getElementById('loading-overlay').style.display = 'flex';
+  });
+</script>
 
 {% endblock %}

@@ -11,7 +11,7 @@
 
     </div>
     
-    <form action="/add_wish" method="post" class="form-container">
+    <form action="/add_wish" method="post" class="form-container" id="submit-form">
         {% include 'back.html' %}
         <div class="form-group">
             <select id="yearSelect" name="year" class="input" required></select>
@@ -264,5 +264,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             }
         });
+  document.getElementById('submit-form').addEventListener('submit', function() {
+      document.getElementById('loading-overlay').style.display = 'flex';
+  });
+
     </script>
 {% endblock %}

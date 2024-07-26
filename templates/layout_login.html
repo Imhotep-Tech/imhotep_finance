@@ -12,7 +12,35 @@
     <meta name="description" content="Imhotep Financial Manager - Manage Finance with ease.">
     <meta name="keywords" content="Finance, Financial Manager, Imhotep Finance, Imhotep Financial Manager">
     <title>{% block title %}Imhotep Financial Manager{% endblock %}</title>
-
+    <style>
+        #loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 1000;
+            text-align: center;
+            font-size: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .loader {
+            border: 16px solid #f3f3f3; /* Light grey */
+            border-radius: 50%;
+            border-top: 16px solid #3498db; /* Blue */
+            width: 120px;
+            height: 120px;
+            animation: spin 2s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
     <div id="loading-overlay">
@@ -46,39 +74,16 @@
                 </div>
         </div>
     </footer>
+
     <script>
-        // Function to show loading screen
-        function showLoading() {
-            document.getElementById('loading-overlay').style.display = 'block';
-        }
-
-        // Function to hide loading screen
-        function hideLoading() {
-            document.getElementById('loading-overlay').style.display = 'none';
-        }
-
         // Show loading screen on page load
-        document.addEventListener("DOMContentLoaded", function() {
-            showLoading();
-        });
-
-        // Hide loading screen once the page has fully loaded
         window.addEventListener('load', function() {
-            hideLoading();
+            document.getElementById('loading-overlay').style.display = 'none';
         });
 
-        // Optionally disable inputs until the page is fully loaded
-        document.addEventListener("readystatechange", function() {
-            let inputs = document.querySelectorAll('input, textarea, select, button');
-            if (document.readyState !== "complete") {
-                inputs.forEach(input => {
-                    input.disabled = true;
-                });
-            } else {
-                inputs.forEach(input => {
-                    input.disabled = false;
-                });
-            }
+        // Show loading screen on page unload
+        window.addEventListener('beforeunload', function() {
+            document.getElementById('loading-overlay').style.display = 'flex';
         });
     </script>
 </body>
