@@ -1,62 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-        <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
-        <meta charset="utf-8">
-        <link rel="shortcut icon" href="{{ url_for('static', filename='imhotep_finance.ico')}}">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-        <meta name="description" content="Imhotep Financial Manager - Manage Finance with ease.">
-        <meta name="keywords" content="Finance, Financial Manager, Imhotep Finance, Imhotep Financial Manager">
-        <title>Imhotep Financial Manager</title>
-    </head>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <meta charset="utf-8">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='imhotep_finance.ico')}}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <meta name="description" content="Imhotep Financial Manager - Manage Finance with ease.">
+    <meta name="keywords" content="Finance, Financial Manager, Imhotep Finance, Imhotep Financial Manager">
+    <title>{% block title %}Imhotep Financial Manager{% endblock %}</title>
 
+</head>
 <body>
+    <div id="loading-overlay">
+        <div class="loader"></div>
+        <p>Loading...</p>
+    </div>
+
     {% include 'nav.html' %}
+
     <div class="content-container">
         {% block body %}
         {% endblock %}
     </div>
-</body>
-<footer>
-    <div class="footer-content">
-        <p>&copy; 2024 Imhotep Financial Manager. All rights reserved. <a href="https://imhoteptech.vercel.app" style="color: white;">Imhotep tech</a><br>
-            <a href="/version" style="color: white;">Version: 3.0</a>
-            <a href="/download" title="Download" style="color: white;">
-                <i class="fas fa-download"></i> Download
-            </a></p>
-            <div class="d-flex justify-content-end align-items-center">
-                <p class="mb-0">Contact us:</p>
-                <a href="mailto:imhoteptech@outlook.com" class="footer-icon">
-                    <i class="fa fa-envelope"></i>
-                </a>
-                <a href="https://www.instagram.com/imhotep_tech?igsh=YXV0Y24xZnNveDQ5" target="_blank" class="footer-icon">
-                    <i class="fab fa-instagram"></i>
-                </a>
-                <a href="https://x.com/Imhoteptech1?t=E5JmfSp5WpyZaWkDzILpKw&s=09" target="_blank" class="footer-icon">
-                    <i class="fab fa-twitter"></i> 
-                </a>
-            </div>
-    </div>
-</footer>
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        let inputs = document.querySelectorAll('input, textarea, select, button');
-        inputs.forEach(input => {
-            input.disabled = false;
-        });
-    });
 
-    document.addEventListener("readystatechange", function() {
-        if (document.readyState !== "complete") {
-            let inputs = document.querySelectorAll('input, textarea, select, button');
-            inputs.forEach(input => {
-                input.disabled = true;
-            });
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2024 Imhotep Financial Manager. All rights reserved. <a href="https://imhoteptech.vercel.app" style="color: white;">Imhotep tech</a><br>
+                <a href="/version" style="color: white;">Version: 3.0</a>
+                <a href="/download" title="Download" style="color: white;">
+                    <i class="fas fa-download"></i> Download
+                </a></p>
+                <div class="d-flex justify-content-end align-items-center">
+                    <p class="mb-0">Contact us:</p>
+                    <a href="mailto:imhoteptech@outlook.com" class="footer-icon">
+                        <i class="fa fa-envelope"></i>
+                    </a>
+                    <a href="https://www.instagram.com/imhotep_tech?igsh=YXV0Y24xZnNveDQ5" target="_blank" class="footer-icon">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="https://x.com/Imhoteptech1?t=E5JmfSp5WpyZaWkDzILpKw&s=09" target="_blank" class="footer-icon">
+                        <i class="fab fa-twitter"></i> 
+                    </a>
+                </div>
+        </div>
+    </footer>
+    <script>
+        // Function to show loading screen
+        function showLoading() {
+            document.getElementById('loading-overlay').style.display = 'block';
         }
-    });
-</script>
+
+        // Function to hide loading screen
+        function hideLoading() {
+            document.getElementById('loading-overlay').style.display = 'none';
+        }
+
+        // Show loading screen on page load
+        document.addEventListener("DOMContentLoaded", function() {
+            showLoading();
+        });
+
+        // Hide loading screen once the page has fully loaded
+        window.addEventListener('load', function() {
+            hideLoading();
+        });
+
+        // Optionally disable inputs until the page is fully loaded
+        document.addEventListener("readystatechange", function() {
+            let inputs = document.querySelectorAll('input, textarea, select, button');
+            if (document.readyState !== "complete") {
+                inputs.forEach(input => {
+                    input.disabled = true;
+                });
+            } else {
+                inputs.forEach(input => {
+                    input.disabled = false;
+                });
+            }
+        });
+    </script>
+</body>
 </html>

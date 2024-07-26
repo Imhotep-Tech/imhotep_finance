@@ -1,7 +1,6 @@
-from flask import render_template, redirect, Flask, session, request, make_response, Response
+from flask import render_template, redirect, Flask, session, request, make_response
 from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
-from flask_session import Session
 from werkzeug.security import generate_password_hash, check_password_hash
 import secrets
 from sqlalchemy import text
@@ -10,12 +9,14 @@ from werkzeug.utils import secure_filename
 import os
 import datetime
 from datetime import date, timedelta
-from cryptography.fernet import Fernet
+
 #define the app
 app = Flask(__name__)
+
 #define a secret key with a hexadecimal number of 16 digit
 secret_key = secrets.token_hex(16)
 app.config['SECRET_KEY'] = secret_key
+app.permanent_session_lifetime = timedelta(days=30)
 
 #define the mail to send the verification code and the forget password
 app.config['MAIL_SERVER']='smtp.gmail.com'
@@ -31,17 +32,10 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://kbassem:kb@localhost/imhot
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-#define the place to save the 
+#define the place to save the user photo and the allowed image formats
 app.config["MAX_CONTENT_LENGTH"] = 3 * 1024 * 1024
 app.config["UPLOAD_FOLDER_PHOTO"] = os.path.join(os.getcwd(), "static", "user_photo")
 ALLOWED_EXTENSIONS = ("png", "jpg", "jpeg")
-
-key = Fernet.generate_key()
-cipher_suite = Fernet(key)
-
-app.config['SESSION_COOKIE_SECURE'] = True
-app.config['SESSION_COOKIE_HTTPONLY'] = True
-app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
 def send_verification_mail_code(user_mail):
     verification_code = secrets.token_hex(4)
@@ -196,10 +190,11 @@ def index():
 
 @app.route("/login_page", methods=["GET"])
 def login_page():
-    if session.get("logged_in") or request.cookies.get("secret_key"):
+    if session.get("logged_in"):
         return redirect("/home")
     else:
         return render_template("login.html")
+
 @app.route("/register_page", methods=["GET"])
 def register_page():
     return render_template("register.html")
@@ -288,11 +283,9 @@ def login():
                 
                 session["logged_in"] = True
                 session["user_id"] = user
-                
-                response = make_response(redirect("/home"))
-                response.set_cookie("secret_key", secret_key, secure=True, httponly=True, samesite='Lax')
+                session.permanent = True
 
-                return response
+                return redirect("/home")
             else:
                 error_verify = "Your mail isn't verified"
                 return render_template("login.html", error_verify=error_verify)
@@ -317,11 +310,8 @@ def login():
                     
                     session["logged_in"] = True
                     session["user_id"] = user
-
-                    response = make_response(redirect("/home"))
-                    response.set_cookie("secret_key", secret_key, secure=True, httponly=True, samesite='Lax')
-
-                    return response
+                    return redirect("/home")
+                
                 else:
                     error_verify = "Your mail isn't verified"
                     return render_template("login.html", error_verify=error_verify)
