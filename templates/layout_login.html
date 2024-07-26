@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <meta name="description" content="Imhotep Financial Manager - Manage Finance with ease.">
     <meta name="keywords" content="Finance, Financial Manager, Imhotep Finance, Imhotep Financial Manager">
-    <title>{% block title %}Imhotep Financial Manager{% endblock %}</title>
+    <title>Imhotep Financial Manager</title>
     <style>
         #loading-overlay {
             display: none;
@@ -29,9 +29,9 @@
             align-items: center;
         }
         .loader {
-            border: 16px solid #f3f3f3; /* Light grey */
+            border: 16px solid #f3f3f3;
             border-radius: 50%;
-            border-top: 16px solid #3498db; /* Blue */
+            border-top: 16px solid #3498db;
             width: 120px;
             height: 120px;
             animation: spin 2s linear infinite;
@@ -43,10 +43,12 @@
     </style>
 </head>
 <body>
+    <!-- Loading Screen -->
     <div id="loading-overlay">
         <div class="loader"></div>
         <p>Loading...</p>
     </div>
+
 
     <div class="content-container">
         {% block body %}
@@ -76,14 +78,29 @@
     </footer>
 
     <script>
-        // Show loading screen on page load
-        window.addEventListener('load', function() {
+        // Show loading screen
+        function showLoadingScreen() {
+            document.getElementById('loading-overlay').style.display = 'flex';
+        }
+
+        // Hide loading screen
+        function hideLoadingScreen() {
             document.getElementById('loading-overlay').style.display = 'none';
+        }
+
+        // Event listener for back navigation
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                showLoadingScreen();
+                setTimeout(function() {
+                    hideLoadingScreen();
+                }, 100); // Adjust delay if necessary
+            }
         });
 
-        // Show loading screen on page unload
-        window.addEventListener('beforeunload', function() {
-            document.getElementById('loading-overlay').style.display = 'flex';
+        // Hide loading screen on initial load
+        window.addEventListener('load', function() {
+            hideLoadingScreen();
         });
     </script>
 </body>
