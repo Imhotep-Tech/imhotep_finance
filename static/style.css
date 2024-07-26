@@ -399,7 +399,7 @@ table.c {
 .loader {
   border: 16px solid #f3f3f3; /* Light grey */
   border-radius: 50%;
-  border-top: 16px solid #3498db; /* Blue */
+  border-top: 16px solid teal; /* Blue */
   width: 120px;
   height: 120px;
   animation: spin 2s linear infinite;
