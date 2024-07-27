@@ -26,27 +26,7 @@
         {% endblock %}
     </div>
 
-    <footer>
-        <div class="footer-content">
-            <p>&copy; 2024 Imhotep Financial Manager. All rights reserved. <a href="https://imhoteptech.vercel.app" style="color: white;">Imhotep tech</a><br>
-                <a href="/version" style="color: white;">Version: 3.0</a>
-                <a href="/download" title="Download" style="color: white;">
-                    <i class="fas fa-download"></i> Download
-                </a></p>
-                <div class="d-flex justify-content-end align-items-center">
-                    <p class="mb-0">Contact us:</p>
-                    <a href="mailto:imhoteptech@outlook.com" class="footer-icon">
-                        <i class="fa fa-envelope"></i>
-                    </a>
-                    <a href="https://www.instagram.com/imhotep_tech?igsh=YXV0Y24xZnNveDQ5" target="_blank" class="footer-icon">
-                        <i class="fab fa-instagram"></i>
-                    </a>
-                    <a href="https://x.com/Imhoteptech1?t=E5JmfSp5WpyZaWkDzILpKw&s=09" target="_blank" class="footer-icon">
-                        <i class="fab fa-twitter"></i> 
-                    </a>
-                </div>
-        </div>
-    </footer>
+    {% include 'footer.html' %}
 
     <script>
         function showLoadingScreen() {

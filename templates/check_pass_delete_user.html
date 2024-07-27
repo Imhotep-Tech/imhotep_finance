@@ -1,4 +1,4 @@
-{% extends "layout_login.html" %}
+{% extends "layout.html" %}
 
 {% block body %}
 
@@ -12,7 +12,7 @@
     </div>
     {% include 'back.html' %}
     <p class="title">Check Password</p>
-    <form action="/settings/security_check" method="post" class="form">
+    <form action="/delete_user/check_pass" method="post" class="form">
         <input type="hidden" name="user_id" value="{ user_id }">
         <input type="password" class="input" placeholder="Old Password" name="check_pass" id = "password" required="">
         <label for="password-toggle" class="password-toggle-btn">

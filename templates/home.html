@@ -44,7 +44,7 @@
             </div>
             <div class="col-auto">
                 <br>
-                <h2>{{ score }}</h2>
+                <h2>{{ "{:,.2f}".format(score) }}</h2>
             </div>
         </div>
         {% elif score_txt == "On Target" %}
@@ -55,7 +55,7 @@
             </div>
             <div class="col-auto">
                 <br>
-                <h2>{{ score }}</h2>
+                <h2>{{ "{:,.2f}".format(score) }}</h2>
             </div>
         </div>
         {% elif score_txt == "Above Target" %}
@@ -66,7 +66,7 @@
             </div>
             <div class="col-auto">
                 <br>
-                <h2>{{ score }}</h2>
+                <h2>{{ "{:,.2f}".format(score) }}</h2>
             </div>
         </div>
         {% else %}

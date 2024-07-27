@@ -10,6 +10,7 @@ import os
 import datetime
 from datetime import date, timedelta
 from sqlalchemy.exc import OperationalError
+from flask_session import Session
 
 #define the app
 app = Flask(__name__)
@@ -18,6 +19,8 @@ app = Flask(__name__)
 secret_key = secrets.token_hex(16)
 app.config['SECRET_KEY'] = secret_key
 app.permanent_session_lifetime = timedelta(days=30)
+app.config['SESSION_TYPE'] = 'filesystem'
+sess = Session(app)
 
 #define the mail to send the verification code and the forget password
 app.config['MAIL_SERVER']='smtp.gmail.com'
@@ -31,7 +34,6 @@ mail = Mail(app)
 #connection with the database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://kbassem:kb@localhost/imhotep_finance'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
 db = SQLAlchemy(app)
 
 #define the place to save the user photo and the allowed image formats
@@ -46,37 +48,6 @@ def send_verification_mail_code(user_mail):
     mail.send(msg)
 
     session["verification_code"] = verification_code
-
-def show_networth():
-    user_id = session.get("user_id")
-    favorite_currency = select_favorite_currency(user_id)
-
-    total_db = db.session.execute(
-        text("SELECT currency, total FROM networth WHERE user_id = :user_id"),
-        {"user_id": user_id}
-    ).fetchall()
-
-    total_db_dict = dict(total_db)
-
-    try:
-        #karimbassemj
-        response = requests.get(f"https://v6.exchangerate-api.com/v6/2a4f75a189d39f96688afc97/latest/{favorite_currency}")
-        data = response.json()
-        rate = data["conversion_rates"]
-        total_favorite_currency = 0
-    except:
-        #imhotep_finance
-        response = requests.get(f"https://v6.exchangerate-api.com/v6/18c9f74feadb9bea7bf26ce4/latest/{favorite_currency}")
-        data = response.json()
-        rate = data["conversion_rates"]
-        total_favorite_currency = 0
-
-
-    for currency, amount in total_db_dict.items():
-        converted_amount = amount / rate[currency]
-        total_favorite_currency += converted_amount
-
-    return total_favorite_currency, favorite_currency
 
 def convert_to_fav_currency(dictionary, user_id):
         favorite_currency = select_favorite_currency(user_id)
@@ -99,6 +70,21 @@ def convert_to_fav_currency(dictionary, user_id):
             total_favorite_currency += converted_amount
         
         return total_favorite_currency, favorite_currency
+
+def show_networth():
+    user_id = session.get("user_id")
+    favorite_currency = select_favorite_currency(user_id)
+
+    total_db = db.session.execute(
+        text("SELECT currency, total FROM networth WHERE user_id = :user_id"),
+        {"user_id": user_id}
+    ).fetchall()
+
+    total_db_dict = dict(total_db)
+
+    total_favorite_currency,favorite_currency = convert_to_fav_currency(total_db_dict, user_id)
+
+    return total_favorite_currency, favorite_currency
         
 def select_currencies(user_id):
     currency_db = db.session.execute(
@@ -186,6 +172,22 @@ def wishlist_page(user_id):
 
         return year, wishlist_db
 
+def logout():
+        session.permanent = False
+        session["logged_in"] = False
+        session.clear()
+
+def security_check(user_id, check_pass):
+    password_db = db.session.execute(
+                text("SELECT user_password FROM users WHERE user_id = :user_id"),
+                {"user_id" :user_id}
+            ).fetchone()[0]
+
+    if check_password_hash(password_db, check_pass):
+        return True
+    else:
+        return False
+    
 @app.route("/", methods=["GET"])
 def index():
     return render_template("index.html")
@@ -206,6 +208,14 @@ def register():
     user_username = (request.form.get("user_username").strip()).lower()
     user_password = request.form.get("user_password")
     user_mail = request.form.get("user_mail").lower()
+
+    if "@" in user_username:
+        error = "username should not have @"
+        return render_template("register.html", error=error)
+    
+    if "@" not in user_mail:
+        error = "mail should have @"
+        return render_template("register.html", error=error)
 
     existing_username = db.session.execute(
         text("SELECT user_username FROM users WHERE LOWER(user_username) = :user_username"),
@@ -242,7 +252,7 @@ def register():
     )
     db.session.commit()
 
-    return render_template("mail_verify.html")
+    return render_template("mail_verify.html", user_mail=user_mail, user_username=user_username)
 
 @app.route("/mail_verification", methods=["POST", "GET"])
 def mail_verification():
@@ -251,11 +261,18 @@ def mail_verification():
     else: 
         verification_code = request.form.get("verification_code").strip()
         user_id = session.get("user_id")
+        user_mail = request.form.get("user_mail")
+        user_username = request.form.get("user_username")
         if verification_code == session.get("verification_code"):
             db.session.execute(
                 text("UPDATE users SET user_mail_verify = :user_mail_verify WHERE user_id = :user_id"), {"user_mail_verify" :"verified", "user_id": user_id}
                 )
             db.session.commit()
+
+            msg = Message('Email Changed', sender='imhotepfinance@gmail.com', recipients=[user_mail])
+            msg.body = f"Welcome {user_username} To Imhotep Finacial Manager"
+            mail.send(msg)
+
             success="Email verified successfully. You can now log in."
             return render_template("login.html", success=success)
         
@@ -268,38 +285,13 @@ def login():
     user_username_mail = (request.form.get("user_username_mail").strip()).lower()
     user_password = request.form.get("user_password")
 
-    try:
-        login_db = db.session.execute(
-            text("SELECT user_password, user_mail_verify FROM users WHERE LOWER(user_username) = :user_username"),
-            {"user_username": user_username_mail}
-        ).fetchall()[0]
-        password_db = login_db[0]
-        user_mail_verify = login_db[1]
-
-        if check_password_hash(password_db, user_password):
-            if user_mail_verify == "verified":
-                user = db.session.execute(
-                    text("SELECT user_id FROM users WHERE LOWER(user_username) = :user_username AND user_password = :user_password"),
-                    {"user_username": user_username_mail, "user_password": password_db}
-                ).fetchone()[0]
-                
-                session["logged_in"] = True
-                session["user_id"] = user
-                session.permanent = True
-
-                return redirect("/home")
-            else:
-                error_verify = "Your mail isn't verified"
-                return render_template("login.html", error_verify=error_verify)
-        else:
-            error = "Your username or password are incorrect!"
-            return render_template("login.html", error=error)
-    except:
+    if "@" in user_username_mail:
         try:
             login_db = db.session.execute(
             text("SELECT user_password, user_mail_verify FROM users WHERE LOWER(user_mail) = :user_mail"),
             {"user_mail": user_username_mail}
             ).fetchall()[0]
+
             password_db = login_db[0]
             user_mail_verify = login_db[1]
 
@@ -312,8 +304,8 @@ def login():
                     
                     session["logged_in"] = True
                     session["user_id"] = user
+                    session.permanent = True
                     return redirect("/home")
-                
                 else:
                     error_verify = "Your mail isn't verified"
                     return render_template("login.html", error_verify=error_verify)
@@ -321,10 +313,38 @@ def login():
                 error = "Your username or password are incorrect!"
                 return render_template("login.html", error=error)
         except:
-            
-            error = "Your username is incorrect!"
+            error = "Your E-mail or password are incorrect!"
             return render_template("login.html", error=error)
+    else:
+        try:
+            login_db = db.session.execute(
+                    text("SELECT user_password, user_mail_verify FROM users WHERE LOWER(user_username) = :user_username"),
+                    {"user_username": user_username_mail}
+                ).fetchall()[0]
+            password_db = login_db[0]
+            user_mail_verify = login_db[1]
 
+            if check_password_hash(password_db, user_password):
+                if user_mail_verify == "verified":
+                    user = db.session.execute(
+                        text("SELECT user_id FROM users WHERE LOWER(user_username) = :user_username AND user_password = :user_password"),
+                        {"user_username": user_username_mail, "user_password": password_db}
+                    ).fetchone()[0]
+                    
+                    session["logged_in"] = True
+                    session["user_id"] = user
+                    session.permanent = True
+                    return redirect("/home")
+                else:
+                    error_verify = "Your mail isn't verified"
+                    return render_template("login.html", error_verify=error_verify)
+            else:
+                error = "Your username or password are incorrect!"
+                return render_template("login.html", error=error)
+        except:
+            error = "Your username or password are incorrect!"
+            return render_template("login.html", error=error)
+        
 @app.route("/manual_mail_verification", methods=["POST", "GET"])
 def manual_mail_verification():
     if request.method == "GET":
@@ -379,9 +399,8 @@ def forget_password():
             return render_template("forget_password.html", error = error)
 
 @app.route("/logout", methods=["GET", "POST"])
-def logout():
-        session.permanent = False
-        session["logged_in"] = False
+def logout_route():
+        logout()
         return redirect("/login_page")
 
 @app.route("/home", methods=["GET"])
@@ -832,6 +851,7 @@ def delete_trans():
         ).fetchall()
 
         return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+
 @app.route("/settings/personal_info", methods=["GET", "POST"])
 def personal_info():
     if not session.get("logged_in"):
@@ -848,6 +868,16 @@ def personal_info():
             user_mail = request.form.get("user_mail")
             user_photo_path = request.form.get("user_photo_path")
             
+            if "@" in user_username:
+                error_existing = "username should not have @"
+                user_username, user_mail, user_photo_path = select_user_data(user_id)
+                return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+    
+            if "@" not in user_mail:
+                error_existing = "mail should have @"
+                user_username, user_mail, user_photo_path = select_user_data(user_id)
+                return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+
             user_username_mail_db = db.session.execute(
                 text("SELECT user_mail, user_username FROM users WHERE user_id = :user_id"),
                 {"user_id" :user_id}
@@ -877,39 +907,24 @@ def personal_info():
                     error_existing = "Username is already in use. Please choose another one."
                     user_username, user_mail, user_photo_path = select_user_data(user_id)
                     return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
-                
-                db.session.execute(
-                    text("UPDATE users SET user_mail_verify = :user_mail_verify, user_mail = :user_mail, user_username = :user_username WHERE user_id = :user_id"),
-                    {"user_mail_verify" :"not_verified", "user_mail" :user_mail, "user_username": user_username, "user_id":user_id}
-                )
-                db.session.commit()
 
                 send_verification_mail_code(user_mail)
-                session.permanent = False
-                session["logged_in"] = False
-                return redirect("/mail_verification")
+                return render_template("mail_verify_change_mail.html", total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path, user_mail=user_mail, user_username=user_username, user_mail_db=user_mail_db)
             
             if user_mail != user_mail_db:
                 existing_mail = db.session.execute(
                 text("SELECT user_mail FROM users WHERE LOWER(user_mail) = :user_mail"),
                 {"user_mail": user_mail}
                 ).fetchall()
+
                 if existing_mail:
                     error_existing = "Mail is already in use. Please choose another one. or "
                     user_username, user_mail, user_photo_path = select_user_data(user_id)
                     return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
                 
-                db.session.execute(
-                    text("UPDATE users SET user_mail_verify = :user_mail_verify, user_mail = :user_mail WHERE user_id = :user_id"),
-                    {"user_mail_verify" :"not_verified", "user_mail" :user_mail, "user_id":user_id}
-                )
-                db.session.commit()
-
                 send_verification_mail_code(user_mail)
-                session.permanent = False
-                session["logged_in"] = False
-                return redirect("/mail_verification")
-            
+                return render_template("mail_verify_change_mail.html", total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path, user_mail=user_mail, user_username=user_username, user_mail_db=user_mail_db)
+                        
             if user_username != user_username_db:
                 existing_username = db.session.execute(
                     text("SELECT user_username FROM users WHERE LOWER(user_username) = :user_username"),
@@ -921,14 +936,54 @@ def personal_info():
                     user_username, user_mail, user_photo_path = select_user_data(user_id)
                     return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
 
+                db.session.execute(
+                    text("UPDATE users SET user_username = :user_username WHERE user_id = :user_id"),
+                    {"user_username" :user_username, "user_id":user_id}
+                )
+                db.session.commit()
+                done = "User Name Changed Successfully!"
+                user_username, user_mail, user_photo_path = select_user_data(user_id)
+                return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, done = done, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+            
+        user_username, user_mail, user_photo_path = select_user_data(user_id)
+        return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+
+@app.route("/settings/personal_info/mail_verification", methods=["POST"])
+def mail_verification_change_mail():
+    if not session.get("logged_in"):
+        return redirect("/login_page")
+    else:
+        total_favorite_currency, favorite_currency = show_networth()
+        total_favorite_currency = f"{total_favorite_currency:,.2f}"
+        user_id = session.get("user_id") 
+        user_photo_path = select_user_photo()
+
+        verification_code = request.form.get("verification_code").strip()
+        user_mail = request.form.get("user_mail")
+        user_username = request.form.get("user_username")
+        user_mail_db = request.form.get("user_mail_db")
+
+        if verification_code == session.get("verification_code"):
             db.session.execute(
-                text("UPDATE users SET user_username = :user_username WHERE user_id = :user_id"),
-                {"user_username" :user_username, "user_id":user_id}
+                text("UPDATE users SET user_mail_verify = :user_mail_verify, user_mail = :user_mail, user_username = :user_username WHERE user_id = :user_id"),
+                {"user_mail_verify" :"verified", "user_mail" :user_mail, "user_username": user_username, "user_id":user_id}
             )
             db.session.commit()
+
+            msg = Message('Email Changed', sender='imhotepfinance@gmail.com', recipients=[user_mail_db])
+            msg.body = f"Your E-mail has been changed now to {user_mail}"
+            mail.send(msg)
+
+            msg = Message('Welcome', sender='imhotepfinance@gmail.com', recipients=[user_mail])
+            msg.body = f"Welcome {user_username} To Imhotep Finacial Manager"
+            mail.send(msg)
+            
             done = "User Name Changed Successfully!"
             user_username, user_mail, user_photo_path = select_user_data(user_id)
             return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, done = done, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+        else:
+            error="Invalid verification code."
+            return render_template("mail_verify_change_mail.html", total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path, error=error)
         
 @app.route("/settings/personal_info/upload_user_photo", methods=["POST"])
 def upload_user_photo():
@@ -1018,7 +1073,7 @@ def favorite_currency():
             return render_template("favorite_currency.html", done=done, favorite_currency=favorite_currency, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency)
         
 @app.route("/settings/security_check", methods=["POST", "GET"])
-def security_check():
+def security_check_password():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
@@ -1027,13 +1082,9 @@ def security_check():
         else:
             user_id = session.get("user_id")
             check_pass = request.form.get("check_pass")
-            password_db = db.session.execute(
-                text("SELECT user_password FROM users WHERE user_id = :user_id"),
-                {"user_id" :user_id}
-            ).fetchone()[0]
+            security = security_check(user_id, check_pass)
 
-            if check_password_hash(password_db, check_pass):
-
+            if security:
                 return render_template("change_pass.html", user_id = user_id)
             else:
                 error = "This password is incorrect!"
@@ -1046,17 +1097,110 @@ def security():
     else:
         user_id = session.get("user_id")
         new_password = request.form.get("new_password")
-        print(user_id)
+
+        user_mail = db.session.execute(
+            text("SELECT user_mail FROM users WHERE user_id = :user_id"),
+            {"user_id": user_id}
+        ).fetchone()[0]
+
         hashed_password = generate_password_hash(new_password)
         db.session.execute(
             text("UPDATE users SET user_password = :user_password WHERE user_id = :user_id"),
             {"user_password" :hashed_password, "user_id" :user_id}
         )
         db.session.commit()
-        session.permanent = False
-        session["logged_in"] = False
+
+        msg = Message('Password Change', sender='imhotepfinance@gmail.com', recipients=[user_mail])
+        msg.body = f"Your password has been changed"
+        mail.send(msg)
+        
+        logout()
         success = "You password has been changed successfully!"
         return render_template("login.html", success = success)
+
+@app.route("/settings/set_target", methods=["GET","POST"])
+def set_target():
+    if not session.get("logged_in"):
+        return redirect("/login_page")
+    else:
+        total_favorite_currency, favorite_currency = show_networth()
+        total_favorite_currency = f"{total_favorite_currency:,.2f}"
+        user_id = session.get("user_id")
+        user_photo_path = select_user_photo()
+        if request.method == "GET":
+            now = datetime.datetime.now()
+            mounth = now.month
+            year = now.year
+            target_db = db.session.execute(
+                text("SELECT * FROM target WHERE user_id = :user_id AND mounth = :mounth AND year = :year"),
+                {"user_id" :user_id, "mounth" : mounth, "year":year}
+            ).fetchall()
+            if target_db:
+                target_db = target_db[0]
+                return render_template("update_target.html", total_favorite_currency=total_favorite_currency,favorite_currency=favorite_currency,user_photo_path=user_photo_path, target_db=target_db)
+            else:
+                return render_template("set_target.html", total_favorite_currency=total_favorite_currency,favorite_currency=favorite_currency,user_photo_path=user_photo_path)
+        else:
+            target = request.form.get("target")
+
+            now = datetime.datetime.now()
+            mounth = now.month
+            year = now.year
+
+            try:
+                last_target_id = db.session.execute(
+                        text("SELECT MAX(target_id) FROM target")
+                    ).fetchone()[0]
+                target_id = last_target_id + 1
+            except:
+                target_id = 1
+
+            db.session.execute(
+                text("INSERT INTO target (target_id, user_id, target, mounth, year) VALUES (:target_id, :user_id, :target, :mounth, :year)"),
+                {"target_id":target_id, "user_id" :user_id, "target": target, "mounth" :mounth, "year" :year}
+            )
+            db.session.commit()
+            done = "Your Target have been set"
+            target_db = db.session.execute(
+                text("SELECT * FROM target WHERE user_id = :user_id AND mounth = :mounth AND year = :year"),
+                {"user_id" :user_id, "mounth" : mounth, "year":year}
+            ).fetchall()[0]
+            return render_template("update_target.html", total_favorite_currency=total_favorite_currency,favorite_currency=favorite_currency, done=done,user_photo_path=user_photo_path, target=target, target_db=target_db)
+
+@app.route("/settings/update_target", methods=["POST"])
+def update_target():
+    if not session.get("logged_in"):
+        return redirect("/login_page")
+    else:
+        total_favorite_currency, favorite_currency = show_networth()
+        total_favorite_currency = f"{total_favorite_currency:,.2f}"
+        user_id = session.get("user_id")
+        user_photo_path = select_user_photo()
+
+        target = request.form.get("target")
+
+        now = datetime.datetime.now()
+        mounth = now.month
+        year = now.year
+
+        target_id = db.session.execute(
+                text("SELECT target_id FROM target WHERE user_id = :user_id AND mounth = :mounth AND year = :year"),
+                {"user_id": user_id, "mounth": mounth, "year":year}
+            ).fetchone()[0]
+
+        db.session.execute(
+            text("UPDATE target SET target = :target WHERE target_id = :target_id"),
+            {"target_id":target_id, "target": target}
+        )
+        db.session.commit()
+
+        target_db = db.session.execute(
+            text("SELECT * FROM target WHERE user_id = :user_id AND mounth = :mounth AND year = :year"),
+            {"user_id" :user_id, "mounth" : mounth, "year":year}
+        ).fetchall()[0]
+        print(target_db)
+        done = "Your Target have been updated"
+        return render_template("update_target.html", total_favorite_currency=total_favorite_currency,favorite_currency=favorite_currency, done=done,user_photo_path=user_photo_path, target_db=target_db)
 
 @app.route("/filter_year_wishlist", methods=["GET"])
 def filter_year_wishlist():
@@ -1325,6 +1469,98 @@ def delete_wish():
         all_years = select_years_wishlist(user_id)
         return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
 
+@app.route("/delete_user", methods=["POST", "GET"])
+def delete_user():
+    if not session.get("logged_in"):
+        return redirect("/login_page")
+    else:
+        total_favorite_currency, favorite_currency = show_networth()
+        total_favorite_currency = f"{total_favorite_currency:,.2f}"
+        user_photo_path = select_user_photo()
+        return render_template("check_pass_delete_user.html", total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path)
+
+@app.route("/delete_user/check_pass", methods=["POST"])
+def check_pass_delete_user():
+    if not session.get("logged_in"):
+        return redirect("/login_page")
+    else:
+        total_favorite_currency, favorite_currency = show_networth()
+        total_favorite_currency = f"{total_favorite_currency:,.2f}"
+        user_id = session.get("user_id")
+        user_photo_path = select_user_photo()
+        check_pass = request.form.get("check_pass")
+        security = security_check(user_id, check_pass)
+
+        if security:
+            user_mail = db.session.execute(
+                text("SELECT user_mail FROM users WHERE user_id = :user_id"),
+                {"user_id": user_id}
+            ).fetchone()[0]
+            
+            verification_code = secrets.token_hex(4)
+            msg = Message('Delete Verification', sender='imhotepfinance@gmail.com', recipients=[user_mail])
+            msg.body = f"Your verification code is: {verification_code}"
+            mail.send(msg)
+
+            session["verification_code"] = verification_code
+
+            return render_template("mail_verify_delete_user.html", user_id = user_id, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path, user_mail=user_mail)
+        else:
+            error = "This password is incorrect!"
+            return render_template("check_pass_delete_user.html", error = error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path)
+            
+@app.route("/delete_user/verify_delete_user", methods=["POST"])
+def verify_delete_user():
+    if not session.get("logged_in"):
+        return redirect("/login_page")
+    else:
+        verification_code = request.form.get("verification_code").strip()
+        user_id = session.get("user_id")
+        if verification_code == session.get("verification_code"):
+
+            db.session.execute(
+                text("DELETE FROM networth WHERE user_id = :user_id"),
+                {"user_id": user_id}
+                )
+            db.session.commit()
+
+            db.session.execute(
+                text("DELETE FROM trans WHERE user_id = :user_id"),
+                {"user_id": user_id}
+                )
+            db.session.commit()
+
+            db.session.execute(
+                text("DELETE FROM target WHERE user_id = :user_id"),
+                {"user_id": user_id}
+                )
+            db.session.commit()
+
+            db.session.execute(
+                text("DELETE FROM wishlist WHERE user_id = :user_id"),
+                {"user_id": user_id}
+                )
+            db.session.commit()
+
+            user_mail = request.form.get("user_mail")
+            msg = Message('Accout Deleted', sender='imhotepfinance@gmail.com', recipients=[user_mail])
+            msg.body = "Account Deleted"
+            mail.send(msg)
+
+            db.session.execute(
+                text("DELETE FROM users WHERE user_id = :user_id"),
+                {"user_id": user_id}
+                )
+            db.session.commit()
+            logout()
+
+            success="Account Deleted"
+            return render_template("login.html", success=success)
+        
+        else:
+            error="Invalid verification code."
+            return render_template("mail_verify_delete_user.html", error=error)
+
 @app.route("/version")
 def version():
     return render_template("version.html")
@@ -1332,90 +1568,6 @@ def version():
 @app.route("/download")
 def download():
     return render_template("download.html")
-
-@app.route("/settings/set_target", methods=["GET","POST"])
-def set_target():
-    if not session.get("logged_in"):
-        return redirect("/login_page")
-    else:
-        total_favorite_currency, favorite_currency = show_networth()
-        total_favorite_currency = f"{total_favorite_currency:,.2f}"
-        user_id = session.get("user_id")
-        user_photo_path = select_user_photo()
-        if request.method == "GET":
-            now = datetime.datetime.now()
-            mounth = now.month
-            year = now.year
-            target_db = db.session.execute(
-                text("SELECT * FROM target WHERE user_id = :user_id AND mounth = :mounth AND year = :year"),
-                {"user_id" :user_id, "mounth" : mounth, "year":year}
-            ).fetchall()
-            if target_db:
-                target_db = target_db[0]
-                return render_template("update_target.html", total_favorite_currency=total_favorite_currency,favorite_currency=favorite_currency,user_photo_path=user_photo_path, target_db=target_db)
-            else:
-                return render_template("set_target.html", total_favorite_currency=total_favorite_currency,favorite_currency=favorite_currency,user_photo_path=user_photo_path)
-        else:
-            target = request.form.get("target")
-
-            now = datetime.datetime.now()
-            mounth = now.month
-            year = now.year
-
-            try:
-                last_target_id = db.session.execute(
-                        text("SELECT MAX(target_id) FROM target")
-                    ).fetchone()[0]
-                target_id = last_target_id + 1
-            except:
-                target_id = 1
-
-            db.session.execute(
-                text("INSERT INTO target (target_id, user_id, target, mounth, year) VALUES (:target_id, :user_id, :target, :mounth, :year)"),
-                {"target_id":target_id, "user_id" :user_id, "target": target, "mounth" :mounth, "year" :year}
-            )
-            db.session.commit()
-            done = "Your Target have been set"
-            target_db = db.session.execute(
-                text("SELECT * FROM target WHERE user_id = :user_id AND mounth = :mounth AND year = :year"),
-                {"user_id" :user_id, "mounth" : mounth, "year":year}
-            ).fetchall()[0]
-            return render_template("update_target.html", total_favorite_currency=total_favorite_currency,favorite_currency=favorite_currency, done=done,user_photo_path=user_photo_path, target=target, target_db=target_db)
-
-@app.route("/settings/update_target", methods=["POST"])
-def update_target():
-    if not session.get("logged_in"):
-        return redirect("/login_page")
-    else:
-        total_favorite_currency, favorite_currency = show_networth()
-        total_favorite_currency = f"{total_favorite_currency:,.2f}"
-        user_id = session.get("user_id")
-        user_photo_path = select_user_photo()
-
-        target = request.form.get("target")
-
-        now = datetime.datetime.now()
-        mounth = now.month
-        year = now.year
-
-        target_id = db.session.execute(
-                text("SELECT target_id FROM target WHERE user_id = :user_id AND mounth = :mounth AND year = :year"),
-                {"user_id": user_id, "mounth": mounth, "year":year}
-            ).fetchone()[0]
-
-        db.session.execute(
-            text("UPDATE target SET target = :target WHERE target_id = :target_id"),
-            {"target_id":target_id, "target": target}
-        )
-        db.session.commit()
-
-        target_db = db.session.execute(
-            text("SELECT * FROM target WHERE user_id = :user_id AND mounth = :mounth AND year = :year"),
-            {"user_id" :user_id, "mounth" : mounth, "year":year}
-        ).fetchall()[0]
-        print(target_db)
-        done = "Your Target have been updated"
-        return render_template("update_target.html", total_favorite_currency=total_favorite_currency,favorite_currency=favorite_currency, done=done,user_photo_path=user_photo_path, target_db=target_db)
 
 @app.route('/sitemap.xml')
 def sitemap():

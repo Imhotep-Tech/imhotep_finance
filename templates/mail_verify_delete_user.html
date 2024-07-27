@@ -1,4 +1,4 @@
-{% extends "layout_login.html" %}
+{% extends "layout.html" %}
 
 {% block body %}
 <div class="form-container">
@@ -9,12 +9,10 @@
             </div>
         {% endif %}
     </div>
-    {% include 'back.html' %}
     <p class="title">Verify</p>
-    <form action="/mail_verification" method="post" class="form" onsubmit="return validatePassword()">
+    <form action="/delete_user/verify_delete_user" method="post" class="form" onsubmit="return validatePassword()">
         <input type="name" class="input" placeholder="Verification Code" name="verification_code" required="">
-        <input type="hidden" name="user_mail" value="{{ user_mail }}">
-        <input type="hidden"  name="user_username" value="{{ user_username }}">
+        <input type="hidden"  name="user_mail" value="{{ user_mail }}">
         <p class="page-link"></p>
         <button class="form-btn">
             <i class="fas fa-check"></i>
