@@ -190,7 +190,7 @@ def security_check(user_id, check_pass):
     
 @app.route("/", methods=["GET"])
 def index():
-    return render_template("index.html")
+    return redirect("/login_page")
 
 @app.route("/login_page", methods=["GET"])
 def login_page():
