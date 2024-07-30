@@ -1695,12 +1695,26 @@ def ai_chatbot():
         response = query_gemini(user_question, user_data)
         return render_template("ai_chatbot.html", chat_history=response, secret_key=secret_key)'''
 
+@app.after_request
+def add_header(response):
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    return response
+
+@app.after_request
+def remove_csp_header(response):
+    if 'Content-Security-Policy' in response.headers:
+        del response.headers['Content-Security-Policy']
+    return response
+
+@app.after_request
+def set_content_type_options(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    return response
 
 @app.route('/sitemap.xml')
 def sitemap():
     pages = []
 
-    # Static pages
     ten_days_ago = (datetime.datetime.now() - datetime.timedelta(days=10)).date().isoformat()
     for rule in app.url_map.iter_rules():
         if "GET" in rule.methods and len(rule.arguments) == 0:
