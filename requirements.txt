@@ -12,3 +12,5 @@ psycopg2-binary
 flask_session
 flask_kvsession
 redis
+sqlalchemy.exc
+google.generativeai==0.7.2

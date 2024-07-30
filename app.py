@@ -11,6 +11,7 @@ import datetime
 from datetime import date, timedelta
 from sqlalchemy.exc import OperationalError
 from flask_session import Session
+import google.generativeai as genai
 
 #define the app
 app = Flask(__name__)
@@ -41,6 +42,28 @@ app.config["MAX_CONTENT_LENGTH"] = 3 * 1024 * 1024
 app.config["UPLOAD_FOLDER_PHOTO"] = os.path.join(os.getcwd(), "static", "user_photo")
 ALLOWED_EXTENSIONS = ("png", "jpg", "jpeg")
 
+genai.configure(api_key="AIzaSyCmVVszLfhcQiofkBYrz_9VVl7jgs-tBl0")
+
+generation_config = {
+  "temperature": 1,
+  "top_p": 0.95,
+  "top_k": 64,
+  "max_output_tokens": 8192,
+  "response_mime_type": "text/plain",
+}
+
+model = genai.GenerativeModel(
+  model_name="gemini-1.5-pro",
+  generation_config=generation_config,
+  # safety_settings = Adjust safety settings
+  # See https://ai.google.dev/gemini-api/docs/safety-settings
+)
+
+chat_session = model.start_chat(
+  history=[
+  ]
+)
+
 def send_verification_mail_code(user_mail):
     verification_code = secrets.token_hex(4)
     msg = Message('Email Verification', sender='imhotepfinance@gmail.com', recipients=[user_mail])
@@ -63,7 +86,6 @@ def convert_to_fav_currency(dictionary, user_id):
             data = response.json()
             rate = data["conversion_rates"]
             total_favorite_currency = 0
-
 
         for currency, amount in dictionary.items():
             converted_amount = amount / rate[currency]
@@ -188,8 +210,48 @@ def security_check(user_id, check_pass):
     else:
         return False
     
+def query_gemini(prompt, user_data):
+    enriched_prompt = prompt
+    if user_data:
+        enriched_prompt = f"User data: {user_data}\n{prompt}"
+
+    response = chat_session.send_message(enriched_prompt)
+    print(response.text)
+    return response.text
+
+def get_user_data(user_id):
+    trans_db = db.session.execute(
+        text("SELECT currency, date, amount, trans_status, trans_details FROM trans WHERE user_id = :user_id"),
+        {"user_id":user_id}
+    ).fetchall()
+    target_db = db.session.execute(
+        text("SELECT target, mounth, year FROM target WHERE user_id = :user_id"),
+        {"user_id":user_id}
+    ).fetchall()
+    wishlist_db = db.session.execute(
+        text("SELECT currency, price, status, link, wish_details, year FROM wishlist WHERE user_id = :user_id"),
+        {"user_id":user_id}
+    ).fetchall()
+    networth_db = db.session.execute(
+        text("SELECT currency, total FROM networth WHERE user_id = :user_id"),
+        {"user_id":user_id}
+    ).fetchall()
+    favorite_currency = db.session.execute(
+        text("SELECT favorite_currency FROM users WHERE user_id = :user_id"),
+        {"user_id":user_id}
+    ).fetchone()[0]
+    user_data = {
+        'transactions': [{'currency': row[0], 'date': row[1].strftime('%Y-%m-%d'), 'amount': float(row[2]), 'trans_status': row[3], 'trans_details': row[4] } for row in trans_db],
+        'user_save_target': [{'target': row[0], 'mounth': row[1], 'year': row[2]} for row in target_db],
+        'wishlist': [{'currency': row[0], 'price': row[1], 'status': row[2], 'link': row[3], 'wish_details': row[4], 'year': row[5]} for row in wishlist_db],
+        'networth': [{'currency': row[0], 'total': row[1]} for row in networth_db],
+        'fav_currency': favorite_currency,
+        }
+    return user_data
+
 @app.route("/", methods=["GET"])
 def index():
+    session["secret_key"] = secret_key
     return redirect("/login_page")
 
 @app.route("/login_page", methods=["GET"])
@@ -197,25 +259,29 @@ def login_page():
     if session.get("logged_in"):
         return redirect("/home")
     else:
-        return render_template("login.html")
+        session["secret_key"] = secret_key
+        return render_template("login.html", secret_key=secret_key)
 
 @app.route("/register_page", methods=["GET"])
 def register_page():
-    return render_template("register.html")
+    session["secret_key"] = secret_key
+    return render_template("register.html", secret_key=secret_key)
 
 @app.route("/register", methods=["POST"])
 def register():
+    if request.form.get("secret_key") != session.get('secret_key'):
+        return 'Invalid CSRF token', 400, logout()
     user_username = (request.form.get("user_username").strip()).lower()
     user_password = request.form.get("user_password")
     user_mail = request.form.get("user_mail").lower()
 
     if "@" in user_username:
         error = "username should not have @"
-        return render_template("register.html", error=error)
+        return render_template("register.html", error=error, secret_key=secret_key)
     
     if "@" not in user_mail:
         error = "mail should have @"
-        return render_template("register.html", error=error)
+        return render_template("register.html", error=error, secret_key=secret_key)
 
     existing_username = db.session.execute(
         text("SELECT user_username FROM users WHERE LOWER(user_username) = :user_username"),
@@ -223,7 +289,7 @@ def register():
     ).fetchall()
     if existing_username:
         error_existing = "Username is already in use. Please choose another one. or "
-        return render_template("register.html", error=error_existing)
+        return render_template("register.html", error=error_existing, secret_key=secret_key)
 
     existing_mail = db.session.execute(
         text("SELECT user_mail FROM users WHERE LOWER(user_mail) = :user_mail"),
@@ -231,7 +297,7 @@ def register():
     ).fetchall()
     if existing_mail:
         error_existing = "Mail is already in use. Please choose another one. or "
-        return render_template("register.html", error=error_existing)
+        return render_template("register.html", error=error_existing, secret_key=secret_key)
 
     try:
         last_user_id = db.session.execute(
@@ -252,13 +318,15 @@ def register():
     )
     db.session.commit()
 
-    return render_template("mail_verify.html", user_mail=user_mail, user_username=user_username)
+    return render_template("mail_verify.html", user_mail=user_mail, user_username=user_username, secret_key=secret_key)
 
 @app.route("/mail_verification", methods=["POST", "GET"])
 def mail_verification():
     if request.method == "GET":
         return render_template("mail_verify.html")
     else: 
+        if request.form.get("secret_key") != session.get('secret_key'):
+                return 'Invalid CSRF token', 400, logout()
         verification_code = request.form.get("verification_code").strip()
         user_id = session.get("user_id")
         user_mail = request.form.get("user_mail")
@@ -274,14 +342,16 @@ def mail_verification():
             mail.send(msg)
 
             success="Email verified successfully. You can now log in."
-            return render_template("login.html", success=success)
+            return render_template("login.html", success=success, secret_key=secret_key)
         
         else:
             error="Invalid verification code."
-            return render_template("mail_verify.html", error=error)
+            return render_template("mail_verify.html", error=error, secret_key=secret_key)
     
 @app.route("/login", methods=["POST"])
 def login():
+    if request.form.get("secret_key") != session.get('secret_key'):
+        return 'Invalid CSRF token', 400, logout()
     user_username_mail = (request.form.get("user_username_mail").strip()).lower()
     user_password = request.form.get("user_password")
 
@@ -308,13 +378,13 @@ def login():
                     return redirect("/home")
                 else:
                     error_verify = "Your mail isn't verified"
-                    return render_template("login.html", error_verify=error_verify)
+                    return render_template("login.html", error_verify=error_verify, secret_key=secret_key)
             else:
                 error = "Your username or password are incorrect!"
-                return render_template("login.html", error=error)
+                return render_template("login.html", error=error, secret_key=secret_key)
         except:
             error = "Your E-mail or password are incorrect!"
-            return render_template("login.html", error=error)
+            return render_template("login.html", error=error, secret_key=secret_key)
     else:
         try:
             login_db = db.session.execute(
@@ -332,24 +402,27 @@ def login():
                     ).fetchone()[0]
                     
                     session["logged_in"] = True
+                    session["secret_key"] = secret_key
                     session["user_id"] = user
                     session.permanent = True
                     return redirect("/home")
                 else:
                     error_verify = "Your mail isn't verified"
-                    return render_template("login.html", error_verify=error_verify)
+                    return render_template("login.html", error_verify=error_verify, secret_key=secret_key)
             else:
                 error = "Your username or password are incorrect!"
-                return render_template("login.html", error=error)
+                return render_template("login.html", error=error, secret_key=secret_key)
         except:
             error = "Your username or password are incorrect!"
-            return render_template("login.html", error=error)
+            return render_template("login.html", error=error, secret_key=secret_key)
         
 @app.route("/manual_mail_verification", methods=["POST", "GET"])
 def manual_mail_verification():
     if request.method == "GET":
         return render_template("manual_mail_verification.html")
     else: 
+        if request.form.get("secret_key") != session.get('secret_key'):
+                return 'Invalid CSRF token', 400, logout()
         user_mail = (request.form.get("user_mail").strip()).lower()
 
         try:
@@ -368,13 +441,15 @@ def manual_mail_verification():
         else:
             session["user_id"] = user_id
             send_verification_mail_code(user_mail)
-            return render_template("mail_verify.html")
+            return render_template("mail_verify.html", secret_key=secret_key)
 
 @app.route("/forget_password",methods=["POST", "GET"])
 def forget_password():
     if request.method == "GET":
         return render_template("forget_password.html")
     else:
+        if request.form.get("secret_key") != session.get('secret_key'):
+                return 'Invalid CSRF token', 400, logout()
         user_mail = request.form.get("user_mail")
         try:
             db.session.execute(
@@ -393,10 +468,10 @@ def forget_password():
             db.session.commit()
 
             success="The Mail is sent check Your mail for your new password"
-            return render_template("login.html", success=success)
+            return render_template("login.html", success=success, secret_key=secret_key)
         except:
             error = "This Email isn't saved"
-            return render_template("forget_password.html", error = error)
+            return render_template("forget_password.html", error = error, secret_key=secret_key)
 
 @app.route("/logout", methods=["GET", "POST"])
 def logout_route():
@@ -417,7 +492,6 @@ def home():
         user_id = session.get("user_id")
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
-
         target_db = db.session.execute(
             text("SELECT * FROM target WHERE user_id = :user_id"),
             {"user_id": user_id}
@@ -499,9 +573,9 @@ def home():
                     score_txt = "Below Target"
                 else:
                     score_txt = "On Target"
-                return render_template("home.html", total_favorite_currency = total_favorite_currency, favorite_currency=favorite_currency , user_photo_path=user_photo_path, score_txt=score_txt, score=score, target = target)
+                return render_template("home.html", total_favorite_currency = total_favorite_currency, favorite_currency=favorite_currency , user_photo_path=user_photo_path, score_txt=score_txt, score=score, target = target, secret_key=secret_key)
         else: 
-            return render_template("home.html", total_favorite_currency = total_favorite_currency, favorite_currency=favorite_currency , user_photo_path=user_photo_path)
+            return render_template("home.html", total_favorite_currency = total_favorite_currency, favorite_currency=favorite_currency , user_photo_path=user_photo_path, secret_key=secret_key)
 
 @app.route("/deposit", methods=["POST", "GET"])
 def deposit():
@@ -512,8 +586,10 @@ def deposit():
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         if request.method == "GET":
             user_photo_path = select_user_photo()
-            return render_template("deposit.html", user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+            return render_template("deposit.html", user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
         else:
+            if request.form.get("secret_key") != session.get('secret_key'):
+                return 'Invalid CSRF token', 400, logout()
             user_photo_path = select_user_photo()
             date = request.form.get("date")
             amount = int(request.form.get("amount"))
@@ -523,7 +599,7 @@ def deposit():
 
             if currency is None or amount is None :
                 error = "You have to choose the currency!"
-                return render_template("deposit.html", error = error,total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency,  user_photo_path=user_photo_path)
+                return render_template("deposit.html", error = error,total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency,  user_photo_path=user_photo_path, secret_key=secret_key)
             
             try:
                 last_trans_id = db.session.execute(
@@ -592,9 +668,11 @@ def withdraw():
             user_photo_path = select_user_photo()
             user_id = session.get("user_id")
             currency_all = select_currencies(user_id)
-            return render_template("withdraw.html", currency_all = currency_all, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+            return render_template("withdraw.html", currency_all = currency_all, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
         
         else:
+            if request.form.get("secret_key") != session.get('secret_key'):
+                return 'Invalid CSRF token', 400, logout()
             user_photo_path = select_user_photo()
             date = request.form.get("date")
             amount = int(request.form.get("amount"))
@@ -607,7 +685,7 @@ def withdraw():
                 error = "You have to choose the currency!"
                 currency_all = select_currencies(user_id)
                 user_photo_path = select_user_photo()
-                return render_template("withdraw.html", currency_all = currency_all, error = error, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+                return render_template("withdraw.html", currency_all = currency_all, error = error, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
             
             amount_of_currency = db.session.execute(
                 text("SELECT total FROM networth WHERE user_id = :user_id AND currency = :currency"),
@@ -618,7 +696,7 @@ def withdraw():
                 error = "This user doesn't have this amount of this currency"
                 currency_all = select_currencies(user_id)
                 user_photo_path = select_user_photo()
-                return render_template("withdraw.html", currency_all = currency_all, error=error, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+                return render_template("withdraw.html", currency_all = currency_all, error=error, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
 
             try:
                 last_trans_id = db.session.execute(
@@ -677,7 +755,7 @@ def show_networth_details():
         ).fetchall()
 
         networth_details = dict(networth_details_db)
-        return render_template("networth_details.html", networth_details=networth_details, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+        return render_template("networth_details.html", networth_details=networth_details, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
 
 @app.route("/show_trans", methods=["GET"])
 def show_trans():
@@ -710,7 +788,7 @@ def show_trans():
             text("SELECT * FROM trans WHERE user_id = :user_id AND date BETWEEN :from_date AND :to_date ORDER BY trans_id"),
             {"user_id": user_id, "from_date" :from_date, "to_date" :to_date}
         ).fetchall()
-        return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, to_date=to_date, from_date=from_date)
+        return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, to_date=to_date, from_date=from_date, secret_key=secret_key)
 
 @app.route("/edit_trans", methods=["POST", "GET"])
 def edit_trans():
@@ -727,9 +805,11 @@ def edit_trans():
             ).fetchall()[0]
             total_favorite_currency, favorite_currency = show_networth()
             total_favorite_currency = f"{total_favorite_currency:,.2f}"
-            return render_template("edit_trans.html", trans_db = trans_db, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+            return render_template("edit_trans.html", trans_db = trans_db, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
         
         else:
+            if request.form.get("secret_key") != session.get('secret_key'):
+                return 'Invalid CSRF token', 400, logout()
             trans_key = request.form.get("trans_key")
             currency = request.form.get("currency")
             date = request.form.get("date")
@@ -768,7 +848,7 @@ def edit_trans():
                 ).fetchall()[0]
                 total_favorite_currency, favorite_currency = show_networth()
                 total_favorite_currency = f"{total_favorite_currency:,.2f}"
-                return render_template("edit_trans.html", trans_db = trans_db, user_photo_path=user_photo_path, error=error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+                return render_template("edit_trans.html", trans_db = trans_db, user_photo_path=user_photo_path, error=error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
             
             db.session.execute(
                 text("UPDATE trans SET  date = :date, trans_details = :trans_details, trans_details_link = :trans_details_link, amount = :amount WHERE trans_key = :trans_key"),
@@ -788,13 +868,15 @@ def edit_trans():
             ).fetchall()
             total_favorite_currency, favorite_currency = show_networth()
             total_favorite_currency = f"{total_favorite_currency:,.2f}"
-            return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+            return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
         
 @app.route("/delete_trans", methods=["POST"])
 def delete_trans():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        if request.form.get("secret_key") != session.get('secret_key'):
+                return 'Invalid CSRF token', 400, logout()
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_photo_path = select_user_photo()
@@ -822,7 +904,7 @@ def delete_trans():
                     text("SELECT * FROM trans WHERE user_id = :user_id"),
                     {"user_id": user_id}
                 ).fetchall()
-                return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, error = error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+                return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, error = error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
         
         elif trans_status_db == "withdraw":
             total = total_db + int(amount_db)
@@ -850,7 +932,7 @@ def delete_trans():
             {"user_id": user_id}
         ).fetchall()
 
-        return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+        return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
 
 @app.route("/settings/personal_info", methods=["GET", "POST"])
 def personal_info():
@@ -862,8 +944,10 @@ def personal_info():
         user_id = session.get("user_id") 
         if request.method == "GET":
             user_username, user_mail, user_photo_path = select_user_data(user_id)
-            return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+            return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
         else:
+            if request.form.get("secret_key") != session.get('secret_key'):
+                return 'Invalid CSRF token', 400, logout()
             user_username = request.form.get("user_username")
             user_mail = request.form.get("user_mail")
             user_photo_path = request.form.get("user_photo_path")
@@ -871,12 +955,12 @@ def personal_info():
             if "@" in user_username:
                 error_existing = "username should not have @"
                 user_username, user_mail, user_photo_path = select_user_data(user_id)
-                return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+                return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
     
             if "@" not in user_mail:
                 error_existing = "mail should have @"
                 user_username, user_mail, user_photo_path = select_user_data(user_id)
-                return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+                return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
 
             user_username_mail_db = db.session.execute(
                 text("SELECT user_mail, user_username FROM users WHERE user_id = :user_id"),
@@ -901,15 +985,15 @@ def personal_info():
                 if existing_mail:
                     error_existing = "Mail is already in use. Please choose another one."
                     user_username, user_mail, user_photo_path = select_user_data(user_id)
-                    return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+                    return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
                 
                 if existing_username:
                     error_existing = "Username is already in use. Please choose another one."
                     user_username, user_mail, user_photo_path = select_user_data(user_id)
-                    return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+                    return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
 
                 send_verification_mail_code(user_mail)
-                return render_template("mail_verify_change_mail.html", total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path, user_mail=user_mail, user_username=user_username, user_mail_db=user_mail_db)
+                return render_template("mail_verify_change_mail.html", total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path, user_mail=user_mail, user_username=user_username, user_mail_db=user_mail_db, secret_key=secret_key)
             
             if user_mail != user_mail_db:
                 existing_mail = db.session.execute(
@@ -920,10 +1004,10 @@ def personal_info():
                 if existing_mail:
                     error_existing = "Mail is already in use. Please choose another one. or "
                     user_username, user_mail, user_photo_path = select_user_data(user_id)
-                    return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+                    return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
                 
                 send_verification_mail_code(user_mail)
-                return render_template("mail_verify_change_mail.html", total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path, user_mail=user_mail, user_username=user_username, user_mail_db=user_mail_db)
+                return render_template("mail_verify_change_mail.html", total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path, user_mail=user_mail, user_username=user_username, user_mail_db=user_mail_db, secret_key=secret_key)
                         
             if user_username != user_username_db:
                 existing_username = db.session.execute(
@@ -934,7 +1018,7 @@ def personal_info():
                 if existing_username:
                     error_existing = "Username is already in use. Please choose another one. or "
                     user_username, user_mail, user_photo_path = select_user_data(user_id)
-                    return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+                    return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
 
                 db.session.execute(
                     text("UPDATE users SET user_username = :user_username WHERE user_id = :user_id"),
@@ -943,10 +1027,10 @@ def personal_info():
                 db.session.commit()
                 done = "User Name Changed Successfully!"
                 user_username, user_mail, user_photo_path = select_user_data(user_id)
-                return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, done = done, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+                return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, done = done, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
             
         user_username, user_mail, user_photo_path = select_user_data(user_id)
-        return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+        return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
 
 @app.route("/settings/personal_info/mail_verification", methods=["POST"])
 def mail_verification_change_mail():
@@ -978,18 +1062,20 @@ def mail_verification_change_mail():
             msg.body = f"Welcome {user_username} To Imhotep Finacial Manager"
             mail.send(msg)
             
-            done = "User Name Changed Successfully!"
+            done = "User Mail Changed Successfully!"
             user_username, user_mail, user_photo_path = select_user_data(user_id)
-            return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, done = done, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+            return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, done = done, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
         else:
             error="Invalid verification code."
-            return render_template("mail_verify_change_mail.html", total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path, error=error)
+            return render_template("mail_verify_change_mail.html", total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path, error=error, secret_key=secret_key)
         
 @app.route("/settings/personal_info/upload_user_photo", methods=["POST"])
 def upload_user_photo():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        if request.form.get("secret_key") != session.get('secret_key'):
+            return 'Invalid CSRF token', 400, logout()
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
@@ -1012,21 +1098,23 @@ def upload_user_photo():
                 )
                 db.session.commit()
                 user_username, user_mail, user_photo_path = select_user_data(user_id)
-                return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+                return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
             else:
                 error = "Invalid file format. Allowed formats are: png, jpg, jpeg"
                 user_username, user_mail, user_photo_path = select_user_data(user_id)
-                return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+                return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
         else:
             error = "file upload failed"
             user_username, user_mail, user_photo_path = select_user_data(user_id)
-            return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+            return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
     
 @app.route("/settings/personal_info/delete_user_photo", methods=["POST"])
 def delete_user_photo():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        if request.form.get("secret_key") != session.get('secret_key'):
+            return 'Invalid CSRF token', 400, logout()
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
@@ -1040,11 +1128,11 @@ def delete_user_photo():
 
             delete_photo(user_id, photo_path)
             user_username, user_mail, user_photo_path = select_user_data(user_id)
-            return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+            return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
         else:
             error = "No image associated with this doctor to delete."
             user_username, user_mail, user_photo_path = select_user_data(user_id)
-            return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+            return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
 
 @app.route("/settings/favorite_currency", methods=["GET", "POST"])
 def favorite_currency():
@@ -1057,8 +1145,10 @@ def favorite_currency():
             favorite_currency = select_favorite_currency(user_id)
             total_favorite_currency, favorite_currency = show_networth()
             total_favorite_currency = f"{total_favorite_currency:,.2f}"
-            return render_template("favorite_currency.html", favorite_currency=favorite_currency, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency)
+            return render_template("favorite_currency.html", favorite_currency=favorite_currency, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, secret_key=secret_key)
         else:
+            if request.form.get("secret_key") != session.get('secret_key'):
+                return 'Invalid CSRF token', 400, logout()
             favorite_currency = request.form.get("favorite_currency")
             db.session.execute(
                 text("UPDATE users SET favorite_currency = :favorite_currency WHERE user_id = :user_id"), 
@@ -1070,31 +1160,36 @@ def favorite_currency():
             total_favorite_currency, favorite_currency = show_networth()
             total_favorite_currency = f"{total_favorite_currency:,.2f}"
             favorite_currency = select_favorite_currency(user_id)
-            return render_template("favorite_currency.html", done=done, favorite_currency=favorite_currency, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency)
+            return render_template("favorite_currency.html", done=done, favorite_currency=favorite_currency, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, secret_key=secret_key)
         
 @app.route("/settings/security_check", methods=["POST", "GET"])
 def security_check_password():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        secret_key = session.get('secret_key')
         if request.method == "GET":
-            return render_template("check_pass.html")
+            return render_template("check_pass.html", secret_key=secret_key)
         else:
+            if request.form.get("secret_key") != session.get('secret_key'):
+                return 'Invalid CSRF token', 400, logout()
             user_id = session.get("user_id")
             check_pass = request.form.get("check_pass")
             security = security_check(user_id, check_pass)
 
             if security:
-                return render_template("change_pass.html", user_id = user_id)
+                return render_template("change_pass.html", user_id = user_id, secret_key=secret_key)
             else:
                 error = "This password is incorrect!"
-                return render_template("check_pass.html", error = error)
+                return render_template("check_pass.html", error = error, secret_key=secret_key)
 
 @app.route("/settings/security", methods=["POST"])
 def security():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        if request.form.get("secret_key") != session.get('secret_key'):
+            return 'Invalid CSRF token', 400, logout()
         user_id = session.get("user_id")
         new_password = request.form.get("new_password")
 
@@ -1137,10 +1232,12 @@ def set_target():
             ).fetchall()
             if target_db:
                 target_db = target_db[0]
-                return render_template("update_target.html", total_favorite_currency=total_favorite_currency,favorite_currency=favorite_currency,user_photo_path=user_photo_path, target_db=target_db)
+                return render_template("update_target.html", total_favorite_currency=total_favorite_currency,favorite_currency=favorite_currency,user_photo_path=user_photo_path, target_db=target_db, secret_key=secret_key)
             else:
-                return render_template("set_target.html", total_favorite_currency=total_favorite_currency,favorite_currency=favorite_currency,user_photo_path=user_photo_path)
+                return render_template("set_target.html", total_favorite_currency=total_favorite_currency,favorite_currency=favorite_currency,user_photo_path=user_photo_path, secret_key=secret_key)
         else:
+            if request.form.get("secret_key") != session.get('secret_key'):
+                return 'Invalid CSRF token', 400, logout()
             target = request.form.get("target")
 
             now = datetime.datetime.now()
@@ -1165,13 +1262,15 @@ def set_target():
                 text("SELECT * FROM target WHERE user_id = :user_id AND mounth = :mounth AND year = :year"),
                 {"user_id" :user_id, "mounth" : mounth, "year":year}
             ).fetchall()[0]
-            return render_template("update_target.html", total_favorite_currency=total_favorite_currency,favorite_currency=favorite_currency, done=done,user_photo_path=user_photo_path, target=target, target_db=target_db)
+            return render_template("update_target.html", total_favorite_currency=total_favorite_currency,favorite_currency=favorite_currency, done=done,user_photo_path=user_photo_path, target=target, target_db=target_db, secret_key=secret_key)
 
 @app.route("/settings/update_target", methods=["POST"])
 def update_target():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        if request.form.get("secret_key") != session.get('secret_key'):
+            return 'Invalid CSRF token', 400, logout()
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
@@ -1200,7 +1299,7 @@ def update_target():
         ).fetchall()[0]
         print(target_db)
         done = "Your Target have been updated"
-        return render_template("update_target.html", total_favorite_currency=total_favorite_currency,favorite_currency=favorite_currency, done=done,user_photo_path=user_photo_path, target_db=target_db)
+        return render_template("update_target.html", total_favorite_currency=total_favorite_currency,favorite_currency=favorite_currency, done=done,user_photo_path=user_photo_path, target_db=target_db, secret_key=secret_key)
 
 @app.route("/filter_year_wishlist", methods=["GET"])
 def filter_year_wishlist():
@@ -1223,7 +1322,7 @@ def filter_year_wishlist():
             
             all_years = select_years_wishlist(user_id)
     
-            return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+            return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
                 
 @app.route("/add_wish", methods=["GET", "POST"])
 def add_wish():
@@ -1236,8 +1335,10 @@ def add_wish():
         user_photo_path = select_user_photo()
         if request.method == "GET":
             year = request.form.get("year")
-            return render_template("add_wish.html", user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+            return render_template("add_wish.html", user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
         else:
+            if request.form.get("secret_key") != session.get('secret_key'):
+                return 'Invalid CSRF token', 400, logout()
             user_id = session.get("user_id")
             user_photo_path = select_user_photo()
             price = request.form.get("price")
@@ -1277,13 +1378,15 @@ def add_wish():
             ).fetchall()
 
             all_years = select_years_wishlist(user_id)
-            return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, done = done, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+            return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, done = done, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
         
 @app.route("/check_wish", methods=["POST"])
 def check_wish():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        if request.form.get("secret_key") != session.get('secret_key'):
+            return 'Invalid CSRF token', 400, logout()
         user_id = session.get("user_id")
         user_photo_path = select_user_photo()
         wish_key = request.form.get("wish_key")
@@ -1314,7 +1417,7 @@ def check_wish():
                 all_years = select_years_wishlist(user_id)
                 total_favorite_currency, favorite_currency = show_networth()
                 total_favorite_currency = f"{total_favorite_currency:,.2f}"
-                return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, error = error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+                return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, error = error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
             else:
                 try:
                     last_trans_key = db.session.execute(
@@ -1363,7 +1466,7 @@ def check_wish():
                     all_years = select_years_wishlist(user_id)
                     total_favorite_currency, favorite_currency = show_networth()
                     total_favorite_currency = f"{total_favorite_currency:,.2f}"
-                    return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+                    return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
                 
                 elif status == "done":
                     new_status = "pending"
@@ -1399,7 +1502,7 @@ def check_wish():
                     all_years = select_years_wishlist(user_id)
                     total_favorite_currency, favorite_currency = show_networth()
                     total_favorite_currency = f"{total_favorite_currency:,.2f}"
-                    return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+                    return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
             
         else:
             error = "You don't have on your balance enough of this currency!"
@@ -1407,7 +1510,7 @@ def check_wish():
             all_years = select_years_wishlist(user_id)
             total_favorite_currency, favorite_currency = show_networth()
             total_favorite_currency = f"{total_favorite_currency:,.2f}"
-            return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, error = error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+            return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, error = error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
         
 
 @app.route("/edit_wish", methods=["GET", "POST"])
@@ -1425,8 +1528,10 @@ def edit_wish():
                 text("SELECT year, price, currency, wish_details, link, wish_key FROM wishlist WHERE wish_key = :wish_key"),
                 {"wish_key" :wish_key}
             ).fetchone()
-            return render_template("edit_wish.html", wish_db=wish_db,user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+            return render_template("edit_wish.html", wish_db=wish_db,user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
         else:
+            if request.form.get("secret_key") != session.get('secret_key'):
+                return 'Invalid CSRF token', 400, logout()
             wish_key = request.form.get("wish_key")
             year = request.form.get("year")
             price = request.form.get("price")
@@ -1446,13 +1551,15 @@ def edit_wish():
             ).fetchall()
 
             all_years = select_years_wishlist(user_id)
-            return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+            return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
 
 @app.route("/delete_wish", methods=["POST"])
 def delete_wish():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        if request.form.get("secret_key") != session.get('secret_key'):
+            return 'Invalid CSRF token', 400, logout()
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
@@ -1467,7 +1574,7 @@ def delete_wish():
         
         year, wishlist_db = wishlist_page(user_id)
         all_years = select_years_wishlist(user_id)
-        return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency)
+        return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
 
 @app.route("/delete_user", methods=["POST", "GET"])
 def delete_user():
@@ -1477,13 +1584,15 @@ def delete_user():
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_photo_path = select_user_photo()
-        return render_template("check_pass_delete_user.html", total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path)
+        return render_template("check_pass_delete_user.html", total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path, secret_key=secret_key)
 
 @app.route("/delete_user/check_pass", methods=["POST"])
 def check_pass_delete_user():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        if request.form.get("secret_key") != session.get('secret_key'):
+            return 'Invalid CSRF token', 400, logout()
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
@@ -1504,16 +1613,18 @@ def check_pass_delete_user():
 
             session["verification_code"] = verification_code
 
-            return render_template("mail_verify_delete_user.html", user_id = user_id, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path, user_mail=user_mail)
+            return render_template("mail_verify_delete_user.html", user_id = user_id, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path, user_mail=user_mail, secret_key=secret_key)
         else:
             error = "This password is incorrect!"
-            return render_template("check_pass_delete_user.html", error = error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path)
+            return render_template("check_pass_delete_user.html", error = error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path, secret_key=secret_key)
             
 @app.route("/delete_user/verify_delete_user", methods=["POST"])
 def verify_delete_user():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        if request.form.get("secret_key") != session.get('secret_key'):
+            return 'Invalid CSRF token', 400, logout()
         verification_code = request.form.get("verification_code").strip()
         user_id = session.get("user_id")
         if verification_code == session.get("verification_code"):
@@ -1555,19 +1666,35 @@ def verify_delete_user():
             logout()
 
             success="Account Deleted"
-            return render_template("login.html", success=success)
+            return render_template("login.html", success=success, secret_key=secret_key)
         
         else:
             error="Invalid verification code."
-            return render_template("mail_verify_delete_user.html", error=error)
+            return render_template("mail_verify_delete_user.html", error=error, secret_key=secret_key)
 
 @app.route("/version")
 def version():
-    return render_template("version.html")
+    return render_template("version.html", secret_key=secret_key)
 
 @app.route("/download")
 def download():
-    return render_template("download.html")
+    return render_template("download.html", secret_key=secret_key)
+
+'''@app.route("/ai_chatbot", methods=["GET", "POST"])
+def ai_chatbot():
+    if request.method == "GET":
+        if "chat_history" not in session:
+            session["chat_history"] = []
+        return render_template("ai_chatbot.html", chat_history=session["chat_history"])
+    else:
+        if request.form.get("secret_key") != session.get('secret_key'):
+                return 'Invalid CSRF token', 400, logout()
+        user_question = request.form.get("user_question")
+        user_id = session.get("user_id")
+        user_data = get_user_data(user_id)
+        response = query_gemini(user_question, user_data)
+        return render_template("ai_chatbot.html", chat_history=response, secret_key=secret_key)'''
+
 
 @app.route('/sitemap.xml')
 def sitemap():
@@ -1578,7 +1705,7 @@ def sitemap():
     for rule in app.url_map.iter_rules():
         if "GET" in rule.methods and len(rule.arguments) == 0:
             pages.append(
-                ["https://imhotepf.pythonanywhere.com/" + str(rule.rule), ten_days_ago]
+                ["https://imhotepf.pythonanywhere.com" + str(rule.rule), ten_days_ago]
             )
 
     sitemap_xml = render_template('sitemap.xml', pages=pages)

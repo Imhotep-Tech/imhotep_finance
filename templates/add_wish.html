@@ -12,6 +12,7 @@
     </div>
     
     <form action="/add_wish" method="post" class="form-container" id="submit-form">
+        <input type="hidden" name="secret_key" value="{{ secret_key }}">
         {% include 'back.html' %}
         <div class="form-group">
             <select id="yearSelect" name="year" class="input" required></select>
