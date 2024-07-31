@@ -12,10 +12,8 @@ from datetime import date, timedelta
 from sqlalchemy.exc import OperationalError
 from flask_session import Session
 import google.generativeai as genai
-
 #define the app
 app = Flask(__name__)
-
 #define a secret key with a hexadecimal number of 16 digit
 secret_key = secrets.token_hex(16)
 app.config['SECRET_KEY'] = secret_key
@@ -911,6 +909,41 @@ def delete_trans():
         elif trans_status_db == "withdraw":
             total = total_db + int(amount_db)
 
+        trans_data_db = db.session.execute(
+                text("SELECT currency, date, amount, trans_status, trans_details, trans_details_link FROM trans WHERE user_id = :user_id AND trans_key = :trans_key"),
+                {"user_id": user_id, "trans_key" :trans_key}
+            ).fetchone()
+        
+        currency = trans_data_db[0]
+        date = trans_data_db[1]
+        amount = trans_data_db[2]
+        trans_status = trans_data_db[3]
+        trans_details = trans_data_db[4]
+        trans_details_link = trans_data_db[5]
+
+        try:
+            last_trans_trash_id = db.session.execute(
+                    text("SELECT MAX(trans_trash_id) FROM trans_trash WHERE user_id = :user_id"),
+                    {"user_id": user_id}
+                ).fetchone()[0]
+            trans_trash_id = last_trans_trash_id + 1
+        except:
+            trans_trash_id = 1
+
+        try:
+            last_trans_trash_key = db.session.execute(
+                text("SELECT MAX(trans_trash_key) FROM trans_trash")
+            ).fetchone()[0]
+            trans_trash_key = last_trans_trash_key + 1
+        except:
+            trans_trash_key = 1
+        
+        db.session.execute(
+            text("INSERT INTO trans_trash (trans_trash_key, trans_trash_id, user_id, currency, date, amount, trans_status, trans_details, trans_details_link) VALUES(:trans_trash_key, :trans_trash_id, :user_id, :currency, :date, :amount, :trans_status, :trans_details, :trans_details_link)"),
+            {"trans_trash_key" :trans_trash_key, "trans_trash_id": trans_trash_id, "user_id": user_id, "currency": currency, "date": date, "amount": amount, "trans_status": trans_status, "trans_details": trans_details, "trans_details_link": trans_details_link}
+        )
+        db.session.commit()
+
         db.session.execute(
             text("DELETE FROM trans WHERE trans_key = :trans_key"),
             {"trans_key" :trans_key}
@@ -1568,6 +1601,40 @@ def delete_wish():
         user_photo_path = select_user_photo()
         wish_key = request.form.get("wish_key")
 
+        wish_data_db = db.session.execute(
+                        text("SELECT currency, price, link, wish_details, year FROM wishlist WHERE user_id = :user_id AND wish_key = :wish_key"),
+                        {"user_id": user_id, "wish_key" :wish_key}
+                    ).fetchone()
+        
+        currency = wish_data_db[0]
+        price = wish_data_db[1]
+        link = wish_data_db[2]
+        wish_details = wish_data_db[3]
+        year_db = wish_data_db[4]
+
+        try:
+            last_wish_trash_id = db.session.execute(
+                    text("SELECT MAX(wish_trash_id) FROM wishlist_trash WHERE user_id = :user_id"),
+                    {"user_id": user_id}
+                ).fetchone()[0]
+            wish_trash_id = last_wish_trash_id + 1
+        except:
+            wish_trash_id = 1
+
+        try:
+            last_wish_trash_key = db.session.execute(
+                text("SELECT MAX(wish_trash_key) FROM wishlist_trash")
+            ).fetchone()[0]
+            wish_trash_key = last_wish_trash_key + 1
+        except:
+            wish_trash_key = 1
+        
+        db.session.execute(
+            text("INSERT INTO wishlist_trash (wish_trash_key, wish_trash_id, user_id, currency, price, link, wish_details, year) VALUES(:wish_trash_key, :wish_trash_id, :user_id, :currency, :price, :link, :wish_details, :year_db)"),
+            {"wish_trash_key" :wish_trash_key, "wish_trash_id": wish_trash_id, "user_id": user_id, "currency": currency, "price": price, "link": link, "wish_details": wish_details, "year_db": year_db}
+        )
+        db.session.commit()
+
         db.session.execute(
             text("DELETE FROM wishlist WHERE wish_key = :wish_key"),
             {"wish_key" :wish_key}
@@ -1674,6 +1741,215 @@ def verify_delete_user():
             error="Invalid verification code."
             return render_template("mail_verify_delete_user.html", error=error, secret_key=secret_key)
 
+@app.route("/trash_wishlist", methods=["GET", "POST"])
+def trash_wishlist():
+    if not session.get("logged_in"):
+        return redirect("/login_page")
+    else:
+        total_favorite_currency, favorite_currency = show_networth()
+        total_favorite_currency = f"{total_favorite_currency:,.2f}"
+        user_id = session.get("user_id")
+        user_photo_path = select_user_photo()
+        if request.method == "GET":
+            trash_wishlist_data = db.session.execute(
+                text("SELECT * FROM wishlist_trash WHERE user_id = :user_id"),
+                {"user_id" :user_id}
+            ).fetchall()   
+
+            return render_template("trash_wishlist.html",user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key, trash_wishlist_data=trash_wishlist_data)
+        
+        else:
+            if request.form.get("secret_key") != session.get('secret_key'):
+                return 'Invalid CSRF token', 400, logout()
+            
+            wish_trash_key = request.form.get("wish_trash_key")
+            trash_wishlist_data = db.session.execute(
+                text("SELECT currency, price, link, wish_details, year FROM wishlist_trash WHERE user_id = :user_id AND wish_trash_key = :wish_trash_key"),
+                {"user_id" :user_id, "wish_trash_key" :wish_trash_key}
+            ).fetchone()
+            try:
+                last_wish_id = db.session.execute(
+                        text("SELECT MAX(wish_id) FROM wishlist WHERE user_id = :user_id"),
+                        {"user_id": user_id}
+                    ).fetchone()[0]
+                wish_id = last_wish_id + 1
+            except:
+                wish_id = 1
+
+            try:
+                last_wish_key = db.session.execute(
+                    text("SELECT MAX(wish_key) FROM wishlist")
+                ).fetchone()[0]
+                wish_key = last_wish_key + 1
+            except:
+                wish_key = 1
+
+            currency = trash_wishlist_data[0]
+            price = trash_wishlist_data[1]
+            link = trash_wishlist_data[2]
+            wish_details = trash_wishlist_data[3]
+            year = trash_wishlist_data[4]
+
+            db.session.execute(
+                text("INSERT INTO wishlist (wish_key, wish_id, user_id, currency, price, link, wish_details, year, status) VALUES (:wish_key, :wish_id, :user_id, :currency, :price, :link, :wish_details, :year, :status)"),
+                {"wish_key": wish_key, "wish_id": wish_id, "user_id" :user_id, "currency" :currency, "price" :price, "link" :link, "wish_details" :wish_details, "year" :year, "status" :"pending"}
+            )
+            db.session.commit()
+
+            db.session.execute(
+                text("DELETE FROM wishlist_trash WHERE wish_trash_key = :wish_trash_key"),
+                {"wish_trash_key" :wish_trash_key}
+            )
+            db.session.commit()
+
+            trash_wishlist_data = db.session.execute(
+                text("SELECT * FROM wishlist_trash WHERE user_id = :user_id"),
+                {"user_id" :user_id}
+            ).fetchall()   
+
+            return render_template("trash_wishlist.html",user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key, trash_wishlist_data=trash_wishlist_data)
+
+@app.route("/delete_trash_wishlist", methods=["POST"])
+def delete_trash_wishlist():
+    if not session.get("logged_in"):
+        return redirect("/login_page")
+    else:
+        if request.form.get("secret_key") != session.get('secret_key'):
+            return 'Invalid CSRF token', 400, logout()
+        total_favorite_currency, favorite_currency = show_networth()
+        total_favorite_currency = f"{total_favorite_currency:,.2f}"
+        user_id = session.get("user_id")
+        user_photo_path = select_user_photo()
+
+        wish_trash_key = request.form.get("wish_trash_key")
+        db.session.execute(
+            text("DELETE FROM wishlist_trash WHERE wish_trash_key = :wish_trash_key"),
+            {"wish_trash_key" :wish_trash_key}
+        )
+        db.session.commit()
+
+        trash_wishlist_data = db.session.execute(
+                text("SELECT * FROM wishlist_trash WHERE user_id = :user_id"),
+                {"user_id" :user_id}
+        ).fetchall()   
+
+        return render_template("trash_wishlist.html",user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key, trash_wishlist_data=trash_wishlist_data)
+
+@app.route("/trash_trans", methods=["GET", "POST"])
+def trash_trans():
+    if not session.get("logged_in"):
+        return redirect("/login_page")
+    else:
+        total_favorite_currency, favorite_currency = show_networth()
+        total_favorite_currency = f"{total_favorite_currency:,.2f}"
+        user_id = session.get("user_id")
+        user_photo_path = select_user_photo()
+        if request.method == "GET":
+
+            trash_trans_data = db.session.execute(
+                text("SELECT * FROM trans_trash WHERE user_id = :user_id"),
+                {"user_id" :user_id}
+            ).fetchall()      
+
+            return render_template("trash_trans.html",user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key, trash_trans_data=trash_trans_data)
+        
+        else:
+            if request.form.get("secret_key") != session.get('secret_key'):
+                return 'Invalid CSRF token', 400, logout()
+            
+            trans_trash_key = request.form.get("trans_trash_key")
+            trash_trans_data = db.session.execute(
+                text("SELECT currency, date, amount, trans_status, trans_details, trans_details_link FROM trans_trash WHERE user_id = :user_id AND trans_trash_key = :trans_trash_key"),
+                {"user_id" :user_id, "trans_trash_key" :trans_trash_key}
+            ).fetchone()
+
+            try:
+                last_trans_id = db.session.execute(
+                        text("SELECT MAX(trans_id) FROM trans WHERE user_id = :user_id"),
+                        {"user_id": user_id}
+                    ).fetchone()[0]
+                trans_id = last_trans_id + 1
+            except:
+                trans_id = 1
+
+            try:
+                last_trans_key = db.session.execute(
+                    text("SELECT MAX(trans_key) FROM trans")
+                ).fetchone()[0]
+                trans_key = last_trans_key + 1
+            except:
+                trans_key = 1
+
+            currency = trash_trans_data[0]
+            date = trash_trans_data[1]
+            amount = trash_trans_data[2]
+            trans_status = trash_trans_data[3]
+            trans_details = trash_trans_data[4]
+            trans_details_link = trash_trans_data[5]
+
+            db.session.execute(
+                text("INSERT INTO trans (trans_key, trans_id, user_id, currency, date, amount, trans_status, trans_details, trans_details_link) VALUES (:trans_key, :trans_id, :user_id, :currency, :date, :amount, :trans_status, :trans_details, :trans_details_link)"),
+                {"trans_key": trans_key, "trans_id": trans_id, "user_id" :user_id, "currency" :currency, "date" :date, "amount" :amount, "trans_status" :trans_status, "trans_details" :trans_details, "trans_details_link" :trans_details_link}
+            )
+            db.session.commit()
+            
+            total_db = db.session.execute(
+                text("SELECT total FROM networth WHERE user_id = :user_id and currency = :currency"),
+                {"user_id" :user_id, "currency" :currency}
+            ).fetchone()[0]
+
+            if trans_status == "deposit":
+                total = total_db + int(amount)
+            elif trans_status == "withdraw":
+                total = total_db - int(amount)
+            
+            db.session.execute(
+                text("UPDATE networth SET total = :total WHERE user_id = :user_id AND currency = :currency"),
+                {"total" :total, "user_id" :user_id, "currency" :currency}
+            )
+            db.session.commit()
+
+            db.session.execute(
+                text("DELETE FROM trans_trash WHERE trans_trash_key = :trans_trash_key"),
+                {"trans_trash_key" :trans_trash_key}
+            )
+            db.session.commit()
+
+            trash_trans_data = db.session.execute(
+                text("SELECT * FROM trans_trash WHERE user_id = :user_id"),
+                {"user_id" :user_id}
+            ).fetchall()      
+
+            return render_template("trash_trans.html",user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key, trash_trans_data=trash_trans_data)
+
+@app.route("/delete_trash_trans", methods=["POST"])
+def delete_trash_trans():
+    if not session.get("logged_in"):
+        return redirect("/login_page")
+    else:
+        if request.form.get("secret_key") != session.get('secret_key'):
+            return 'Invalid CSRF token', 400, logout()
+        
+        total_favorite_currency, favorite_currency = show_networth()
+        total_favorite_currency = f"{total_favorite_currency:,.2f}"
+        user_id = session.get("user_id")
+        user_photo_path = select_user_photo()
+
+        trans_trash_key = request.form.get("trans_trash_key")
+
+        db.session.execute(
+            text("DELETE FROM trans_trash WHERE trans_trash_key = :trans_trash_key"),
+            {"trans_trash_key" :trans_trash_key}
+        )
+        db.session.commit()
+
+        trash_trans_data = db.session.execute(
+            text("SELECT * FROM trans_trash WHERE user_id = :user_id"),
+            {"user_id" :user_id}
+        ).fetchall()      
+
+        return render_template("trash_trans.html",user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key, trash_trans_data=trash_trans_data)
+
 @app.route("/version")
 def version():
     return render_template("version.html", secret_key=secret_key)
@@ -1727,4 +2003,3 @@ def sitemap():
     response.headers["Content-Type"] = "application/xml"
 
     return response
-    

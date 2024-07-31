@@ -9,38 +9,8 @@
                 <div class="error-message">{{ error }}</div>
                 {% endif %}
             </div>
-
-            <div style="text-align: center;">
-                <table style="background-color: #f5f5f5 !important; border: 0cm; display: inline-block;">
-                    <thead>
-                        <tr>
-                            <td style="display: inline-block; vertical-align: top;">
-                                <form action="/trash_trans" method="get">
-                                    <button type="submit" class="btn-green" title="Trash" style="background-color: teal; color: white; border: none; padding: 6px 10px; border-radius: 5px; margin-top: 10px;">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                    </thead>
-                </table>
-            </div>
-
+            <a class="nav-link" href="/show_trans"><i class="fas fa-arrow-left"></i>Transactions</a>
             <div class="table-container" style="flex-grow: 1; overflow: auto;">
-                <form action="/show_trans" method="get" id="date-form">
-                    <table>
-                        <tr>
-                            <th>
-                                From Date:
-                                <input type="date" name="from_date" value="{{ from_date }}" onchange="this.form.submit()">
-                            </th>
-                            <th>
-                                To Date:
-                                <input type="date" name="to_date" value="{{ to_date }}" onchange="this.form.submit()">
-                            </th>
-                        </tr>
-                    </table>
-                </form>
                 <table class="c">
                     <thead>
                         <tr>
@@ -55,9 +25,9 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for trans in trans_db %}
+                        {% for trans in trash_trans_data %}
                             <tr>
-                                <td>{{ trans.trans_id }}</td>
+                                <td>{{ trans.trans_trash_id }}</td>
                                 <td>{{ trans.date }}</td>
                                 <td>{{ "{:,.2f}".format(trans.amount|float) }}</td>
                                 <td>{{ trans.currency }}</td>
@@ -67,17 +37,17 @@
                                 </td>
                                 <td>{{ trans.trans_status }}</td>
                                 <td>
-                                    <form action="/edit_trans" method="get" style="display: inline;">
+                                    <form action="/trash_trans" method="post" style="display: inline;">
                                         <input type="hidden" name="secret_key" value="{{ secret_key }}">
-                                        <input type="hidden" name="trans_key" value="{{ trans.trans_key }}">
-                                        <button type="submit" class="btn-green" title="Edit">
-                                            <i class="fas fa-pen"></i>
+                                        <input type="hidden" name="trans_trash_key" value="{{ trans.trans_trash_key }}">
+                                        <button type="submit" class="btn-green" title="Restore">
+                                            <i class="fas fa-add"></i>
                                         </button>
                                     </form>
-                                    <form action="/delete_trans" method="post" style="display: inline;">
+                                    <form action="/delete_trash_trans" method="post" style="display: inline;">
                                         <input type="hidden" name="secret_key" value="{{ secret_key }}">
-                                        <input type="hidden" name="trans_key" value="{{ trans.trans_key }}">
-                                        <button type="submit" class="btn-red" title="Delete">
+                                        <input type="hidden" name="trans_trash_key" value="{{ trans.trans_trash_key }}">
+                                        <button type="submit" class="btn-red" title="Permanent Delete">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </form>

@@ -54,33 +54,36 @@ img {
 </style>
         {% include 'back.html' %}
         <div style="text-align:center ;">
-            <a href="https://www.amazon.com/dp/B0D9TVMV3D/ref=sr_1_2?dib=eyJ2IjoiMSJ9.qzFudk5ElS-BgrqDZfGpZ41oDM22hTBqu51QpR0uz2U.gaEl94dYgf1OQ7HDnnCjwOm9-K70Vj7R-gUBLnW6eGQ&dib_tag=se&qid=1721656003&refinements=p_4%3AImhotep+Tech&s=mobile-apps&search-type=ss&sr=1-2" style="color: #986f07;">
-                <img src="{{ url_for('static', filename='amazon.png') }}" height="50" width="auto" alt="Android Amazon Download">
-            </a>
+        <h1>Android & PC & Mac</h1>
+        <a href="https://github.com/Kbassem10/imhotep_finance_apk/releases/tag/imhotep_finance" style="color: #986f07;">
+            <img src="{{ url_for('static', filename='github.png') }}" height="100" width="auto" alt="Github Download">
+        </a>
 
-            <br>
+        <br>
+        <a href="https://drive.google.com/drive/folders/18WzgnAXo3NyrKLs6R1iJk9X2kcOcujth?usp=drive_link" style="color: #986f07;">
+            <img src="{{ url_for('static', filename='googledrive.png') }}" height="50" width="auto" alt="Google Drive Download">
+        </a>
+        <br>
+        <h1>Android Only</h1>
+        <a href="https://www.amazon.com/dp/B0D9TVMV3D/ref=sr_1_2?dib=eyJ2IjoiMSJ9.qzFudk5ElS-BgrqDZfGpZ41oDM22hTBqu51QpR0uz2U.gaEl94dYgf1OQ7HDnnCjwOm9-K70Vj7R-gUBLnW6eGQ&dib_tag=se&qid=1721656003&refinements=p_4%3AImhotep+Tech&s=mobile-apps&search-type=ss&sr=1-2" style="color: #986f07;">
+            <img src="{{ url_for('static', filename='amazon.png') }}" height="50" width="auto" alt="Android Amazon Download">
+        </a>
 
-            <a href="https://github.com/Kbassem10/imhotep_finance_apk/releases/tag/imhotep_finance" style="color: #986f07;">
-                <img src="{{ url_for('static', filename='github.png') }}" height="70" width="auto" alt="Github Apk Download">
-            </a>
+        <br>
 
-            <br>
-
-            <a id="installButton" href="#" style="color: #986f07;">PC PWA Download</a>
-
-            <br>
-            
-            <a id="iosInstall" href="#" style="color: #986f07;">
-                <img src="{{ url_for('static', filename='ios.jpg') }}" height="70" width="auto" alt="Add to Home Screen on iOS">
-            </a>
-        <div class="ios-instructions" id="iosInstructions">
-            <p>To add this app to your home screen on iOS:</p>
-            <ol>
-                <li>Tap the Share button at the bottom of the Safari browser.</li>
-                <li>Select "Add to Home Screen" from the options.</li>
-            </ol>
-        </div>
+        <br>
+        <h1>IOS</h1>
+        <a id="iosInstall" href="#" style="color: #986f07;">
+            <img src="{{ url_for('static', filename='ios.jpg') }}" height="70" width="auto" alt="Add to Home Screen on iOS">
+        </a>
+    <div class="ios-instructions" id="iosInstructions">
+        <p>To add this app to your home screen on iOS:</p>
+        <ol>
+            <li>Tap the Share button at the bottom of the Safari browser.</li>
+            <li>Select "Add to Home Screen" from the options.</li>
+        </ol>
     </div>
+</div>
     </body>
     <script>
         let deferredPrompt;
