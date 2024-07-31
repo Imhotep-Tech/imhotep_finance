@@ -16,7 +16,7 @@
             {% if user_photo_path %}
             <img src="{{ url_for('static', filename = '/user_photo/'+ user_photo_path) }}" alt="Image" class="user_img">
 
-            <form action="/settings/personal_info/delete_user_photo" method="post" onclick="return confirm('Are you sure you want to delete your image')">
+            <form action="/settings/personal_info/delete_user_photo" method="post">
                 <input type="hidden" name="secret_key" value="{{ secret_key }}">
                 <button type="submit" class="btn-red" title="Delete">
                     <i class="fas fa-trash"></i>
@@ -35,7 +35,7 @@
             {% endif %}
 
             <br>
-            <form action="/settings/personal_info" method="post" class="form" onsubmit="return confirm('Are you sure you want to edit this');">
+            <form action="/settings/personal_info" method="post" class="form">
                 <input type="hidden" name="secret_key" value="{{ secret_key }}">
             <label>Username</label>
             <input type="name" class="input" placeholder="Username" value="{{ user_username }}" name="user_username" required="">
