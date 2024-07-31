@@ -236,16 +236,18 @@ def get_user_data(user_id):
         text("SELECT currency, total FROM networth WHERE user_id = :user_id"),
         {"user_id":user_id}
     ).fetchall()
+    print(user_id)
     favorite_currency = db.session.execute(
         text("SELECT favorite_currency FROM users WHERE user_id = :user_id"),
         {"user_id":user_id}
     ).fetchone()[0]
+    print(favorite_currency)
     user_data = {
         'transactions': [{'currency': row[0], 'date': row[1].strftime('%Y-%m-%d'), 'amount': float(row[2]), 'trans_status': row[3], 'trans_details': row[4] } for row in trans_db],
         'user_save_target': [{'target': row[0], 'mounth': row[1], 'year': row[2]} for row in target_db],
         'wishlist': [{'currency': row[0], 'price': row[1], 'status': row[2], 'link': row[3], 'wish_details': row[4], 'year': row[5]} for row in wishlist_db],
         'networth': [{'currency': row[0], 'total': row[1]} for row in networth_db],
-        'fav_currency': favorite_currency,
+        'favorite_currency': favorite_currency,
         }
     return user_data
 
@@ -1687,13 +1689,11 @@ def ai_chatbot():
             session["chat_history"] = []
         return render_template("ai_chatbot.html", chat_history=session["chat_history"])
     else:
-        if request.form.get("secret_key") != session.get('secret_key'):
-                return 'Invalid CSRF token', 400, logout()
         user_question = request.form.get("user_question")
         user_id = session.get("user_id")
         user_data = get_user_data(user_id)
         response = query_gemini(user_question, user_data)
-        return render_template("ai_chatbot.html", chat_history=response, secret_key=secret_key)'''
+        return render_template("ai_chatbot.html", chat_history=response)'''
 
 @app.after_request
 def add_header(response):
