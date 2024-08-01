@@ -12,6 +12,7 @@ from datetime import date, timedelta
 from sqlalchemy.exc import OperationalError
 from flask_session import Session
 import google.generativeai as genai
+
 #define the app
 app = Flask(__name__)
 #define a secret key with a hexadecimal number of 16 digit
@@ -25,13 +26,13 @@ sess = Session(app)
 app.config['MAIL_SERVER']='smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USERNAME'] = 'imhotepfinance@gmail.com'
-app.config['MAIL_PASSWORD'] = "hrsw vzhz cixd eecs"
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 mail = Mail(app)
 
 #connection with the database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://kbassem:kb@localhost/imhotep_finance'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
@@ -40,7 +41,7 @@ app.config["MAX_CONTENT_LENGTH"] = 3 * 1024 * 1024
 app.config["UPLOAD_FOLDER_PHOTO"] = os.path.join(os.getcwd(), "static", "user_photo")
 ALLOWED_EXTENSIONS = ("png", "jpg", "jpeg")
 
-genai.configure(api_key="AIzaSyCmVVszLfhcQiofkBYrz_9VVl7jgs-tBl0")
+'''genai.configure(api_key="AIzaSyCmVVszLfhcQiofkBYrz_9VVl7jgs-tBl0")
 
 generation_config = {
   "temperature": 1,
@@ -60,7 +61,7 @@ model = genai.GenerativeModel(
 chat_session = model.start_chat(
   history=[
   ]
-)
+)'''
 
 def send_verification_mail_code(user_mail):
     verification_code = secrets.token_hex(4)
@@ -72,15 +73,17 @@ def send_verification_mail_code(user_mail):
 
 def convert_to_fav_currency(dictionary, user_id):
         favorite_currency = select_favorite_currency(user_id)
+        primary_api_key = os.getenv('EXCHANGE_API_KEY_PRIMARY')
+        secondary_api_key = os.getenv('EXCHANGE_API_KEY_SECONDARY')
         try:
             #karimbassemj
-            response = requests.get(f"https://v6.exchangerate-api.com/v6/2a4f75a189d39f96688afc97/latest/{favorite_currency}")
+            response = requests.get(f"https://v6.exchangerate-api.com/v6/{primary_api_key}/latest/{favorite_currency}")
             data = response.json()
             rate = data["conversion_rates"]
             total_favorite_currency = 0
         except:
             #imhotep_finance
-            response = requests.get(f"https://v6.exchangerate-api.com/v6/18c9f74feadb9bea7bf26ce4/latest/{favorite_currency}")
+            response = requests.get(f"https://v6.exchangerate-api.com/v6/{secondary_api_key}/latest/{favorite_currency}")
             data = response.json()
             rate = data["conversion_rates"]
             total_favorite_currency = 0
@@ -208,7 +211,7 @@ def security_check(user_id, check_pass):
     else:
         return False
     
-def query_gemini(prompt, user_data):
+'''def query_gemini(prompt, user_data):
     enriched_prompt = prompt
     if user_data:
         enriched_prompt = f"User data: {user_data}\n{prompt}"
@@ -247,7 +250,7 @@ def get_user_data(user_id):
         'networth': [{'currency': row[0], 'total': row[1]} for row in networth_db],
         'favorite_currency': favorite_currency,
         }
-    return user_data
+    return user_data'''
 
 @app.route("/", methods=["GET"])
 def index():
