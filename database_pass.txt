@@ -1,1 +1,0 @@
-mysql+mysqlconnector://imhotepf:kb10122005@imhotepf.mysql.pythonanywhere-services.com/imhotepf$default
