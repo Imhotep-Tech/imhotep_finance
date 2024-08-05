@@ -9,6 +9,12 @@
                 {{ error }} <a href="/login_page">Sign in</a>
             </div>
         {% endif %}
+        
+        {% if error_existing %}
+          <div class="error-message">
+              {{ error_existing }}</a>
+          </div>
+      {% endif %}
     </div>
     {% include 'back.html' %}
     <p class="title">Welcome</p>

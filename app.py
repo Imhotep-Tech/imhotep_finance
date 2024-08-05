@@ -273,7 +273,9 @@ def register_page():
 @app.route("/register", methods=["POST"])
 def register():
     if request.form.get("secret_key") != session.get('secret_key'):
-        return 'Invalid CSRF token', 400, logout()
+        error_existing = "Cookies are blocked, please enable cookies from your browser settings"
+        return render_template("register.html", error_existing=error_existing, secret_key=secret_key), 400, logout()
+    
     user_username = (request.form.get("user_username").strip()).lower()
     user_password = request.form.get("user_password")
     user_mail = request.form.get("user_mail").lower()
@@ -329,7 +331,9 @@ def mail_verification():
         return render_template("mail_verify.html")
     else: 
         if request.form.get("secret_key") != session.get('secret_key'):
-                return 'Invalid CSRF token', 400, logout()
+            error = "Cookies are blocked, please enable cookies from your browser settings"
+            return render_template("mail_verify.html", error=error, secret_key=secret_key), 400
+        
         verification_code = request.form.get("verification_code").strip()
         user_id = session.get("user_id")
         user_mail = request.form.get("user_mail")
@@ -354,7 +358,9 @@ def mail_verification():
 @app.route("/login", methods=["POST"])
 def login():
     if request.form.get("secret_key") != session.get('secret_key'):
-        return 'Invalid CSRF token', 400, logout()
+        error = "Cookies are blocked, please enable cookies from your browser settings"
+        return render_template("login.html", error=error, secret_key=secret_key), 400
+    
     user_username_mail = (request.form.get("user_username_mail").strip()).lower()
     user_password = request.form.get("user_password")
 
@@ -425,9 +431,10 @@ def manual_mail_verification():
         return render_template("manual_mail_verification.html")
     else: 
         if request.form.get("secret_key") != session.get('secret_key'):
-                return 'Invalid CSRF token', 400, logout()
+                error = "Cookies are blocked, please enable cookies from your browser settings"
+                return render_template("login.html", error=error), 400
+        
         user_mail = (request.form.get("user_mail").strip()).lower()
-
         try:
             mail_verify_db = db.session.execute(
                 text("SELECT user_id, user_mail_verify FROM users WHERE user_mail = :user_mail"), {"user_mail" : user_mail}
@@ -452,7 +459,9 @@ def forget_password():
         return render_template("forget_password.html")
     else:
         if request.form.get("secret_key") != session.get('secret_key'):
-                return 'Invalid CSRF token', 400, logout()
+                error = "Cookies are blocked, please enable cookies from your browser settings"
+                return render_template("forget_password.html", error = error, secret_key=secret_key), 400
+        
         user_mail = request.form.get("user_mail")
         try:
             db.session.execute(
@@ -592,7 +601,9 @@ def deposit():
             return render_template("deposit.html", user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
         else:
             if request.form.get("secret_key") != session.get('secret_key'):
-                return 'Invalid CSRF token', 400, logout()
+                error = "Cookies are blocked, please enable cookies from your browser settings"
+                return f'{error}', 400, logout()
+            
             user_photo_path = select_user_photo()
             date = request.form.get("date")
             amount = int(request.form.get("amount"))
@@ -675,7 +686,9 @@ def withdraw():
         
         else:
             if request.form.get("secret_key") != session.get('secret_key'):
-                return 'Invalid CSRF token', 400, logout()
+                    error = "Cookies are blocked, please enable cookies from your browser settings"
+                    return f'{error}', 400, logout()
+            
             user_photo_path = select_user_photo()
             date = request.form.get("date")
             amount = int(request.form.get("amount"))
@@ -788,7 +801,7 @@ def show_trans():
 
         user_photo_path = select_user_photo()
         trans_db = db.session.execute(
-            text("SELECT * FROM trans WHERE user_id = :user_id AND date BETWEEN :from_date AND :to_date ORDER BY trans_id"),
+            text("SELECT * FROM trans WHERE user_id = :user_id AND date BETWEEN :from_date AND :to_date ORDER BY date"),
             {"user_id": user_id, "from_date" :from_date, "to_date" :to_date}
         ).fetchall()
         return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, to_date=to_date, from_date=from_date, secret_key=secret_key)
@@ -812,7 +825,9 @@ def edit_trans():
         
         else:
             if request.form.get("secret_key") != session.get('secret_key'):
-                return 'Invalid CSRF token', 400, logout()
+                error = "Cookies are blocked, please enable cookies from your browser settings"
+                return f'{error}', 400, logout()
+            
             trans_key = request.form.get("trans_key")
             currency = request.form.get("currency")
             date = request.form.get("date")
@@ -879,7 +894,9 @@ def delete_trans():
         return redirect("/login_page")
     else:
         if request.form.get("secret_key") != session.get('secret_key'):
-                return 'Invalid CSRF token', 400, logout()
+            error = "Cookies are blocked, please enable cookies from your browser settings"
+            return f'{error}', 400, logout()
+        
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_photo_path = select_user_photo()
@@ -985,7 +1002,9 @@ def personal_info():
             return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
         else:
             if request.form.get("secret_key") != session.get('secret_key'):
-                return 'Invalid CSRF token', 400, logout()
+                error = "Cookies are blocked, please enable cookies from your browser settings"
+                return f'{error}', 400, logout()
+            
             user_username = request.form.get("user_username")
             user_mail = request.form.get("user_mail")
             user_photo_path = request.form.get("user_photo_path")
@@ -1113,7 +1132,9 @@ def upload_user_photo():
         return redirect("/login_page")
     else:
         if request.form.get("secret_key") != session.get('secret_key'):
-            return 'Invalid CSRF token', 400, logout()
+            error = "Cookies are blocked, please enable cookies from your browser settings"
+            return f'{error}', 400, logout()
+      
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
@@ -1152,7 +1173,9 @@ def delete_user_photo():
         return redirect("/login_page")
     else:
         if request.form.get("secret_key") != session.get('secret_key'):
-            return 'Invalid CSRF token', 400, logout()
+            error = "Cookies are blocked, please enable cookies from your browser settings"
+            return f'{error}', 400, logout()    
+           
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
@@ -1185,9 +1208,15 @@ def favorite_currency():
             total_favorite_currency = f"{total_favorite_currency:,.2f}"
             return render_template("favorite_currency.html", favorite_currency=favorite_currency, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, secret_key=secret_key)
         else:
+            total_favorite_currency, favorite_currency = show_networth()
+            total_favorite_currency = f"{total_favorite_currency:,.2f}"
+            favorite_currency = select_favorite_currency(user_id)
             if request.form.get("secret_key") != session.get('secret_key'):
-                return 'Invalid CSRF token', 400, logout()
+                error = "Cookies are blocked, please enable cookies from your browser settings"
+                return f'{error}', 400, logout()
+            
             favorite_currency = request.form.get("favorite_currency")
+
             db.session.execute(
                 text("UPDATE users SET favorite_currency = :favorite_currency WHERE user_id = :user_id"), 
                 {"favorite_currency" :favorite_currency, "user_id" :user_id}
@@ -1195,9 +1224,6 @@ def favorite_currency():
             db.session.commit()
 
             done = f"Your favorite currency is {favorite_currency} now"
-            total_favorite_currency, favorite_currency = show_networth()
-            total_favorite_currency = f"{total_favorite_currency:,.2f}"
-            favorite_currency = select_favorite_currency(user_id)
             return render_template("favorite_currency.html", done=done, favorite_currency=favorite_currency, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, secret_key=secret_key)
         
 @app.route("/settings/security_check", methods=["POST", "GET"])
@@ -1210,7 +1236,9 @@ def security_check_password():
             return render_template("check_pass.html", secret_key=secret_key)
         else:
             if request.form.get("secret_key") != session.get('secret_key'):
-                return 'Invalid CSRF token', 400, logout()
+                error = "Cookies are blocked, please enable cookies from your browser settings"
+                return f'{error}', 400, logout()
+            
             user_id = session.get("user_id")
             check_pass = request.form.get("check_pass")
             security = security_check(user_id, check_pass)
@@ -1227,7 +1255,9 @@ def security():
         return redirect("/login_page")
     else:
         if request.form.get("secret_key") != session.get('secret_key'):
-            return 'Invalid CSRF token', 400, logout()
+            error = "Cookies are blocked, please enable cookies from your browser settings"
+            return f'{error}', 400, logout()
+        
         user_id = session.get("user_id")
         new_password = request.form.get("new_password")
 
@@ -1275,7 +1305,9 @@ def set_target():
                 return render_template("set_target.html", total_favorite_currency=total_favorite_currency,favorite_currency=favorite_currency,user_photo_path=user_photo_path, secret_key=secret_key)
         else:
             if request.form.get("secret_key") != session.get('secret_key'):
-                return 'Invalid CSRF token', 400, logout()
+                error = "Cookies are blocked, please enable cookies from your browser settings"
+                return f'{error}', 400, logout()
+            
             target = request.form.get("target")
 
             now = datetime.datetime.now()
@@ -1308,7 +1340,8 @@ def update_target():
         return redirect("/login_page")
     else:
         if request.form.get("secret_key") != session.get('secret_key'):
-            return 'Invalid CSRF token', 400, logout()
+            error = "Cookies are blocked, please enable cookies from your browser settings"
+            return f'{error}', 400, logout()
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
@@ -1376,7 +1409,9 @@ def add_wish():
             return render_template("add_wish.html", user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
         else:
             if request.form.get("secret_key") != session.get('secret_key'):
-                return 'Invalid CSRF token', 400, logout()
+                error = "Cookies are blocked, please enable cookies from your browser settings"
+                return f'{error}', 400, logout()
+            
             user_id = session.get("user_id")
             user_photo_path = select_user_photo()
             price = request.form.get("price")
@@ -1424,7 +1459,9 @@ def check_wish():
         return redirect("/login_page")
     else:
         if request.form.get("secret_key") != session.get('secret_key'):
-            return 'Invalid CSRF token', 400, logout()
+            error = "Cookies are blocked, please enable cookies from your browser settings"
+            return f'{error}', 400, logout()
+        
         user_id = session.get("user_id")
         user_photo_path = select_user_photo()
         wish_key = request.form.get("wish_key")
@@ -1569,7 +1606,9 @@ def edit_wish():
             return render_template("edit_wish.html", wish_db=wish_db,user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
         else:
             if request.form.get("secret_key") != session.get('secret_key'):
-                return 'Invalid CSRF token', 400, logout()
+                error = "Cookies are blocked, please enable cookies from your browser settings"
+                return f'{error}', 400, logout()
+            
             wish_key = request.form.get("wish_key")
             year = request.form.get("year")
             price = request.form.get("price")
@@ -1597,7 +1636,9 @@ def delete_wish():
         return redirect("/login_page")
     else:
         if request.form.get("secret_key") != session.get('secret_key'):
-            return 'Invalid CSRF token', 400, logout()
+            error = "Cookies are blocked, please enable cookies from your browser settings"
+            return f'{error}', 400, logout()
+        
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
@@ -1664,7 +1705,9 @@ def check_pass_delete_user():
         return redirect("/login_page")
     else:
         if request.form.get("secret_key") != session.get('secret_key'):
-            return 'Invalid CSRF token', 400, logout()
+            error = "Cookies are blocked, please enable cookies from your browser settings"
+            return f'{error}', 400, logout()
+        
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
@@ -1696,7 +1739,9 @@ def verify_delete_user():
         return redirect("/login_page")
     else:
         if request.form.get("secret_key") != session.get('secret_key'):
-            return 'Invalid CSRF token', 400, logout()
+            error = "Cookies are blocked, please enable cookies from your browser settings"
+            return f'{error}', 400, logout()
+        
         verification_code = request.form.get("verification_code").strip()
         user_id = session.get("user_id")
         if verification_code == session.get("verification_code"):
@@ -1763,7 +1808,8 @@ def trash_wishlist():
         
         else:
             if request.form.get("secret_key") != session.get('secret_key'):
-                return 'Invalid CSRF token', 400, logout()
+                error = "Cookies are blocked, please enable cookies from your browser settings"
+                return f'{error}', 400, logout()
             
             wish_trash_key = request.form.get("wish_trash_key")
             trash_wishlist_data = db.session.execute(
@@ -1818,7 +1864,9 @@ def delete_trash_wishlist():
         return redirect("/login_page")
     else:
         if request.form.get("secret_key") != session.get('secret_key'):
-            return 'Invalid CSRF token', 400, logout()
+            error = "Cookies are blocked, please enable cookies from your browser settings"
+            return f'{error}', 400, logout()
+        
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
@@ -1858,7 +1906,8 @@ def trash_trans():
         
         else:
             if request.form.get("secret_key") != session.get('secret_key'):
-                return 'Invalid CSRF token', 400, logout()
+                error = "Cookies are blocked, please enable cookies from your browser settings"
+                return f'{error}', 400, logout()
             
             trans_trash_key = request.form.get("trans_trash_key")
             trash_trans_data = db.session.execute(
@@ -1931,7 +1980,8 @@ def delete_trash_trans():
         return redirect("/login_page")
     else:
         if request.form.get("secret_key") != session.get('secret_key'):
-            return 'Invalid CSRF token', 400, logout()
+            error = "Cookies are blocked, please enable cookies from your browser settings"
+            return f'{error}', 400, logout()
         
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
