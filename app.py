@@ -41,28 +41,6 @@ app.config["MAX_CONTENT_LENGTH"] = 3 * 1024 * 1024
 app.config["UPLOAD_FOLDER_PHOTO"] = os.path.join(os.getcwd(), "static", "user_photo")
 ALLOWED_EXTENSIONS = ("png", "jpg", "jpeg")
 
-'''genai.configure(api_key="AIzaSyCmVVszLfhcQiofkBYrz_9VVl7jgs-tBl0")
-
-generation_config = {
-  "temperature": 1,
-  "top_p": 0.95,
-  "top_k": 64,
-  "max_output_tokens": 8192,
-  "response_mime_type": "text/plain",
-}
-
-model = genai.GenerativeModel(
-  model_name="gemini-1.5-pro",
-  generation_config=generation_config,
-  # safety_settings = Adjust safety settings
-  # See https://ai.google.dev/gemini-api/docs/safety-settings
-)
-
-chat_session = model.start_chat(
-  history=[
-  ]
-)'''
-
 def send_verification_mail_code(user_mail):
     verification_code = secrets.token_hex(4)
     msg = Message('Email Verification', sender='imhotepfinance@gmail.com', recipients=[user_mail])
@@ -75,6 +53,7 @@ def convert_to_fav_currency(dictionary, user_id):
         favorite_currency = select_favorite_currency(user_id)
         primary_api_key = os.getenv('EXCHANGE_API_KEY_PRIMARY')
         secondary_api_key = os.getenv('EXCHANGE_API_KEY_SECONDARY')
+        third_api_key = os.getenv('EXCHANGE_API_KEY_THIRD')
         try:
             #karimbassemj
             response = requests.get(f"https://v6.exchangerate-api.com/v6/{primary_api_key}/latest/{favorite_currency}")
@@ -82,16 +61,24 @@ def convert_to_fav_currency(dictionary, user_id):
             rate = data["conversion_rates"]
             total_favorite_currency = 0
         except:
-            #imhotep_finance
-            response = requests.get(f"https://v6.exchangerate-api.com/v6/{secondary_api_key}/latest/{favorite_currency}")
-            data = response.json()
-            rate = data["conversion_rates"]
-            total_favorite_currency = 0
+            try:
+                #imhotep_finance
+                response = requests.get(f"https://v6.exchangerate-api.com/v6/{secondary_api_key}/latest/{favorite_currency}")
+                data = response.json()
+                rate = data["conversion_rates"]
+                total_favorite_currency = 0
+            except:
+                #imhotep_finance
+                response = requests.get(f"https://v6.exchangerate-api.com/v6/{third_api_key}/latest/{favorite_currency}")
+                data = response.json()
+                rate = data["conversion_rates"]
+                total_favorite_currency = 0
+
 
         for currency, amount in dictionary.items():
             converted_amount = amount / rate[currency]
             total_favorite_currency += converted_amount
-        
+
         return total_favorite_currency, favorite_currency
 
 def show_networth():
@@ -108,7 +95,7 @@ def show_networth():
     total_favorite_currency,favorite_currency = convert_to_fav_currency(total_db_dict, user_id)
 
     return total_favorite_currency, favorite_currency
-        
+
 def select_currencies(user_id):
     currency_db = db.session.execute(
         text("SELECT currency from networth WHERE user_id = :user_id"),
@@ -118,7 +105,7 @@ def select_currencies(user_id):
     currency_all = []
     for item in currency_db:
         currency_all.append(item[0])
-        
+
     return(currency_all)
 
 def allowed_file(filename):
@@ -139,7 +126,7 @@ def select_user_data(user_id):
         text("SELECT user_username, user_mail, user_photo_path FROM users WHERE user_id = :user_id"),
             {"user_id": user_id}
         ).fetchall()[0]
-        
+
         user_username = user_info[0]
         user_mail = user_info[1]
         user_photo_path = user_info[2]
@@ -155,7 +142,7 @@ def select_user_photo():
 
 def delete_photo(user_id, photo_path):
         if os.path.exists(photo_path):
-                os.remove(photo_path)   
+                os.remove(photo_path)
                 db.session.execute(
                     text("UPDATE users SET user_photo_path = NULL WHERE user_id = :user_id"),
                     {"user_id" :user_id}
@@ -210,7 +197,7 @@ def security_check(user_id, check_pass):
         return True
     else:
         return False
-    
+
 '''def query_gemini(prompt, user_data):
     enriched_prompt = prompt
     if user_data:
@@ -275,7 +262,7 @@ def register():
     if request.form.get("secret_key") != session.get('secret_key'):
         error_existing = "Cookies are blocked, please enable cookies from your browser settings"
         return render_template("register.html", error_existing=error_existing, secret_key=secret_key), 400, logout()
-    
+
     user_username = (request.form.get("user_username").strip()).lower()
     user_password = request.form.get("user_password")
     user_mail = request.form.get("user_mail").lower()
@@ -283,7 +270,7 @@ def register():
     if "@" in user_username:
         error = "username should not have @"
         return render_template("register.html", error=error, secret_key=secret_key)
-    
+
     if "@" not in user_mail:
         error = "mail should have @"
         return render_template("register.html", error=error, secret_key=secret_key)
@@ -329,11 +316,11 @@ def register():
 def mail_verification():
     if request.method == "GET":
         return render_template("mail_verify.html")
-    else: 
+    else:
         if request.form.get("secret_key") != session.get('secret_key'):
             error = "Cookies are blocked, please enable cookies from your browser settings"
             return render_template("mail_verify.html", error=error, secret_key=secret_key), 400
-        
+
         verification_code = request.form.get("verification_code").strip()
         user_id = session.get("user_id")
         user_mail = request.form.get("user_mail")
@@ -350,17 +337,17 @@ def mail_verification():
 
             success="Email verified successfully. You can now log in."
             return render_template("login.html", success=success, secret_key=secret_key)
-        
+
         else:
             error="Invalid verification code."
             return render_template("mail_verify.html", error=error, secret_key=secret_key)
-    
+
 @app.route("/login", methods=["POST"])
 def login():
     if request.form.get("secret_key") != session.get('secret_key'):
         error = "Cookies are blocked, please enable cookies from your browser settings"
         return render_template("login.html", error=error, secret_key=secret_key), 400
-    
+
     user_username_mail = (request.form.get("user_username_mail").strip()).lower()
     user_password = request.form.get("user_password")
 
@@ -380,7 +367,7 @@ def login():
                         text("SELECT user_id FROM users WHERE LOWER(user_mail) = :user_mail AND user_password = :user_password"),
                         {"user_mail": user_username_mail, "user_password": password_db}
                     ).fetchone()[0]
-                    
+
                     session["logged_in"] = True
                     session["user_id"] = user
                     session.permanent = True
@@ -409,7 +396,7 @@ def login():
                         text("SELECT user_id FROM users WHERE LOWER(user_username) = :user_username AND user_password = :user_password"),
                         {"user_username": user_username_mail, "user_password": password_db}
                     ).fetchone()[0]
-                    
+
                     session["logged_in"] = True
                     session["secret_key"] = secret_key
                     session["user_id"] = user
@@ -424,16 +411,16 @@ def login():
         except:
             error = "Your username or password are incorrect!"
             return render_template("login.html", error=error, secret_key=secret_key)
-        
+
 @app.route("/manual_mail_verification", methods=["POST", "GET"])
 def manual_mail_verification():
     if request.method == "GET":
         return render_template("manual_mail_verification.html")
-    else: 
+    else:
         if request.form.get("secret_key") != session.get('secret_key'):
                 error = "Cookies are blocked, please enable cookies from your browser settings"
                 return render_template("login.html", error=error), 400
-        
+
         user_mail = (request.form.get("user_mail").strip()).lower()
         try:
             mail_verify_db = db.session.execute(
@@ -444,7 +431,7 @@ def manual_mail_verification():
         except:
             error_not = "This mail isn't used on the webapp!"
             return render_template("manual_mail_verification.html", error_not = error_not)
-        
+
         if mail_verify == "verified":
             error = "This Mail is already used and verified"
             return render_template("login.html", error=error)
@@ -461,7 +448,7 @@ def forget_password():
         if request.form.get("secret_key") != session.get('secret_key'):
                 error = "Cookies are blocked, please enable cookies from your browser settings"
                 return render_template("forget_password.html", error = error, secret_key=secret_key), 400
-        
+
         user_mail = request.form.get("user_mail")
         try:
             db.session.execute(
@@ -472,7 +459,7 @@ def forget_password():
             msg = Message('Reset Password', sender='imhotepfinance@gmail.com', recipients=[user_mail])
             msg.body = f"Your temporary Password is: {temp_password}"
             mail.send(msg)
-            
+
             hashed_password = generate_password_hash(temp_password)
             db.session.execute(
                 text("UPDATE users SET user_password = :user_password WHERE user_mail = :user_mail"), {"user_password" :hashed_password, "user_mail": user_mail}
@@ -500,7 +487,7 @@ def home():
         except OperationalError:
             error = "Welcome Back"
             return render_template('error.html', error=error), 500
-        
+
         user_id = session.get("user_id")
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
@@ -532,14 +519,14 @@ def home():
                     {"target_id":target_id, "user_id" :user_id, "target": target, "mounth" :mounth, "year" :year}
                 )
                 db.session.commit()
-                
+
             first_day_current_month = now.replace(day=1)
 
             if now.month == 12:
                 first_day_next_month = now.replace(year=now.year + 1, month=1, day=1)
             else:
                 first_day_next_month = now.replace(month=now.month + 1, day=1)
-                
+
             from_date = first_day_current_month.date()
             to_date = first_day_next_month.date()
 
@@ -586,7 +573,7 @@ def home():
                 else:
                     score_txt = "On Target"
                 return render_template("home.html", total_favorite_currency = total_favorite_currency, favorite_currency=favorite_currency , user_photo_path=user_photo_path, score_txt=score_txt, score=score, target = target, secret_key=secret_key)
-        else: 
+        else:
             return render_template("home.html", total_favorite_currency = total_favorite_currency, favorite_currency=favorite_currency , user_photo_path=user_photo_path, secret_key=secret_key)
 
 @app.route("/deposit", methods=["POST", "GET"])
@@ -603,7 +590,7 @@ def deposit():
             if request.form.get("secret_key") != session.get('secret_key'):
                 error = "Cookies are blocked, please enable cookies from your browser settings"
                 return f'{error}', 400, logout()
-            
+
             user_photo_path = select_user_photo()
             date = request.form.get("date")
             amount = int(request.form.get("amount"))
@@ -614,7 +601,7 @@ def deposit():
             if currency is None or amount is None :
                 error = "You have to choose the currency!"
                 return render_template("deposit.html", error = error,total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency,  user_photo_path=user_photo_path, secret_key=secret_key)
-            
+
             try:
                 last_trans_id = db.session.execute(
                         text("SELECT MAX(trans_id) FROM trans WHERE user_id = :user_id"),
@@ -657,7 +644,7 @@ def deposit():
 
                 new_total = total + amount
                 db.session.execute(
-                    text("UPDATE networth SET total = :total WHERE networth_id = :networth_id"), 
+                    text("UPDATE networth SET total = :total WHERE networth_id = :networth_id"),
                     {"total" :new_total, "networth_id": networth_id}
                 )
                 db.session.commit()
@@ -683,12 +670,12 @@ def withdraw():
             user_id = session.get("user_id")
             currency_all = select_currencies(user_id)
             return render_template("withdraw.html", currency_all = currency_all, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
-        
+
         else:
             if request.form.get("secret_key") != session.get('secret_key'):
                     error = "Cookies are blocked, please enable cookies from your browser settings"
                     return f'{error}', 400, logout()
-            
+
             user_photo_path = select_user_photo()
             date = request.form.get("date")
             amount = int(request.form.get("amount"))
@@ -702,7 +689,7 @@ def withdraw():
                 currency_all = select_currencies(user_id)
                 user_photo_path = select_user_photo()
                 return render_template("withdraw.html", currency_all = currency_all, error = error, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
-            
+
             amount_of_currency = db.session.execute(
                 text("SELECT total FROM networth WHERE user_id = :user_id AND currency = :currency"),
                 {"user_id": user_id, "currency":currency}
@@ -747,7 +734,7 @@ def withdraw():
 
                 new_total = total - amount
                 db.session.execute(
-                    text("UPDATE networth SET total = :total WHERE networth_id = :networth_id"), 
+                    text("UPDATE networth SET total = :total WHERE networth_id = :networth_id"),
                     {"total" :new_total, "networth_id": networth_id}
                 )
                 db.session.commit()
@@ -755,7 +742,7 @@ def withdraw():
             except:
                 error = "You don't have money from that currency!"
             return redirect("/home")
-        
+
 @app.route("/show_networth_details", methods=["GET"])
 def show_networth_details():
     if not session.get("logged_in"):
@@ -822,12 +809,12 @@ def edit_trans():
             total_favorite_currency, favorite_currency = show_networth()
             total_favorite_currency = f"{total_favorite_currency:,.2f}"
             return render_template("edit_trans.html", trans_db = trans_db, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
-        
+
         else:
             if request.form.get("secret_key") != session.get('secret_key'):
                 error = "Cookies are blocked, please enable cookies from your browser settings"
                 return f'{error}', 400, logout()
-            
+
             trans_key = request.form.get("trans_key")
             currency = request.form.get("currency")
             date = request.form.get("date")
@@ -867,7 +854,7 @@ def edit_trans():
                 total_favorite_currency, favorite_currency = show_networth()
                 total_favorite_currency = f"{total_favorite_currency:,.2f}"
                 return render_template("edit_trans.html", trans_db = trans_db, user_photo_path=user_photo_path, error=error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
-            
+
             db.session.execute(
                 text("UPDATE trans SET  date = :date, trans_details = :trans_details, trans_details_link = :trans_details_link, amount = :amount WHERE trans_key = :trans_key"),
                 {"date" :date, "trans_details" :trans_details, "trans_details_link" :trans_details_link, "amount" :amount, "trans_key" :trans_key}
@@ -887,7 +874,7 @@ def edit_trans():
             total_favorite_currency, favorite_currency = show_networth()
             total_favorite_currency = f"{total_favorite_currency:,.2f}"
             return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
-        
+
 @app.route("/delete_trans", methods=["POST"])
 def delete_trans():
     if not session.get("logged_in"):
@@ -896,7 +883,7 @@ def delete_trans():
         if request.form.get("secret_key") != session.get('secret_key'):
             error = "Cookies are blocked, please enable cookies from your browser settings"
             return f'{error}', 400, logout()
-        
+
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_photo_path = select_user_photo()
@@ -925,7 +912,7 @@ def delete_trans():
                     {"user_id": user_id}
                 ).fetchall()
                 return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, error = error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
-        
+
         elif trans_status_db == "withdraw":
             total = total_db + int(amount_db)
 
@@ -933,7 +920,7 @@ def delete_trans():
                 text("SELECT currency, date, amount, trans_status, trans_details, trans_details_link FROM trans WHERE user_id = :user_id AND trans_key = :trans_key"),
                 {"user_id": user_id, "trans_key" :trans_key}
             ).fetchone()
-        
+
         currency = trans_data_db[0]
         date = trans_data_db[1]
         amount = trans_data_db[2]
@@ -957,7 +944,7 @@ def delete_trans():
             trans_trash_key = last_trans_trash_key + 1
         except:
             trans_trash_key = 1
-        
+
         db.session.execute(
             text("INSERT INTO trans_trash (trans_trash_key, trans_trash_id, user_id, currency, date, amount, trans_status, trans_details, trans_details_link) VALUES(:trans_trash_key, :trans_trash_id, :user_id, :currency, :date, :amount, :trans_status, :trans_details, :trans_details_link)"),
             {"trans_trash_key" :trans_trash_key, "trans_trash_id": trans_trash_id, "user_id": user_id, "currency": currency, "date": date, "amount": amount, "trans_status": trans_status, "trans_details": trans_details, "trans_details_link": trans_details_link}
@@ -981,7 +968,7 @@ def delete_trans():
             {"status" :"pending", "trans_key" :trans_key}
         )
         db.session.commit()
-        
+
         trans_db = db.session.execute(
             text("SELECT * FROM trans WHERE user_id = :user_id"),
             {"user_id": user_id}
@@ -996,7 +983,7 @@ def personal_info():
     else:
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
-        user_id = session.get("user_id") 
+        user_id = session.get("user_id")
         if request.method == "GET":
             user_username, user_mail, user_photo_path = select_user_data(user_id)
             return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
@@ -1004,16 +991,16 @@ def personal_info():
             if request.form.get("secret_key") != session.get('secret_key'):
                 error = "Cookies are blocked, please enable cookies from your browser settings"
                 return f'{error}', 400, logout()
-            
+
             user_username = request.form.get("user_username")
             user_mail = request.form.get("user_mail")
             user_photo_path = request.form.get("user_photo_path")
-            
+
             if "@" in user_username:
                 error_existing = "username should not have @"
                 user_username, user_mail, user_photo_path = select_user_data(user_id)
                 return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
-    
+
             if "@" not in user_mail:
                 error_existing = "mail should have @"
                 user_username, user_mail, user_photo_path = select_user_data(user_id)
@@ -1043,7 +1030,7 @@ def personal_info():
                     error_existing = "Mail is already in use. Please choose another one."
                     user_username, user_mail, user_photo_path = select_user_data(user_id)
                     return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
-                
+
                 if existing_username:
                     error_existing = "Username is already in use. Please choose another one."
                     user_username, user_mail, user_photo_path = select_user_data(user_id)
@@ -1051,7 +1038,7 @@ def personal_info():
 
                 send_verification_mail_code(user_mail)
                 return render_template("mail_verify_change_mail.html", total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path, user_mail=user_mail, user_username=user_username, user_mail_db=user_mail_db, secret_key=secret_key)
-            
+
             if user_mail != user_mail_db:
                 existing_mail = db.session.execute(
                 text("SELECT user_mail FROM users WHERE LOWER(user_mail) = :user_mail"),
@@ -1062,10 +1049,10 @@ def personal_info():
                     error_existing = "Mail is already in use. Please choose another one. or "
                     user_username, user_mail, user_photo_path = select_user_data(user_id)
                     return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
-                
+
                 send_verification_mail_code(user_mail)
                 return render_template("mail_verify_change_mail.html", total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path, user_mail=user_mail, user_username=user_username, user_mail_db=user_mail_db, secret_key=secret_key)
-                        
+
             if user_username != user_username_db:
                 existing_username = db.session.execute(
                     text("SELECT user_username FROM users WHERE LOWER(user_username) = :user_username"),
@@ -1085,7 +1072,7 @@ def personal_info():
                 done = "User Name Changed Successfully!"
                 user_username, user_mail, user_photo_path = select_user_data(user_id)
                 return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, done = done, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
-            
+
         user_username, user_mail, user_photo_path = select_user_data(user_id)
         return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
 
@@ -1096,7 +1083,7 @@ def mail_verification_change_mail():
     else:
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
-        user_id = session.get("user_id") 
+        user_id = session.get("user_id")
         user_photo_path = select_user_photo()
 
         verification_code = request.form.get("verification_code").strip()
@@ -1118,14 +1105,14 @@ def mail_verification_change_mail():
             msg = Message('Welcome', sender='imhotepfinance@gmail.com', recipients=[user_mail])
             msg.body = f"Welcome {user_username} To Imhotep Finacial Manager"
             mail.send(msg)
-            
+
             done = "User Mail Changed Successfully!"
             user_username, user_mail, user_photo_path = select_user_data(user_id)
             return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, done = done, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
         else:
             error="Invalid verification code."
             return render_template("mail_verify_change_mail.html", total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path, error=error, secret_key=secret_key)
-        
+
 @app.route("/settings/personal_info/upload_user_photo", methods=["POST"])
 def upload_user_photo():
     if not session.get("logged_in"):
@@ -1134,7 +1121,7 @@ def upload_user_photo():
         if request.form.get("secret_key") != session.get('secret_key'):
             error = "Cookies are blocked, please enable cookies from your browser settings"
             return f'{error}', 400, logout()
-      
+
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
@@ -1166,7 +1153,7 @@ def upload_user_photo():
             error = "file upload failed"
             user_username, user_mail, user_photo_path = select_user_data(user_id)
             return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
-    
+
 @app.route("/settings/personal_info/delete_user_photo", methods=["POST"])
 def delete_user_photo():
     if not session.get("logged_in"):
@@ -1174,8 +1161,8 @@ def delete_user_photo():
     else:
         if request.form.get("secret_key") != session.get('secret_key'):
             error = "Cookies are blocked, please enable cookies from your browser settings"
-            return f'{error}', 400, logout()    
-           
+            return f'{error}', 400, logout()
+
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
@@ -1214,18 +1201,18 @@ def favorite_currency():
             if request.form.get("secret_key") != session.get('secret_key'):
                 error = "Cookies are blocked, please enable cookies from your browser settings"
                 return f'{error}', 400, logout()
-            
+
             favorite_currency = request.form.get("favorite_currency")
 
             db.session.execute(
-                text("UPDATE users SET favorite_currency = :favorite_currency WHERE user_id = :user_id"), 
+                text("UPDATE users SET favorite_currency = :favorite_currency WHERE user_id = :user_id"),
                 {"favorite_currency" :favorite_currency, "user_id" :user_id}
             )
             db.session.commit()
 
             done = f"Your favorite currency is {favorite_currency} now"
             return render_template("favorite_currency.html", done=done, favorite_currency=favorite_currency, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, secret_key=secret_key)
-        
+
 @app.route("/settings/security_check", methods=["POST", "GET"])
 def security_check_password():
     if not session.get("logged_in"):
@@ -1238,7 +1225,7 @@ def security_check_password():
             if request.form.get("secret_key") != session.get('secret_key'):
                 error = "Cookies are blocked, please enable cookies from your browser settings"
                 return f'{error}', 400, logout()
-            
+
             user_id = session.get("user_id")
             check_pass = request.form.get("check_pass")
             security = security_check(user_id, check_pass)
@@ -1257,7 +1244,7 @@ def security():
         if request.form.get("secret_key") != session.get('secret_key'):
             error = "Cookies are blocked, please enable cookies from your browser settings"
             return f'{error}', 400, logout()
-        
+
         user_id = session.get("user_id")
         new_password = request.form.get("new_password")
 
@@ -1276,7 +1263,7 @@ def security():
         msg = Message('Password Change', sender='imhotepfinance@gmail.com', recipients=[user_mail])
         msg.body = f"Your password has been changed"
         mail.send(msg)
-        
+
         logout()
         success = "You password has been changed successfully!"
         return render_template("login.html", success = success)
@@ -1307,7 +1294,7 @@ def set_target():
             if request.form.get("secret_key") != session.get('secret_key'):
                 error = "Cookies are blocked, please enable cookies from your browser settings"
                 return f'{error}', 400, logout()
-            
+
             target = request.form.get("target")
 
             now = datetime.datetime.now()
@@ -1390,11 +1377,11 @@ def filter_year_wishlist():
                         text("SELECT * FROM wishlist WHERE user_id = :user_id and year = :year ORDER BY wish_id"),
                         {"user_id" :user_id, "year" :year}
                     ).fetchall()
-            
+
             all_years = select_years_wishlist(user_id)
-    
+
             return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
-                
+
 @app.route("/add_wish", methods=["GET", "POST"])
 def add_wish():
     if not session.get("logged_in"):
@@ -1411,7 +1398,7 @@ def add_wish():
             if request.form.get("secret_key") != session.get('secret_key'):
                 error = "Cookies are blocked, please enable cookies from your browser settings"
                 return f'{error}', 400, logout()
-            
+
             user_id = session.get("user_id")
             user_photo_path = select_user_photo()
             price = request.form.get("price")
@@ -1452,7 +1439,7 @@ def add_wish():
 
             all_years = select_years_wishlist(user_id)
             return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, done = done, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
-        
+
 @app.route("/check_wish", methods=["POST"])
 def check_wish():
     if not session.get("logged_in"):
@@ -1461,7 +1448,7 @@ def check_wish():
         if request.form.get("secret_key") != session.get('secret_key'):
             error = "Cookies are blocked, please enable cookies from your browser settings"
             return f'{error}', 400, logout()
-        
+
         user_id = session.get("user_id")
         user_photo_path = select_user_photo()
         wish_key = request.form.get("wish_key")
@@ -1470,7 +1457,7 @@ def check_wish():
                 text("SELECT * FROM wishlist WHERE wish_key = :wish_key"),
                 {"wish_key" :wish_key}
             ).fetchone()
-        
+
         currency = wishlist_data_db[3]
         amount = wishlist_data_db[4]
         status = wishlist_data_db[5]
@@ -1501,7 +1488,7 @@ def check_wish():
                     trans_key = last_trans_key + 1
                 except:
                     trans_key = 1
-                
+
                 if status == "pending":
                     new_total = int(total_db) - int(amount)
                     new_status = "done"
@@ -1514,7 +1501,7 @@ def check_wish():
                         trans_id = last_trans_id + 1
                     except:
                         trans_id = 1
-                    
+
                     db.session.execute(
                         text("INSERT INTO trans (currency, amount, trans_details, trans_details_link, user_id, trans_id, trans_key, trans_status, date) VALUES(:currency, :amount, :trans_details, :trans_details_link, :user_id, :trans_id, :trans_key, :trans_status, :date)"),
                         {"currency" :currency, "amount" :amount, "trans_details" :wish_details, "trans_details_link" :link, "user_id" :user_id, "trans_id" :trans_id, "trans_key" :trans_key, "trans_status" :"withdraw", "date" :current_date}
@@ -1542,7 +1529,7 @@ def check_wish():
                     total_favorite_currency, favorite_currency = show_networth()
                     total_favorite_currency = f"{total_favorite_currency:,.2f}"
                     return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
-                
+
                 elif status == "done":
                     new_status = "pending"
                     new_total = int(total_db) + int(amount)
@@ -1578,7 +1565,7 @@ def check_wish():
                     total_favorite_currency, favorite_currency = show_networth()
                     total_favorite_currency = f"{total_favorite_currency:,.2f}"
                     return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
-            
+
         else:
             error = "You don't have on your balance enough of this currency!"
             year, wishlist_db = wishlist_page(user_id)
@@ -1586,7 +1573,7 @@ def check_wish():
             total_favorite_currency, favorite_currency = show_networth()
             total_favorite_currency = f"{total_favorite_currency:,.2f}"
             return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, error = error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
-        
+
 
 @app.route("/edit_wish", methods=["GET", "POST"])
 def edit_wish():
@@ -1608,7 +1595,7 @@ def edit_wish():
             if request.form.get("secret_key") != session.get('secret_key'):
                 error = "Cookies are blocked, please enable cookies from your browser settings"
                 return f'{error}', 400, logout()
-            
+
             wish_key = request.form.get("wish_key")
             year = request.form.get("year")
             price = request.form.get("price")
@@ -1638,7 +1625,7 @@ def delete_wish():
         if request.form.get("secret_key") != session.get('secret_key'):
             error = "Cookies are blocked, please enable cookies from your browser settings"
             return f'{error}', 400, logout()
-        
+
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
@@ -1649,7 +1636,7 @@ def delete_wish():
                         text("SELECT currency, price, link, wish_details, year FROM wishlist WHERE user_id = :user_id AND wish_key = :wish_key"),
                         {"user_id": user_id, "wish_key" :wish_key}
                     ).fetchone()
-        
+
         currency = wish_data_db[0]
         price = wish_data_db[1]
         link = wish_data_db[2]
@@ -1672,7 +1659,7 @@ def delete_wish():
             wish_trash_key = last_wish_trash_key + 1
         except:
             wish_trash_key = 1
-        
+
         db.session.execute(
             text("INSERT INTO wishlist_trash (wish_trash_key, wish_trash_id, user_id, currency, price, link, wish_details, year) VALUES(:wish_trash_key, :wish_trash_id, :user_id, :currency, :price, :link, :wish_details, :year_db)"),
             {"wish_trash_key" :wish_trash_key, "wish_trash_id": wish_trash_id, "user_id": user_id, "currency": currency, "price": price, "link": link, "wish_details": wish_details, "year_db": year_db}
@@ -1684,7 +1671,7 @@ def delete_wish():
             {"wish_key" :wish_key}
         )
         db.session.commit()
-        
+
         year, wishlist_db = wishlist_page(user_id)
         all_years = select_years_wishlist(user_id)
         return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
@@ -1707,7 +1694,7 @@ def check_pass_delete_user():
         if request.form.get("secret_key") != session.get('secret_key'):
             error = "Cookies are blocked, please enable cookies from your browser settings"
             return f'{error}', 400, logout()
-        
+
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
@@ -1720,7 +1707,7 @@ def check_pass_delete_user():
                 text("SELECT user_mail FROM users WHERE user_id = :user_id"),
                 {"user_id": user_id}
             ).fetchone()[0]
-            
+
             verification_code = secrets.token_hex(4)
             msg = Message('Delete Verification', sender='imhotepfinance@gmail.com', recipients=[user_mail])
             msg.body = f"Your verification code is: {verification_code}"
@@ -1732,7 +1719,7 @@ def check_pass_delete_user():
         else:
             error = "This password is incorrect!"
             return render_template("check_pass_delete_user.html", error = error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path, secret_key=secret_key)
-            
+
 @app.route("/delete_user/verify_delete_user", methods=["POST"])
 def verify_delete_user():
     if not session.get("logged_in"):
@@ -1741,7 +1728,7 @@ def verify_delete_user():
         if request.form.get("secret_key") != session.get('secret_key'):
             error = "Cookies are blocked, please enable cookies from your browser settings"
             return f'{error}', 400, logout()
-        
+
         verification_code = request.form.get("verification_code").strip()
         user_id = session.get("user_id")
         if verification_code == session.get("verification_code"):
@@ -1784,7 +1771,7 @@ def verify_delete_user():
 
             success="Account Deleted"
             return render_template("login.html", success=success, secret_key=secret_key)
-        
+
         else:
             error="Invalid verification code."
             return render_template("mail_verify_delete_user.html", error=error, secret_key=secret_key)
@@ -1802,15 +1789,15 @@ def trash_wishlist():
             trash_wishlist_data = db.session.execute(
                 text("SELECT * FROM wishlist_trash WHERE user_id = :user_id"),
                 {"user_id" :user_id}
-            ).fetchall()   
+            ).fetchall()
 
             return render_template("trash_wishlist.html",user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key, trash_wishlist_data=trash_wishlist_data)
-        
+
         else:
             if request.form.get("secret_key") != session.get('secret_key'):
                 error = "Cookies are blocked, please enable cookies from your browser settings"
                 return f'{error}', 400, logout()
-            
+
             wish_trash_key = request.form.get("wish_trash_key")
             trash_wishlist_data = db.session.execute(
                 text("SELECT currency, price, link, wish_details, year FROM wishlist_trash WHERE user_id = :user_id AND wish_trash_key = :wish_trash_key"),
@@ -1854,7 +1841,7 @@ def trash_wishlist():
             trash_wishlist_data = db.session.execute(
                 text("SELECT * FROM wishlist_trash WHERE user_id = :user_id"),
                 {"user_id" :user_id}
-            ).fetchall()   
+            ).fetchall()
 
             return render_template("trash_wishlist.html",user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key, trash_wishlist_data=trash_wishlist_data)
 
@@ -1866,7 +1853,7 @@ def delete_trash_wishlist():
         if request.form.get("secret_key") != session.get('secret_key'):
             error = "Cookies are blocked, please enable cookies from your browser settings"
             return f'{error}', 400, logout()
-        
+
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
@@ -1882,7 +1869,7 @@ def delete_trash_wishlist():
         trash_wishlist_data = db.session.execute(
                 text("SELECT * FROM wishlist_trash WHERE user_id = :user_id"),
                 {"user_id" :user_id}
-        ).fetchall()   
+        ).fetchall()
 
         return render_template("trash_wishlist.html",user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key, trash_wishlist_data=trash_wishlist_data)
 
@@ -1900,15 +1887,15 @@ def trash_trans():
             trash_trans_data = db.session.execute(
                 text("SELECT * FROM trans_trash WHERE user_id = :user_id"),
                 {"user_id" :user_id}
-            ).fetchall()      
+            ).fetchall()
 
             return render_template("trash_trans.html",user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key, trash_trans_data=trash_trans_data)
-        
+
         else:
             if request.form.get("secret_key") != session.get('secret_key'):
                 error = "Cookies are blocked, please enable cookies from your browser settings"
                 return f'{error}', 400, logout()
-            
+
             trans_trash_key = request.form.get("trans_trash_key")
             trash_trans_data = db.session.execute(
                 text("SELECT currency, date, amount, trans_status, trans_details, trans_details_link FROM trans_trash WHERE user_id = :user_id AND trans_trash_key = :trans_trash_key"),
@@ -1944,7 +1931,7 @@ def trash_trans():
                 {"trans_key": trans_key, "trans_id": trans_id, "user_id" :user_id, "currency" :currency, "date" :date, "amount" :amount, "trans_status" :trans_status, "trans_details" :trans_details, "trans_details_link" :trans_details_link}
             )
             db.session.commit()
-            
+
             total_db = db.session.execute(
                 text("SELECT total FROM networth WHERE user_id = :user_id and currency = :currency"),
                 {"user_id" :user_id, "currency" :currency}
@@ -1954,7 +1941,7 @@ def trash_trans():
                 total = total_db + int(amount)
             elif trans_status == "withdraw":
                 total = total_db - int(amount)
-            
+
             db.session.execute(
                 text("UPDATE networth SET total = :total WHERE user_id = :user_id AND currency = :currency"),
                 {"total" :total, "user_id" :user_id, "currency" :currency}
@@ -1970,7 +1957,7 @@ def trash_trans():
             trash_trans_data = db.session.execute(
                 text("SELECT * FROM trans_trash WHERE user_id = :user_id"),
                 {"user_id" :user_id}
-            ).fetchall()      
+            ).fetchall()
 
             return render_template("trash_trans.html",user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key, trash_trans_data=trash_trans_data)
 
@@ -1982,7 +1969,7 @@ def delete_trash_trans():
         if request.form.get("secret_key") != session.get('secret_key'):
             error = "Cookies are blocked, please enable cookies from your browser settings"
             return f'{error}', 400, logout()
-        
+
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
@@ -1999,7 +1986,7 @@ def delete_trash_trans():
         trash_trans_data = db.session.execute(
             text("SELECT * FROM trans_trash WHERE user_id = :user_id"),
             {"user_id" :user_id}
-        ).fetchall()      
+        ).fetchall()
 
         return render_template("trash_trans.html",user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key, trash_trans_data=trash_trans_data)
 
@@ -2010,19 +1997,6 @@ def version():
 @app.route("/download")
 def download():
     return render_template("download.html", secret_key=secret_key)
-
-'''@app.route("/ai_chatbot", methods=["GET", "POST"])
-def ai_chatbot():
-    if request.method == "GET":
-        if "chat_history" not in session:
-            session["chat_history"] = []
-        return render_template("ai_chatbot.html", chat_history=session["chat_history"])
-    else:
-        user_question = request.form.get("user_question")
-        user_id = session.get("user_id")
-        user_data = get_user_data(user_id)
-        response = query_gemini(user_question, user_data)
-        return render_template("ai_chatbot.html", chat_history=response)'''
 
 @app.after_request
 def add_header(response):

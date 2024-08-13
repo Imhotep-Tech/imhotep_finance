@@ -2,7 +2,7 @@
 
 {% block body %}
     {% include 'nav.html' %}
-    <body style="background-color: #f5f5f5 !important; display: flex; flex-direction: column; min-height: 200vh;">
+    <body display: flex; flex-direction: column; min-height: 200vh;">
         <div class="container" style="flex-grow: 1; padding-top: 80px; overflow: auto; display: flex; flex-direction: column; align-items: center; justify-content: center;">
 
             <div class="message-container">
@@ -11,7 +11,6 @@
                 {% endif %}
             </div>
             <h1 class="centered">{{ year }}</h1>
-            
             <form id="filterForm" action="/filter_year_wishlist" method="get">
                 <input type="text" id="searchInput1" placeholder="Year" class="input">
                 <select name="year" id="YearSelect" class="input" required>
@@ -23,20 +22,20 @@
             </form>
 
             <div style="text-align: center;">
-                <table style="background-color: #f5f5f5 !important; border: 0cm; display: inline-block;">
+                <table class="table-container">
                     <thead>
                         <tr>
                             <td style="display: inline-block; vertical-align: top;">
                                 <form action="/add_wish" method="get">
                                     <input type="hidden" name="year" value="{{ year }}">
-                                    <button type="submit" class="btn-green" title="Add" style="background-color: teal; color: white; border: none; padding: 6px 10px; border-radius: 5px; margin-top: 10px;">
+                                    <button type="submit" class="btn-green" title="Add">
                                         <i class="fas fa-plus"></i>
                                     </button>
                                 </form>
                             </td>
                             <td style="display: inline-block; vertical-align: top;">
                                 <form action="/trash_wishlist" method="get">
-                                    <button type="submit" class="btn-green" title="Trash" style="background-color: teal; color: white; border: none; padding: 6px 10px; border-radius: 5px; margin-top: 10px;">
+                                    <button type="submit" class="btn-green" title="Trash">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </form>
@@ -45,7 +44,6 @@
                     </thead>
                 </table>
             </div>
-            
             <div class="table-container" style="flex-grow: 1; overflow: auto; width: 100%; max-width: 1000px; margin: 0 auto;">
                 <table class="c">
                     <thead>

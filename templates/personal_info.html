@@ -4,49 +4,48 @@
     <div class="form-container">
 
         <div class="message-container">
-
             {% if error %}
             <div class="error-message">{{ error }}</div>
             {% elif done %}
             <div class="done-message">{{ done }}</div>
             {% endif %}
-
         </div>
 
-            {% if user_photo_path %}
-            <img src="{{ url_for('static', filename = '/user_photo/'+ user_photo_path) }}" alt="Image" class="user_img">
+        {% if user_photo_path %}
+        <img src="{{ url_for('static', filename='/user_photo/' + user_photo_path) }}" alt="Image" class="user_img">
+        <form action="/settings/personal_info/delete_user_photo" method="post">
+            <input type="hidden" name="secret_key" value="{{ secret_key }}">
+            <button type="submit" class="btn-red" title="Delete">
+                <i class="fas fa-trash"></i>
+            </button>
+        </form>
+        {% else %}
+        <form action="/settings/personal_info/upload_user_photo" method="post" enctype="multipart/form-data" id="upload-form">
+            <input type="hidden" name="secret_key" value="{{ secret_key }}">
+            <label for="file-upload" class="btn-upload">
+                <i class="fas fa-cloud-upload-alt"></i> Upload File
+            </label>
+            <input id="file-upload" type="file" name="file" style="display: none;" onchange="submitForm();">
+        </form>
+        <br>
+        {% endif %}
 
-            <form action="/settings/personal_info/delete_user_photo" method="post">
-                <input type="hidden" name="secret_key" value="{{ secret_key }}">
-                <button type="submit" class="btn-red" title="Delete">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </form>
-            
-            {% else %}
-            <form action="/settings/personal_info/upload_user_photo" method="post" enctype="multipart/form-data" id="upload-form">
-                <input type="hidden" name="secret_key" value="{{ secret_key }}">
-                <label for="file-upload" class="btn-upload">
-                    <i class="fas fa-cloud-upload-alt"></i> Upload File
-                </label>
-                <input id="file-upload" type="file" name="file" style="display: none;" id="picture" onchange="submitForm();">
-            </form>
-            <br>
-            {% endif %}
-
-            <br>
-            <form action="/settings/personal_info" method="post" class="form">
-                <input type="hidden" name="secret_key" value="{{ secret_key }}">
+        <br>
+        <button id="toggle-dark-mode" class="btn btn-outline-secondary">Dark / Light Mode</button>
+        <br>
+        <form action="/settings/personal_info" method="post" class="form">
+            <input type="hidden" name="secret_key" value="{{ secret_key }}">
             <label>Username</label>
-            <input type="name" class="input" placeholder="Username" value="{{ user_username }}" name="user_username" required="">
+            <input type="text" class="input" placeholder="Username" value="{{ user_username }}" name="user_username" required="">
             <label>E-mail</label>
-            <input type="mail" class="input" placeholder="E-Mail" value="{{ user_mail }}" name="user_mail" required="">
+            <input type="email" class="input" placeholder="E-Mail" value="{{ user_mail }}" name="user_mail" required="">
             <p class="page-link"></p>
             <button class="form-btn" title="Submit">
                 <i class="fas fa-check"></i>
             </button>
-            </form>
+        </form>
     </div>
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
     <script>
         function submitForm() {
             document.getElementById("upload-form").submit();

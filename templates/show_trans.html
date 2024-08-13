@@ -2,7 +2,7 @@
 
 {% block body %}
     {% include 'nav.html' %}
-    <body style="background-color: #f5f5f5 !important; display: flex; flex-direction: column; min-height: 100vh;">
+    <body>
         <div class="container" style="flex-grow: 1; padding-top: 80px; overflow: auto;">
             <div class="message-container">
                 {% if error %}
@@ -11,12 +11,12 @@
             </div>
 
             <div style="text-align: center;">
-                <table style="background-color: #f5f5f5 !important; border: 0cm; display: inline-block;">
+                <table class="table-container">
                     <thead>
                         <tr>
                             <td style="display: inline-block; vertical-align: top;">
                                 <form action="/trash_trans" method="get">
-                                    <button type="submit" class="btn-green" title="Trash" style="background-color: teal; color: white; border: none; padding: 6px 10px; border-radius: 5px; margin-top: 10px;">
+                                    <button type="submit" class="btn-green" title="Trash">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </form>
@@ -63,7 +63,7 @@
                                 <td>{{ trans.currency }}</td>
                                 <td class="details-cell">{{ trans.trans_details }}</td>
                                 <td class="details-cell">
-                                    <a href="{{ trans.trans_details_link }}" target="_blank" title="{{ trans.trans_details_link }}">{{ trans.trans_details_link}}</a>
+                                    <a href="{{ trans.trans_details_link }}" target="_blank" title="{{ trans.trans_details_link }}">{{ trans.trans_details_link }}</a>
                                 </td>
                                 <td>{{ trans.trans_status }}</td>
                                 <td>
@@ -89,5 +89,4 @@
             </div>
         </div>
     </body>
-    
 {% endblock %}

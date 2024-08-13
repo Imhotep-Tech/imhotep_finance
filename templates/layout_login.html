@@ -68,6 +68,34 @@
                 }, 100); // Adjust delay if necessary
             }
         });
+
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
+
+        function updateOnlineStatus() {
+            if (!navigator.onLine) {
+                document.body.innerHTML = '<h1>You are offline</h1><p>Database connection is unavailable. Please check your internet connection.</p>';
+            } else {
+                location.reload();  // Reload when back online
+            }
+        }
+
+        
+    // Check localStorage for user preference
+    if (localStorage.getItem('dark-mode') === 'enabled') {
+        document.body.classList.add('dark-mode');
+    }
+
+    // Toggle dark mode on button click
+    toggleDarkMode.addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        // Save user preference in localStorage
+        if (document.body.classList.contains('dark-mode')) {
+            localStorage.setItem('dark-mode', 'enabled');
+        } else {
+            localStorage.setItem('dark-mode', 'disabled');
+        }
+    });
     </script>
 </body>
 </html>
