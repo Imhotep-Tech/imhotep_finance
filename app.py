@@ -49,31 +49,59 @@ def send_verification_mail_code(user_mail):
 
     session["verification_code"] = verification_code
 
-def convert_to_fav_currency(dictionary, user_id):
-        favorite_currency = select_favorite_currency(user_id)
-        primary_api_key = os.getenv('EXCHANGE_API_KEY_PRIMARY')
-        secondary_api_key = os.getenv('EXCHANGE_API_KEY_SECONDARY')
-        third_api_key = os.getenv('EXCHANGE_API_KEY_THIRD')
+def set_currency_session(favorite_currency):
+    primary_api_key = os.getenv('EXCHANGE_API_KEY_PRIMARY')
+    secondary_api_key = os.getenv('EXCHANGE_API_KEY_SECONDARY')
+    third_api_key = os.getenv('EXCHANGE_API_KEY_THIRD')
+    
+    data = None
+    try:
+        response = requests.get(f"https://v6.exchangerate-api.com/v6/{primary_api_key}/latest/{favorite_currency}")
+        data = response.json()
+        rate = data["conversion_rates"]
+    except:
         try:
-            #karimbassemj
-            response = requests.get(f"https://v6.exchangerate-api.com/v6/{primary_api_key}/latest/{favorite_currency}")
+            response = requests.get(f"https://v6.exchangerate-api.com/v6/{secondary_api_key}/latest/{favorite_currency}")
             data = response.json()
             rate = data["conversion_rates"]
-            total_favorite_currency = 0
         except:
             try:
-                #imhotep_finance
-                response = requests.get(f"https://v6.exchangerate-api.com/v6/{secondary_api_key}/latest/{favorite_currency}")
-                data = response.json()
-                rate = data["conversion_rates"]
-                total_favorite_currency = 0
-            except:
-                #imhotep_finance
                 response = requests.get(f"https://v6.exchangerate-api.com/v6/{third_api_key}/latest/{favorite_currency}")
                 data = response.json()
                 rate = data["conversion_rates"]
-                total_favorite_currency = 0
+            except requests.RequestException as e:
+                print(f"Failed to fetch exchange rates: {e}")
+                return None
 
+    if rate:
+        session["rate"] = rate
+        tomorrow = (datetime.datetime.now() + datetime.timedelta(days=1)).date()
+        session["rate_expire"] = tomorrow
+        return rate
+    return None
+
+def convert_to_fav_currency(dictionary, user_id):
+        favorite_currency = select_favorite_currency(user_id)
+        today = datetime.datetime.now().date()
+        if session.get('rate_expire') == today:
+
+            session.pop('rate', None)
+            session.pop('rate_expire', None)
+
+            rate = set_currency_session(favorite_currency)
+            if not rate:
+                return None, favorite_currency
+        else:
+            rate = session.get('rate')
+            print("hello")
+            if rate == None:
+                print("world")
+                try:
+                    rate = set_currency_session(favorite_currency)
+                except:
+                    return "Error"
+        
+        total_favorite_currency = 0
 
         for currency, amount in dictionary.items():
             converted_amount = amount / rate[currency]
@@ -185,6 +213,8 @@ def wishlist_page(user_id):
 def logout():
         session.permanent = False
         session["logged_in"] = False
+        session.pop('rate', None)
+        session.pop('rate_expire', None)
         session.clear()
 
 def security_check(user_id, check_pass):
@@ -487,7 +517,7 @@ def home():
         except OperationalError:
             error = "Welcome Back"
             return render_template('error.html', error=error), 500
-
+        
         user_id = session.get("user_id")
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
