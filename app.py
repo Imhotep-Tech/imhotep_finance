@@ -93,9 +93,7 @@ def convert_to_fav_currency(dictionary, user_id):
                 return None, favorite_currency
         else:
             rate = session.get('rate')
-            print("hello")
             if rate == None:
-                print("world")
                 try:
                     rate = set_currency_session(favorite_currency)
                 except:
@@ -516,7 +514,7 @@ def home():
             user_photo_path = select_user_photo()
         except OperationalError:
             error = "Welcome Back"
-            return render_template('error.html', error=error), 500
+            return render_template('error.html', error=error)
         
         user_id = session.get("user_id")
         total_favorite_currency, favorite_currency = show_networth()
@@ -796,6 +794,12 @@ def show_trans():
         return redirect("/login_page")
     else:
         user_id = session.get("user_id")
+        try:
+            user_photo_path = select_user_photo()
+        except OperationalError:
+            error = "Welcome Back"
+            return render_template('error.html', error=error)
+        
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         from_date = request.args.get("from_date")
@@ -816,7 +820,6 @@ def show_trans():
         if to_date is None:
             to_date = first_day_next_month.date()
 
-        user_photo_path = select_user_photo()
         trans_db = db.session.execute(
             text("SELECT * FROM trans WHERE user_id = :user_id AND date BETWEEN :from_date AND :to_date ORDER BY date"),
             {"user_id": user_id, "from_date" :from_date, "to_date" :to_date}
