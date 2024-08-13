@@ -446,8 +446,8 @@ def manual_mail_verification():
         return render_template("manual_mail_verification.html")
     else:
         if request.form.get("secret_key") != session.get('secret_key'):
-                error = "Cookies are blocked, please enable cookies from your browser settings"
-                return render_template("login.html", error=error), 400
+            error = "Cookies are blocked, please enable cookies from your browser settings"
+            return render_template("login.html", error=error), 400
 
         user_mail = (request.form.get("user_mail").strip()).lower()
         try:
