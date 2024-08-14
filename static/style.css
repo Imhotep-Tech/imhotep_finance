@@ -377,6 +377,7 @@ body.dark-mode .footer-icon:hover {
   color: #007bff; /* Hover color for footer icons in dark mode */
 }
 
+/* Light Mode Styles */
 .ios-instructions, .android-instructions {
   display: none;
   text-align: center;
@@ -385,6 +386,14 @@ body.dark-mode .footer-icon:hover {
   border: 1px solid #ddd;
   margin-top: 20px;
 }
+
+/* Dark Mode Styles */
+body.dark-mode .ios-instructions, body.dark-mode .android-instructions {
+  background-color: #333;
+  border: 1px solid #555;
+  color: #e0e0e0;
+}
+
 
 #loading-overlay {
   display: none;

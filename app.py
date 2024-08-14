@@ -609,17 +609,20 @@ def deposit():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        try:
+            user_photo_path = select_user_photo()
+        except OperationalError:
+            error = "Welcome Back"
+            return render_template('error.html', error=error)
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         if request.method == "GET":
-            user_photo_path = select_user_photo()
             return render_template("deposit.html", user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
         else:
             if request.form.get("secret_key") != session.get('secret_key'):
                 error = "Cookies are blocked, please enable cookies from your browser settings"
                 return f'{error}', 400, logout()
 
-            user_photo_path = select_user_photo()
             date = request.form.get("date")
             amount = int(request.form.get("amount"))
             currency = request.form.get("currency")
@@ -691,10 +694,14 @@ def withdraw():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        try:
+            user_photo_path = select_user_photo()
+        except OperationalError:
+            error = "Welcome Back"
+            return render_template('error.html', error=error)
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         if request.method == "GET":
-            user_photo_path = select_user_photo()
             user_id = session.get("user_id")
             currency_all = select_currencies(user_id)
             return render_template("withdraw.html", currency_all = currency_all, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
@@ -704,7 +711,6 @@ def withdraw():
                     error = "Cookies are blocked, please enable cookies from your browser settings"
                     return f'{error}', 400, logout()
 
-            user_photo_path = select_user_photo()
             date = request.form.get("date")
             amount = int(request.form.get("amount"))
             currency = request.form.get("currency")
@@ -715,7 +721,6 @@ def withdraw():
             if currency == None or date == None or amount == None :
                 error = "You have to choose the currency!"
                 currency_all = select_currencies(user_id)
-                user_photo_path = select_user_photo()
                 return render_template("withdraw.html", currency_all = currency_all, error = error, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
 
             amount_of_currency = db.session.execute(
@@ -726,7 +731,6 @@ def withdraw():
             if amount > amount_of_currency:
                 error = "This user doesn't have this amount of this currency"
                 currency_all = select_currencies(user_id)
-                user_photo_path = select_user_photo()
                 return render_template("withdraw.html", currency_all = currency_all, error=error, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
 
             try:
@@ -776,9 +780,13 @@ def show_networth_details():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        try:
+            user_photo_path = select_user_photo()
+        except OperationalError:
+            error = "Welcome Back"
+            return render_template('error.html', error=error)
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
-        user_photo_path = select_user_photo()
         user_id = session.get("user_id")
         networth_details_db = db.session.execute(
             text("SELECT currency, total FROM networth WHERE user_id = :user_id"),
@@ -831,7 +839,12 @@ def edit_trans():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
-        user_photo_path = select_user_photo()
+        try:
+            user_photo_path = select_user_photo()
+        except OperationalError:
+            error = "Welcome Back"
+            return render_template('error.html', error=error)
+        
         user_id = session.get("user_id")
         if request.method == "GET":
             trans_key = request.args.get("trans_key")
@@ -916,10 +929,14 @@ def delete_trans():
         if request.form.get("secret_key") != session.get('secret_key'):
             error = "Cookies are blocked, please enable cookies from your browser settings"
             return f'{error}', 400, logout()
-
+        try:
+            user_photo_path = select_user_photo()
+        except OperationalError:
+            error = "Welcome Back"
+            return render_template('error.html', error=error)
+        
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
-        user_photo_path = select_user_photo()
         user_id = session.get("user_id")
         trans_key = request.form.get("trans_key")
         trans_db = db.session.execute(
@@ -1014,9 +1031,16 @@ def personal_info():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        try:
+            user_photo_path = select_user_photo()
+        except OperationalError:
+            error = "Welcome Back"
+            return render_template('error.html', error=error)
+        
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
+        
         if request.method == "GET":
             user_username, user_mail, user_photo_path = select_user_data(user_id)
             return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
@@ -1114,10 +1138,15 @@ def mail_verification_change_mail():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        try:
+            user_photo_path = select_user_photo()
+        except OperationalError:
+            error = "Welcome Back"
+            return render_template('error.html', error=error)
+        
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
-        user_photo_path = select_user_photo()
 
         verification_code = request.form.get("verification_code").strip()
         user_mail = request.form.get("user_mail")
@@ -1154,7 +1183,13 @@ def upload_user_photo():
         if request.form.get("secret_key") != session.get('secret_key'):
             error = "Cookies are blocked, please enable cookies from your browser settings"
             return f'{error}', 400, logout()
-
+        
+        try:
+            user_photo_path = select_user_photo()
+        except OperationalError:
+            error = "Welcome Back"
+            return render_template('error.html', error=error)
+        
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
@@ -1195,7 +1230,12 @@ def delete_user_photo():
         if request.form.get("secret_key") != session.get('secret_key'):
             error = "Cookies are blocked, please enable cookies from your browser settings"
             return f'{error}', 400, logout()
-
+        try:
+            user_photo_path = select_user_photo()
+        except OperationalError:
+            error = "Welcome Back"
+            return render_template('error.html', error=error)
+        
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
@@ -1220,7 +1260,12 @@ def favorite_currency():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
-        user_photo_path = select_user_photo()
+        try:
+            user_photo_path = select_user_photo()
+        except OperationalError:
+            error = "Welcome Back"
+            return render_template('error.html', error=error)
+        
         user_id = session.get("user_id")
         if request.method == "GET":
             favorite_currency = select_favorite_currency(user_id)
@@ -1252,6 +1297,12 @@ def security_check_password():
         return redirect("/login_page")
     else:
         secret_key = session.get('secret_key')
+        try:
+            user_id = session.get("user_id")
+        except OperationalError:
+            error = "Welcome Back"
+            return render_template('error.html', error=error)   
+             
         if request.method == "GET":
             return render_template("check_pass.html", secret_key=secret_key)
         else:
@@ -1306,10 +1357,15 @@ def set_target():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        try:
+            user_photo_path = select_user_photo()
+        except OperationalError:
+            error = "Welcome Back"
+            return render_template('error.html', error=error)
+        
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
-        user_photo_path = select_user_photo()
         if request.method == "GET":
             now = datetime.datetime.now()
             mounth = now.month
@@ -1362,10 +1418,16 @@ def update_target():
         if request.form.get("secret_key") != session.get('secret_key'):
             error = "Cookies are blocked, please enable cookies from your browser settings"
             return f'{error}', 400, logout()
+        
+        try:
+            user_photo_path = select_user_photo()
+        except OperationalError:
+            error = "Welcome Back"
+            return render_template('error.html', error=error)
+        
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
-        user_photo_path = select_user_photo()
 
         target = request.form.get("target")
 
@@ -1397,10 +1459,15 @@ def filter_year_wishlist():
         if not session.get("logged_in"):
             return redirect("/login_page")
         else:
+            try:
+                user_photo_path = select_user_photo()
+            except OperationalError:
+                error = "Welcome Back"
+                return render_template('error.html', error=error)
+
             total_favorite_currency, favorite_currency = show_networth()
             total_favorite_currency = f"{total_favorite_currency:,.2f}"
             user_id = session.get("user_id")
-            user_photo_path = select_user_photo()
             year = request.args.get("year")
             if year is None:
                 today = date.today()
@@ -1420,10 +1487,15 @@ def add_wish():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        try:
+            user_photo_path = select_user_photo()
+        except OperationalError:
+            error = "Welcome Back"
+            return render_template('error.html', error=error)
+        
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
-        user_photo_path = select_user_photo()
         if request.method == "GET":
             year = request.form.get("year")
             return render_template("add_wish.html", user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
@@ -1433,7 +1505,6 @@ def add_wish():
                 return f'{error}', 400, logout()
 
             user_id = session.get("user_id")
-            user_photo_path = select_user_photo()
             price = request.form.get("price")
             currency = request.form.get("currency")
             wish_details = request.form.get("details")
@@ -1481,9 +1552,14 @@ def check_wish():
         if request.form.get("secret_key") != session.get('secret_key'):
             error = "Cookies are blocked, please enable cookies from your browser settings"
             return f'{error}', 400, logout()
-
+        
+        try:
+            user_photo_path = select_user_photo()
+        except OperationalError:
+            error = "Welcome Back"
+            return render_template('error.html', error=error)
+        
         user_id = session.get("user_id")
-        user_photo_path = select_user_photo()
         wish_key = request.form.get("wish_key")
 
         wishlist_data_db = db.session.execute(
@@ -1613,10 +1689,16 @@ def edit_wish():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+
+        try:
+            user_photo_path = select_user_photo()
+        except OperationalError:
+            error = "Welcome Back"
+            return render_template('error.html', error=error)
+        
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
-        user_photo_path = select_user_photo()
         if request.method == "GET":
             wish_key = request.args.get("wish_key")
             wish_db = db.session.execute(
@@ -1658,11 +1740,15 @@ def delete_wish():
         if request.form.get("secret_key") != session.get('secret_key'):
             error = "Cookies are blocked, please enable cookies from your browser settings"
             return f'{error}', 400, logout()
-
+        try:
+            user_photo_path = select_user_photo()
+        except OperationalError:
+            error = "Welcome Back"
+            return render_template('error.html', error=error)
+        
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
-        user_photo_path = select_user_photo()
         wish_key = request.form.get("wish_key")
 
         wish_data_db = db.session.execute(
@@ -1714,9 +1800,14 @@ def delete_user():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        try:
+            user_photo_path = select_user_photo()
+        except OperationalError:
+            error = "Welcome Back"
+            return render_template('error.html', error=error)
+        
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
-        user_photo_path = select_user_photo()
         return render_template("check_pass_delete_user.html", total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path, secret_key=secret_key)
 
 @app.route("/delete_user/check_pass", methods=["POST"])
@@ -1727,11 +1818,15 @@ def check_pass_delete_user():
         if request.form.get("secret_key") != session.get('secret_key'):
             error = "Cookies are blocked, please enable cookies from your browser settings"
             return f'{error}', 400, logout()
-
+        try:
+            user_photo_path = select_user_photo()
+        except OperationalError:
+            error = "Welcome Back"
+            return render_template('error.html', error=error)
+        
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
-        user_photo_path = select_user_photo()
         check_pass = request.form.get("check_pass")
         security = security_check(user_id, check_pass)
 
@@ -1814,10 +1909,15 @@ def trash_wishlist():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        try:
+            user_photo_path = select_user_photo()
+        except OperationalError:
+            error = "Welcome Back"
+            return render_template('error.html', error=error)
+        
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
-        user_photo_path = select_user_photo()
         if request.method == "GET":
             trash_wishlist_data = db.session.execute(
                 text("SELECT * FROM wishlist_trash WHERE user_id = :user_id"),
@@ -1886,11 +1986,15 @@ def delete_trash_wishlist():
         if request.form.get("secret_key") != session.get('secret_key'):
             error = "Cookies are blocked, please enable cookies from your browser settings"
             return f'{error}', 400, logout()
-
+        try:
+            user_photo_path = select_user_photo()
+        except OperationalError:
+            error = "Welcome Back"
+            return render_template('error.html', error=error)
+        
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
-        user_photo_path = select_user_photo()
 
         wish_trash_key = request.form.get("wish_trash_key")
         db.session.execute(
@@ -1911,10 +2015,15 @@ def trash_trans():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+        try:
+            user_photo_path = select_user_photo()
+        except OperationalError:
+            error = "Welcome Back"
+            return render_template('error.html', error=error)
+        
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
-        user_photo_path = select_user_photo()
         if request.method == "GET":
 
             trash_trans_data = db.session.execute(
@@ -2002,11 +2111,15 @@ def delete_trash_trans():
         if request.form.get("secret_key") != session.get('secret_key'):
             error = "Cookies are blocked, please enable cookies from your browser settings"
             return f'{error}', 400, logout()
-
+        try:
+            user_photo_path = select_user_photo()
+        except OperationalError:
+            error = "Welcome Back"
+            return render_template('error.html', error=error)
+        
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
-        user_photo_path = select_user_photo()
 
         trans_trash_key = request.form.get("trans_trash_key")
 
