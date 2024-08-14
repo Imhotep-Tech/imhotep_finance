@@ -11,7 +11,6 @@ import datetime
 from datetime import date, timedelta
 from sqlalchemy.exc import OperationalError
 from flask_session import Session
-import google.generativeai as genai
 
 #define the app
 app = Flask(__name__)
