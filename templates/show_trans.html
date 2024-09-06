@@ -32,11 +32,16 @@
                         <tr>
                             <th>
                                 From Date:
-                                <input type="date" name="from_date" value="{{ from_date }}" onchange="this.form.submit()">
+                                <input type="date" name="from_date" value="{{ from_date }}">
                             </th>
                             <th>
                                 To Date:
-                                <input type="date" name="to_date" value="{{ to_date }}" onchange="this.form.submit()">
+                                <input type="date" name="to_date" value="{{ to_date }}">
+                            </th>
+                            <th>
+                                <button class="form-btn" title="Submit" type="submit">
+                                    <i class="fas fa-check"></i>
+                                </button>
                             </th>
                         </tr>
                     </table>
