@@ -12,7 +12,7 @@
     {% include 'back.html' %}
     <p class="title">Verify</p>
     <form action="/manual_mail_verification" method="post" class="form">
-        <input type="hidden" name="secret_key" value="{{ secret_key }}">
+        {{ form.hidden_tag() }}
         <input type="name" class="input" placeholder="User E-mail" name="user_mail" required="">
         <p class="page-link"></p>
         <button class="form-btn">

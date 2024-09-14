@@ -11,7 +11,7 @@
     </div>
     
     <form action="/withdraw" method="post" class="form-container">
-        <input type="hidden" name="secret_key" value="{{ secret_key }}">
+        {{ form.hidden_tag() }}
         {% include 'back.html' %}
         <div class="form-group">
             <input type="date" class="input" placeholder="Date" name="date" id="dateInput">

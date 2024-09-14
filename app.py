@@ -11,15 +11,27 @@ import datetime
 from datetime import date, timedelta
 from sqlalchemy.exc import OperationalError
 from flask_session import Session
+from flask_talisman import Talisman
+from flask_wtf import FlaskForm
+from flask_wtf.csrf import CSRFProtect
 
 #define the app
 app = Flask(__name__)
 #define a secret key with a hexadecimal number of 16 digit
-secret_key = secrets.token_hex(16)
-app.config['SECRET_KEY'] = secret_key
+app.config['SECRET_KEY'] = os.getenv('secret_key')
+
 app.permanent_session_lifetime = timedelta(days=30)
+app.config['SESSION_PERMANENT'] = False
+app.config['SESSION_USE_SIGNER'] = True  # Sign the session cookies
+app.config['SESSION_KEY_PREFIX'] = 'myapp_session:'
+app.config['SESSION_COOKIE_SECURE'] = True  # Only send over HTTPS
+app.config['SESSION_COOKIE_HTTPONLY'] = True  # No JS access
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # CSRF protection
 app.config['SESSION_TYPE'] = 'filesystem'
+
 sess = Session(app)
+
+Talisman(app, content_security_policy=None)  # Adjust CSP as needed
 
 #define the mail to send the verification code and the forget password
 app.config['MAIL_SERVER']='smtp.gmail.com'
@@ -39,6 +51,22 @@ db = SQLAlchemy(app)
 app.config["MAX_CONTENT_LENGTH"] = 3 * 1024 * 1024
 app.config["UPLOAD_FOLDER_PHOTO"] = os.path.join(os.getcwd(), "static", "user_photo")
 ALLOWED_EXTENSIONS = ("png", "jpg", "jpeg")
+
+csrf = CSRFProtect(app)
+
+class CSRFForm(FlaskForm):
+    pass
+
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SECURE=True  # Ensure cookies are only sent over HTTPS
+)
+
+csp = {
+    'default-src': ["'self'"],
+    'script-src': ["'self'", "'unsafe-inline'"],
+    'style-src': ["'self'", "'unsafe-inline'"]
+}
 
 def send_verification_mail_code(user_mail):
     verification_code = secrets.token_hex(4)
@@ -268,7 +296,6 @@ def get_user_data(user_id):
 
 @app.route("/", methods=["GET"])
 def index():
-    session["secret_key"] = secret_key
     return redirect("/login_page")
 
 @app.route("/login_page", methods=["GET"])
@@ -276,31 +303,25 @@ def login_page():
     if session.get("logged_in"):
         return redirect("/home")
     else:
-        session["secret_key"] = secret_key
-        return render_template("login.html", secret_key=secret_key)
+        return render_template("login.html", form=CSRFForm())
 
 @app.route("/register_page", methods=["GET"])
 def register_page():
-    session["secret_key"] = secret_key
-    return render_template("register.html", secret_key=secret_key)
+    return render_template("register.html", form=CSRFForm())
 
 @app.route("/register", methods=["POST"])
 def register():
-    if request.form.get("secret_key") != session.get('secret_key'):
-        error_existing = "Cookies are blocked, please enable cookies from your browser settings"
-        return render_template("register.html", error_existing=error_existing, secret_key=secret_key), 400, logout()
-
     user_username = (request.form.get("user_username").strip()).lower()
     user_password = request.form.get("user_password")
     user_mail = request.form.get("user_mail").lower()
 
     if "@" in user_username:
         error = "username should not have @"
-        return render_template("register.html", error=error, secret_key=secret_key)
+        return render_template("register.html", error=error, form=CSRFForm())
 
     if "@" not in user_mail:
         error = "mail should have @"
-        return render_template("register.html", error=error, secret_key=secret_key)
+        return render_template("register.html", error=error, form=CSRFForm())
 
     existing_username = db.session.execute(
         text("SELECT user_username FROM users WHERE LOWER(user_username) = :user_username"),
@@ -308,7 +329,7 @@ def register():
     ).fetchall()
     if existing_username:
         error_existing = "Username is already in use. Please choose another one. or "
-        return render_template("register.html", error=error_existing, secret_key=secret_key)
+        return render_template("register.html", error=error_existing, form=CSRFForm())
 
     existing_mail = db.session.execute(
         text("SELECT user_mail FROM users WHERE LOWER(user_mail) = :user_mail"),
@@ -316,7 +337,7 @@ def register():
     ).fetchall()
     if existing_mail:
         error_existing = "Mail is already in use. Please choose another one. or "
-        return render_template("register.html", error=error_existing, secret_key=secret_key)
+        return render_template("register.html", error=error_existing, form=CSRFForm())
 
     try:
         last_user_id = db.session.execute(
@@ -337,16 +358,13 @@ def register():
     )
     db.session.commit()
 
-    return render_template("mail_verify.html", user_mail=user_mail, user_username=user_username, secret_key=secret_key)
+    return render_template("mail_verify.html", user_mail=user_mail, user_username=user_username, form=CSRFForm())
 
 @app.route("/mail_verification", methods=["POST", "GET"])
 def mail_verification():
     if request.method == "GET":
-        return render_template("mail_verify.html")
+        return render_template("mail_verify.html", form=CSRFForm())
     else:
-        if request.form.get("secret_key") != session.get('secret_key'):
-            error = "Cookies are blocked, please enable cookies from your browser settings"
-            return render_template("mail_verify.html", error=error, secret_key=secret_key), 400
 
         verification_code = request.form.get("verification_code").strip()
         user_id = session.get("user_id")
@@ -363,18 +381,14 @@ def mail_verification():
             mail.send(msg)
 
             success="Email verified successfully. You can now log in."
-            return render_template("login.html", success=success, secret_key=secret_key)
+            return render_template("login.html", success=success, form=CSRFForm())
 
         else:
             error="Invalid verification code."
-            return render_template("mail_verify.html", error=error, secret_key=secret_key)
+            return render_template("mail_verify.html", error=error, form=CSRFForm())
 
 @app.route("/login", methods=["POST"])
 def login():
-    if request.form.get("secret_key") != session.get('secret_key'):
-        error = "Cookies are blocked, please enable cookies from your browser settings"
-        return render_template("login.html", error=error, secret_key=secret_key), 400
-
     user_username_mail = (request.form.get("user_username_mail").strip()).lower()
     user_password = request.form.get("user_password")
 
@@ -401,13 +415,13 @@ def login():
                     return redirect("/home")
                 else:
                     error_verify = "Your mail isn't verified"
-                    return render_template("login.html", error_verify=error_verify, secret_key=secret_key)
+                    return render_template("login.html", error_verify=error_verify, form=CSRFForm())
             else:
                 error = "Your username or password are incorrect!"
-                return render_template("login.html", error=error, secret_key=secret_key)
+                return render_template("login.html", error=error, form=CSRFForm())
         except:
             error = "Your E-mail or password are incorrect!"
-            return render_template("login.html", error=error, secret_key=secret_key)
+            return render_template("login.html", error=error, form=CSRFForm())
     else:
         try:
             login_db = db.session.execute(
@@ -425,29 +439,24 @@ def login():
                     ).fetchone()[0]
 
                     session["logged_in"] = True
-                    session["secret_key"] = secret_key
                     session["user_id"] = user
                     session.permanent = True
                     return redirect("/home")
                 else:
                     error_verify = "Your mail isn't verified"
-                    return render_template("login.html", error_verify=error_verify, secret_key=secret_key)
+                    return render_template("login.html", error_verify=error_verify, form=CSRFForm())
             else:
                 error = "Your username or password are incorrect!"
-                return render_template("login.html", error=error, secret_key=secret_key)
+                return render_template("login.html", error=error, form=CSRFForm())
         except:
             error = "Your username or password are incorrect!"
-            return render_template("login.html", error=error, secret_key=secret_key)
+            return render_template("login.html", error=error, form=CSRFForm())
 
 @app.route("/manual_mail_verification", methods=["POST", "GET"])
 def manual_mail_verification():
     if request.method == "GET":
-        return render_template("manual_mail_verification.html")
+        return render_template("manual_mail_verification.html", form=CSRFForm())
     else:
-        if request.form.get("secret_key") != session.get('secret_key'):
-            error = "Cookies are blocked, please enable cookies from your browser settings"
-            return render_template("login.html", error=error), 400
-
         user_mail = (request.form.get("user_mail").strip()).lower()
         try:
             mail_verify_db = db.session.execute(
@@ -457,24 +466,21 @@ def manual_mail_verification():
             mail_verify = mail_verify_db[1]
         except:
             error_not = "This mail isn't used on the webapp!"
-            return render_template("manual_mail_verification.html", error_not = error_not)
+            return render_template("manual_mail_verification.html", error_not = error_not, form=CSRFForm())
 
         if mail_verify == "verified":
             error = "This Mail is already used and verified"
-            return render_template("login.html", error=error)
+            return render_template("login.html", error=error, form=CSRFForm())
         else:
             session["user_id"] = user_id
             send_verification_mail_code(user_mail)
-            return render_template("mail_verify.html", secret_key=secret_key)
+            return render_template("mail_verify.html", form=CSRFForm())
 
 @app.route("/forget_password",methods=["POST", "GET"])
 def forget_password():
     if request.method == "GET":
-        return render_template("forget_password.html")
+        return render_template("forget_password.html", form=CSRFForm())
     else:
-        if request.form.get("secret_key") != session.get('secret_key'):
-                error = "Cookies are blocked, please enable cookies from your browser settings"
-                return render_template("forget_password.html", error = error, secret_key=secret_key), 400
 
         user_mail = request.form.get("user_mail")
         try:
@@ -494,10 +500,10 @@ def forget_password():
             db.session.commit()
 
             success="The Mail is sent check Your mail for your new password"
-            return render_template("login.html", success=success, secret_key=secret_key)
+            return render_template("login.html", success=success, form=CSRFForm())
         except:
             error = "This Email isn't saved"
-            return render_template("forget_password.html", error = error, secret_key=secret_key)
+            return render_template("forget_password.html", error = error, form=CSRFForm())
 
 @app.route("/logout", methods=["GET", "POST"])
 def logout_route():
@@ -513,7 +519,7 @@ def home():
             user_photo_path = select_user_photo()
         except OperationalError:
             error = "Welcome Back"
-            return render_template('error.html', error=error)
+            return render_template('error.html', error=error, form=CSRFForm())
         
         user_id = session.get("user_id")
         total_favorite_currency, favorite_currency = show_networth()
@@ -599,9 +605,9 @@ def home():
                     score_txt = "Below Target"
                 else:
                     score_txt = "On Target"
-                return render_template("home.html", total_favorite_currency = total_favorite_currency, favorite_currency=favorite_currency , user_photo_path=user_photo_path, score_txt=score_txt, score=score, target = target, secret_key=secret_key)
+                return render_template("home.html", total_favorite_currency = total_favorite_currency, favorite_currency=favorite_currency , user_photo_path=user_photo_path, score_txt=score_txt, score=score, target = target, form=CSRFForm())
         else:
-            return render_template("home.html", total_favorite_currency = total_favorite_currency, favorite_currency=favorite_currency , user_photo_path=user_photo_path, secret_key=secret_key)
+            return render_template("home.html", total_favorite_currency = total_favorite_currency, favorite_currency=favorite_currency , user_photo_path=user_photo_path, form=CSRFForm())
 
 @app.route("/deposit", methods=["POST", "GET"])
 def deposit():
@@ -612,15 +618,12 @@ def deposit():
             user_photo_path = select_user_photo()
         except OperationalError:
             error = "Welcome Back"
-            return render_template('error.html', error=error)
+            return render_template('error.html', error=error, form=CSRFForm())
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         if request.method == "GET":
-            return render_template("deposit.html", user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
+            return render_template("deposit.html", user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
         else:
-            if request.form.get("secret_key") != session.get('secret_key'):
-                error = "Cookies are blocked, please enable cookies from your browser settings"
-                return f'{error}', 400, logout()
 
             date = request.form.get("date")
             amount = int(request.form.get("amount"))
@@ -630,7 +633,7 @@ def deposit():
 
             if currency is None or amount is None :
                 error = "You have to choose the currency!"
-                return render_template("deposit.html", error = error,total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency,  user_photo_path=user_photo_path, secret_key=secret_key)
+                return render_template("deposit.html", error = error,total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency,  user_photo_path=user_photo_path, form=CSRFForm())
 
             try:
                 last_trans_id = db.session.execute(
@@ -697,18 +700,15 @@ def withdraw():
             user_photo_path = select_user_photo()
         except OperationalError:
             error = "Welcome Back"
-            return render_template('error.html', error=error)
+            return render_template('error.html', error=error, form=CSRFForm())
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         if request.method == "GET":
             user_id = session.get("user_id")
             currency_all = select_currencies(user_id)
-            return render_template("withdraw.html", currency_all = currency_all, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
+            return render_template("withdraw.html", currency_all = currency_all, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
 
         else:
-            if request.form.get("secret_key") != session.get('secret_key'):
-                    error = "Cookies are blocked, please enable cookies from your browser settings"
-                    return f'{error}', 400, logout()
 
             date = request.form.get("date")
             amount = int(request.form.get("amount"))
@@ -720,7 +720,7 @@ def withdraw():
             if currency == None or date == None or amount == None :
                 error = "You have to choose the currency!"
                 currency_all = select_currencies(user_id)
-                return render_template("withdraw.html", currency_all = currency_all, error = error, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
+                return render_template("withdraw.html", currency_all = currency_all, error = error, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
 
             amount_of_currency = db.session.execute(
                 text("SELECT total FROM networth WHERE user_id = :user_id AND currency = :currency"),
@@ -730,7 +730,7 @@ def withdraw():
             if amount > amount_of_currency:
                 error = "This user doesn't have this amount of this currency"
                 currency_all = select_currencies(user_id)
-                return render_template("withdraw.html", currency_all = currency_all, error=error, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
+                return render_template("withdraw.html", currency_all = currency_all, error=error, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
 
             try:
                 last_trans_id = db.session.execute(
@@ -783,7 +783,7 @@ def show_networth_details():
             user_photo_path = select_user_photo()
         except OperationalError:
             error = "Welcome Back"
-            return render_template('error.html', error=error)
+            return render_template('error.html', error=error, form=CSRFForm())
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
@@ -793,7 +793,7 @@ def show_networth_details():
         ).fetchall()
 
         networth_details = dict(networth_details_db)
-        return render_template("networth_details.html", networth_details=networth_details, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
+        return render_template("networth_details.html", networth_details=networth_details, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
 
 @app.route("/show_trans", methods=["GET"])
 def show_trans():
@@ -805,7 +805,7 @@ def show_trans():
             user_photo_path = select_user_photo()
         except OperationalError:
             error = "Welcome Back"
-            return render_template('error.html', error=error)
+            return render_template('error.html', error=error, form=CSRFForm())
         
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
@@ -831,7 +831,7 @@ def show_trans():
             text("SELECT * FROM trans WHERE user_id = :user_id AND date BETWEEN :from_date AND :to_date ORDER BY date"),
             {"user_id": user_id, "from_date" :from_date, "to_date" :to_date}
         ).fetchall()
-        return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, to_date=to_date, from_date=from_date, secret_key=secret_key)
+        return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, to_date=to_date, from_date=from_date, form=CSRFForm())
 
 @app.route("/edit_trans", methods=["POST", "GET"])
 def edit_trans():
@@ -842,7 +842,7 @@ def edit_trans():
             user_photo_path = select_user_photo()
         except OperationalError:
             error = "Welcome Back"
-            return render_template('error.html', error=error)
+            return render_template('error.html', error=error, form=CSRFForm())
         
         user_id = session.get("user_id")
         if request.method == "GET":
@@ -853,12 +853,9 @@ def edit_trans():
             ).fetchall()[0]
             total_favorite_currency, favorite_currency = show_networth()
             total_favorite_currency = f"{total_favorite_currency:,.2f}"
-            return render_template("edit_trans.html", trans_db = trans_db, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
+            return render_template("edit_trans.html", trans_db = trans_db, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
 
         else:
-            if request.form.get("secret_key") != session.get('secret_key'):
-                error = "Cookies are blocked, please enable cookies from your browser settings"
-                return f'{error}', 400, logout()
 
             trans_key = request.form.get("trans_key")
             currency = request.form.get("currency")
@@ -898,7 +895,7 @@ def edit_trans():
                 ).fetchall()[0]
                 total_favorite_currency, favorite_currency = show_networth()
                 total_favorite_currency = f"{total_favorite_currency:,.2f}"
-                return render_template("edit_trans.html", trans_db = trans_db, user_photo_path=user_photo_path, error=error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
+                return render_template("edit_trans.html", trans_db = trans_db, user_photo_path=user_photo_path, error=error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
 
             db.session.execute(
                 text("UPDATE trans SET  date = :date, trans_details = :trans_details, trans_details_link = :trans_details_link, amount = :amount WHERE trans_key = :trans_key"),
@@ -918,21 +915,19 @@ def edit_trans():
             ).fetchall()
             total_favorite_currency, favorite_currency = show_networth()
             total_favorite_currency = f"{total_favorite_currency:,.2f}"
-            return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
+            return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
 
 @app.route("/delete_trans", methods=["POST"])
 def delete_trans():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
-        if request.form.get("secret_key") != session.get('secret_key'):
-            error = "Cookies are blocked, please enable cookies from your browser settings"
-            return f'{error}', 400, logout()
+
         try:
             user_photo_path = select_user_photo()
         except OperationalError:
             error = "Welcome Back"
-            return render_template('error.html', error=error)
+            return render_template('error.html', error=error, form=CSRFForm())
         
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
@@ -960,7 +955,7 @@ def delete_trans():
                     text("SELECT * FROM trans WHERE user_id = :user_id"),
                     {"user_id": user_id}
                 ).fetchall()
-                return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, error = error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
+                return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, error = error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
 
         elif trans_status_db == "withdraw":
             total = total_db + int(amount_db)
@@ -1023,7 +1018,7 @@ def delete_trans():
             {"user_id": user_id}
         ).fetchall()
 
-        return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
+        return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
 
 @app.route("/settings/personal_info", methods=["GET", "POST"])
 def personal_info():
@@ -1034,7 +1029,7 @@ def personal_info():
             user_photo_path = select_user_photo()
         except OperationalError:
             error = "Welcome Back"
-            return render_template('error.html', error=error)
+            return render_template('error.html', error=error, form=CSRFForm())
         
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
@@ -1042,11 +1037,8 @@ def personal_info():
         
         if request.method == "GET":
             user_username, user_mail, user_photo_path = select_user_data(user_id)
-            return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
+            return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
         else:
-            if request.form.get("secret_key") != session.get('secret_key'):
-                error = "Cookies are blocked, please enable cookies from your browser settings"
-                return f'{error}', 400, logout()
 
             user_username = request.form.get("user_username")
             user_mail = request.form.get("user_mail")
@@ -1055,12 +1047,12 @@ def personal_info():
             if "@" in user_username:
                 error_existing = "username should not have @"
                 user_username, user_mail, user_photo_path = select_user_data(user_id)
-                return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
+                return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
 
             if "@" not in user_mail:
                 error_existing = "mail should have @"
                 user_username, user_mail, user_photo_path = select_user_data(user_id)
-                return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
+                return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
 
             user_username_mail_db = db.session.execute(
                 text("SELECT user_mail, user_username FROM users WHERE user_id = :user_id"),
@@ -1085,15 +1077,15 @@ def personal_info():
                 if existing_mail:
                     error_existing = "Mail is already in use. Please choose another one."
                     user_username, user_mail, user_photo_path = select_user_data(user_id)
-                    return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
+                    return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
 
                 if existing_username:
                     error_existing = "Username is already in use. Please choose another one."
                     user_username, user_mail, user_photo_path = select_user_data(user_id)
-                    return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
+                    return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
 
                 send_verification_mail_code(user_mail)
-                return render_template("mail_verify_change_mail.html", total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path, user_mail=user_mail, user_username=user_username, user_mail_db=user_mail_db, secret_key=secret_key)
+                return render_template("mail_verify_change_mail.html", total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path, user_mail=user_mail, user_username=user_username, user_mail_db=user_mail_db, form=CSRFForm())
 
             if user_mail != user_mail_db:
                 existing_mail = db.session.execute(
@@ -1104,10 +1096,10 @@ def personal_info():
                 if existing_mail:
                     error_existing = "Mail is already in use. Please choose another one. or "
                     user_username, user_mail, user_photo_path = select_user_data(user_id)
-                    return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
+                    return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
 
                 send_verification_mail_code(user_mail)
-                return render_template("mail_verify_change_mail.html", total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path, user_mail=user_mail, user_username=user_username, user_mail_db=user_mail_db, secret_key=secret_key)
+                return render_template("mail_verify_change_mail.html", total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path, user_mail=user_mail, user_username=user_username, user_mail_db=user_mail_db, form=CSRFForm())
 
             if user_username != user_username_db:
                 existing_username = db.session.execute(
@@ -1118,7 +1110,7 @@ def personal_info():
                 if existing_username:
                     error_existing = "Username is already in use. Please choose another one. or "
                     user_username, user_mail, user_photo_path = select_user_data(user_id)
-                    return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
+                    return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error_existing, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
 
                 db.session.execute(
                     text("UPDATE users SET user_username = :user_username WHERE user_id = :user_id"),
@@ -1127,10 +1119,10 @@ def personal_info():
                 db.session.commit()
                 done = "User Name Changed Successfully!"
                 user_username, user_mail, user_photo_path = select_user_data(user_id)
-                return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, done = done, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
+                return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, done = done, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
 
         user_username, user_mail, user_photo_path = select_user_data(user_id)
-        return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
+        return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
 
 @app.route("/settings/personal_info/mail_verification", methods=["POST"])
 def mail_verification_change_mail():
@@ -1141,7 +1133,7 @@ def mail_verification_change_mail():
             user_photo_path = select_user_photo()
         except OperationalError:
             error = "Welcome Back"
-            return render_template('error.html', error=error)
+            return render_template('error.html', error=error, form=CSRFForm())
         
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
@@ -1169,25 +1161,22 @@ def mail_verification_change_mail():
 
             done = "User Mail Changed Successfully!"
             user_username, user_mail, user_photo_path = select_user_data(user_id)
-            return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, done = done, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
+            return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, done = done, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
         else:
             error="Invalid verification code."
-            return render_template("mail_verify_change_mail.html", total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path, error=error, secret_key=secret_key)
+            return render_template("mail_verify_change_mail.html", total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path, error=error, form=CSRFForm())
 
 @app.route("/settings/personal_info/upload_user_photo", methods=["POST"])
 def upload_user_photo():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
-        if request.form.get("secret_key") != session.get('secret_key'):
-            error = "Cookies are blocked, please enable cookies from your browser settings"
-            return f'{error}', 400, logout()
         
         try:
             user_photo_path = select_user_photo()
         except OperationalError:
             error = "Welcome Back"
-            return render_template('error.html', error=error)
+            return render_template('error.html', error=error, form=CSRFForm())
         
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
@@ -1211,29 +1200,27 @@ def upload_user_photo():
                 )
                 db.session.commit()
                 user_username, user_mail, user_photo_path = select_user_data(user_id)
-                return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
+                return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
             else:
                 error = "Invalid file format. Allowed formats are: png, jpg, jpeg"
                 user_username, user_mail, user_photo_path = select_user_data(user_id)
-                return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
+                return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
         else:
             error = "file upload failed"
             user_username, user_mail, user_photo_path = select_user_data(user_id)
-            return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
+            return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
 
 @app.route("/settings/personal_info/delete_user_photo", methods=["POST"])
 def delete_user_photo():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
-        if request.form.get("secret_key") != session.get('secret_key'):
-            error = "Cookies are blocked, please enable cookies from your browser settings"
-            return f'{error}', 400, logout()
+
         try:
             user_photo_path = select_user_photo()
         except OperationalError:
             error = "Welcome Back"
-            return render_template('error.html', error=error)
+            return render_template('error.html', error=error, form=CSRFForm())
         
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
@@ -1248,11 +1235,11 @@ def delete_user_photo():
 
             delete_photo(user_id, photo_path)
             user_username, user_mail, user_photo_path = select_user_data(user_id)
-            return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
+            return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
         else:
             error = "No image associated with this doctor to delete."
             user_username, user_mail, user_photo_path = select_user_data(user_id)
-            return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
+            return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
 
 @app.route("/settings/favorite_currency", methods=["GET", "POST"])
 def favorite_currency():
@@ -1263,21 +1250,18 @@ def favorite_currency():
             user_photo_path = select_user_photo()
         except OperationalError:
             error = "Welcome Back"
-            return render_template('error.html', error=error)
+            return render_template('error.html', error=error, form=CSRFForm())
         
         user_id = session.get("user_id")
         if request.method == "GET":
             favorite_currency = select_favorite_currency(user_id)
             total_favorite_currency, favorite_currency = show_networth()
             total_favorite_currency = f"{total_favorite_currency:,.2f}"
-            return render_template("favorite_currency.html", favorite_currency=favorite_currency, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, secret_key=secret_key)
+            return render_template("favorite_currency.html", favorite_currency=favorite_currency, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, form=CSRFForm())
         else:
             total_favorite_currency, favorite_currency = show_networth()
             total_favorite_currency = f"{total_favorite_currency:,.2f}"
             favorite_currency = select_favorite_currency(user_id)
-            if request.form.get("secret_key") != session.get('secret_key'):
-                error = "Cookies are blocked, please enable cookies from your browser settings"
-                return f'{error}', 400, logout()
 
             favorite_currency = request.form.get("favorite_currency")
 
@@ -1288,45 +1272,38 @@ def favorite_currency():
             db.session.commit()
 
             done = f"Your favorite currency is {favorite_currency} now"
-            return render_template("favorite_currency.html", done=done, favorite_currency=favorite_currency, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, secret_key=secret_key)
+            return render_template("favorite_currency.html", done=done, favorite_currency=favorite_currency, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, form=CSRFForm())
 
 @app.route("/settings/security_check", methods=["POST", "GET"])
 def security_check_password():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
-        secret_key = session.get('secret_key')
         try:
             user_id = session.get("user_id")
         except OperationalError:
             error = "Welcome Back"
-            return render_template('error.html', error=error)   
+            return render_template('error.html', error=error, form=CSRFForm())   
              
         if request.method == "GET":
-            return render_template("check_pass.html", secret_key=secret_key)
+            return render_template("check_pass.html", form=CSRFForm())
         else:
-            if request.form.get("secret_key") != session.get('secret_key'):
-                error = "Cookies are blocked, please enable cookies from your browser settings"
-                return f'{error}', 400, logout()
 
             user_id = session.get("user_id")
             check_pass = request.form.get("check_pass")
             security = security_check(user_id, check_pass)
 
             if security:
-                return render_template("change_pass.html", user_id = user_id, secret_key=secret_key)
+                return render_template("change_pass.html", user_id = user_id, form=CSRFForm())
             else:
                 error = "This password is incorrect!"
-                return render_template("check_pass.html", error = error, secret_key=secret_key)
+                return render_template("check_pass.html", error = error, form=CSRFForm())
 
 @app.route("/settings/security", methods=["POST"])
 def security():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
-        if request.form.get("secret_key") != session.get('secret_key'):
-            error = "Cookies are blocked, please enable cookies from your browser settings"
-            return f'{error}', 400, logout()
 
         user_id = session.get("user_id")
         new_password = request.form.get("new_password")
@@ -1349,7 +1326,7 @@ def security():
 
         logout()
         success = "You password has been changed successfully!"
-        return render_template("login.html", success = success)
+        return render_template("login.html", success = success, form=CSRFForm())
 
 @app.route("/settings/set_target", methods=["GET","POST"])
 def set_target():
@@ -1360,7 +1337,7 @@ def set_target():
             user_photo_path = select_user_photo()
         except OperationalError:
             error = "Welcome Back"
-            return render_template('error.html', error=error)
+            return render_template('error.html', error=error, form=CSRFForm())
         
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
@@ -1375,13 +1352,10 @@ def set_target():
             ).fetchall()
             if target_db:
                 target_db = target_db[0]
-                return render_template("update_target.html", total_favorite_currency=total_favorite_currency,favorite_currency=favorite_currency,user_photo_path=user_photo_path, target_db=target_db, secret_key=secret_key)
+                return render_template("update_target.html", total_favorite_currency=total_favorite_currency,favorite_currency=favorite_currency,user_photo_path=user_photo_path, target_db=target_db, form=CSRFForm())
             else:
-                return render_template("set_target.html", total_favorite_currency=total_favorite_currency,favorite_currency=favorite_currency,user_photo_path=user_photo_path, secret_key=secret_key)
+                return render_template("set_target.html", total_favorite_currency=total_favorite_currency,favorite_currency=favorite_currency,user_photo_path=user_photo_path, form=CSRFForm())
         else:
-            if request.form.get("secret_key") != session.get('secret_key'):
-                error = "Cookies are blocked, please enable cookies from your browser settings"
-                return f'{error}', 400, logout()
 
             target = request.form.get("target")
 
@@ -1407,22 +1381,18 @@ def set_target():
                 text("SELECT * FROM target WHERE user_id = :user_id AND mounth = :mounth AND year = :year"),
                 {"user_id" :user_id, "mounth" : mounth, "year":year}
             ).fetchall()[0]
-            return render_template("update_target.html", total_favorite_currency=total_favorite_currency,favorite_currency=favorite_currency, done=done,user_photo_path=user_photo_path, target=target, target_db=target_db, secret_key=secret_key)
+            return render_template("update_target.html", total_favorite_currency=total_favorite_currency,favorite_currency=favorite_currency, done=done,user_photo_path=user_photo_path, target=target, target_db=target_db, form=CSRFForm())
 
 @app.route("/settings/update_target", methods=["POST"])
 def update_target():
     if not session.get("logged_in"):
         return redirect("/login_page")
-    else:
-        if request.form.get("secret_key") != session.get('secret_key'):
-            error = "Cookies are blocked, please enable cookies from your browser settings"
-            return f'{error}', 400, logout()
-        
+    else:        
         try:
             user_photo_path = select_user_photo()
         except OperationalError:
             error = "Welcome Back"
-            return render_template('error.html', error=error)
+            return render_template('error.html', error=error, form=CSRFForm())
         
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
@@ -1451,7 +1421,7 @@ def update_target():
         ).fetchall()[0]
         print(target_db)
         done = "Your Target have been updated"
-        return render_template("update_target.html", total_favorite_currency=total_favorite_currency,favorite_currency=favorite_currency, done=done,user_photo_path=user_photo_path, target_db=target_db, secret_key=secret_key)
+        return render_template("update_target.html", total_favorite_currency=total_favorite_currency,favorite_currency=favorite_currency, done=done,user_photo_path=user_photo_path, target_db=target_db, form=CSRFForm())
 
 @app.route("/filter_year_wishlist", methods=["GET"])
 def filter_year_wishlist():
@@ -1462,7 +1432,7 @@ def filter_year_wishlist():
                 user_photo_path = select_user_photo()
             except OperationalError:
                 error = "Welcome Back"
-                return render_template('error.html', error=error)
+                return render_template('error.html', error=error, form=CSRFForm())
 
             total_favorite_currency, favorite_currency = show_networth()
             total_favorite_currency = f"{total_favorite_currency:,.2f}"
@@ -1479,7 +1449,7 @@ def filter_year_wishlist():
 
             all_years = select_years_wishlist(user_id)
 
-            return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
+            return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
 
 @app.route("/add_wish", methods=["GET", "POST"])
 def add_wish():
@@ -1490,19 +1460,15 @@ def add_wish():
             user_photo_path = select_user_photo()
         except OperationalError:
             error = "Welcome Back"
-            return render_template('error.html', error=error)
+            return render_template('error.html', error=error, form=CSRFForm())
         
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
         if request.method == "GET":
             year = request.form.get("year")
-            return render_template("add_wish.html", user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
+            return render_template("add_wish.html", user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
         else:
-            if request.form.get("secret_key") != session.get('secret_key'):
-                error = "Cookies are blocked, please enable cookies from your browser settings"
-                return f'{error}', 400, logout()
-
             user_id = session.get("user_id")
             price = request.form.get("price")
             currency = request.form.get("currency")
@@ -1541,22 +1507,19 @@ def add_wish():
             ).fetchall()
 
             all_years = select_years_wishlist(user_id)
-            return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, done = done, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
+            return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, done = done, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
 
 @app.route("/check_wish", methods=["POST"])
 def check_wish():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
-        if request.form.get("secret_key") != session.get('secret_key'):
-            error = "Cookies are blocked, please enable cookies from your browser settings"
-            return f'{error}', 400, logout()
         
         try:
             user_photo_path = select_user_photo()
         except OperationalError:
             error = "Welcome Back"
-            return render_template('error.html', error=error)
+            return render_template('error.html', error=error, form=CSRFForm())
         
         user_id = session.get("user_id")
         wish_key = request.form.get("wish_key")
@@ -1587,7 +1550,7 @@ def check_wish():
                 all_years = select_years_wishlist(user_id)
                 total_favorite_currency, favorite_currency = show_networth()
                 total_favorite_currency = f"{total_favorite_currency:,.2f}"
-                return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, error = error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
+                return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, error = error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
             else:
                 try:
                     last_trans_key = db.session.execute(
@@ -1636,7 +1599,7 @@ def check_wish():
                     all_years = select_years_wishlist(user_id)
                     total_favorite_currency, favorite_currency = show_networth()
                     total_favorite_currency = f"{total_favorite_currency:,.2f}"
-                    return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
+                    return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
 
                 elif status == "done":
                     new_status = "pending"
@@ -1672,7 +1635,7 @@ def check_wish():
                     all_years = select_years_wishlist(user_id)
                     total_favorite_currency, favorite_currency = show_networth()
                     total_favorite_currency = f"{total_favorite_currency:,.2f}"
-                    return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
+                    return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
 
         else:
             error = "You don't have on your balance enough of this currency!"
@@ -1680,7 +1643,7 @@ def check_wish():
             all_years = select_years_wishlist(user_id)
             total_favorite_currency, favorite_currency = show_networth()
             total_favorite_currency = f"{total_favorite_currency:,.2f}"
-            return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, error = error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
+            return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, error = error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
 
 
 @app.route("/edit_wish", methods=["GET", "POST"])
@@ -1693,7 +1656,7 @@ def edit_wish():
             user_photo_path = select_user_photo()
         except OperationalError:
             error = "Welcome Back"
-            return render_template('error.html', error=error)
+            return render_template('error.html', error=error, form=CSRFForm())
         
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
@@ -1704,11 +1667,8 @@ def edit_wish():
                 text("SELECT year, price, currency, wish_details, link, wish_key FROM wishlist WHERE wish_key = :wish_key"),
                 {"wish_key" :wish_key}
             ).fetchone()
-            return render_template("edit_wish.html", wish_db=wish_db,user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
+            return render_template("edit_wish.html", wish_db=wish_db,user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
         else:
-            if request.form.get("secret_key") != session.get('secret_key'):
-                error = "Cookies are blocked, please enable cookies from your browser settings"
-                return f'{error}', 400, logout()
 
             wish_key = request.form.get("wish_key")
             year = request.form.get("year")
@@ -1729,21 +1689,19 @@ def edit_wish():
             ).fetchall()
 
             all_years = select_years_wishlist(user_id)
-            return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
+            return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
 
 @app.route("/delete_wish", methods=["POST"])
 def delete_wish():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
-        if request.form.get("secret_key") != session.get('secret_key'):
-            error = "Cookies are blocked, please enable cookies from your browser settings"
-            return f'{error}', 400, logout()
+
         try:
             user_photo_path = select_user_photo()
         except OperationalError:
             error = "Welcome Back"
-            return render_template('error.html', error=error)
+            return render_template('error.html', error=error, form=CSRFForm())
         
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
@@ -1792,7 +1750,7 @@ def delete_wish():
 
         year, wishlist_db = wishlist_page(user_id)
         all_years = select_years_wishlist(user_id)
-        return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key)
+        return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
 
 @app.route("/delete_user", methods=["POST", "GET"])
 def delete_user():
@@ -1803,25 +1761,23 @@ def delete_user():
             user_photo_path = select_user_photo()
         except OperationalError:
             error = "Welcome Back"
-            return render_template('error.html', error=error)
+            return render_template('error.html', error=error, form=CSRFForm())
         
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
-        return render_template("check_pass_delete_user.html", total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path, secret_key=secret_key)
+        return render_template("check_pass_delete_user.html", total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path, form=CSRFForm())
 
 @app.route("/delete_user/check_pass", methods=["POST"])
 def check_pass_delete_user():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
-        if request.form.get("secret_key") != session.get('secret_key'):
-            error = "Cookies are blocked, please enable cookies from your browser settings"
-            return f'{error}', 400, logout()
+
         try:
             user_photo_path = select_user_photo()
         except OperationalError:
             error = "Welcome Back"
-            return render_template('error.html', error=error)
+            return render_template('error.html', error=error, form=CSRFForm())
         
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
@@ -1842,19 +1798,16 @@ def check_pass_delete_user():
 
             session["verification_code"] = verification_code
 
-            return render_template("mail_verify_delete_user.html", user_id = user_id, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path, user_mail=user_mail, secret_key=secret_key)
+            return render_template("mail_verify_delete_user.html", user_id = user_id, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path, user_mail=user_mail, form=CSRFForm())
         else:
             error = "This password is incorrect!"
-            return render_template("check_pass_delete_user.html", error = error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path, secret_key=secret_key)
+            return render_template("check_pass_delete_user.html", error = error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path, form=CSRFForm())
 
 @app.route("/delete_user/verify_delete_user", methods=["POST"])
 def verify_delete_user():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
-        if request.form.get("secret_key") != session.get('secret_key'):
-            error = "Cookies are blocked, please enable cookies from your browser settings"
-            return f'{error}', 400, logout()
 
         verification_code = request.form.get("verification_code").strip()
         user_id = session.get("user_id")
@@ -1897,11 +1850,11 @@ def verify_delete_user():
             logout()
 
             success="Account Deleted"
-            return render_template("login.html", success=success, secret_key=secret_key)
+            return render_template("login.html", success=success, form=CSRFForm())
 
         else:
             error="Invalid verification code."
-            return render_template("mail_verify_delete_user.html", error=error, secret_key=secret_key)
+            return render_template("mail_verify_delete_user.html", error=error, form=CSRFForm())
 
 @app.route("/trash_wishlist", methods=["GET", "POST"])
 def trash_wishlist():
@@ -1912,7 +1865,7 @@ def trash_wishlist():
             user_photo_path = select_user_photo()
         except OperationalError:
             error = "Welcome Back"
-            return render_template('error.html', error=error)
+            return render_template('error.html', error=error, form=CSRFForm())
         
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
@@ -1923,12 +1876,9 @@ def trash_wishlist():
                 {"user_id" :user_id}
             ).fetchall()
 
-            return render_template("trash_wishlist.html",user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key, trash_wishlist_data=trash_wishlist_data)
+            return render_template("trash_wishlist.html",user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, trash_wishlist_data=trash_wishlist_data, form=CSRFForm())
 
         else:
-            if request.form.get("secret_key") != session.get('secret_key'):
-                error = "Cookies are blocked, please enable cookies from your browser settings"
-                return f'{error}', 400, logout()
 
             wish_trash_key = request.form.get("wish_trash_key")
             trash_wishlist_data = db.session.execute(
@@ -1975,21 +1925,19 @@ def trash_wishlist():
                 {"user_id" :user_id}
             ).fetchall()
 
-            return render_template("trash_wishlist.html",user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key, trash_wishlist_data=trash_wishlist_data)
+            return render_template("trash_wishlist.html",user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, trash_wishlist_data=trash_wishlist_data, form=CSRFForm())
 
 @app.route("/delete_trash_wishlist", methods=["POST"])
 def delete_trash_wishlist():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
-        if request.form.get("secret_key") != session.get('secret_key'):
-            error = "Cookies are blocked, please enable cookies from your browser settings"
-            return f'{error}', 400, logout()
+
         try:
             user_photo_path = select_user_photo()
         except OperationalError:
             error = "Welcome Back"
-            return render_template('error.html', error=error)
+            return render_template('error.html', error=error, form=CSRFForm())
         
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
@@ -2007,7 +1955,7 @@ def delete_trash_wishlist():
                 {"user_id" :user_id}
         ).fetchall()
 
-        return render_template("trash_wishlist.html",user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key, trash_wishlist_data=trash_wishlist_data)
+        return render_template("trash_wishlist.html",user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, trash_wishlist_data=trash_wishlist_data, form=CSRFForm())
 
 @app.route("/trash_trans", methods=["GET", "POST"])
 def trash_trans():
@@ -2018,7 +1966,7 @@ def trash_trans():
             user_photo_path = select_user_photo()
         except OperationalError:
             error = "Welcome Back"
-            return render_template('error.html', error=error)
+            return render_template('error.html', error=error, form=CSRFForm())
         
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
@@ -2030,12 +1978,9 @@ def trash_trans():
                 {"user_id" :user_id}
             ).fetchall()
 
-            return render_template("trash_trans.html",user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key, trash_trans_data=trash_trans_data)
+            return render_template("trash_trans.html",user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, trash_trans_data=trash_trans_data, form=CSRFForm())
 
         else:
-            if request.form.get("secret_key") != session.get('secret_key'):
-                error = "Cookies are blocked, please enable cookies from your browser settings"
-                return f'{error}', 400, logout()
 
             trans_trash_key = request.form.get("trans_trash_key")
             trash_trans_data = db.session.execute(
@@ -2100,21 +2045,18 @@ def trash_trans():
                 {"user_id" :user_id}
             ).fetchall()
 
-            return render_template("trash_trans.html",user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key, trash_trans_data=trash_trans_data)
+            return render_template("trash_trans.html",user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, trash_trans_data=trash_trans_data, form=CSRFForm())
 
 @app.route("/delete_trash_trans", methods=["POST"])
 def delete_trash_trans():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
-        if request.form.get("secret_key") != session.get('secret_key'):
-            error = "Cookies are blocked, please enable cookies from your browser settings"
-            return f'{error}', 400, logout()
         try:
             user_photo_path = select_user_photo()
         except OperationalError:
             error = "Welcome Back"
-            return render_template('error.html', error=error)
+            return render_template('error.html', error=error, form=CSRFForm())
         
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
@@ -2133,15 +2075,15 @@ def delete_trash_trans():
             {"user_id" :user_id}
         ).fetchall()
 
-        return render_template("trash_trans.html",user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, secret_key=secret_key, trash_trans_data=trash_trans_data)
+        return render_template("trash_trans.html",user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, trash_trans_data=trash_trans_data, form=CSRFForm())
 
 @app.route("/version")
 def version():
-    return render_template("version.html", secret_key=secret_key)
+    return render_template("version.html", form=CSRFForm())
 
 @app.route("/download")
 def download():
-    return render_template("download.html", secret_key=secret_key)
+    return render_template("download.html", form=CSRFForm())
 
 @app.after_request
 def add_header(response):

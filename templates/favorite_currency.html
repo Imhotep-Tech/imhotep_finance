@@ -11,7 +11,7 @@
 
     <form action="/settings/favorite_currency" method="post" class="form-container">
         <div class="form-group">
-            <input type="hidden" name="secret_key" value="{{ secret_key }}">
+            {{ form.hidden_tag() }}
             <div class="input-group">
                 <input type="text" id="searchInput1" placeholder="Search Currency" class="input">
                 <select name="favorite_currency" id="CurrencySelect1" class="input" required>

@@ -70,7 +70,7 @@
                                 </td>
                                 <td>
                                     <form action="/check_wish" method="post">
-                                        <input type="hidden" name="secret_key" value="{{ secret_key }}">
+                                        {{ form.hidden_tag() }}
                                         <input name="wish_key" type="hidden" value="{{ wish.wish_key }}">
                                         {% if wish.status == 'pending' %}
                                             <button type="submit">-</button>
@@ -82,14 +82,14 @@
                                 {% if wish.status == 'pending' %}
                                     <td>
                                         <form action="/edit_wish" method="get" style="display: inline;">
-                                            <input type="hidden" name="secret_key" value="{{ secret_key }}">
+                                            {{ form.hidden_tag() }}
                                             <input type="hidden" name="wish_key" value="{{ wish.wish_key }}">
                                             <button type="submit" class="btn-green" title="Edit">
                                                 <i class="fas fa-pen"></i>
                                             </button>
                                         </form>
                                         <form action="/delete_wish" method="post" style="display: inline;">
-                                            <input type="hidden" name="secret_key" value="{{ secret_key }}">
+                                            {{ form.hidden_tag() }}
                                             <input type="hidden" name="wish_key" value="{{ wish.wish_key }}">
                                             <button type="submit" class="btn-red" title="Delete">
                                                 <i class="fas fa-trash"></i>

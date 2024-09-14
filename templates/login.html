@@ -30,7 +30,7 @@
           style="display: block; margin-left: auto; margin-right: auto;">
     </div>
     <form id="login-form" action="/login" method="POST" class="form">
-      <input type="hidden" name="secret_key" value="{{ secret_key }}">
+      {{ form.hidden_tag() }}
       <input type="name" class="input" placeholder="Username/ E-Mail" name="user_username_mail" required="">
       <div class="password-container">
         <input type="password" id="password" class="input" placeholder="Password" name="user_password" required=""><br><br>

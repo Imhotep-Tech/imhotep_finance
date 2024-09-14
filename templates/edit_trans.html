@@ -11,7 +11,7 @@
     
     <form action="/edit_trans" method="post" class="form-container">
         {% include 'back.html' %}
-        <input type="hidden" name="secret_key" value="{{ secret_key }}">
+        {{ form.hidden_tag() }}
         <input type="hidden" name="trans_key" value="{{ trans_db.trans_key }}">
 
         <label>Currency</label>

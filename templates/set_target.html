@@ -11,7 +11,7 @@
     </div>
     
     <form action="/settings/set_target" method="post" class="form-container">
-        <input type="hidden" name="secret_key" value="{{ secret_key }}">
+        {{ form.hidden_tag() }}
         <div class="form-group">
             <input type="number" class="input" placeholder="Target" name="target">
         </div>

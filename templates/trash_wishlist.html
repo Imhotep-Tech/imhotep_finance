@@ -36,14 +36,14 @@
                                 </td>
                                 <td>
                                     <form action="/trash_wishlist" method="post" style="display: inline;">
-                                        <input type="hidden" name="secret_key" value="{{ secret_key }}">
+                                        {{ form.hidden_tag() }}
                                         <input type="hidden" name="wish_trash_key" value="{{ wish.wish_trash_key }}">
                                         <button type="submit" class="btn-green" title="Restore">
                                             <i class="fas fa-add"></i>
                                         </button>
                                     </form>
                                     <form action="/delete_trash_wishlist" method="post" style="display: inline;">
-                                        <input type="hidden" name="secret_key" value="{{ secret_key }}">
+                                        {{ form.hidden_tag() }}
                                         <input type="hidden" name="wish_trash_key" value="{{ wish.wish_trash_key }}">
                                         <button type="submit" class="btn-red" title="Permanent Delete">
                                             <i class="fas fa-trash"></i>

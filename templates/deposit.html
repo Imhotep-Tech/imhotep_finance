@@ -13,7 +13,7 @@
     
     <form action="/deposit" method="post" class="form-container">
         {% include 'back.html' %}
-        <input type="hidden" name="secret_key" value="{{ secret_key }}">
+        {{ form.hidden_tag() }}
         <div class="form-group">
             <input type="date" class="input" placeholder="Date" id="dateInput" name="date">
         </div>

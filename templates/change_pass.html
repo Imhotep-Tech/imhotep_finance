@@ -4,7 +4,7 @@
 <div class="form-container">
     <p class="title">Welcome</p>
     <form action="/settings/security" method="post" class="form">
-        <input type="hidden" name="secret_key" value="{{ secret_key }}">
+      {{ form.hidden_tag() }}
         <input type="password" class="input" placeholder="New Password" name="new_password" id="password" required="">
         <input type="password" class="input" placeholder="Confirm New Password" id="confirm_password" required="">
         <input type="hidden" name="user_id" value="{ user_id }">

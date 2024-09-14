@@ -11,7 +11,7 @@
     </div>
     <p class="title">Verify</p>
     <form action="/delete_user/verify_delete_user" method="post" class="form" onsubmit="return validatePassword()">
-        <input type="hidden" name="secret_key" value="{{ secret_key }}">
+        {{ form.hidden_tag() }}
         <input type="name" class="input" placeholder="Verification Code" name="verification_code" required="">
         <input type="hidden"  name="user_mail" value="{{ user_mail }}">
         <p class="page-link"></p>
