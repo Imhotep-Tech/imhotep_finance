@@ -562,3 +562,23 @@ body.dark-mode .nav-item .dropdown-item {
 body.dark-mode .nav-item .dropdown-item:hover {
   background-color: #495057; /* Background color on hover in dark mode */
 }
+
+.google-login-button {
+  border: 2px solid #747474;
+}
+
+.google-login-button {
+  border-radius: 20px;
+  box-sizing: border-box;
+  padding: 10px 15px;
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 10px 36px 0px,
+        rgba(0, 0, 0, 0.06) 0px 0px 0px 1px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
+        "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+  font-size: 11px;
+  gap: 5px;
+}
