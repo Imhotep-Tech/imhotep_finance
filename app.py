@@ -1,3 +1,4 @@
+#Made by : Karim Bassem/ Imhotep Tech
 from flask import render_template, redirect, Flask, session, request, make_response, url_for
 from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
@@ -22,9 +23,10 @@ from flask_limiter.util import get_remote_address
 #define the app
 app = Flask(__name__)
 
-#define a secret key with a hexadecimal number of 16 digit
+#getting the session secret key from the env variables
 app.config['SECRET_KEY'] = os.getenv('secret_key')
 
+#defining the session to expire after 30 days
 app.permanent_session_lifetime = timedelta(days=30)
 app.config['SESSION_PERMANENT'] = True
 app.config['SESSION_USE_SIGNER'] = True  # Sign the session cookies
@@ -59,6 +61,7 @@ ALLOWED_EXTENSIONS = ("png", "jpg", "jpeg")
 
 csrf = CSRFProtect(app)
 
+#creating a simple class to protect from csrf attacks
 class CSRFForm(FlaskForm):
     pass
 
@@ -75,6 +78,7 @@ csp = {
     'connect-src': ["'self'", "https://api.example.com"],  # API calls
 }
 
+#defining the google outh to get the details for the register with google option
 oauth = OAuth(app)
 google = oauth.register(
     name='google',
@@ -90,12 +94,14 @@ google = oauth.register(
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration'
 )
 
+#limit the number of requests to protect form bots attacks
 limiter = Limiter(
     get_remote_address,  # This will limit based on the IP address of the requester
     app=app,
     default_limits=["200 per day", "50 per hour"]  # Set default rate limits
 )
 
+#defining a function to send the verification codes to the users mail
 def send_verification_mail_code(user_mail):
     verification_code = secrets.token_hex(4)
     msg = Message('Email Verification', sender='imhotepfinance@gmail.com', recipients=[user_mail])
@@ -104,12 +110,14 @@ def send_verification_mail_code(user_mail):
 
     session["verification_code"] = verification_code
 
+#defining the function to get the currencies prices ans saved them to the session to reduce the api calls
 def set_currency_session(favorite_currency):
     primary_api_key = os.getenv('EXCHANGE_API_KEY_PRIMARY')
     secondary_api_key = os.getenv('EXCHANGE_API_KEY_SECONDARY')
     third_api_key = os.getenv('EXCHANGE_API_KEY_THIRD')
     
     data = None
+    #using try and except to use more api keys so could get more free requests per mounth
     try:
         response = requests.get(f"https://v6.exchangerate-api.com/v6/{primary_api_key}/latest/{favorite_currency}")
         data = response.json()
@@ -127,7 +135,7 @@ def set_currency_session(favorite_currency):
             except requests.RequestException as e:
                 print(f"Failed to fetch exchange rates: {e}")
                 return None
-
+    #saving to the session the date of the next day so the session will exipre on it
     if rate:
         session["rate"] = rate
         tomorrow = (datetime.datetime.now() + datetime.timedelta(days=1)).date()
@@ -135,9 +143,11 @@ def set_currency_session(favorite_currency):
         return rate
     return None
 
+#a function to convert the currencies to the users favorite currency
 def convert_to_fav_currency(dictionary, user_id):
         favorite_currency = select_favorite_currency(user_id)
         today = datetime.datetime.now().date()
+        #checks if the saved currency prices are from yesterday so it will delete them and recall the todays ones
         if session.get('rate_expire') == today:
 
             session.pop('rate', None)
@@ -155,13 +165,14 @@ def convert_to_fav_currency(dictionary, user_id):
                     return "Error"
         
         total_favorite_currency = 0
-
+        #calculating the total currency of the user by his fav currency
         for currency, amount in dictionary.items():
             converted_amount = amount / rate[currency]
             total_favorite_currency += converted_amount
 
         return total_favorite_currency, favorite_currency
 
+#function to get the users fav currency and his networth with the currency
 def show_networth():
     user_id = session.get("user_id")
     favorite_currency = select_favorite_currency(user_id)
@@ -177,6 +188,7 @@ def show_networth():
 
     return total_favorite_currency, favorite_currency
 
+#a function to selects all of the currencies that the user have
 def select_currencies(user_id):
     currency_db = db.session.execute(
         text("SELECT currency from networth WHERE user_id = :user_id"),
@@ -189,6 +201,7 @@ def select_currencies(user_id):
 
     return(currency_all)
 
+#a function to checks rhe file extentions
 def allowed_file(filename):
     if "." in filename:
         filename_check = filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -202,6 +215,7 @@ def file_ext(filename):
                 file_ext = filename.split('.', 1)[1].lower()
         return file_ext
 
+#a function to selects all of the user data
 def select_user_data(user_id):
         user_info = db.session.execute(
         text("SELECT user_username, user_mail, user_photo_path FROM users WHERE user_id = :user_id"),
@@ -213,6 +227,7 @@ def select_user_data(user_id):
         user_photo_path = user_info[2]
         return user_username, user_mail, user_photo_path
 
+# a function to get the user photo path tp show it on the nav bar
 def select_user_photo():
     user_id = session.get("user_id")
     user_photo_path = db.session.execute(
@@ -221,6 +236,7 @@ def select_user_photo():
     ).fetchone()[0]
     return user_photo_path
 
+# a function tp delete the user image
 def delete_photo(user_id, photo_path):
         if os.path.exists(photo_path):
                 os.remove(photo_path)
@@ -233,6 +249,7 @@ def delete_photo(user_id, photo_path):
             error = "No image associated with this doctor to delete."
             return error
 
+# a function to selects the users fav currency only
 def select_favorite_currency(user_id):
         favorite_currency = db.session.execute(
         text("SELECT favorite_currency FROM users WHERE user_id = :user_id"),
@@ -240,6 +257,7 @@ def select_favorite_currency(user_id):
         ).fetchone()[0]
         return favorite_currency
 
+# a function to the years that he user have on his wishlist
 def select_years_wishlist(user_id):
         all_years_db = db.session.execute(
             text("SELECT DISTINCT(year) FROM wishlist WHERE user_id = :user_id"),
@@ -252,6 +270,7 @@ def select_years_wishlist(user_id):
 
         return all_years
 
+# a function to laods the data of the wishlist page
 def wishlist_page(user_id):
         today = date.today()
         year = today.year
@@ -263,6 +282,7 @@ def wishlist_page(user_id):
 
         return year, wishlist_db
 
+# a function to logout
 def logout():
         session.permanent = False
         session["logged_in"] = False
@@ -270,6 +290,7 @@ def logout():
         session.pop('rate_expire', None)
         session.clear()
 
+# a function to checks the users pass if it's the same as the saved one or not
 def security_check(user_id, check_pass):
     password_db = db.session.execute(
                 text("SELECT user_password FROM users WHERE user_id = :user_id"),
@@ -281,6 +302,7 @@ def security_check(user_id, check_pass):
     else:
         return False
 
+# a function to saves the user profile pic from google directly
 def save_profile_picture(picture_url, user_id):
     """Downloads and saves the user's Google profile picture to the server using the user ID."""
     try:
@@ -301,6 +323,7 @@ def save_profile_picture(picture_url, user_id):
     except Exception:
         return None
 
+# a function to use the google AI
 '''def query_gemini(prompt, user_data):
     enriched_prompt = prompt
     if user_data:
@@ -423,10 +446,12 @@ def mail_verification():
                 text("UPDATE users SET user_mail_verify = :user_mail_verify WHERE user_id = :user_id"), {"user_mail_verify" :"verified", "user_id": user_id}
                 )
             db.session.commit()
-
-            msg = Message('Email Changed', sender='imhotepfinance@gmail.com', recipients=[user_mail])
-            msg.body = f"Welcome {user_username} To Imhotep Finacial Manager"
-            mail.send(msg)
+            try:
+                msg = Message('Email Changed', sender='imhotepfinance@gmail.com', recipients=[user_mail])
+                msg.body = f"Welcome {user_username} To Imhotep Finacial Manager"
+                mail.send(msg)
+            except:
+                """Pass the mail send"""
 
             success="Email verified successfully. You can now log in."
             return render_template("login.html", success=success, form=CSRFForm())
@@ -453,8 +478,8 @@ def authorize():
         user_info = resp.json()
         user = oauth.google.userinfo()# uses openid endpoint to fetch user info
 
-        user_username = user_info["name"]
         user_mail = user_info["email"]
+        user_username = user_mail.split('@')[0]
         user_mail_verify = user_info["verified_email"]
         user_photo_url = user_info["picture"]
 
@@ -479,7 +504,7 @@ def authorize():
         session["user_mail_verify"] = user_mail_verify
         session["user_photo_url"] = user_photo_url
         return render_template('add_password_google_login.html', form=CSRFForm())
-    
+
     except OAuthError as error:
         # Catch the OAuthError and handle it
         if error.error == 'access_denied':
@@ -665,7 +690,7 @@ def home():
         except OperationalError:
             error = "Welcome Back"
             return render_template('error.html', error=error, form=CSRFForm())
-        
+
         user_id = session.get("user_id")
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
@@ -951,7 +976,7 @@ def show_trans():
         except OperationalError:
             error = "Welcome Back"
             return render_template('error.html', error=error, form=CSRFForm())
-        
+
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         from_date = request.args.get("from_date")
@@ -988,7 +1013,7 @@ def edit_trans():
         except OperationalError:
             error = "Welcome Back"
             return render_template('error.html', error=error, form=CSRFForm())
-        
+
         user_id = session.get("user_id")
         if request.method == "GET":
             trans_key = request.args.get("trans_key")
@@ -1073,7 +1098,7 @@ def delete_trans():
         except OperationalError:
             error = "Welcome Back"
             return render_template('error.html', error=error, form=CSRFForm())
-        
+
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
@@ -1175,11 +1200,11 @@ def personal_info():
         except OperationalError:
             error = "Welcome Back"
             return render_template('error.html', error=error, form=CSRFForm())
-        
+
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
-        
+
         if request.method == "GET":
             user_username, user_mail, user_photo_path = select_user_data(user_id)
             return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
@@ -1279,7 +1304,7 @@ def mail_verification_change_mail():
         except OperationalError:
             error = "Welcome Back"
             return render_template('error.html', error=error, form=CSRFForm())
-        
+
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
@@ -1316,13 +1341,13 @@ def upload_user_photo():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
-        
+
         try:
             user_photo_path = select_user_photo()
         except OperationalError:
             error = "Welcome Back"
             return render_template('error.html', error=error, form=CSRFForm())
-        
+
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
@@ -1366,7 +1391,7 @@ def delete_user_photo():
         except OperationalError:
             error = "Welcome Back"
             return render_template('error.html', error=error, form=CSRFForm())
-        
+
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
@@ -1396,7 +1421,7 @@ def favorite_currency():
         except OperationalError:
             error = "Welcome Back"
             return render_template('error.html', error=error, form=CSRFForm())
-        
+
         user_id = session.get("user_id")
         if request.method == "GET":
             favorite_currency = select_favorite_currency(user_id)
@@ -1428,8 +1453,8 @@ def security_check_password():
             user_id = session.get("user_id")
         except OperationalError:
             error = "Welcome Back"
-            return render_template('error.html', error=error, form=CSRFForm())   
-             
+            return render_template('error.html', error=error, form=CSRFForm())
+
         if request.method == "GET":
             return render_template("check_pass.html", form=CSRFForm())
         else:
@@ -1483,7 +1508,7 @@ def set_target():
         except OperationalError:
             error = "Welcome Back"
             return render_template('error.html', error=error, form=CSRFForm())
-        
+
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
@@ -1532,13 +1557,13 @@ def set_target():
 def update_target():
     if not session.get("logged_in"):
         return redirect("/login_page")
-    else:        
+    else:
         try:
             user_photo_path = select_user_photo()
         except OperationalError:
             error = "Welcome Back"
             return render_template('error.html', error=error, form=CSRFForm())
-        
+
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
@@ -1606,7 +1631,7 @@ def add_wish():
         except OperationalError:
             error = "Welcome Back"
             return render_template('error.html', error=error, form=CSRFForm())
-        
+
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
@@ -1659,13 +1684,13 @@ def check_wish():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
-        
+
         try:
             user_photo_path = select_user_photo()
         except OperationalError:
             error = "Welcome Back"
             return render_template('error.html', error=error, form=CSRFForm())
-        
+
         user_id = session.get("user_id")
         wish_key = request.form.get("wish_key")
 
@@ -1802,7 +1827,7 @@ def edit_wish():
         except OperationalError:
             error = "Welcome Back"
             return render_template('error.html', error=error, form=CSRFForm())
-        
+
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
@@ -1847,7 +1872,7 @@ def delete_wish():
         except OperationalError:
             error = "Welcome Back"
             return render_template('error.html', error=error, form=CSRFForm())
-        
+
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
@@ -1907,7 +1932,7 @@ def delete_user():
         except OperationalError:
             error = "Welcome Back"
             return render_template('error.html', error=error, form=CSRFForm())
-        
+
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         return render_template("check_pass_delete_user.html", total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path, form=CSRFForm())
@@ -1923,7 +1948,7 @@ def check_pass_delete_user():
         except OperationalError:
             error = "Welcome Back"
             return render_template('error.html', error=error, form=CSRFForm())
-        
+
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
@@ -2011,7 +2036,7 @@ def trash_wishlist():
         except OperationalError:
             error = "Welcome Back"
             return render_template('error.html', error=error, form=CSRFForm())
-        
+
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
@@ -2083,7 +2108,7 @@ def delete_trash_wishlist():
         except OperationalError:
             error = "Welcome Back"
             return render_template('error.html', error=error, form=CSRFForm())
-        
+
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
@@ -2112,7 +2137,7 @@ def trash_trans():
         except OperationalError:
             error = "Welcome Back"
             return render_template('error.html', error=error, form=CSRFForm())
-        
+
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
@@ -2202,7 +2227,7 @@ def delete_trash_trans():
         except OperationalError:
             error = "Welcome Back"
             return render_template('error.html', error=error, form=CSRFForm())
-        
+
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
