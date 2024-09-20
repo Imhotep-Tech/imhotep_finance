@@ -1,4 +1,3 @@
-#Made by : Karim Bassem/ Imhotep Tech
 from flask import render_template, redirect, Flask, session, request, make_response, url_for
 from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
@@ -23,20 +22,22 @@ from flask_limiter.util import get_remote_address
 #define the app
 app = Flask(__name__)
 
-#getting the session secret key from the env variables
 app.config['SECRET_KEY'] = os.getenv('secret_key')
-
-#defining the session to expire after 30 days
 app.permanent_session_lifetime = timedelta(days=30)
 app.config['SESSION_PERMANENT'] = True
-app.config['SESSION_USE_SIGNER'] = True  # Sign the session cookies
+app.config['SESSION_USE_SIGNER'] = True
 app.config['SESSION_KEY_PREFIX'] = 'myapp_session:'
-app.config['SESSION_COOKIE_SECURE'] = True  # Only send over HTTPS
-app.config['SESSION_COOKIE_HTTPONLY'] = True  # No JS access
-app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # CSRF protection
+app.config['SESSION_COOKIE_SECURE'] = True
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_TYPE'] = 'filesystem'
+app.config['SESSION_REFRESH_EACH_REQUEST'] = True  # Refresh session timeout with each request
 
 sess = Session(app)
+
+@app.before_request
+def refresh_session():
+    session.permanent = True  # Refresh the session timeout with every request
 
 Talisman(app, content_security_policy=None)  # Adjust CSP as needed
 
@@ -61,7 +62,6 @@ ALLOWED_EXTENSIONS = ("png", "jpg", "jpeg")
 
 csrf = CSRFProtect(app)
 
-#creating a simple class to protect from csrf attacks
 class CSRFForm(FlaskForm):
     pass
 
@@ -73,12 +73,11 @@ app.config.update(
 csp = {
     'default-src': "'self'",
     'script-src': ["'self'", "https://ajax.googleapis.com"],  # Allow Google-hosted scripts
-    'style-src': ["'self'", "https://stackpath.bootstrapcdn.com"],  # Bootstrap CDN
+    'style-src': ["'self'", "'unsafe-inline'", "https://stackpath.bootstrapcdn.com"],  # Added Bootstrap CDN
     'img-src': ["'self'", "https://my-images.com"],  # Custom image host
     'connect-src': ["'self'", "https://api.example.com"],  # API calls
 }
 
-#defining the google outh to get the details for the register with google option
 oauth = OAuth(app)
 google = oauth.register(
     name='google',
@@ -94,14 +93,12 @@ google = oauth.register(
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration'
 )
 
-#limit the number of requests to protect form bots attacks
 limiter = Limiter(
     get_remote_address,  # This will limit based on the IP address of the requester
     app=app,
     default_limits=["200 per day", "50 per hour"]  # Set default rate limits
 )
 
-#defining a function to send the verification codes to the users mail
 def send_verification_mail_code(user_mail):
     verification_code = secrets.token_hex(4)
     msg = Message('Email Verification', sender='imhotepfinance@gmail.com', recipients=[user_mail])
@@ -110,14 +107,12 @@ def send_verification_mail_code(user_mail):
 
     session["verification_code"] = verification_code
 
-#defining the function to get the currencies prices ans saved them to the session to reduce the api calls
 def set_currency_session(favorite_currency):
     primary_api_key = os.getenv('EXCHANGE_API_KEY_PRIMARY')
     secondary_api_key = os.getenv('EXCHANGE_API_KEY_SECONDARY')
     third_api_key = os.getenv('EXCHANGE_API_KEY_THIRD')
-    
+
     data = None
-    #using try and except to use more api keys so could get more free requests per mounth
     try:
         response = requests.get(f"https://v6.exchangerate-api.com/v6/{primary_api_key}/latest/{favorite_currency}")
         data = response.json()
@@ -135,44 +130,54 @@ def set_currency_session(favorite_currency):
             except requests.RequestException as e:
                 print(f"Failed to fetch exchange rates: {e}")
                 return None
-    #saving to the session the date of the next day so the session will exipre on it
+
     if rate:
         session["rate"] = rate
-        tomorrow = (datetime.datetime.now() + datetime.timedelta(days=1)).date()
-        session["rate_expire"] = tomorrow
+        today = datetime.datetime.now().date()
+        session["rate_date"] = today
+        session["favorite_currency"] = favorite_currency
         return rate
     return None
 
-#a function to convert the currencies to the users favorite currency
 def convert_to_fav_currency(dictionary, user_id):
         favorite_currency = select_favorite_currency(user_id)
         today = datetime.datetime.now().date()
-        #checks if the saved currency prices are from yesterday so it will delete them and recall the todays ones
-        if session.get('rate_expire') == today:
+        if session.get('rate_date') != today:
+            print("hello")
 
             session.pop('rate', None)
             session.pop('rate_expire', None)
+            session.pop('favorite_currency', None)
+
+            rate = set_currency_session(favorite_currency)
+            if not rate:
+                return None, favorite_currency
+        elif session.get('favorite_currency') != favorite_currency:
+            print("World")
+            session.pop('rate', None)
+            session.pop('rate_expire', None)
+            session.pop('favorite_currency', None)
 
             rate = set_currency_session(favorite_currency)
             if not rate:
                 return None, favorite_currency
         else:
+            print("HEllo, World")
             rate = session.get('rate')
             if rate == None:
                 try:
                     rate = set_currency_session(favorite_currency)
                 except:
                     return "Error"
-        
+
         total_favorite_currency = 0
-        #calculating the total currency of the user by his fav currency
+
         for currency, amount in dictionary.items():
             converted_amount = amount / rate[currency]
             total_favorite_currency += converted_amount
 
         return total_favorite_currency, favorite_currency
 
-#function to get the users fav currency and his networth with the currency
 def show_networth():
     user_id = session.get("user_id")
     favorite_currency = select_favorite_currency(user_id)
@@ -188,7 +193,6 @@ def show_networth():
 
     return total_favorite_currency, favorite_currency
 
-#a function to selects all of the currencies that the user have
 def select_currencies(user_id):
     currency_db = db.session.execute(
         text("SELECT currency from networth WHERE user_id = :user_id"),
@@ -201,7 +205,6 @@ def select_currencies(user_id):
 
     return(currency_all)
 
-#a function to checks rhe file extentions
 def allowed_file(filename):
     if "." in filename:
         filename_check = filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -215,7 +218,6 @@ def file_ext(filename):
                 file_ext = filename.split('.', 1)[1].lower()
         return file_ext
 
-#a function to selects all of the user data
 def select_user_data(user_id):
         user_info = db.session.execute(
         text("SELECT user_username, user_mail, user_photo_path FROM users WHERE user_id = :user_id"),
@@ -227,7 +229,6 @@ def select_user_data(user_id):
         user_photo_path = user_info[2]
         return user_username, user_mail, user_photo_path
 
-# a function to get the user photo path tp show it on the nav bar
 def select_user_photo():
     user_id = session.get("user_id")
     user_photo_path = db.session.execute(
@@ -236,7 +237,6 @@ def select_user_photo():
     ).fetchone()[0]
     return user_photo_path
 
-# a function tp delete the user image
 def delete_photo(user_id, photo_path):
         if os.path.exists(photo_path):
                 os.remove(photo_path)
@@ -249,7 +249,6 @@ def delete_photo(user_id, photo_path):
             error = "No image associated with this doctor to delete."
             return error
 
-# a function to selects the users fav currency only
 def select_favorite_currency(user_id):
         favorite_currency = db.session.execute(
         text("SELECT favorite_currency FROM users WHERE user_id = :user_id"),
@@ -257,7 +256,6 @@ def select_favorite_currency(user_id):
         ).fetchone()[0]
         return favorite_currency
 
-# a function to the years that he user have on his wishlist
 def select_years_wishlist(user_id):
         all_years_db = db.session.execute(
             text("SELECT DISTINCT(year) FROM wishlist WHERE user_id = :user_id"),
@@ -270,7 +268,6 @@ def select_years_wishlist(user_id):
 
         return all_years
 
-# a function to laods the data of the wishlist page
 def wishlist_page(user_id):
         today = date.today()
         year = today.year
@@ -282,7 +279,6 @@ def wishlist_page(user_id):
 
         return year, wishlist_db
 
-# a function to logout
 def logout():
         session.permanent = False
         session["logged_in"] = False
@@ -290,7 +286,6 @@ def logout():
         session.pop('rate_expire', None)
         session.clear()
 
-# a function to checks the users pass if it's the same as the saved one or not
 def security_check(user_id, check_pass):
     password_db = db.session.execute(
                 text("SELECT user_password FROM users WHERE user_id = :user_id"),
@@ -302,7 +297,6 @@ def security_check(user_id, check_pass):
     else:
         return False
 
-# a function to saves the user profile pic from google directly
 def save_profile_picture(picture_url, user_id):
     """Downloads and saves the user's Google profile picture to the server using the user ID."""
     try:
@@ -323,7 +317,6 @@ def save_profile_picture(picture_url, user_id):
     except Exception:
         return None
 
-# a function to use the google AI
 '''def query_gemini(prompt, user_data):
     enriched_prompt = prompt
     if user_data:
@@ -364,6 +357,17 @@ def get_user_data(user_id):
         'favorite_currency': favorite_currency,
         }
     return user_data'''
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template('error_handle.html', error_code = "404", error_description = "We can't find that page."), 404
+
+@app.errorhandler(500)
+def internal_server_error(error):
+    return render_template('error_handle.html', error_code = "500", error_description="Something Went Wrong."), 500
+
+@app.errorhandler(400)
+def internal_server_error(error):
+    return render_template('error_handle.html', error_code = "400", error_description= "Something Went Wrong."), 400
 
 @app.route("/", methods=["GET"])
 def index():
@@ -483,14 +487,6 @@ def authorize():
         user_mail_verify = user_info["verified_email"]
         user_photo_url = user_info["picture"]
 
-        existing_username = db.session.execute(
-        text("SELECT user_username FROM users WHERE LOWER(user_username) = :user_username"),
-        {"user_username": user_username}
-        ).fetchall()
-        if existing_username:
-            error_existing = "Username is already in use. Please choose another one."
-            return render_template("login.html", error=error_existing, form=CSRFForm())
-
         existing_mail = db.session.execute(
             text("SELECT user_mail FROM users WHERE LOWER(user_mail) = :user_mail"),
             {"user_mail": user_mail}
@@ -499,10 +495,19 @@ def authorize():
             error_existing = "Mail is already in use. Please choose another one."
             return render_template("login.html", error=error_existing, form=CSRFForm())
 
-        session["user_username"] = user_username
         session["user_mail"] = user_mail
         session["user_mail_verify"] = user_mail_verify
         session["user_photo_url"] = user_photo_url
+
+        existing_username = db.session.execute(
+            text("SELECT user_username FROM users WHERE LOWER(user_username) = :user_username"),
+            {"user_username": user_username}
+        ).fetchall()
+        if existing_username:
+            #error_existing = "Username is already in use. Please choose another one."
+            return render_template("add_username_google_login.html", form=CSRFForm())
+
+        session["user_username"] = user_username
         return render_template('add_password_google_login.html', form=CSRFForm())
 
     except OAuthError as error:
@@ -511,7 +516,7 @@ def authorize():
             error_message = "Google login was canceled. Please try again."
             return render_template("login.html", error=error_message, form=CSRFForm())
         else:
-            error_message = f"An error occurred. Please try again."
+            error_message = "An error occurred. Please try again."
             return render_template("login.html", error=error_message, form=CSRFForm())
 
 @app.route("/add_password_google_login", methods=["POST"])
@@ -545,7 +550,7 @@ def add_password_google_login():
     db.session.commit()
 
     try:
-        msg = Message('Email Changed', sender='imhotepfinance@gmail.com', recipients=[user_mail])
+        msg = Message('Welcome To Imhotep Finance', sender='imhotepfinance@gmail.com', recipients=[user_mail])
         msg.body = f"Welcome {user_username} To Imhotep Finacial Manager"
         mail.send(msg)
     except:
@@ -555,6 +560,22 @@ def add_password_google_login():
     session["user_id"] = user_id
     session.permanent = True
     return redirect("/home")
+
+@app.route("/add_username_google_login", methods=["POST"])
+def add_username_google_login():
+
+    user_username = request.form.get("user_username")
+
+    existing_username = db.session.execute(
+        text("SELECT user_username FROM users WHERE LOWER(user_username) = :user_username"),
+        {"user_username": user_username}
+    ).fetchall()
+    if existing_username:
+        error_existing = "Username is already in use. Please choose another one."
+        return render_template("add_username_google_login.html", form=CSRFForm(), error=error_existing)
+
+    session["user_username"] = user_username
+    return render_template('add_password_google_login.html', form=CSRFForm())
 
 @app.route("/login", methods=["POST"])
 @limiter.limit("5 per minute")
