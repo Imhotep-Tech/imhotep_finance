@@ -143,7 +143,6 @@ def convert_to_fav_currency(dictionary, user_id):
         favorite_currency = select_favorite_currency(user_id)
         today = datetime.datetime.now().date()
         if session.get('rate_date') != today:
-            print("hello")
 
             session.pop('rate', None)
             session.pop('rate_expire', None)
@@ -153,7 +152,6 @@ def convert_to_fav_currency(dictionary, user_id):
             if not rate:
                 return None, favorite_currency
         elif session.get('favorite_currency') != favorite_currency:
-            print("World")
             session.pop('rate', None)
             session.pop('rate_expire', None)
             session.pop('favorite_currency', None)
@@ -162,7 +160,6 @@ def convert_to_fav_currency(dictionary, user_id):
             if not rate:
                 return None, favorite_currency
         else:
-            print("HEllo, World")
             rate = session.get('rate')
             if rate == None:
                 try:
