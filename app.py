@@ -23,8 +23,9 @@ from flask_limiter.util import get_remote_address
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = os.getenv('secret_key')
-app.permanent_session_lifetime = timedelta(days=30)
 app.config['SESSION_PERMANENT'] = True
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=365)
+app.config['SESSION_REFRESH_EACH_REQUEST'] = True
 app.config['SESSION_USE_SIGNER'] = True
 app.config['SESSION_KEY_PREFIX'] = 'myapp_session:'
 app.config['SESSION_COOKIE_SECURE'] = True
@@ -37,7 +38,7 @@ sess = Session(app)
 
 @app.before_request
 def refresh_session():
-    session.permanent = True  # Refresh the session timeout with every request
+    session.permanent = True  # Keep the session permanent for every request
 
 Talisman(app, content_security_policy=None)  # Adjust CSP as needed
 
@@ -354,6 +355,7 @@ def get_user_data(user_id):
         'favorite_currency': favorite_currency,
         }
     return user_data'''
+
 @app.errorhandler(404)
 def page_not_found(error):
     return render_template('error_handle.html', error_code = "404", error_description = "We can't find that page."), 404
@@ -364,7 +366,7 @@ def internal_server_error(error):
 
 @app.errorhandler(400)
 def internal_server_error(error):
-    return render_template('error_handle.html', error_code = "400", error_description= "Something Went Wrong."), 400
+    return render_template('error_handle.html', error_code = "400", error_description= "Session expired!"), 400
 
 @app.route("/", methods=["GET"])
 def index():

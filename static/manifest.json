@@ -17,5 +17,20 @@
       "standalone",
       "browser",
       "window-controls-overlay"
+    ],
+    "scope": "/",
+    "shortcuts": [
+        {
+            "name": "Transactions",
+            "description": "Access your financial reports",
+            "url": "/",
+            "icons": [
+                {
+                    "src": "report_icon.png",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                }
+            ]
+        }
     ]
 }
