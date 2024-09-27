@@ -97,7 +97,7 @@ google = oauth.register(
 limiter = Limiter(
     get_remote_address,  # This will limit based on the IP address of the requester
     app=app,
-    default_limits=["200 per day", "50 per hour"]  # Set default rate limits
+    default_limits=["250 per day", "75 per hour"]  # Set default rate limits
 )
 
 def send_verification_mail_code(user_mail):
@@ -365,8 +365,12 @@ def internal_server_error(error):
     return render_template('error_handle.html', error_code = "500", error_description="Something Went Wrong."), 500
 
 @app.errorhandler(400)
-def internal_server_error(error):
-    return render_template('error_handle.html', error_code = "400", error_description= "Session expired!"), 400
+def session_expired(error):
+    return render_template('error_handle.html', error_code = "400", error_description= "Session Expired."), 400
+
+@app.errorhandler(429)
+def request_amount_exceed(error):
+    return render_template('error_handle.html', error_code = "429", error_description= "You exceeded the Maximum amount of requests! Please Try Again Later"), 429
 
 @app.route("/", methods=["GET"])
 def index():
@@ -1001,6 +1005,10 @@ def show_trans():
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         from_date = request.args.get("from_date")
         to_date = request.args.get("to_date")
+        page = int(request.args.get("page", 1))  # Default to page 1
+        per_page = 20  # Number of records per page
+
+        offset = (page - 1) * per_page
 
         now = datetime.datetime.now()
 
@@ -1018,10 +1026,23 @@ def show_trans():
             to_date = first_day_next_month.date()
 
         trans_db = db.session.execute(
-            text("SELECT * FROM trans WHERE user_id = :user_id AND date BETWEEN :from_date AND :to_date ORDER BY date"),
-            {"user_id": user_id, "from_date" :from_date, "to_date" :to_date}
+            text("SELECT * FROM trans WHERE user_id = :user_id AND date BETWEEN :from_date AND :to_date ORDER BY date LIMIT :limit OFFSET :offset"),
+            {"user_id": user_id, "from_date" :from_date, "to_date" :to_date, "limit": per_page, "offset": offset}
         ).fetchall()
-        return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, to_date=to_date, from_date=from_date, form=CSRFForm())
+
+        # Get total count for pagination
+        total_count = db.session.execute(
+            text('''
+                SELECT COUNT(*) FROM trans
+                WHERE user_id = :user_id
+                AND date BETWEEN :from_date AND :to_date
+            '''),
+            {"user_id": user_id, "from_date": from_date, "to_date": to_date}
+        ).scalar()
+
+        total_pages = (total_count + per_page - 1) // per_page  # Calculate total number of pages
+    
+        return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, to_date=to_date, from_date=from_date, total_pages=total_pages,page=page, form=CSRFForm())
 
 @app.route("/edit_trans", methods=["POST", "GET"])
 def edit_trans():

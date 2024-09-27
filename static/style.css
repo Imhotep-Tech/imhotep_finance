@@ -190,7 +190,7 @@ button.btn-red, button.btn-orange, button.btn-blue, button.btn-black, button.btn
 
 button.btn-red { background-color: red; }
 button.btn-orange { background-color: orange; }
-button.btn-blue { background-color: #202761; }
+button.btn-blue { background-color: #104c92; }
 button.btn-black { background-color: #212529; }
 button.btn-green { background-color: green; }
 button.btn-purple { background-color: purple; }
@@ -587,4 +587,8 @@ body.dark-mode .google-link {
   font-family: "Lucida Sans", Geneva, Verdana, sans-serif;
   font-size: 11px;
   gap: 5px;
+}
+
+.btn_page{
+  width: 29%;
 }
