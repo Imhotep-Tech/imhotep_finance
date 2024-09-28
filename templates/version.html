@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <meta charset="utf-8">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='imhotep_finance.ico')}}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>Imhotep Financial Manager</title>
+    <style>
+        body {
+            background-color: #f5f5f5;
+            color: black;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        h1, h2 {
+            text-align: center;
+        }
+
+        button.btn-black {
+            padding: 9px 15px;
+            border-radius: 5px;
+            border: none;
+            background-color: #212529;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* Dark Mode Styles */
+        body.dark-mode {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode button.btn-black {
+            background-color: #1f1f1f;
+        }
+
+        body.dark-mode h1, body.dark-mode h2 {
+            color: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Imhotep Financial Manager</h1>
+
+    {% include 'back.html' %}
+
+    <h2>Version 4.2</h2>
+    <p>
+        14/9/2024<br>
+        1. Added Register With your google account.<br>
+        2. major security and performance improvments.<br>
+        3. added autobackup to the database.
+        
+    <h2>Version 4.1</h2>
+    <p>
+        13/8/2024<br>
+        1. Implemented a dark mode option accessible from the Personal Information section within Settings.<br>
+        2. Introduced a background process for .exe and .dmg files on computer systems to significantly reduce application launch times after initial installation.<br>
+        3. Improved the speed of teh program.
+
+    <h2>Version 4.0</h2>
+    <p>
+        31/7/2024<br>
+        1. Added a .exe and .dmg files to download the app as a native app from the downloads page.<br>
+        2. Major Improvement In security from cyber attacks<br>
+        3. Changed the login page UI<br>
+        4. Added a Sitemap to make it faster on the browsers.<br>
+        5. Added a trash for the deleted items so they can be restored again.<br>
+        6. Improved the Speed Of some functions.<br>
+        7. Improved the download page UI.<br>
+        8. Fixed Some UI bugs<br>
+
+    <h2>Version 3.1</h2>
+    <p>
+        27/7/2024<br>
+        1. Improved security<br>
+        2. Fixed Some UI bugs<br>
+        3. added more mails for info<br>
+        4. added delete account option<br>
+        5. improved the speed of some functions<br>
+        6. added the loader theme<br>
+        7. added the stay logged in on this device to be more user friendly.
+
+    <h2>Version 3.0</h2>
+    <p>
+        22/7/2024<br>
+        1. added an APK version.<br>
+        2. updated the elements colors for the APK.<br>
+        3. Added the Download on the footer<br>
+        4. added download page.<br>
+        5. Added a target to save your money every month.<br>
+        6. Fixed the UI on some pages.
+
+    <h2>Version 2.1</h2>
+    <p>
+        9/7/2024<br>
+        1. Updated the select menus to be automatically selected by the users favorite currency.<br>
+
+    <h2>Version 2.0</h2>
+    <p>
+        1/7/2024<br>
+        1. Fixed some UI/UX bugs<br>
+        2. Updated the Look of the buttons<br>
+        3. Added to choose the date you want to see the transactions<br>
+    <h2>Version 1.0</h2>
+    <p>
+        27/6/2024<br>
+        Imhotep Financial Manager is your comprehensive solution for managing your finances with ease and precision. Our app is designed to help you take control of your money, track your net worth, and manage your transactions efficiently.<br><br>
+        Key Features:<br>
+        Personalized Financial Dashboard: Get a holistic view of your financial health, including your net worth, account balances, and recent transactions, all in one place.<br>
+        Wishlist Management: Create and manage a wishlist of items you aspire to purchase. Our app helps you prioritize and save towards your financial goals.<br>
+        Transaction Tracking: Easily log and categorize your income and expenses to understand your spending patterns and make informed financial decisions.<br>
+        Live Currency Conversion: Convert your money in real-time using live currency exchange rates through our integrated API, ensuring you get the most accurate and up-to-date information.<br>
+        Secure User Authentication: Protect your sensitive financial data with robust user authentication and profile management features.<br>
+        Responsive Design: Enjoy a seamless user experience on any device, thanks to our responsive design powered by Bootstrap's navbar and offcanvas components.<br><br>
+        Take charge of your financial future with Imhotep Financial Manager – your trusted partner in achieving financial success.<br>
+    </p>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const toggleButton = document.getElementById('dark-mode-toggle');
+            
+            // Check local storage for dark mode preference
+            if (localStorage.getItem('dark-mode') === 'enabled') {
+                document.body.classList.add('dark-mode');
+            }
+            
+            toggleButton.addEventListener('click', function () {
+                document.body.classList.toggle('dark-mode');
+                // Save user preference in local storage
+                if (document.body.classList.contains('dark-mode')) {
+                    localStorage.setItem('dark-mode', 'enabled');
+                } else {
+                    localStorage.setItem('dark-mode', 'disabled');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,173 @@
+{% extends "layout.html" %}
+
+{% block body %}
+    {% include 'nav.html' %}
+    <body display: flex; flex-direction: column; min-height: 200vh;">
+        <div class="container" style="flex-grow: 1; padding-top: 80px; overflow: auto; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+
+            <div class="message-container">
+                {% if error %}
+                <div class="error-message">{{ error }}</div>
+                {% endif %}
+            </div>
+            <h1 class="centered">{{ year }}</h1>
+            <form id="filterForm" action="/filter_year_wishlist" method="get">
+                <input type="text" id="searchInput1" placeholder="Year" class="input">
+                <select name="year" id="YearSelect" class="input" required>
+                    <option disabled selected>Years</option>
+                    {% for year in all_years %}
+                        <option value="{{ year }}">{{ year }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+
+            <div style="text-align: center;">
+                <table class="table-container">
+                    <thead>
+                        <tr>
+                            <td style="display: inline-block; vertical-align: top;">
+                                <form action="/add_wish" method="get">
+                                    <input type="hidden" name="year" value="{{ year }}">
+                                    <button type="submit" class="btn-green" title="Add">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </form>
+                            </td>
+                            <td style="display: inline-block; vertical-align: top;">
+                                <form action="/trash_wishlist" method="get">
+                                    <button type="submit" class="btn-green" title="Trash">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+            <div class="table-container" style="flex-grow: 1; overflow: auto; width: 100%; max-width: 1000px; margin: 0 auto;">
+                <table class="c">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Year</th>
+                            <th>Price</th>
+                            <th>Currency</th>
+                            <th>Details</th>
+                            <th>Link</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for wish in wishlist_db %}
+                            <tr>
+                                <td>{{ wish.wish_id }}</td>
+                                <td>{{ wish.year }}</td>
+                                <td>{{ "{:,.2f}".format(wish.price|float) }}</td>
+                                <td>{{ wish.currency }}</td>
+                                <td class="details-cell">{{ wish.wish_details }}</td>
+                                <td class="details-cell">
+                                    <a href="{{ wish.link }}" target="_blank" title="{{ wish.link }}">{{ wish.link }}</a>
+                                </td>
+                                <td>
+                                    <form action="/check_wish" method="post">
+                                        {{ form.hidden_tag() }}
+                                        <input name="wish_key" type="hidden" value="{{ wish.wish_key }}">
+                                        {% if wish.status == 'pending' %}
+                                            <button type="submit">-</button>
+                                        {% elif wish.status == 'done' %}
+                                            <button type="submit">✓</button>
+                                        {% endif %}
+                                    </form>
+                                </td>
+                                {% if wish.status == 'pending' %}
+                                    <td>
+                                        <form action="/edit_wish" method="get" style="display: inline;">
+                                            {{ form.hidden_tag() }}
+                                            <input type="hidden" name="wish_key" value="{{ wish.wish_key }}">
+                                            <button type="submit" class="btn-green" title="Edit">
+                                                <i class="fas fa-pen"></i>
+                                            </button>
+                                        </form>
+                                        <form action="/delete_wish" method="post" style="display: inline;">
+                                            {{ form.hidden_tag() }}
+                                            <input type="hidden" name="wish_key" value="{{ wish.wish_key }}">
+                                            <button type="submit" class="btn-red" title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </body>
+    <script>
+                        const searchInput = document.getElementById('searchInput');
+        const YearSelect = document.getElementById('YearSelect');
+
+        const originalOptions1 = [...YearSelect.options];
+
+        function filterOptions(searchInput, YearSelect, originalOptions) {
+            const searchText = searchInput.value.toLowerCase();
+            YearSelect.innerHTML = '';
+
+            const filteredOptions = originalOptions.filter(option => {
+                const optionText = option.textContent.toLowerCase();
+                return optionText.includes(searchText);
+            });
+
+            filteredOptions.forEach(option => {
+                YearSelect.appendChild(option);
+            });
+
+            if (filteredOptions.length === 0) {
+                const defaultOption = document.createElement('option');
+                defaultOption.disabled = true;
+                defaultOption.selected = true;
+                defaultOption.textContent = 'No Match';
+                YearSelect.appendChild(defaultOption);
+            }
+        }
+
+        searchInput1.addEventListener('input', () => {
+            filterOptions(searchInput1, YearSelect, originalOptions1);
+        });
+
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const doctorCategory = "{{ year }}";
+
+            const selectElement = document.getElementById("YearSelect");
+            const options = selectElement.options;
+
+            for (let i = 0; i < options.length; i++) {
+                if (options[i].value === doctorCategory) {
+                    options[i].selected = true;
+                    break;
+                }
+            }
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const selectElement = document.getElementById("YearSelect");
+            selectElement.addEventListener("change", function () {
+                document.getElementById("filterForm").submit();
+            });
+
+            // Optional: Pre-select the year if it matches the current filter
+            const selectedYear = "{{ year }}";
+            if (selectedYear) {
+                const options = selectElement.options;
+                for (let i = 0; i < options.length; i++) {
+                    if (options[i].value === selectedYear) {
+                        options[i].selected = true;
+                        break;
+                    }
+                }
+            }
+        });
+    </script>
+{% endblock %}

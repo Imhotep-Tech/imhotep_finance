@@ -1,0 +1,56 @@
+{% extends "layout_login.html" %}
+
+{% block body %}
+<div class="form-container">
+    <p class="title">Welcome</p>
+    <form action="/settings/security" method="post" class="form">
+      {{ form.hidden_tag() }}
+        <input type="password" class="input" placeholder="New Password" name="new_password" id="password" required="">
+        <input type="password" class="input" placeholder="Confirm New Password" id="confirm_password" required="">
+        <input type="hidden" name="user_id" value="{ user_id }">
+        <label for="password-toggle" class="password-toggle-btn">
+            <input type="checkbox" id="password-toggle" onclick="togglePasswordVisibility_all()">
+            <span class="checkmark">Show password</span>
+          </label>
+        <p class="page-link"></p>
+        <button class="form-btn" title="Submit">
+          <i class="fas fa-check"></i>
+      </button>
+    </form>
+  </div>
+  <script>
+    function validatePassword() {
+        var password = document.getElementById("password").value;
+        var confirmPassword = document.getElementById("confirm_password").value;
+
+        if (password !== confirmPassword) {
+            alert("Passwords do not match!");
+            return false;
+        }
+        return true;
+    }
+
+    window.onload = function() {
+        history.pushState(null, null, location.href);
+        window.onpopstate = function() {
+            history.go(1);
+        };
+    };
+
+    function togglePasswordVisibility_all() {
+  var passwordInput = document.getElementById("password");
+  var confirm_passwordInput = document.getElementById("confirm_password");
+  if (passwordInput.type === "password") {
+    passwordInput.type = "text";
+  } else {
+    passwordInput.type = "password";
+  }
+
+  if (confirm_passwordInput.type === "password") {
+    confirm_passwordInput.type = "text";
+  } else {
+    confirm_passwordInput.type = "password";
+  }
+}
+</script>
+{% endblock %}
