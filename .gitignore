@@ -1,2 +1,5 @@
 wsgi.py
 imhotep_finance_env/
+flask_session/
+__pycache__/
+.vscode/
