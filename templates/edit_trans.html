@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+
+{% block body %}
+    {% include 'nav.html' %}
+    
+    <div class="message-container">
+        {% if error %}
+        <div class="error-message">{{ error }}</div>
+        {% endif %}
+    </div>
+    
+    <form action="/edit_trans" method="post" class="form-container">
+        {% include 'back.html' %}
+        {{ form.hidden_tag() }}
+        <input type="hidden" name="trans_key" value="{{ trans_db.trans_key }}">
+
+        <label>Currency</label>
+        <div class="form-group">
+            <p>{{ trans_db.currency }}</p>
+            <input type="hidden" name="currency" value="{{ trans_db.currency }}">
+        </div>
+
+        <label>Status</label>
+        <div class="form-group">
+            <p>{{ trans_db.trans_status }}</p>
+        </div>
+
+        <label>Date</label>
+        <div class="form-group">
+            <input type="date" class="input" placeholder="Date" name="date" value="{{ trans_db.date }}">
+        </div>
+
+        <label>Amount</label>
+        <div class="form-group">
+            <input type="number" min="0" class="input" placeholder="Amount" value="{{ trans_db.amount }}" name="amount" required="">
+        </div>
+
+        <label>Details</label>
+        <div class="form-group">
+            <input type="text" class="input" name="trans_details" value="{{ trans_db.trans_details }}">
+        </div>
+        <label>Link</label>
+        <div class="form-group">
+            <input type="text" class="input" placeholder="Link" name="trans_details_link" value="{{ trans_db.trans_details_link }}">
+        </div>
+
+        <div class="form-group">
+            <button class="btn-teal" type="submit" title="Submit">
+                <i class="fas fa-check"></i>
+            </button>
+        </div>
+    </form>
+{% endblock %}

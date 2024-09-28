@@ -1,0 +1,36 @@
+{
+    "name": "Imhotep Financial Manager",
+    "short_name": "Imhotep Finance",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#ffffff",
+    "icons": [
+        {
+            "src": "imhotep_finance.ico",
+            "sizes": "192x192",
+            "type": "image/png"
+        }
+    ],
+    "orientation": "natural",
+    "display_override": [
+      "standalone",
+      "browser",
+      "window-controls-overlay"
+    ],
+    "scope": "/",
+    "shortcuts": [
+        {
+            "name": "Transactions",
+            "description": "Access your financial reports",
+            "url": "/",
+            "icons": [
+                {
+                    "src": "report_icon.png",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                }
+            ]
+        }
+    ]
+}

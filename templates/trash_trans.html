@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+
+{% block body %}
+    {% include 'nav.html' %}
+    <body style="display: flex; flex-direction: column; min-height: 100vh;">
+        <div class="container" style="flex-grow: 1; padding-top: 80px; overflow: auto;">
+            <div class="message-container">
+                {% if error %}
+                <div class="error-message">{{ error }}</div>
+                {% endif %}
+            </div>
+            <a class="nav-link" href="/show_trans"><i class="fas fa-arrow-left"></i>Transactions</a>
+            <div class="table-container" style="flex-grow: 1; overflow: auto;">
+                <table class="c">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Currency</th>
+                            <th>Details</th>
+                            <th>Link</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for trans in trash_trans_data %}
+                            <tr>
+                                <td>{{ trans.trans_trash_id }}</td>
+                                <td>{{ trans.date }}</td>
+                                <td>{{ "{:,.2f}".format(trans.amount|float) }}</td>
+                                <td>{{ trans.currency }}</td>
+                                <td class="details-cell">{{ trans.trans_details }}</td>
+                                <td class="details-cell">
+                                    <a href="{{ trans.trans_details_link }}" target="_blank" title="{{ trans.trans_details_link }}">{{ trans.trans_details_link}}</a>
+                                </td>
+                                <td>{{ trans.trans_status }}</td>
+                                <td>
+                                    <form action="/trash_trans" method="post" style="display: inline;">
+                                        {{ form.hidden_tag() }}
+                                        <input type="hidden" name="trans_trash_key" value="{{ trans.trans_trash_key }}">
+                                        <button type="submit" class="btn-green" title="Restore">
+                                            <i class="fas fa-add"></i>
+                                        </button>
+                                    </form>
+                                    <form action="/delete_trash_trans" method="post" style="display: inline;">
+                                        {{ form.hidden_tag() }}
+                                        <input type="hidden" name="trans_trash_key" value="{{ trans.trans_trash_key }}">
+                                        <button type="submit" class="btn-red" title="Permanent Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </body>
+    
+{% endblock %}

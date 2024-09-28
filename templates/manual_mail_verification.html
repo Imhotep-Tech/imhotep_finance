@@ -1,0 +1,23 @@
+{% extends "layout_login.html" %}
+
+{% block body %}
+<div class="form-container">
+    <div class="message-container">
+        {% if error_not %}
+            <div class="error-message">
+                {{ error_not }} <a href="/register_page">Sign Up</a>
+            </div>
+        {% endif %}
+    </div>
+    {% include 'back.html' %}
+    <p class="title">Verify</p>
+    <form action="/manual_mail_verification" method="post" class="form">
+        {{ form.hidden_tag() }}
+        <input type="name" class="input" placeholder="User E-mail" name="user_mail" required="">
+        <p class="page-link"></p>
+        <button class="form-btn">
+            <i class="fas fa-check"></i>
+        </button>
+    </form>
+  </div>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "layout_login.html" %}
+
+{% block body %}
+<div class="form-container">
+    <div class="message-container">
+        {% if error %}
+            <div class="error-message">
+                {{ error }}
+            </div>
+        {% endif %}
+    </div>
+    {% include 'back.html' %}
+    <p class="title">Verify</p>
+    <form action="/mail_verification" method="post" class="form" onsubmit="return validatePassword()">
+        {{ form.hidden_tag() }}
+        <input type="name" class="input" placeholder="Verification Code" name="verification_code" required="">
+        <input type="hidden" name="user_mail" value="{{ user_mail }}">
+        <input type="hidden"  name="user_username" value="{{ user_username }}">
+        <p class="page-link"></p>
+        <button class="form-btn">
+            <i class="fas fa-check"></i>
+        </button>
+    </form>
+  </div>
+{% endblock %}

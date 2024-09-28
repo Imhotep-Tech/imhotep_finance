@@ -1,0 +1,594 @@
+/* Dark Mode Toggle Styles */
+.theme-toggle-container {
+  margin-bottom: 20px;
+}
+
+#theme-toggle {
+  margin-left: 10px;
+}
+
+/* Default light mode styles */
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  margin: 0;
+  background-color: #f5f5f5;
+  color: black; /* Default text color for light mode */
+}
+
+/* Dark mode styles */
+body.dark-mode {
+  background-color: #121212;
+  color: white; /* Default text color for dark mode */
+}
+
+.container {
+  margin-top: 80px;
+  flex-grow: 1;
+}
+
+.content-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 70px;
+  flex-grow: 1;
+}
+
+.centered-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.centered-button {
+  padding: 10px 20px;
+  font-size: 18px;
+  background-color: teal;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.form-container {
+  width: 350px;
+  height: 600px;
+  background-color: #fff;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  border-radius: 10px;
+  box-sizing: border-box;
+  padding: 20px 30px;
+}
+
+body.dark-mode .form-container {
+  background-color: #333; /* Darker background color */
+  box-shadow: rgba(255, 255, 255, 0.35) 0px 5px 15px; /* Lighter shadow for dark mode */
+  color: #fff; /* Light text color for dark mode */
+}
+
+.title {
+  text-align: center;
+  font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande", "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+  margin: 10px 0 30px 0;
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-bottom: 15px;
+}
+
+footer {
+  background-color: teal;
+  color: white;
+  text-align: center;
+  padding: 0.1px;
+  width: 100%;
+  position: relative;
+  bottom: 0;
+}
+
+.footer-content {
+  width: 100%;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.input {
+  border-radius: 20px;
+  border: 1px solid #c0c0c0;
+  outline: 0 !important;
+  box-sizing: border-box;
+  padding: 12px 15px;
+}
+
+body.dark-mode .input {
+  border: 1px solid #444;
+  background-color: #333;
+  color: #e0e0e0;
+}
+
+body.dark-mode .input::placeholder {
+  color: #888;
+}
+
+.page-link {
+  text-decoration: underline;
+  margin: 0;
+  text-align: end;
+  color: #747474;
+  text-decoration-color: #747474;
+}
+
+.page-link-label {
+  cursor: pointer;
+  font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande", "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.page-link-label:hover {
+  color: #000;
+}
+
+.form-btn {
+  padding: 10px 15px;
+  font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande", "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+  border-radius: 20px;
+  border: 0 !important;
+  outline: 0 !important;
+  background: teal;
+  color: white;
+  cursor: pointer;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+}
+
+.form-btn:active {
+  box-shadow: none;
+}
+
+.sign-up-label {
+  margin: 0;
+  font-size: 10px;
+  color: #747474;
+  font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande", "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+}
+
+.sign-up-link {
+  margin-left: 1px;
+  font-size: 11px;
+  text-decoration: underline;
+  text-decoration-color: teal;
+  color: teal;
+  cursor: pointer;
+  font-weight: 800;
+  font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande", "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+}
+
+.buttons-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  margin-top: 20px;
+  gap: 15px;
+}
+
+button.btn-red, button.btn-orange, button.btn-blue, button.btn-black, button.btn-green, button.btn-purple, button.btn-teal {
+  padding: 6px 10px;
+  border-radius: 5px;
+  border: none;
+  color: white;
+}
+
+button.btn-red { background-color: red; }
+button.btn-orange { background-color: orange; }
+button.btn-blue { background-color: #104c92; }
+button.btn-black { background-color: #212529; }
+button.btn-green { background-color: green; }
+button.btn-purple { background-color: purple; }
+button.btn-teal { background-color: teal; width: 100%; }
+
+/* Default light mode styles for tables */
+table {
+  background-color: white; /* Light background color */
+  border-collapse: collapse;
+  border: 1px solid black; /* Dark border color */
+  border-radius: 1rem;
+  width: 100%;
+}
+
+th, td {
+  border: 1px solid black; /* Dark border color for table cells */
+  font-weight: bold;
+  border-radius: 1rem;
+}
+
+/* Dark mode styles for tables */
+body.dark-mode table {
+  background-color: #333; /* Dark background color for table */
+  border: 1px solid #444; /* Lighter border color for table */
+}
+
+body.dark-mode th,
+body.dark-mode td {
+  border: 1px solid #444; /* Lighter border color for table cells */
+  color: #fff; /* Light text color for dark mode */
+}
+
+/* Optional: Adjust text color and background for centered table */
+body.dark-mode table.centered {
+  text-align: center;
+  background-color: #444; /* Slightly lighter dark mode background for centered table */
+}
+
+
+.done-message {
+  background-color: green;
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+.form-container {
+  display: flex;
+  flex-direction: column;
+  border: none;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  border: none;
+}
+
+.input-group {
+  display: flex;
+  flex-grow: 1;
+}
+
+.input, .btn {
+  width: 100%;
+}
+
+.input {
+  margin-right: 0.5rem;
+}
+
+.c {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.c th, .c td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.details-cell {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.details-cell a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.details-cell a:hover {
+  text-decoration: underline;
+}
+
+.message-container, .message-container1 {
+  position: fixed;
+  top: 0px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+}
+
+.error-message {
+  background-color: red;
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.user_img {
+  aspect-ratio: 1/1;
+  object-fit: cover;
+  border-radius: 50%;
+  max-width: 100px;
+  max-height: 100px;
+}
+
+.user_img_nav {
+  aspect-ratio: 1/1;
+  object-fit: cover;
+  border-radius: 50%;
+  max-width: 50px;
+  max-height: 100px;
+}
+
+/* Light mode footer styles */
+footer {
+  background-color: teal; /* Background color for footer in light mode */
+  color: white; /* Text color for footer in light mode */
+  text-align: center;
+  padding: 20px;
+}
+
+footer a {
+  color: white; /* Link color in light mode */
+  text-decoration: none;
+}
+
+footer a:hover {
+  text-decoration: underline; /* Underline on hover in light mode */
+}
+
+.footer-icon {
+  margin: 0 10px;
+  color: white; /* Color for footer icons in light mode */
+  font-size: 24px;
+  text-decoration: none;
+}
+
+.footer-icon:hover {
+  color: #007bff; /* Hover color for footer icons in light mode */
+}
+
+/* Dark mode footer styles */
+body.dark-mode footer {
+  background-color: #212529; /* Background color for footer in dark mode */
+  color: #f8f9fa; /* Text color for footer in dark mode */
+}
+
+body.dark-mode footer a {
+  color: #f8f9fa; /* Link color in dark mode */
+}
+
+body.dark-mode footer a:hover {
+  color: #007bff; /* Hover color for links in dark mode */
+}
+
+body.dark-mode .footer-icon {
+  color: #f8f9fa; /* Color for footer icons in dark mode */
+}
+
+body.dark-mode .footer-icon:hover {
+  color: #007bff; /* Hover color for footer icons in dark mode */
+}
+
+/* Light Mode Styles */
+.ios-instructions, .android-instructions {
+  display: none;
+  text-align: center;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  margin-top: 20px;
+}
+
+/* Dark Mode Styles */
+body.dark-mode .ios-instructions, body.dark-mode .android-instructions {
+  background-color: #333;
+  border: 1px solid #555;
+  color: #e0e0e0;
+}
+
+
+#loading-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.8);
+  z-index: 1000;
+  text-align: center;
+  font-size: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.loader {
+  border: 16px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 16px solid teal;
+  width: 120px;
+  height: 120px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Light mode styles for Bootstrap navbar */
+.navbar {
+  background-color: #f8f9fa; /* Light background color */
+  color: #000; /* Dark text color */
+}
+
+.navbar a {
+  color: #000; /* Dark link color */
+}
+
+.navbar a:hover {
+  color: #0056b3; /* Hover color */
+}
+
+.navbar-toggler {
+  border-color: #000; /* Dark border color */
+}
+
+.offcanvas {
+  background-color: #f8f9fa; /* Light background color */
+}
+
+.offcanvas .nav-link {
+  color: #000; /* Dark text color for links */
+}
+
+.offcanvas .nav-link:hover {
+  color: #0056b3; /* Hover color */
+}
+
+/* Dark mode styles */
+body.dark-mode .navbar {
+  background-color: #343a40; /* Dark background color for navbar */
+  color: #fff; /* Light text color */
+}
+
+body.dark-mode .navbar a {
+  color: #fff; /* Light link color */
+}
+
+body.dark-mode .navbar a:hover {
+  color: #80bdff; /* Light hover color */
+}
+
+body.dark-mode .navbar-toggler {
+  border-color: #fff; /* Light border color */
+}
+
+body.dark-mode .offcanvas {
+  background-color: #495057; /* Dark background color for offcanvas */
+}
+
+body.dark-mode .offcanvas .nav-link {
+  color: #fff; /* Light text color for links */
+}
+
+body.dark-mode .offcanvas .nav-link:hover {
+  color: #80bdff; /* Light hover color */
+}
+
+/* Additional styles to ensure dark mode applies to other components */
+body.dark-mode .form-container {
+  background-color: #212529; /* Dark background color for form container */
+  color: #fff; /* Light text color */
+}
+
+body.dark-mode table {
+  background-color: #212529; /* Dark background color for tables */
+  color: #fff; /* Light text color */
+}
+
+body.dark-mode table th,
+body.dark-mode table td {
+  border: 1px solid #fff; /* Light border color for table cells */
+}
+
+/* Light mode styles */
+.container-fluid a {
+  color: black; /* Dark text color */
+  text-decoration: none; /* No underline for links */
+}
+
+.container-fluid a:hover {
+  color: #0056b3; /* Hover color for links */
+}
+
+.navbar-toggler {
+  border-color: black; /* Dark border color for toggler */
+}
+
+/* Dark mode styles */
+body.dark-mode .container-fluid a {
+  color: #fff; /* Light text color for dark mode */
+}
+
+body.dark-mode .container-fluid a:hover {
+  color: #80bdff; /* Light hover color for dark mode */
+}
+
+body.dark-mode .navbar-toggler {
+  border-color: #fff; /* Light border color for toggler in dark mode */
+}
+
+/* Dark mode styles for images */
+body.dark-mode .user_img_nav {
+  border: 2px solid #fff; /* Optional: Add border if needed */
+}
+
+/* Light mode styles for dropdown */
+.nav-item .dropdown-menu {
+  background-color: white; /* Background color for dropdown in light mode */
+  color: black; /* Text color for dropdown items in light mode */
+  border: 1px solid #ddd; /* Border color for dropdown in light mode */
+}
+
+.nav-item .dropdown-item {
+  color: black; /* Text color for dropdown items in light mode */
+}
+
+.nav-item .dropdown-item:hover {
+  background-color: #f8f9fa; /* Background color on hover in light mode */
+}
+
+/* Dark mode styles for dropdown */
+body.dark-mode .nav-item .dropdown-menu {
+  background-color: #343a40; /* Background color for dropdown in dark mode */
+  color: #ffffff; /* Text color for dropdown items in dark mode */
+  border: 1px solid #495057; /* Border color for dropdown in dark mode */
+}
+
+body.dark-mode .nav-item .dropdown-item {
+  color: #ffffff; /* Text color for dropdown items in dark mode */
+}
+
+body.dark-mode .nav-item .dropdown-item:hover {
+  background-color: #495057; /* Background color on hover in dark mode */
+}
+
+/* Light mode text color */
+.google-link {
+  color: black; /* Default for light mode */
+}
+
+/* Dark mode text color */
+body.dark-mode .google-link {
+  color: white;
+}
+
+/* Continue with the other styles */
+.google-login-button {
+  border: 2px solid #747474;
+  border-radius: 20px;
+  box-sizing: border-box;
+  padding: 10px 15px;
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 10px 36px 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 1px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "Lucida Sans", Geneva, Verdana, sans-serif;
+  font-size: 11px;
+  gap: 5px;
+}
+
+.btn_page{
+  width: 29%;
+}
