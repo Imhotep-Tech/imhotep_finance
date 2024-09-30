@@ -103,7 +103,7 @@
                     {% endif %}
 
                     <!-- Dropdown Menu for Page Selection -->
-                    <select id="page-selector" onchange="window.location.href=this.value">
+                    <select id="page-selector" onchange="updatePage()">
                         {% for p in range(1, total_pages + 1) %}
                             <option value="{{ url_for('show_trans', page=p, from_date=from_date, to_date=to_date) }}" {% if p == page %}selected{% endif %}>
                                 Page {{ p }}

@@ -372,6 +372,10 @@ def session_expired(error):
 def request_amount_exceed(error):
     return render_template('error_handle.html', error_code = "429", error_description= "You exceeded the Maximum amount of requests! Please Try Again Later"), 429
 
+@app.errorhandler(Exception)
+def server_error(error):
+    return render_template('error_handle.html', error_code = "500", error_description = "Something went wrong."), 500
+
 @app.route("/", methods=["GET"])
 def index():
     return redirect("/login_page")
