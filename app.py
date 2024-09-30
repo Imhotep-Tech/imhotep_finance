@@ -40,7 +40,7 @@ sess = Session(app)
 def refresh_session():
     session.permanent = True  # Keep the session permanent for every request
 
-Talisman(app, content_security_policy=None)  # Adjust CSP as needed
+Talisman(app, content_security_policy=None)
 
 #define the mail to send the verification code and the forget password
 app.config['MAIL_SERVER']='smtp.gmail.com'
