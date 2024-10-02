@@ -18,6 +18,7 @@ from authlib.integrations.flask_client import OAuth
 from authlib.integrations.base_client.errors import OAuthError
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from imhotep_files_flask import upload_file, delete_file
 
 #define the app
 app = Flask(__name__)
@@ -234,18 +235,6 @@ def select_user_photo():
         {"user_id": user_id}
     ).fetchone()[0]
     return user_photo_path
-
-def delete_photo(user_id, photo_path):
-        if os.path.exists(photo_path):
-                os.remove(photo_path)
-                db.session.execute(
-                    text("UPDATE users SET user_photo_path = NULL WHERE user_id = :user_id"),
-                    {"user_id" :user_id}
-                )
-                db.session.commit()
-        else:
-            error = "No image associated with this doctor to delete."
-            return error
 
 def select_favorite_currency(user_id):
         favorite_currency = db.session.execute(
@@ -1396,34 +1385,22 @@ def upload_user_photo():
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
-        if "file" in request.files:
-            file = request.files['file']
-            if file and allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                file_extention = file_ext(filename)
 
-                photo_name = f"{user_id}.{file_extention}"
-                photo_path = os.path.join(app.config['UPLOAD_FOLDER_PHOTO'], photo_name)
+        photo_path, upload_error = upload_file(request, os.path.join(os.getcwd(), "static", "user_photo"), (".png", ".jpg", ".jpeg"), user_id)
 
-                delete_photo(user_id, photo_path)
-
-                file.save(photo_path)
-
-                db.session.execute(
-                    text("UPDATE users SET user_photo_path = :user_photo_path WHERE user_id = :user_id"),
-                    {"user_photo_path": photo_name, "user_id":user_id}
-                )
-                db.session.commit()
-                user_username, user_mail, user_photo_path = select_user_data(user_id)
-                return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
-            else:
-                error = "Invalid file format. Allowed formats are: png, jpg, jpeg"
-                user_username, user_mail, user_photo_path = select_user_data(user_id)
-                return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
-        else:
-            error = "file upload failed"
+        if upload_error:
             user_username, user_mail, user_photo_path = select_user_data(user_id)
-            return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
+            return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=upload_error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
+
+        photo_name = photo_path.split("/")[-1]
+
+        db.session.execute(
+            text("UPDATE users SET user_photo_path = :user_photo_path WHERE user_id = :user_id"),
+            {"user_photo_path": photo_name, "user_id":user_id}
+        )
+        db.session.commit()
+        user_username, user_mail, user_photo_path = select_user_data(user_id)
+        return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
 
 @app.route("/settings/personal_info/delete_user_photo", methods=["POST"])
 def delete_user_photo():
@@ -1448,11 +1425,20 @@ def delete_user_photo():
         if photo_name:
             photo_path = os.path.join(app.config['UPLOAD_FOLDER_PHOTO'], photo_name)
 
-            delete_photo(user_id, photo_path)
+            delete_photo , error = delete_file(photo_path)
+            if error:
+                user_username, user_mail, user_photo_path = select_user_data(user_id)
+                return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
+
+            db.session.execute(
+                    text("UPDATE users SET user_photo_path = NULL WHERE user_id = :user_id"),
+                    {"user_id" :user_id}
+                )
+            db.session.commit()
             user_username, user_mail, user_photo_path = select_user_data(user_id)
             return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
         else:
-            error = "No image associated with this doctor to delete."
+            error = "No image associated with this user to delete."
             user_username, user_mail, user_photo_path = select_user_data(user_id)
             return render_template("personal_info.html", user_username=user_username, user_mail=user_mail, user_photo_path=user_photo_path, error=error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
 
