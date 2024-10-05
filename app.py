@@ -304,6 +304,48 @@ def save_profile_picture(picture_url, user_id):
     except Exception:
         return None
 
+def trans(user_id):
+    from_date = request.args.get("from_date")
+    to_date = request.args.get("to_date")
+    page = int(request.args.get("page", 1))  # Default to page 1
+    per_page = 20  # Number of records per page
+
+    offset = (page - 1) * per_page
+
+    now = datetime.datetime.now()
+
+    first_day_current_month = now.replace(day=1)
+
+    if now.month == 12:
+        first_day_next_month = now.replace(year=now.year + 1, month=1, day=1)
+    else:
+        first_day_next_month = now.replace(month=now.month + 1, day=1)
+
+    if from_date is None:
+        from_date = first_day_current_month.date()
+
+    if to_date is None:
+        to_date = first_day_next_month.date()
+
+    trans_db = db.session.execute(
+        text("SELECT * FROM trans WHERE user_id = :user_id AND date BETWEEN :from_date AND :to_date ORDER BY date DESC LIMIT :limit OFFSET :offset"),
+        {"user_id": user_id, "from_date" :from_date, "to_date" :to_date, "limit": per_page, "offset": offset}
+    ).fetchall()
+
+    # Get total count for pagination
+    total_count = db.session.execute(
+        text('''
+            SELECT COUNT(*) FROM trans
+            WHERE user_id = :user_id
+            AND date BETWEEN :from_date AND :to_date
+        '''),
+        {"user_id": user_id, "from_date": from_date, "to_date": to_date}
+    ).scalar()
+
+    total_pages = (total_count + per_page - 1) // per_page  # Calculate total number of pages
+
+    return trans_db, to_date,from_date, total_pages, page
+
 '''def query_gemini(prompt, user_data):
     enriched_prompt = prompt
     if user_data:
@@ -349,9 +391,9 @@ def get_user_data(user_id):
 def page_not_found(error):
     return render_template('error_handle.html', error_code = "404", error_description = "We can't find that page."), 404
 
-@app.errorhandler(500)
+'''@app.errorhandler(500)
 def internal_server_error(error):
-    return render_template('error_handle.html', error_code = "500", error_description="Something Went Wrong."), 500
+    return render_template('error_handle.html', error_code = "500", error_description="Something Went Wrong."), 500'''
 
 @app.errorhandler(400)
 def session_expired(error):
@@ -361,9 +403,9 @@ def session_expired(error):
 def request_amount_exceed(error):
     return render_template('error_handle.html', error_code = "429", error_description= "You exceeded the Maximum amount of requests! Please Try Again Later"), 429
 
-@app.errorhandler(Exception)
+'''@app.errorhandler(Exception)
 def server_error(error):
-    return render_template('error_handle.html', error_code = "500", error_description = "Something went wrong."), 500
+    return render_template('error_handle.html', error_code = "500", error_description = "Something went wrong."), 500'''
 
 @app.route("/", methods=["GET"])
 def index():
@@ -792,6 +834,12 @@ def home():
                     score_txt = "Below Target"
                 else:
                     score_txt = "On Target"
+
+                db.session.execute(
+                    text("UPDATE target SET score = :score WHERE user_id = :user_id AND mounth = :mounth AND year = :year"),
+                    {"user_id" :user_id, "score":score,  "mounth" :mounth, "year" :year}
+                )
+                db.session.commit()
                 return render_template("home.html", total_favorite_currency = total_favorite_currency, favorite_currency=favorite_currency , user_photo_path=user_photo_path, score_txt=score_txt, score=score, target = target, form=CSRFForm())
         else:
             return render_template("home.html", total_favorite_currency = total_favorite_currency, favorite_currency=favorite_currency , user_photo_path=user_photo_path, form=CSRFForm())
@@ -996,44 +1044,8 @@ def show_trans():
 
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
-        from_date = request.args.get("from_date")
-        to_date = request.args.get("to_date")
-        page = int(request.args.get("page", 1))  # Default to page 1
-        per_page = 20  # Number of records per page
 
-        offset = (page - 1) * per_page
-
-        now = datetime.datetime.now()
-
-        first_day_current_month = now.replace(day=1)
-
-        if now.month == 12:
-            first_day_next_month = now.replace(year=now.year + 1, month=1, day=1)
-        else:
-            first_day_next_month = now.replace(month=now.month + 1, day=1)
-
-        if from_date is None:
-            from_date = first_day_current_month.date()
-
-        if to_date is None:
-            to_date = first_day_next_month.date()
-
-        trans_db = db.session.execute(
-            text("SELECT * FROM trans WHERE user_id = :user_id AND date BETWEEN :from_date AND :to_date ORDER BY date LIMIT :limit OFFSET :offset"),
-            {"user_id": user_id, "from_date" :from_date, "to_date" :to_date, "limit": per_page, "offset": offset}
-        ).fetchall()
-
-        # Get total count for pagination
-        total_count = db.session.execute(
-            text('''
-                SELECT COUNT(*) FROM trans
-                WHERE user_id = :user_id
-                AND date BETWEEN :from_date AND :to_date
-            '''),
-            {"user_id": user_id, "from_date": from_date, "to_date": to_date}
-        ).scalar()
-
-        total_pages = (total_count + per_page - 1) // per_page  # Calculate total number of pages
+        trans_db, to_date,from_date, total_pages, page = trans(user_id)    
     
         return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, to_date=to_date, from_date=from_date, total_pages=total_pages,page=page, form=CSRFForm())
 
@@ -1113,13 +1125,11 @@ def edit_trans():
             )
             db.session.commit()
 
-            trans_db = db.session.execute(
-                text("SELECT * FROM trans WHERE user_id = :user_id"),
-                {"user_id": user_id}
-            ).fetchall()
+            trans_db, to_date,from_date, total_pages, page = trans(user_id) 
+
             total_favorite_currency, favorite_currency = show_networth()
             total_favorite_currency = f"{total_favorite_currency:,.2f}"
-            return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
+            return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, to_date =to_date ,from_date=from_date, total_pages=total_pages, page=page, form=CSRFForm())
 
 @app.route("/delete_trans", methods=["POST"])
 def delete_trans():
@@ -1217,12 +1227,9 @@ def delete_trans():
         )
         db.session.commit()
 
-        trans_db = db.session.execute(
-            text("SELECT * FROM trans WHERE user_id = :user_id"),
-            {"user_id": user_id}
-        ).fetchall()
+        trans_db, to_date,from_date, total_pages, page = trans(user_id) 
 
-        return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
+        return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, page = page,total_pages=total_pages,to_date=to_date, from_date=from_date, form=CSRFForm())
 
 @app.route("/settings/personal_info", methods=["GET", "POST"])
 def personal_info():
@@ -2277,6 +2284,47 @@ def delete_trash_trans():
         ).fetchall()
 
         return render_template("trash_trans.html",user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, trash_trans_data=trash_trans_data, form=CSRFForm())
+
+@app.route("/show_scores_history", methods=["GET"])
+def show_scores_history():
+    if not session.get("logged_in"):
+        return redirect("/login_page")
+    else:
+        try:
+            user_photo_path = select_user_photo()
+        except OperationalError:
+            error = "Welcome Back"
+            return render_template('error.html', error=error, form=CSRFForm())
+        
+        total_favorite_currency, favorite_currency = show_networth()
+        total_favorite_currency = f"{total_favorite_currency:,.2f}"
+        user_id = session.get("user_id")
+
+        page = int(request.args.get("page", 1))  # Default to page 1
+        per_page = 20  # Number of records per page
+
+        offset = (page - 1) * per_page
+
+        target_history = db.session.execute(
+            text("SELECT target, mounth, year, score FROM target WHERE user_id = :user_id ORDER BY target_id DESC LIMIT :limit OFFSET :offset"),
+            {"user_id":user_id, "limit":per_page, "offset":offset}
+        ).fetchall()
+        
+        if not target_history:
+            target_history = []
+
+        # Get total count for pagination
+        total_count = db.session.execute(
+            text('''
+                SELECT COUNT(*) FROM target
+                WHERE user_id = :user_id
+            '''),
+            {"user_id": user_id}
+        ).scalar()
+
+        total_pages = (total_count + per_page - 1) // per_page  # Calculate total number of pages
+
+        return render_template("show_scores_history.html", target_history=target_history, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, total_pages=total_pages,page=page, form=CSRFForm())
 
 @app.route("/version")
 def version():

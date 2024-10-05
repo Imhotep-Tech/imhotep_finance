@@ -95,14 +95,12 @@
              <!-- Pagination Controls -->
              <div class="pagination">
                 <div class="pagination-controls">
-                    <!-- Previous Page Button -->
                     {% if page > 1 %}
                         <a href="{{ url_for('show_trans', page=page-1, from_date=from_date, to_date=to_date) }}" class="btn btn_page">Prev</a>
                     {% else %}
                         <span class="btn disabled btn_page">Prev</span>
                     {% endif %}
-                    
-                    <!-- Dropdown Menu for Page Selection -->
+            
                     <select id="page-selector" onchange="updatePage()">
                         {% for p in range(1, total_pages + 1) %}
                             <option value="{{ url_for('show_trans', page=p, from_date=from_date, to_date=to_date) }}" {% if p == page %}selected{% endif %}>
@@ -110,8 +108,7 @@
                             </option>
                         {% endfor %}
                     </select>
-
-                    <!-- Next Page Button -->
+            
                     {% if page < total_pages %}
                         <a href="{{ url_for('show_trans', page=page+1, from_date=from_date, to_date=to_date) }}" class="btn btn_page">Next</a>
                     {% else %}
