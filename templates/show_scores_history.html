@@ -1,0 +1,64 @@
+{% extends "layout.html" %}
+
+{% block body %}
+    {% include 'nav.html' %}
+    <body>
+        <div class="container" style="flex-grow: 1; padding-top: 80px; overflow: auto;">
+            <div class="message-container">
+                {% if error %}
+                <div class="error-message">{{ error }}</div>
+                {% endif %}
+            </div>
+
+            <div class="table-container" style="flex-grow: 1; overflow: auto;">
+                <table class="c">
+                    <thead>
+                        <tr>
+                            <th>Mounth</th>
+                            <th>Year</th>
+                            <th>Target</th>
+                            <th>Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for mounth in target_history %}
+                            <tr>
+                                <td>{{ mounth.mounth }}</td>
+                                <td>{{ mounth.year }}</td>
+                                <td>{{ mounth.target }}</td>
+                                <td>{{ "{:,.2f}".format(mounth.score|float) }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+             <!-- Pagination Controls -->
+             <div class="pagination">
+                <div class="pagination-controls">
+                    <!-- Previous Page Button -->
+                    {% if page > 1 %}
+                        <a href="{{ url_for('show_scores_history', page=page-1)}}" class="btn btn_page">Prev</a>
+                    {% else %}
+                        <span class="btn disabled btn_page">Prev</span>
+                    {% endif %}
+                    
+                    <!-- Dropdown Menu for Page Selection -->
+                    <select id="page-selector" onchange="updatePage()">
+                        {% for p in range(1, total_pages + 1) %}
+                            <option value="{{ url_for('show_scores_history', page=p) }}" {% if p == page %}selected{% endif %}>
+                                Page {{ p }}
+                            </option>
+                        {% endfor %}
+                    </select>
+
+                    <!-- Next Page Button -->
+                    {% if page < total_pages %}
+                        <a href="{{ url_for('show_scores_history', page=page+1) }}" class="btn btn_page">Next</a>
+                    {% else %}
+                        <span class="btn disabled btn_page">Next</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </body>
+{% endblock %}
