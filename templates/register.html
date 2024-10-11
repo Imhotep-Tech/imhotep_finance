@@ -2,14 +2,14 @@
 
 {% block body %}
 <div class="form-container">
-    
+
     <div class="message-container">
         {% if error %}
             <div class="error-message">
                 {{ error }} <a href="/login_page">Sign in</a>
             </div>
         {% endif %}
-        
+
         {% if error_existing %}
           <div class="error-message">
               {{ error_existing }}</a>
@@ -29,12 +29,12 @@
         <span class="checkmark">Show password</span>
       </label>
       <p class="page-link"></p>
-      <button class="form-btn"> 
+      <button class="form-btn">
         <i class="fas fa-user-plus"></i> Register
       </button>
 
     </form>
-    <a href="/register_google" style="color: white; text-decoration:none;">
+    <a href="/register_google" class="google-link" text-decoration:none;">
       <div class="google-login-button">
           <svg stroke="currentColor" fill="currentColor" stroke-width="0" version="1.1" x="0px" y="0px" class="google-icon" viewBox="0 0 48 48" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
             <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12

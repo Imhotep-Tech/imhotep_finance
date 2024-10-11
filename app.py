@@ -534,8 +534,15 @@ def authorize():
             {"user_mail": user_mail}
         ).fetchall()
         if existing_mail:
-            error_existing = "Mail is already in use. Please choose another one."
-            return render_template("login.html", error=error_existing, form=CSRFForm())
+            user = db.session.execute(
+                text("SELECT user_id FROM users WHERE LOWER(user_mail) = :user_mail"),
+                {"user_mail": user_mail}
+            ).fetchone()[0]
+
+            session["logged_in"] = True
+            session["user_id"] = user
+            session.permanent = True
+            return redirect("/home")
 
         session["user_mail"] = user_mail
         session["user_mail_verify"] = user_mail_verify
