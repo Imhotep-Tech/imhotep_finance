@@ -3,3 +3,4 @@ imhotep_finance_env/
 flask_session/
 __pycache__/
 .vscode/
+send_new_version_mail.py
