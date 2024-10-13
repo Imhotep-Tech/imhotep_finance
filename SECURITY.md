@@ -19,7 +19,7 @@ We appreciate your help in keeping our application secure. If you discover a sec
 - We will acknowledge receipt of your report within 1-3 business days. We will then work to investigate the issue and provide you with an update within 2 more days maximum.
 - If the vulnerability is confirmed, we will prioritize a fix and aim to release a security patch within 5 business days for supported versions.  We may also choose to disclose the vulnerability publicly after a fix is available.
 - We will not disclose your identity without your permission, unless required by law.
-- 
+
 ## Additional Notes:
 
 - We do not offer bounties for vulnerability reports.
