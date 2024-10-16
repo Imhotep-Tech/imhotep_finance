@@ -865,6 +865,7 @@ def deposit():
         except OperationalError:
             error = "Welcome Back"
             return render_template('error.html', error=error, form=CSRFForm())
+        
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         if request.method == "GET":
@@ -872,7 +873,7 @@ def deposit():
         else:
 
             date = request.form.get("date")
-            amount = int(request.form.get("amount"))
+            amount = float(request.form.get("amount"))
             currency = request.form.get("currency")
             user_id = session.get("user_id")
             trans_details = request.form.get("trans_details")
@@ -919,7 +920,7 @@ def deposit():
 
             if networth_db:
                 networth_id = networth_db[0]
-                total = int(networth_db[1])
+                total = float(networth_db[1])
 
                 new_total = total + amount
                 db.session.execute(
@@ -955,9 +956,8 @@ def withdraw():
             return render_template("withdraw.html", currency_all = currency_all, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
 
         else:
-
             date = request.form.get("date")
-            amount = int(request.form.get("amount"))
+            amount = float(request.form.get("amount"))
             currency = request.form.get("currency")
             user_id = session.get("user_id")
             trans_details = request.form.get("trans_details")
@@ -1007,7 +1007,7 @@ def withdraw():
                     {"user_id": user_id, "currency": currency}
                 ).fetchone()
                 networth_id = networth_db[0]
-                total = int(networth_db[1])
+                total = float(networth_db[1])
 
                 new_total = total - amount
                 db.session.execute(
@@ -1096,7 +1096,7 @@ def edit_trans():
                 {"trans_key" :trans_key}
             ).fetchone()
 
-            amount_db = int(amount_currency_db[0])
+            amount_db = float(amount_currency_db[0])
             status_db = amount_currency_db[2]
 
             total_db = db.session.execute(
@@ -1104,15 +1104,15 @@ def edit_trans():
                 {"user_id" :user_id, "currency" :currency}
             ).fetchone()[0]
 
-            total_db = int(total_db)
+            total_db = float(total_db)
 
             if status_db == "withdraw":
                 total_db += amount_db
-                total = total_db - int(amount)
+                total = total_db - float(amount)
 
             elif status_db == "deposit":
                 total_db -= amount_db
-                total = total_db + int(amount)
+                total = total_db + float(amount)
 
             if total < 0:
                 error = "you don't have enough money from this currency!"
@@ -1173,17 +1173,19 @@ def delete_trans():
         ).fetchone()[0]
 
         if trans_status_db == "deposit":
-            total = total_db - int(amount_db)
+            total = total_db - float(amount_db)
             if total < 0:
                 error = "You can't delete this transaction"
                 trans_db = db.session.execute(
                     text("SELECT * FROM trans WHERE user_id = :user_id"),
                     {"user_id": user_id}
                 ).fetchall()
-                return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, error = error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
+                trans_db, to_date,from_date, total_pages, page = trans(user_id) 
+
+                return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, page = page,total_pages=total_pages,to_date=to_date, from_date=from_date,error=error, form=CSRFForm())
 
         elif trans_status_db == "withdraw":
-            total = total_db + int(amount_db)
+            total = total_db + float(amount_db)
 
         trans_data_db = db.session.execute(
                 text("SELECT currency, date, amount, trans_status, trans_details, trans_details_link FROM trans WHERE user_id = :user_id AND trans_key = :trans_key"),
@@ -1638,7 +1640,7 @@ def update_target():
             text("SELECT * FROM target WHERE user_id = :user_id AND mounth = :mounth AND year = :year"),
             {"user_id" :user_id, "mounth" : mounth, "year":year}
         ).fetchall()[0]
-        print(target_db)
+
         done = "Your Target have been updated"
         return render_template("update_target.html", total_favorite_currency=total_favorite_currency,favorite_currency=favorite_currency, done=done,user_photo_path=user_photo_path, target_db=target_db, form=CSRFForm())
 
@@ -1763,7 +1765,7 @@ def check_wish():
                 {"user_id" :user_id, "currency" :currency}
             ).fetchone()[0]
 
-            if int(total_db) < int(amount) and status == "pending":
+            if float(total_db) < float(amount) and status == "pending":
                 error = "You don't have on your balance this currency!"
                 year, wishlist_db = wishlist_page(user_id)
                 all_years = select_years_wishlist(user_id)
@@ -1780,7 +1782,7 @@ def check_wish():
                     trans_key = 1
 
                 if status == "pending":
-                    new_total = int(total_db) - int(amount)
+                    new_total = float(total_db) - float(amount)
                     new_status = "done"
 
                     try:
@@ -1822,7 +1824,7 @@ def check_wish():
 
                 elif status == "done":
                     new_status = "pending"
-                    new_total = int(total_db) + int(amount)
+                    new_total = float(total_db) + float(amount)
 
                     trans_key = db.session.execute(
                         text("SELECT trans_key FROM wishlist WHERE wish_key = :wish_key"),
@@ -2243,9 +2245,9 @@ def trash_trans():
             ).fetchone()[0]
 
             if trans_status == "deposit":
-                total = total_db + int(amount)
+                total = total_db + float(amount)
             elif trans_status == "withdraw":
-                total = total_db - int(amount)
+                total = total_db - float(amount)
 
             db.session.execute(
                 text("UPDATE networth SET total = :total WHERE user_id = :user_id AND currency = :currency"),
