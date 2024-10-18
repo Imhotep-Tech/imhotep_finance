@@ -84,9 +84,15 @@ csp = {
         "https://cdn.jsdelivr.net",  # Allow Bootstrap CSS
         "https://cdnjs.cloudflare.com"  # Allow Font Awesome
     ],
-    'img-src': ["'self'"],  # Add any other domains as necessary
+    'font-src': [
+        "'self'", 
+        "https://cdnjs.cloudflare.com",  # Allow Font Awesome fonts
+        "https://fonts.gstatic.com"  # If using Google Fonts
+    ],
+    'img-src': ["'self'", "data:"],  # Add any other domains as necessary
     'connect-src': ["'self'"],  # Add any other domains for AJAX calls if necessary
 }
+
 
 # Set up Talisman with the CSP configuration
 Talisman(app, content_security_policy=csp)
