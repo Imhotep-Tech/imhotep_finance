@@ -17,7 +17,7 @@
         <input type="hidden" name="user_id" value="{ user_id }">
         <input type="password" class="input" placeholder="Old Password" name="check_pass" id = "password" required="">
         <label for="password-toggle" class="password-toggle-btn">
-            <input type="checkbox" id="password-toggle" onclick="togglePasswordVisibility()">
+            <input type="checkbox" id="password-toggle" onclick="togglePasswordVisibility_all()">
             <span class="checkmark">Show password</span>
           </label>
         <p class="page-link"></p>
@@ -26,14 +26,5 @@
       </button>
     </form>
   </div>
-  <script>
-    function togglePasswordVisibility() {
-      var passwordInput = document.getElementById("password");
-      if (passwordInput.type === "password") {
-        passwordInput.type = "text";
-      } else {
-        passwordInput.type = "password";
-      }
-    }
-    </script>
+
 {% endblock %}

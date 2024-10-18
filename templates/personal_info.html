@@ -31,7 +31,7 @@
         {% endif %}
 
         <br>
-        <button id="toggle-dark-mode" class="btn btn-outline-secondary">Dark / Light Mode</button>
+        <button id="toggleDarkMode" class="btn btn-outline-secondary">Dark / Light Mode</button>
         <br>
         <form action="/settings/personal_info" method="post" class="form">
             {{ form.hidden_tag() }}
@@ -45,9 +45,5 @@
             </button>
         </form>
     </div>
-    <script>
-        function submitForm() {
-            document.getElementById("upload-form").submit();
-        }
-    </script>
+
 {% endblock %}

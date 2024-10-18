@@ -52,32 +52,4 @@
       </a>
   </div>
 
-  <script>
-    function validatePassword() {
-        var password = document.getElementById("password").value;
-        var confirmPassword = document.getElementById("confirm_password").value;
-
-        if (password !== confirmPassword) {
-            alert("Passwords do not match!");
-            return false;
-        }
-        return true;
-    }
-
-function togglePasswordVisibility_all() {
-  var passwordInput = document.getElementById("password");
-  var confirm_passwordInput = document.getElementById("confirm_password");
-  if (passwordInput.type === "password") {
-    passwordInput.type = "text";
-  } else {
-    passwordInput.type = "password";
-  }
-
-  if (confirm_passwordInput.type === "password") {
-    confirm_passwordInput.type = "text";
-  } else {
-    confirm_passwordInput.type = "password";
-  }
-}
-</script>
 {% endblock %}

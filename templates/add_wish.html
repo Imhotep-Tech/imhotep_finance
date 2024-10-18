@@ -203,71 +203,29 @@
             <button class="btn-teal" type="submit">Submit</button>
         </div>
     </form>
-
     <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const yearSelect = document.getElementById('yearSelect');
-    const currentYear = new Date().getFullYear();
-    const startYear = currentYear - 50;
-    const endYear = currentYear + 50;
+                const currencySelect1 = document.getElementById('CurrencySelect1');
 
-    for (let year = startYear; year <= endYear; year++) {
-        const option = document.createElement('option');
-        option.value = year;
-        option.textContent = year;
-        if (year === currentYear) {
-            option.selected = true;
-        }
-        yearSelect.appendChild(option);
-    }
+const originalOptions1 = [...currencySelect1.options];
 
-    const searchInput1 = document.getElementById('searchInput1');
-    const currencySelect1 = document.getElementById('CurrencySelect1');
-    const originalOptions1 = [...currencySelect1.options];
-
-    searchInput1.addEventListener('input', function() {
-        filterOptions(searchInput1, currencySelect1, originalOptions1);
-    });
-
-    function filterOptions(searchInput, currencySelect, originalOptions) {
-        const searchText = searchInput.value.toLowerCase();
-        currencySelect.innerHTML = '';
-
-        const filteredOptions = originalOptions.filter(option => {
-            const optionText = option.textContent.toLowerCase();
-            return optionText.includes(searchText);
-        });
-
-        filteredOptions.forEach(option => {
-            currencySelect.appendChild(option);
-        });
-
-        if (filteredOptions.length === 0) {
-            const defaultOption = document.createElement('option');
-            defaultOption.disabled = true;
-            defaultOption.selected = true;
-            defaultOption.textContent = 'No Match';
-            currencySelect.appendChild(defaultOption);
-        }
-    }
+// Event listeners for the input fields
+searchInput1.addEventListener('input', () => {
+    filterOptions(searchInput1, currencySelect1, originalOptions1);
 });
 
 document.addEventListener("DOMContentLoaded", function () {
-            const doctorCategory = "{{ favorite_currency }}"; // Fetch the doctor's category
+    const doctorCategory = "{{ favorite_currency }}";
 
-            const selectElement = document.getElementById("CurrencySelect1");
-            const options = selectElement.options;
+    const selectElement = document.getElementById("CurrencySelect1");
+    const options = selectElement.options;
 
-            for (let i = 0; i < options.length; i++) {
-                if (options[i].value === doctorCategory) {
-                    options[i].selected = true;
-                    break;
-                }
-            }
-        });
-  document.getElementById('submit-form').addEventListener('submit', function() {
-      document.getElementById('loading-overlay').style.display = 'flex';
-  });
-
+    for (let i = 0; i < options.length; i++) {
+        if (options[i].value === doctorCategory) {
+            options[i].selected = true;
+            break;
+        }
+    }
+});
     </script>
+
 {% endblock %}

@@ -104,70 +104,9 @@
             </div>
         </div>
     </body>
+
     <script>
-                        const searchInput = document.getElementById('searchInput');
-        const YearSelect = document.getElementById('YearSelect');
-
-        const originalOptions1 = [...YearSelect.options];
-
-        function filterOptions(searchInput, YearSelect, originalOptions) {
-            const searchText = searchInput.value.toLowerCase();
-            YearSelect.innerHTML = '';
-
-            const filteredOptions = originalOptions.filter(option => {
-                const optionText = option.textContent.toLowerCase();
-                return optionText.includes(searchText);
-            });
-
-            filteredOptions.forEach(option => {
-                YearSelect.appendChild(option);
-            });
-
-            if (filteredOptions.length === 0) {
-                const defaultOption = document.createElement('option');
-                defaultOption.disabled = true;
-                defaultOption.selected = true;
-                defaultOption.textContent = 'No Match';
-                YearSelect.appendChild(defaultOption);
-            }
-        }
-
-        searchInput1.addEventListener('input', () => {
-            filterOptions(searchInput1, YearSelect, originalOptions1);
-        });
-
-
-        document.addEventListener("DOMContentLoaded", function () {
-            const doctorCategory = "{{ year }}";
-
-            const selectElement = document.getElementById("YearSelect");
-            const options = selectElement.options;
-
-            for (let i = 0; i < options.length; i++) {
-                if (options[i].value === doctorCategory) {
-                    options[i].selected = true;
-                    break;
-                }
-            }
-        });
-
-        document.addEventListener("DOMContentLoaded", function () {
-            const selectElement = document.getElementById("YearSelect");
-            selectElement.addEventListener("change", function () {
-                document.getElementById("filterForm").submit();
-            });
-
-            // Optional: Pre-select the year if it matches the current filter
-            const selectedYear = "{{ year }}";
-            if (selectedYear) {
-                const options = selectElement.options;
-                for (let i = 0; i < options.length; i++) {
-                    if (options[i].value === selectedYear) {
-                        options[i].selected = true;
-                        break;
-                    }
-                }
-            }
-        });
+        // Initialize dropdown filtering and form submission
+        initializeDropdown('searchInput1', 'YearSelect', '{{ year }}', 'filterForm');
     </script>
 {% endblock %}
