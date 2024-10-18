@@ -41,8 +41,6 @@ sess = Session(app)
 def refresh_session():
     session.permanent = True  # Keep the session permanent for every request
 
-Talisman(app, content_security_policy=None)
-
 #define the mail to send the verification code and the forget password
 app.config['MAIL_SERVER']='smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
@@ -72,13 +70,26 @@ app.config.update(
     SESSION_COOKIE_SECURE=True  # Ensure cookies are only sent over HTTPS
 )
 
+# Define your CSP policy
 csp = {
     'default-src': "'self'",
-    'script-src': ["'self'", "https://ajax.googleapis.com"],  # Allow Google-hosted scripts
-    'style-src': ["'self'", "'unsafe-inline'", "https://stackpath.bootstrapcdn.com"],  # Added Bootstrap CDN
-    'img-src': ["'self'", "https://my-images.com"],  # Custom image host
-    'connect-src': ["'self'", "https://api.example.com"],  # API calls
+    'script-src': [
+        "'self'",
+        "https://cdn.jsdelivr.net",  # Allow Bootstrap and Font Awesome
+        "'unsafe-inline'"  # Allow inline scripts (needed for some Bootstrap features)
+    ],
+    'style-src': [
+        "'self'",
+        "'unsafe-inline'",  # Allow inline styles (necessary for Bootstrap)
+        "https://cdn.jsdelivr.net",  # Allow Bootstrap CSS
+        "https://cdnjs.cloudflare.com"  # Allow Font Awesome
+    ],
+    'img-src': ["'self'"],  # Add any other domains as necessary
+    'connect-src': ["'self'"],  # Add any other domains for AJAX calls if necessary
 }
+
+# Set up Talisman with the CSP configuration
+Talisman(app, content_security_policy=csp)
 
 oauth = OAuth(app)
 google = oauth.register(
