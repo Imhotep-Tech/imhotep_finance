@@ -228,28 +228,26 @@ function preselectCurrency(selectElementId, favoriteCurrency) {
     }
 }
 
-
+// Event listeners
 document.addEventListener("DOMContentLoaded", function () {
+    const favoriteCurrency = "{{ favorite_currency }}"; // Assuming this is passed in the template
+
     const searchInput1 = document.getElementById('searchInput1');
     const currencySelect1 = document.getElementById('CurrencySelect1');
-
     const originalOptions1 = [...currencySelect1.options];
 
-    // Event listeners for the input fields
+    // Filter options on search input
     searchInput1.addEventListener('input', () => {
         filterOptions(searchInput1, currencySelect1, originalOptions1);
     });
 
-    const doctorCategory = "{{ favorite_currency }}";
-    const options = currencySelect1.options;
+    // Set default date
+    setTodayDate('dateInput');
 
-    for (let i = 0; i < options.length; i++) {
-        if (options[i].value === doctorCategory) {
-            options[i].selected = true;
-            break;
-        }
-    }
+    // Pre-select favorite currency
+    preselectCurrency('CurrencySelect1', favoriteCurrency);
 });
+
 
 // Pre-select a value in a dropdown based on a value passed from the server
 function preSelectValue(selectElement, value) {
