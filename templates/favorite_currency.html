@@ -187,44 +187,17 @@
         </div>
     </form>
     <script>
-        const searchInput = document.getElementById('searchInput');
         const currencySelect1 = document.getElementById('CurrencySelect1');
 
         const originalOptions1 = [...currencySelect1.options];
-
-        function filterOptions(searchInput, currencySelect, originalOptions) {
-            const searchText = searchInput.value.toLowerCase();
-            currencySelect.innerHTML = '';
-
-            // Filter from original options
-            const filteredOptions = originalOptions.filter(option => {
-                const optionText = option.textContent.toLowerCase();
-                return optionText.includes(searchText);
-            });
-
-            // Add filtered options to the select dropdown
-            filteredOptions.forEach(option => {
-                currencySelect.appendChild(option);
-            });
-
-            // If no options match the filter, re-add the default disabled option
-            if (filteredOptions.length === 0) {
-                const defaultOption = document.createElement('option');
-                defaultOption.disabled = true;
-                defaultOption.selected = true;
-                defaultOption.textContent = 'No Match';
-                currencySelect.appendChild(defaultOption);
-            }
-        }
 
         // Event listeners for the input fields
         searchInput1.addEventListener('input', () => {
             filterOptions(searchInput1, currencySelect1, originalOptions1);
         });
 
-
         document.addEventListener("DOMContentLoaded", function () {
-            const doctorCategory = "{{ favorite_currency }}"; // Fetch the doctor's category
+            const doctorCategory = "{{ favorite_currency }}";
 
             const selectElement = document.getElementById("CurrencySelect1");
             const options = selectElement.options;

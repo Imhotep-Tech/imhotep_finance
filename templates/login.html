@@ -35,7 +35,7 @@
       <div class="password-container">
         <input type="password" id="password" class="input" placeholder="Password" name="user_password" required=""><br><br>
         <label for="password-toggle" class="password-toggle-btn">
-          <input type="checkbox" id="password-toggle" onclick="togglePasswordVisibility()">
+          <input type="checkbox" id="password-toggle" onclick="togglePasswordVisibility_all()">
           <span class="checkmark">Show password</span>
         </label>
       </div>
@@ -69,20 +69,5 @@
         </div>
       </a>
 </div>
-
-<script>
-  document.getElementById('login-form').addEventListener('submit', function() {
-      document.getElementById('loading-overlay').style.display = 'flex';
-  });
-
-  function togglePasswordVisibility() {
-  var passwordInput = document.getElementById("password");
-  if (passwordInput.type === "password") {
-    passwordInput.type = "text";
-  } else {
-    passwordInput.type = "password";
-  }
-}
-</script>
 
 {% endblock %}
