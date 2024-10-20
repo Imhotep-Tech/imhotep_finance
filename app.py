@@ -76,7 +76,8 @@ csp = {
     'script-src': [
         "'self'",
         "https://cdn.jsdelivr.net",  # Allow Bootstrap and Font Awesome
-        "'unsafe-inline'"  # Allow inline scripts (needed for some Bootstrap features)
+        "https://cdn.tailwindcss.com",  # Allow Tailwind CSS CDN
+        "'unsafe-inline'",  # Allow inline scripts (needed for some Bootstrap features)
     ],
     'style-src': [
         "'self'",
