@@ -129,27 +129,16 @@ def send_verification_mail_code(user_mail):
 
 def set_currency_session(favorite_currency):
     primary_api_key = os.getenv('EXCHANGE_API_KEY_PRIMARY')
-    secondary_api_key = os.getenv('EXCHANGE_API_KEY_SECONDARY')
-    third_api_key = os.getenv('EXCHANGE_API_KEY_THIRD')
 
     data = None
     try:
-        response = requests.get(f"https://v6.exchangerate-api.com/v6/{primary_api_key}/latest/{favorite_currency}")
+        response = requests.get(f"https://imhotepexchangeratesapi.pythonanywhere.com/latest_rates/{primary_api_key}/{favorite_currency}")
         data = response.json()
-        rate = data["conversion_rates"]
-    except:
-        try:
-            response = requests.get(f"https://v6.exchangerate-api.com/v6/{secondary_api_key}/latest/{favorite_currency}")
-            data = response.json()
-            rate = data["conversion_rates"]
-        except:
-            try:
-                response = requests.get(f"https://v6.exchangerate-api.com/v6/{third_api_key}/latest/{favorite_currency}")
-                data = response.json()
-                rate = data["conversion_rates"]
-            except requests.RequestException as e:
-                print(f"Failed to fetch exchange rates: {e}")
-                return None
+        rate = data["data"]
+
+    except requests.RequestException as e:
+        print(f"Failed to fetch exchange rates: {e}")
+        return None
 
     if rate:
         session["rate"] = rate
@@ -420,14 +409,14 @@ def request_amount_exceed(error):
 @app.errorhandler(405)
 def page_not_found(error):
     return render_template('error_handle.html', error_code = "405", error_description = "Method Not Allowed."), 405
-
+'''
 @app.errorhandler(Exception)
 def server_error(error):
     return render_template('error_handle.html', error_code = "500", error_description = "Something went wrong."), 500
 
 @app.errorhandler(500)
 def internal_server_error(error):
-    return render_template('error_handle.html', error_code = "500", error_description="Something Went Wrong."), 500
+    return render_template('error_handle.html', error_code = "500", error_description="Something Went Wrong."), 500'''
 
 @app.route("/", methods=["GET"])
 def index():
@@ -511,7 +500,7 @@ def mail_verification():
                 )
             db.session.commit()
             try:
-                msg = Message('Email Changed', sender='imhotepfinance@gmail.com', recipients=[user_mail])
+                msg = Message('Email Verified', sender='imhotepfinance@gmail.com', recipients=[user_mail])
                 msg.body = f"Welcome {user_username} To Imhotep Finacial Manager"
                 mail.send(msg)
             except:
