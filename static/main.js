@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+
 // Handle page load and unload
 window.addEventListener('load', function() {
     hideLoadingScreen(); // Ensure loading screen is hidden after initial load
