@@ -71,11 +71,16 @@ document.addEventListener('DOMContentLoaded', function() {
 function updatePage() {
     showLoadingScreen(); // Show loading screen immediately
     const page = document.getElementById("page-selector").value;
+    const allowedPages = ['home', 'about', 'contact']; // Add allowed values here
     
-    // Redirect after a brief delay to ensure loading screen is visible
-    setTimeout(function() {
-        window.location.href = `${page}`;
-    }, 500); // Adjust delay if needed
+    if (allowedPages.includes(page)) {
+        // Redirect after a brief delay to ensure loading screen is visible
+        setTimeout(function() {
+            window.location.href = `${page}`;
+        }, 500); // Adjust delay if needed
+    } else {
+        console.error('Invalid page selection');
+    }
 }
 
 setTimeout(function() {
