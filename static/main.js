@@ -69,8 +69,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 function updatePage() {
+    showLoadingScreen(); // Show loading screen immediately
     const page = document.getElementById("page-selector").value;
-    window.location.href = `${page}`;
+    
+    // Redirect after a brief delay to ensure loading screen is visible
+    setTimeout(function() {
+        window.location.href = `${page}`;
+    }, 500); // Adjust delay if needed
 }
 
 setTimeout(function() {
