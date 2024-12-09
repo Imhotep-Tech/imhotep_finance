@@ -324,7 +324,7 @@ body.dark-mode table.centered {
   object-fit: cover;
   border-radius: 50%;
   max-width: 50px;
-  max-height: 100px;
+  max-height: 50px;
 }
 
 /* Light mode footer styles */
