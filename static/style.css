@@ -320,7 +320,7 @@ body.dark-mode table.centered {
 }
 
 .user_img_nav {
-  aspect-ratio: 1/1;
+  aspect-ratio: 1/1 !important;
   object-fit: cover;
   border-radius: 50%;
   max-width: 50px;
