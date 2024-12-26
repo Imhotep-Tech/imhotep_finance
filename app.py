@@ -5,7 +5,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import secrets
 from sqlalchemy import text
 import requests
-from werkzeug.utils import secure_filename
 import os
 import datetime
 from datetime import date, timedelta
@@ -108,16 +107,23 @@ google = oauth.register(
     authorize_url='https://accounts.google.com/o/oauth2/auth',
     authorize_params=None,
     api_base_url='https://www.googleapis.com/oauth2/v1/',
-    userinfo_endpoint='https://openidconnect.googleapis.com/v1/userinfo',  # This is only needed if using openId to fetch user info
+    userinfo_endpoint='https://openidconnect.googleapis.com/v1/userinfo',
     client_kwargs={'scope': 'email profile'},
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration'
 )
 
 limiter = Limiter(
-    get_remote_address,  # This will limit based on the IP address of the requester
+    get_remote_address,
     app=app,
-    default_limits=["30 per day", "10 per hour"]  # Set default rate limits
+    default_limits=["30 per day", "10 per hour"]
 )
+
+@app.after_request
+def set_secure_headers(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    return response
 
 def send_verification_mail_code(user_mail):
     verification_code = secrets.token_hex(4)
@@ -126,6 +132,20 @@ def send_verification_mail_code(user_mail):
     mail.send(msg)
 
     session["verification_code"] = verification_code
+    session["verification_code_expiry"] = datetime.datetime.utcnow() + timedelta(minutes=10)  # Add expiry time
+
+@app.before_request
+def make_session_permanent():
+    session.permanent = True
+    app.permanent_session_lifetime = timedelta(minutes=30)  # Set session timeout
+
+@app.before_request
+def check_verification_code_expiry():
+    if "verification_code_expiry" in session:
+        if datetime.datetime.utcnow() > session["verification_code_expiry"]:
+            session.pop("verification_code", None)
+            session.pop("verification_code_expiry", None)
+
 
 def set_currency_session(favorite_currency):
     primary_api_key = os.getenv('EXCHANGE_API_KEY_PRIMARY')
@@ -2353,22 +2373,6 @@ def version():
 @app.route("/download")
 def download():
     return render_template("download.html", form=CSRFForm())
-
-@app.after_request
-def add_header(response):
-    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
-    return response
-
-@app.after_request
-def remove_csp_header(response):
-    if 'Content-Security-Policy' in response.headers:
-        del response.headers['Content-Security-Policy']
-    return response
-
-@app.after_request
-def set_content_type_options(response):
-    response.headers['X-Content-Type-Options'] = 'nosniff'
-    return response
 
 @app.route('/sitemap.xml')
 def sitemap():
