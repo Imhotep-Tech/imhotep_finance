@@ -116,7 +116,7 @@ google = oauth.register(
 limiter = Limiter(
     get_remote_address,  # This will limit based on the IP address of the requester
     app=app,
-    default_limits=["250 per day", "75 per hour"]  # Set default rate limits
+    default_limits=["30 per day", "10 per hour"]  # Set default rate limits
 )
 
 def send_verification_mail_code(user_mail):
@@ -634,7 +634,7 @@ def add_username_google_login():
     return render_template('add_password_google_login.html', form=CSRFForm())
 
 @app.route("/login", methods=["POST"])
-@limiter.limit("5 per minute")
+@limiter.limit("3 per minute")
 def login():
     user_username_mail = (request.form.get("user_username_mail").strip()).lower()
     user_password = request.form.get("user_password")
