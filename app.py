@@ -125,12 +125,7 @@ def send_verification_mail_code(user_mail):
     mail.send(msg)
 
     session["verification_code"] = verification_code
-    session["verification_code_expiry"] = datetime.datetime.utcnow() + timedelta(minutes=10)  # Add expiry time
-
-@app.before_request
-def make_session_permanent():
-    session.permanent = True
-    app.permanent_session_lifetime = timedelta(year=1)  # Set session timeout
+    session["verification_code_expiry"] = datetime.datetime.utcnow() + timedelta(minutes=10)  # Add expiry time # Set session timeout
 
 @app.before_request
 def check_verification_code_expiry():
