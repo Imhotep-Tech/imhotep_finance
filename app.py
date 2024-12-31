@@ -118,13 +118,6 @@ limiter = Limiter(
     default_limits=["30 per day", "10 per hour"]
 )
 
-@app.after_request
-def set_secure_headers(response):
-    response.headers['X-Content-Type-Options'] = 'nosniff'
-    response.headers['X-Frame-Options'] = 'DENY'
-    response.headers['X-XSS-Protection'] = '1; mode=block'
-    return response
-
 def send_verification_mail_code(user_mail):
     verification_code = secrets.token_hex(4)
     msg = Message('Email Verification', sender='imhotepfinance@gmail.com', recipients=[user_mail])
@@ -137,7 +130,7 @@ def send_verification_mail_code(user_mail):
 @app.before_request
 def make_session_permanent():
     session.permanent = True
-    app.permanent_session_lifetime = timedelta(minutes=30)  # Set session timeout
+    app.permanent_session_lifetime = timedelta(year=1)  # Set session timeout
 
 @app.before_request
 def check_verification_code_expiry():
@@ -2373,6 +2366,22 @@ def version():
 @app.route("/download")
 def download():
     return render_template("download.html", form=CSRFForm())
+
+@app.after_request
+def add_header(response):
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    return response
+
+@app.after_request
+def remove_csp_header(response):
+    if 'Content-Security-Policy' in response.headers:
+        del response.headers['Content-Security-Policy']
+    return response
+
+@app.after_request
+def set_content_type_options(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    return response
 
 @app.route('/sitemap.xml')
 def sitemap():
