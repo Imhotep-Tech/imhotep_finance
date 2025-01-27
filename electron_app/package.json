@@ -1,0 +1,68 @@
+{
+  "name": "imhotep_financial_manager",
+  "version": "4.3.0",
+  "description": "Imhotep Financial Manager Application",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "electron-builder --config=build.js",
+    "publish": "electron-builder publish"
+  },
+  "keywords": [],
+  "author": {
+    "name": "Karim Bassem",
+    "email": "karim@example.com"
+  },
+  "license": "Imhotep Tech",
+  "homepage": "https://imhotepf.pythonanywhere.com",
+  "devDependencies": {
+    "electron": "^31.7.2",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.yourdomain.imhotep_finance",
+    "productName": "Imhotep Financial Manager",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "package.json",
+      "icon1.ico",
+      "icon.png"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "icon1.ico",
+      "artifactName": "${productName}_Setup_${version}.${ext}"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "icon.icns"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb",
+        "rpm"
+      ],
+      "icon": "icon.png",
+      "category": "Utility",
+      "maintainer": "Imhotep Tech <imhoteptech@outlook.com>"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "Imhotep-Tech",
+        "repo": "imhotep_finance",
+        "releaseType": "release"
+      }
+    ]
+  },
+  "dependencies": {
+    "electron-updater": "^6.3.9"
+  }
+}
