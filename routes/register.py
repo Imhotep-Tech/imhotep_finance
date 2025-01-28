@@ -79,8 +79,17 @@ def mail_verification():
                 )
             db.session.commit()
             is_html = True
-            body = f"<h3>Your verification code is:</h3> <h1>{verification_code}</h1>"
-            success, error = send_mail(smtp_server , smtp_port , email_send , email_send_password , user_mail, "Email Verification" ,body, is_html)
+            body = f"""
+            <h3>Email Verification</h3>
+            <p>Dear User,</p>
+            <p>Thank you for registering with Imhotep Financial Manager. To complete your registration, please use the following verification code:</p>
+            <h1>{verification_code}</h1>
+            <p>Please enter this code in the verification page to activate your account.</p>
+            <p>If you did not request this email, please ignore it.</p>
+            <p>Best regards,</p>
+            <p>The Imhotep Financial Manager Team</p>
+            """
+            success, error = send_mail(smtp_server, smtp_port, email_send, email_send_password, user_mail, "Email Verification", body, is_html)
             if error:
                 print(error)
 

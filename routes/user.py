@@ -181,8 +181,17 @@ def check_pass_delete_user():
             verification_code = secrets.token_hex(4)
 
             is_html = True
-            body = f"<h3>Your verification code is:</h3> <h1>{verification_code}</h1>"
-            success, error = send_mail(smtp_server , smtp_port , email_send , email_send_password , user_mail, "Delete Verification" ,body, is_html)
+            body = f"""
+            <h3>Account Deletion Verification</h3>
+            <p>Dear User,</p>
+            <p>We have received a request to delete your account. To proceed with the deletion, please use the following verification code:</p>
+            <h1>{verification_code}</h1>
+            <p>Please enter this code on the verification page to confirm the deletion of your account.</p>
+            <p>If you did not request this action, please ignore this email and contact our support team immediately.</p>
+            <p>Best regards,</p>
+            <p>The Imhotep Financial Manager Team</p>
+            """
+            success, error = send_mail(smtp_server, smtp_port, email_send, email_send_password, user_mail, "Delete Verification", body, is_html)
             if error:
                 print(error)
 
@@ -230,8 +239,18 @@ def verify_delete_user():
             user_mail = request.form.get("user_mail")
 
             is_html = True
-            body = f"Accout Deleted"
-            success, error = send_mail(smtp_server , smtp_port , email_send , email_send_password , user_mail, "Accout Deleted" ,body, is_html)
+            body = f"""
+            <h3>Account Deleted</h3>
+            <p>Dear User,</p>
+            <p>We are sorry to see you go. Your account has been successfully deleted.</p>
+            <p>We would appreciate it if you could take a moment to let us know why you decided to delete your account. Your feedback is valuable to us and will help us improve our services.</p>
+            <p>Please click the link below to fill out a short feedback form:</p>
+            <p><a href="https://your-feedback-form-link.com">Feedback Form</a></p>
+            <p>If you have any questions or need further assistance, feel free to reach out to our support team.</p>
+            <p>Best regards,</p>
+            <p>The Imhotep Financial Manager Team</p>
+            """
+            success, error = send_mail(smtp_server, smtp_port, email_send, email_send_password, user_mail, "Account Deleted", body, is_html)
             if error:
                 print(error)
 
