@@ -20,6 +20,9 @@ settings_bp = Blueprint('settings', __name__)
 def personal_info():
     if not session.get("logged_in"):
         return redirect("/login_page")
+    elif session.get("logged_in") == 1:
+        error = "this is a trial you can't edit the account!"
+        return redirect("/home")
     else:
         try:
             user_photo_path = select_user_photo()
@@ -124,6 +127,9 @@ def personal_info():
 def mail_verification_change_mail():
     if not session.get("logged_in"):
         return redirect("/login_page")
+    elif session.get("logged_in") == 1:
+        error = "this is a trial you can't delete that account!"
+        return render_template("check_pass_delete_user.html", error=error, form=CSRFForm())
     else:
         try:
             user_photo_path = select_user_photo()
@@ -170,6 +176,9 @@ def mail_verification_change_mail():
 def upload_user_photo():
     if not session.get("logged_in"):
         return redirect("/login_page")
+    elif session.get("logged_in") == 1:
+        error = "this is a trial you can't delete that account!"
+        return render_template("check_pass_delete_user.html", error=error, form=CSRFForm())
     else:
 
         try:
@@ -202,8 +211,10 @@ def upload_user_photo():
 def delete_user_photo():
     if not session.get("logged_in"):
         return redirect("/login_page")
+    elif session.get("logged_in") == 1:
+        error = "this is a trial you can't delete that account!"
+        return render_template("check_pass_delete_user.html", error=error, form=CSRFForm())
     else:
-
         try:
             user_photo_path = select_user_photo()
         except OperationalError:
@@ -275,6 +286,9 @@ def favorite_currency():
 def security_check_password():
     if not session.get("logged_in"):
         return redirect("/login_page")
+    elif session.get("logged_in") == 1:
+        error = "this is a trial you can't delete that account!"
+        return render_template("check_pass_delete_user.html", error=error, form=CSRFForm())
     else:
         try:
             user_id = session.get("user_id")
@@ -300,6 +314,9 @@ def security_check_password():
 def security():
     if not session.get("logged_in"):
         return redirect("/login_page")
+    elif session.get("logged_in") == 1:
+        error = "this is a trial you can't delete that account!"
+        return render_template("check_pass_delete_user.html", error=error, form=CSRFForm())
     else:
 
         user_id = session.get("user_id")

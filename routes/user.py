@@ -143,6 +143,9 @@ def show_networth_details():
 def delete_user():
     if not session.get("logged_in"):
         return redirect("/login_page")
+    elif session.get("logged_in") == 1:
+        error = "this is a trial you can't delete that account!"
+        return render_template("check_pass_delete_user.html", error=error, form=CSRFForm())
     else:
         try:
             user_photo_path = select_user_photo()
@@ -158,6 +161,9 @@ def delete_user():
 def check_pass_delete_user():
     if not session.get("logged_in"):
         return redirect("/login_page")
+    elif session.get("logged_in") == 1:
+        error = "this is a trial you can't delete that account!"
+        return render_template("check_pass_delete_user.html", error=error, form=CSRFForm())
     else:
 
         try:
@@ -206,6 +212,9 @@ def check_pass_delete_user():
 def verify_delete_user():
     if not session.get("logged_in"):
         return redirect("/login_page")
+    elif session.get("logged_in") == 1:
+        error = "this is a trial you can't delete that account!"
+        return render_template("check_pass_delete_user.html", error=error, form=CSRFForm())
     else:
 
         verification_code = request.form.get("verification_code").strip()
