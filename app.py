@@ -10,6 +10,7 @@ from routes.settings import settings_bp
 from routes.transactions import transactions_bp
 from routes.user import user_bp
 from routes.wishlist import wishlist_bp
+from routes.before_sign import before_sign_bp
 
 #define the app
 def create_app():
@@ -26,6 +27,7 @@ def create_app():
     app.register_blueprint(transactions_bp)
     app.register_blueprint(user_bp)
     app.register_blueprint(wishlist_bp)
+    app.register_blueprint(before_sign_bp)
 
     return app
 
@@ -68,36 +70,36 @@ csp = {
 # Set up Talisman with the CSP configuration
 Talisman(app, content_security_policy=csp)
 
-# @app.errorhandler(404)
-# def page_not_found(error):
-#     return render_template('error_handle.html', error_code = "404", error_description = "We can't find that page."), 404
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template('error_handle.html', error_code = "404", error_description = "We can't find that page."), 404
 
-# @app.errorhandler(400)
-# def session_expired(error):
-#     return render_template('error_handle.html', error_code = "400", error_description= "Session Expired."), 400
+@app.errorhandler(400)
+def session_expired(error):
+    return render_template('error_handle.html', error_code = "400", error_description= "Session Expired."), 400
 
-# @app.errorhandler(429)
-# def request_amount_exceed(error):
-#     return render_template('error_handle.html', error_code = "429", error_description= "You exceeded the Maximum amount of requests! Please Try Again Later"), 429
+@app.errorhandler(429)
+def request_amount_exceed(error):
+    return render_template('error_handle.html', error_code = "429", error_description= "You exceeded the Maximum amount of requests! Please Try Again Later"), 429
 
-# @app.errorhandler(405)
-# def page_not_found(error):
-#     return render_template('error_handle.html', error_code = "405", error_description = "Method Not Allowed."), 405
+@app.errorhandler(405)
+def page_not_found(error):
+    return render_template('error_handle.html', error_code = "405", error_description = "Method Not Allowed."), 405
 
-# @app.errorhandler(Exception)
-# def server_error(error):
-#     return render_template('error_handle.html', error_code = "500", error_description = "Something went wrong."), 500
+@app.errorhandler(Exception)
+def server_error(error):
+    return render_template('error_handle.html', error_code = "500", error_description = "Something went wrong."), 500
 
-# @app.errorhandler(500)
-# def internal_server_error(error):
-#     return render_template('error_handle.html', error_code = "500", error_description="Something Went Wrong."), 500
+@app.errorhandler(500)
+def internal_server_error(error):
+    return render_template('error_handle.html', error_code = "500", error_description="Something Went Wrong."), 500
 
 @app.route("/", methods=["GET"])
 def index():
     if session.get("logged_in"):
         return redirect("/home")
     else:
-        return render_template("login.html", form=CSRFForm())
+        return redirect("/before_sign")
 
 @app.route("/version")
 def version():

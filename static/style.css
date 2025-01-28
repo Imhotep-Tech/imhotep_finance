@@ -592,3 +592,146 @@ body.dark-mode .google-link {
 .btn_page{
   width: 29%;
 }
+
+.copy-button:hover {
+  background-color: #0056b3;
+}
+
+.hero-section {
+background: linear-gradient(135deg, #007BFF, #00BFFF);
+color: white;
+padding: 100px 0;
+text-align: center;
+}
+
+.hero-section h1 {
+font-size: 3.5rem;
+font-weight: bold;
+margin-bottom: 20px;
+animation: fadeInDown 1s;
+}
+
+.hero-section p {
+font-size: 1.5rem;
+margin-bottom: 40px;
+animation: fadeInUp 1s;
+}
+
+.hero-section .btn {
+font-size: 1.2rem;
+padding: 10px 30px;
+margin: 10px;
+animation: fadeIn 2s;
+}
+
+.features-section {
+padding: 80px 0;
+background-color: #f8f9fa;
+}
+
+.features-section h2 {
+font-size: 2.5rem;
+margin-bottom: 60px;
+text-align: center;
+animation: fadeInDown 1s;
+}
+
+.feature-card {
+background: white;
+padding: 30px;
+border-radius: 10px;
+box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+text-align: center;
+transition: transform 0.3s ease;
+}
+
+.feature-card:hover {
+transform: translateY(-10px);
+}
+
+.feature-card i {
+font-size: 3rem;
+color: #007BFF;
+margin-bottom: 20px;
+}
+
+.feature-card h3 {
+font-size: 1.5rem;
+margin-bottom: 15px;
+}
+
+.feature-card p {
+font-size: 1rem;
+color: #666;
+}
+
+.api-demo-section {
+padding: 80px 0;
+background: linear-gradient(135deg, #00BFFF, #007BFF);
+color: white;
+text-align: center;
+}
+
+.api-demo-section h2 {
+font-size: 2.5rem;
+margin-bottom: 40px;
+animation: fadeInDown 1s;
+}
+
+.api-demo-section form {
+max-width: 600px;
+margin: 0 auto;
+animation: fadeInUp 1s;
+}
+
+.api-demo-section input {
+width: 45%;
+padding: 10px;
+margin: 10px;
+border: none;
+border-radius: 5px;
+}
+
+.api-demo-section button {
+padding: 10px 30px;
+border: none;
+border-radius: 5px;
+background: #D4AF37;
+color: white;
+font-size: 1rem;
+cursor: pointer;
+transition: background 0.3s ease;
+}
+
+.api-demo-section button:hover {
+background: #b38f2e;
+}
+
+.demo-response {
+background: rgba(255, 255, 255, 0.1);
+padding: 20px;
+border-radius: 10px;
+margin-top: 30px;
+animation: fadeIn 2s;
+}
+
+.demo-response pre {
+color: white;
+font-size: 1.2rem;
+}
+
+footer {
+background: #1B2631;
+color: white;
+padding: 40px 0;
+text-align: center;
+}
+
+footer a {
+color: #D4AF37;
+text-decoration: none;
+}
+
+footer a:hover {
+text-decoration: underline;
+}
