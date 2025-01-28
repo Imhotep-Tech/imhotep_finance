@@ -245,7 +245,7 @@ def verify_delete_user():
             <p>We are sorry to see you go. Your account has been successfully deleted.</p>
             <p>We would appreciate it if you could take a moment to let us know why you decided to delete your account. Your feedback is valuable to us and will help us improve our services.</p>
             <p>Please click the link below to fill out a short feedback form:</p>
-            <p><a href="https://your-feedback-form-link.com">Feedback Form</a></p>
+            <p><a href="https://forms.gle/FZVhQXnticjx16228">Feedback Form</a></p>
             <p>If you have any questions or need further assistance, feel free to reach out to our support team.</p>
             <p>Best regards,</p>
             <p>The Imhotep Financial Manager Team</p>
