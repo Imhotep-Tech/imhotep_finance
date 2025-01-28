@@ -109,6 +109,14 @@ def version():
 def download():
     return render_template("download.html", form=CSRFForm())
 
+@app.route("/terms")
+def terms():
+    return render_template("terms.html",form=CSRFForm())
+
+@app.route("/privacy")
+def privacy():
+    return render_template("privacy.html",form=CSRFForm())
+
 @app.after_request
 def add_header(response):
     response.headers['X-Frame-Options'] = 'SAMEORIGIN'
