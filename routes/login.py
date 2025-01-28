@@ -123,11 +123,19 @@ def forget_password():
 
             temp_password = secrets.token_hex(4)
             is_html = True
-            body = f"<h3>Your verification code is:</h3> <h1></h1>"
-            success, error = send_mail(smtp_server , smtp_port , email_send , email_send_password , user_mail, "Email Verification" ,body, is_html)
+            body = f"""
+            <h3>Temporary Password</h3>
+            <p>Dear User,</p>
+            <p>We have received a request to reset your password. Please use the following temporary password to log in to your account:</p>
+            <h1>{temp_password}</h1>
+            <p>After logging in, we recommend that you change your password immediately for security reasons.</p>
+            <p>If you did not request this email, please ignore it and contact our support team immediately.</p>
+            <p>Best regards,</p>
+            <p>The Imhotep Financial Manager Team</p>
+            """
+            success, error = send_mail(smtp_server, smtp_port, email_send, email_send_password, user_mail, "Temporary Password", body, is_html)
             if error:
                 print(error)
-
 
             hashed_password = generate_password_hash(temp_password)
             db.session.execute(

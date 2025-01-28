@@ -318,8 +318,16 @@ def security():
         db.session.commit()
 
         is_html = True
-        body = f"Your password has been changed"
-        success, error = send_mail(smtp_server , smtp_port , email_send , email_send_password , user_mail, "Email Verification" ,body, is_html)
+        body = f"""
+        <h3>Password Changed Successfully</h3>
+        <p>Dear User,</p>
+        <p>Your password has been successfully changed. If you did not request this change, please contact our support team immediately.</p>
+        <p>For your security, please do not share your password with anyone.</p>
+        <p>If you have any questions or need further assistance, feel free to reach out to our support team.</p>
+        <p>Best regards,</p>
+        <p>The Imhotep Financial Manager Team</p>
+        """
+        success, error = send_mail(smtp_server, smtp_port, email_send, email_send_password, user_mail, "Password Changed", body, is_html)
         if error:
             print(error)
 

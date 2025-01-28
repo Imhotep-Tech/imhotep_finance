@@ -104,8 +104,22 @@ def add_password_google_login():
     db.session.commit()
 
     is_html = True
-    body = f"<h3>Your verification code is:</h3> <h1></h1>"
-    success, error = send_mail(smtp_server , smtp_port , email_send , email_send_password , user_mail, "Email Verification" ,body, is_html)
+    body = f"""
+    <h3>Welcome to Imhotep Financial Manager, {user_username}!</h3>
+    <p>We are excited to have you on board. Imhotep Financial Manager is your go-to solution for managing your finances efficiently and effectively.</p>
+    <p>Here are some features you can explore:</p>
+    <ul>
+        <li>Track your expenses and income</li>
+        <li>Set financial goals</li>
+        <li>Generate financial reports</li>
+        <li>And much more!</li>
+    </ul>
+    <p>If you have any questions or need assistance, feel free to reach out to our support team.</p>
+    <p>Thank you for joining us, and we look forward to helping you achieve your financial goals.</p>
+    <p>Best regards,</p>
+    <p>The Imhotep Financial Manager Team</p>
+    """
+    success, error = send_mail(smtp_server, smtp_port, email_send, email_send_password, user_mail, "Welcome to Imhotep Financial Manager", body, is_html)
     if error:
         print(error)
 
