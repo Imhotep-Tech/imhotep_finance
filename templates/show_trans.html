@@ -96,21 +96,21 @@
              <div class="pagination">
                 <div class="pagination-controls">
                     {% if page > 1 %}
-                        <a href="{{ url_for('show_trans', page=page-1, from_date=from_date, to_date=to_date) }}" class="btn btn_page">Prev</a>
+                        <a href="{{ url_for('transactions.show_trans', page=page-1, from_date=from_date, to_date=to_date) }}" class="btn btn_page">Prev</a>
                     {% else %}
                         <span class="btn disabled btn_page">Prev</span>
                     {% endif %}
             
                     <select id="page-selector" onchange="updatePage()">
                         {% for p in range(1, total_pages + 1) %}
-                            <option value="{{ url_for('show_trans', page=p, from_date=from_date, to_date=to_date) }}" {% if p == page %}selected{% endif %}>
+                            <option value="{{ url_for('transactions.show_trans', page=p, from_date=from_date, to_date=to_date) }}" {% if p == page %}selected{% endif %}>
                                 Page {{ p }}
                             </option>
                         {% endfor %}
                     </select>
             
                     {% if page < total_pages %}
-                        <a href="{{ url_for('show_trans', page=page+1, from_date=from_date, to_date=to_date) }}" class="btn btn_page">Next</a>
+                        <a href="{{ url_for('transactions.show_trans', page=page+1, from_date=from_date, to_date=to_date) }}" class="btn btn_page">Next</a>
                     {% else %}
                         <span class="btn disabled btn_page">Next</span>
                     {% endif %}
