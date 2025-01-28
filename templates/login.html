@@ -48,6 +48,14 @@
         <i class="fas fa-sign-in-alt"></i> Login
       </button>
     </form>
+
+    <form action="/trial_login" method="POST">
+      {{ form.hidden_tag() }}
+      <button type="submit" class="form-btn">
+        <i class="fas fa-user"></i> Trial
+      </button>
+    </form>
+
     <a class="sign-up-label" href="/register_page">
         Don't have an account?<span class="sign-up-link">Sign up</span>
     </a>
