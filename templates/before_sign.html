@@ -44,6 +44,7 @@
         <p class="lead animate__animated animate__fadeInUp">Take control of your financial future with our comprehensive financial management tools.</p>
         <div class="mt-4">
             <form action="/trial_login" method="POST" class="d-inline">
+                {{ form.hidden_tag() }}
                 <button type="submit" class="btn btn-primary btn-lg me-2">Try Now</button>
             </form>
             <a href="/register_page" class="btn btn-outline-light btn-lg me-2">Create Account Now for Free</a>
