@@ -23,11 +23,13 @@
 
 <div class="form-container">
     <div>
-      <img src="{{ url_for('static', filename='imhotep_finance.jpeg') }}" 
+      <a href="https://imhotepf.pythonanywhere.com/">
+          <img src="{{ url_for('static', filename='imhotep_finance.jpeg') }}" 
           height="200" 
           width="auto" 
           alt="Imhotep Financial Manager"
           style="display: block; margin-left: auto; margin-right: auto;">
+      </a>
     </div>
     <form id="login-form" action="/login" method="POST" class="form">
       {{ form.hidden_tag() }}
@@ -46,13 +48,6 @@
       </p>
       <button type="submit" class="form-btn">
         <i class="fas fa-sign-in-alt"></i> Login
-      </button>
-    </form>
-
-    <form action="/trial_login" method="POST">
-      {{ form.hidden_tag() }}
-      <button type="submit" class="form-btn">
-        <i class="fas fa-user"></i> Trial
       </button>
     </form>
 
