@@ -18,6 +18,14 @@ def login_page():
     else:
         return render_template("login.html", form=CSRFForm())
 
+@login_bp.route("/trial_login", methods=["POST"])
+def trial_login():
+    # Assuming the test user has user_id = 1
+    test_user_id = 1
+    session["logged_in"] = True
+    session["user_id"] = test_user_id
+    session.permanent = True
+    return redirect("/home")
 
 @login_bp.route("/login", methods=["POST"])
 #@limiter.limit("3 per minute")
