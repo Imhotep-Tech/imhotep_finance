@@ -9,6 +9,7 @@ from config import CSRFForm
 
 wishlist_bp = Blueprint('wishlist', __name__)
 
+# a route to get the wishist by a specific year
 @wishlist_bp.route("/filter_year_wishlist", methods=["GET"])
 def filter_year_wishlist():
         if not session.get("logged_in"):
@@ -37,6 +38,7 @@ def filter_year_wishlist():
 
             return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
 
+#a route to add a wish to the database
 @wishlist_bp.route("/add_wish", methods=["GET", "POST"])
 def add_wish():
     if not session.get("logged_in"):
@@ -95,6 +97,8 @@ def add_wish():
             all_years = select_years_wishlist(user_id)
             return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, done = done, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
 
+# a route to check and uncheck a wish from the wishlist as done or not
+#also this route updates the transactions and the total networth of the user
 @wishlist_bp.route("/check_wish", methods=["POST"])
 def check_wish():
     if not session.get("logged_in"):
@@ -231,7 +235,7 @@ def check_wish():
             total_favorite_currency = f"{total_favorite_currency:,.2f}"
             return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, error = error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
 
-
+# a route to edit a wishlist that isn't completed yet
 @wishlist_bp.route("/edit_wish", methods=["GET", "POST"])
 def edit_wish():
     if not session.get("logged_in"):
@@ -277,6 +281,7 @@ def edit_wish():
             all_years = select_years_wishlist(user_id)
             return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
 
+#delete a wish that isn't completed yet
 @wishlist_bp.route("/delete_wish", methods=["POST"])
 def delete_wish():
     if not session.get("logged_in"):
@@ -338,6 +343,8 @@ def delete_wish():
         all_years = select_years_wishlist(user_id)
         return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
 
+#a route to show the current items on the trash of the wishlist
+# if it's a post request then it can restore an item from the trash
 @wishlist_bp.route("/trash_wishlist", methods=["GET", "POST"])
 def trash_wishlist():
     if not session.get("logged_in"):
@@ -409,6 +416,7 @@ def trash_wishlist():
 
             return render_template("trash_wishlist.html",user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, trash_wishlist_data=trash_wishlist_data, form=CSRFForm())
 
+# a route to delete something permenantly
 @wishlist_bp.route("/delete_trash_wishlist", methods=["POST"])
 def delete_trash_wishlist():
     if not session.get("logged_in"):

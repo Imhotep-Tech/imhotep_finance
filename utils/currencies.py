@@ -6,6 +6,7 @@ from extensions import db
 from sqlalchemy import text
 from flask_sqlalchemy import SQLAlchemy
 
+# set the currency every day to update the rates and save it on the session for better performance
 def set_currency_session(favorite_currency):
     primary_api_key = os.getenv('EXCHANGE_API_KEY_PRIMARY')
 
@@ -20,6 +21,7 @@ def set_currency_session(favorite_currency):
         return None
 
     if rate:
+        #if the rate is imported correctly from the api then save it to the session of the user
         session["rate"] = rate
         today = datetime.datetime.now().date()
         session["rate_date"] = today
@@ -27,6 +29,7 @@ def set_currency_session(favorite_currency):
         return rate
     return None
 
+#convert the currency to the fav currency of the user
 def convert_to_fav_currency(dictionary, user_id):
         favorite_currency = select_favorite_currency(user_id)
         today = datetime.datetime.now().date()
@@ -63,6 +66,7 @@ def convert_to_fav_currency(dictionary, user_id):
 
         return total_favorite_currency, favorite_currency
 
+#a function to show the networth of the user
 def show_networth():
     user_id = session.get("user_id")
     favorite_currency = select_favorite_currency(user_id)
@@ -90,6 +94,7 @@ def select_currencies(user_id):
 
     return(currency_all)
 
+#select the fav currency of a user
 def select_favorite_currency(user_id):
         favorite_currency = db.session.execute(
         text("SELECT favorite_currency FROM users WHERE user_id = :user_id"),

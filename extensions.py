@@ -15,8 +15,10 @@ limiter = Limiter(
     default_limits=["200 per day", "50 per hour"]  # Set default rate limits
 )
 
+#the db
 db = SQLAlchemy()
 
+#oauth of google
 oauth = OAuth()
 google = oauth.register(
     name='google',
@@ -32,6 +34,7 @@ google = oauth.register(
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration'
 )
 
+#defining the extentions on all of the app
 def init_extensions(app):
     sess.init_app(app)
     csrf.init_app(app)
