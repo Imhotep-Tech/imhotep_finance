@@ -1,37 +1,44 @@
-from flask import render_template, redirect, Flask, session, request, make_response, url_for, Blueprint
+from flask import render_template, redirect, session, request, Blueprint
 import secrets
 from sqlalchemy import text
 import datetime
 from sqlalchemy.exc import OperationalError
-from utils.user_info import select_user_data, select_user_photo
+from utils.user_info import select_user_photo
 from utils.currencies import show_networth, convert_to_fav_currency
 from utils.security import security_check, logout
-from config import CSRFForm, Config
+from config import CSRFForm
 from extensions import db
-from utils.send_mail import send_verification_mail_code, smtp_server, smtp_port, email_send, email_send_password
+from utils.send_mail import smtp_server, smtp_port, email_send, email_send_password
 from imhotep_mail import send_mail
 
 user_bp = Blueprint('user', __name__)
 
+# the home screen that shows a lot of info
 @user_bp.route("/home", methods=["GET"])
 def home():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
+
+        #gets the user photo
         try:
             user_photo_path = select_user_photo()
         except OperationalError:
             error = "Welcome Back"
             return render_template('error.html', error=error, form=CSRFForm())
 
+        #gets the user id and the total networth of the user
         user_id = session.get("user_id")
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
+
+        # gets the user target points
         target_db = db.session.execute(
             text("SELECT * FROM target WHERE user_id = :user_id"),
             {"user_id": user_id}
         ).fetchall()
 
+        #if the user has a target from the db
         if target_db:
             target_db = sorted(target_db, key=lambda x: (x[4], x[3]), reverse=True)
             target = target_db[0][2]
@@ -41,7 +48,8 @@ def home():
             mounth = now.month
             year = now.year
 
-            if mounth_db != mounth or year_db != year:
+            #if this is a new mounth with the year then add the new mounthly data to the database 
+            if mounth_db != mounth and year_db != year:
                 try:
                     last_target_id = db.session.execute(
                             text("SELECT MAX(target_id) FROM target")

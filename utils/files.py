@@ -1,5 +1,6 @@
 from config import Config
 
+# def a function to check if the file is form the allowed files that can be sent
 def allowed_file(filename):
     if "." in filename:
         filename_check = filename.rsplit('.', 1)[1].lower() in Config.ALLOWED_EXTENSIONS

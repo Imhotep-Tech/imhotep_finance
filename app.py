@@ -70,6 +70,8 @@ csp = {
 # Set up Talisman with the CSP configuration
 Talisman(app, content_security_policy=csp)
 
+#error handling
+
 @app.errorhandler(404)
 def page_not_found(error):
     return render_template('error_handle.html', error_code = "404", error_description = "We can't find that page."), 404
@@ -94,29 +96,37 @@ def server_error(error):
 def internal_server_error(error):
     return render_template('error_handle.html', error_code = "500", error_description="Something Went Wrong."), 500
 
+#the main route
 @app.route("/", methods=["GET"])
 def index():
+    #if logged in return to the home
     if session.get("logged_in"):
         return redirect("/home")
     else:
+        #if not logged in redirect to the before sign in page
         return redirect("/before_sign")
 
+#the version page
 @app.route("/version")
 def version():
     return render_template("version.html", form=CSRFForm())
 
+#the download page
 @app.route("/download")
 def download():
     return render_template("download.html", form=CSRFForm())
 
+#the terms and conditions page
 @app.route("/terms")
 def terms():
     return render_template("terms.html",form=CSRFForm())
 
+#the privacy page
 @app.route("/privacy")
 def privacy():
     return render_template("privacy.html",form=CSRFForm())
 
+#some headers for security
 @app.after_request
 def add_header(response):
     response.headers['X-Frame-Options'] = 'SAMEORIGIN'
@@ -133,6 +143,7 @@ def set_content_type_options(response):
     response.headers['X-Content-Type-Options'] = 'nosniff'
     return response
 
+#the sitemap of the webapp
 @app.route('/sitemap.xml')
 def sitemap():
     pages = []
