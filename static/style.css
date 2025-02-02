@@ -735,3 +735,32 @@ text-decoration: none;
 footer a:hover {
 text-decoration: underline;
 }
+
+/* Style for the report button */
+.btn-report, .btn-rate {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 16px;
+  color: white;
+  background-color: #007bff;
+  border: none;
+  border-radius: 5px;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+  margin: 10px;
+}
+
+.btn-report:hover, .btn-rate:hover {
+  background-color: #0056b3;
+}
+
+.footer-icon {
+  margin: 0 10px;
+  color: white;
+  font-size: 24px;
+  text-decoration: none;
+}
+
+.footer-icon:hover {
+  color: #007bff;
+}
