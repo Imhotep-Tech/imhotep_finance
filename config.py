@@ -2,6 +2,9 @@ import os
 from datetime import timedelta
 from flask_wtf import FlaskForm
 import logging
+from dotenv import load_dotenv
+
+load_dotenv()
 
 #the configs
 class Config:

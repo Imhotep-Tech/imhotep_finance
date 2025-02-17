@@ -1,6 +1,6 @@
-wsgi.py
 flask_session/
 __pycache__/
 .vscode/
 electron_app/node_modules/
 electron_app/dist/
+.env
