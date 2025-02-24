@@ -114,6 +114,11 @@ def version():
 #the download page
 @app.route("/download")
 def download():
+    """
+    The `download` function returns a rendered template for a download page with a CSRF form.
+    :return: The `download()` function is returning a rendered template called "download.html" along
+    with a form object `CSRFForm()`.
+    """
     return render_template("download.html", form=CSRFForm())
 
 #the terms and conditions page
@@ -146,6 +151,14 @@ def set_content_type_options(response):
 #the sitemap of the webapp
 @app.route('/sitemap.xml')
 def sitemap():
+    """
+    The function generates a sitemap.xml file for a Flask web application containing URLs and their last
+    modified dates.
+    :return: The code snippet provided is a Flask route that generates a sitemap.xml file for a website.
+    It collects URLs of all routes that support the GET method and have no arguments, along with the
+    last modified date set to ten days ago. The sitemap is then rendered using a template and returned
+    as a response with the Content-Type header set to "application/xml".
+    """
     pages = []
 
     ten_days_ago = (datetime.datetime.now() - datetime.timedelta(days=10)).date().isoformat()
