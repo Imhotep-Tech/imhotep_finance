@@ -1,16 +1,103 @@
 # Imhotep Financial Manager
-Financial manager webapp to manage your deposits and withdrawals and track your transactions and put your wishlist and set a financial target for every month.
 
-## Features
-- Deposite, withdraw your money easily. <br>
-- Track all your transactions. <br>
-- Make your wishlist. <br>
-- Set targets to save your money. <br>
-- Select your favorite currency.
+[![Project Status: Active](https://img.shields.io/badge/Project%20Status-Active-green.svg)](https://github.com/yourusername/imhotep_finance)
+[![License](https://img.shields.io/badge/License-Dual-blue.svg)](LICENSE)
 
-## Screenshots
-![357954517-cada07c3-6c31-48be-9ab5-9361d122eab7](https://github.com/user-attachments/assets/ecba65cd-f60a-4dfe-8c6d-e325fde38c4b)
+A comprehensive financial management web application that helps you track transactions, manage deposits and withdrawals, create wishlists, and set financial goals.
 
-![357954469-cd1bee34-a7af-48b7-b0d0-8d9b499b48ac](https://github.com/user-attachments/assets/21535dc7-42ec-41fe-9b53-6c35bbd358cf)
+## 💰 Features
 
-![357954414-b38870f6-ad10-4e9e-835c-c843e0ba65cb](https://github.com/user-attachments/assets/33bf89b6-9429-4e6d-b526-e0f74f8192f7)
+- **Financial Tracking**: Easily deposit and withdraw funds with detailed transaction history
+- **Transaction Analysis**: View and analyze your spending patterns over time
+- **Wishlist Management**: Create and prioritize items you want to purchase
+- **Goal Setting**: Set monthly savings targets to help achieve your financial objectives
+- **Currency Options**: Support for multiple currencies to match your location preferences
+- **Responsive Design**: Works seamlessly across desktop and mobile devices
+
+## 🖼️ Screenshots
+
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/ecba65cd-f60a-4dfe-8c6d-e325fde38c4b" alt="Dashboard View" width="700"/>
+  <p><em>Dashboard with transaction overview</em></p>
+  
+  <img src="https://github.com/user-attachments/assets/21535dc7-42ec-41fe-9b53-6c35bbd358cf" alt="Transaction History" width="700"/>
+  <p><em>Transaction history and analytics</em></p>
+  
+  <img src="https://github.com/user-attachments/assets/33bf89b6-9429-4e6d-b526-e0f74f8192f7" alt="Goals Setting" width="700"/>
+  <p><em>Financial goals and wishlist management</em></p>
+</div>
+
+## 🔧 Technology Stack
+
+- Frontend: Jinja syntax, Javascript, tailwindcss, Bootstrap
+- Backend: Flask
+- Database: MYSql
+- Deployment: Pythonanywhere
+
+## 👥 Contributing
+
+We welcome contributions to Imhotep Financial Manager! Here's how you can contribute:
+
+1. **Fork the repository** and create your feature branch
+   ```
+   git checkout -b feature/amazing-feature
+   ```
+
+2. **Make your changes** and test them thoroughly
+
+3. **Commit your changes**
+   ```
+   git commit -m 'Add some amazing feature'
+   ```
+
+4. **Push to your branch**
+   ```
+   git push origin feature/amazing-feature
+   ```
+
+5. **Open a Pull Request** describing your changes and their benefits
+
+### Development Setup
+
+1. Clone the repository
+   ```
+   git clone https://github.com/Imhotep-Tech/imhotep_finance.git
+   cd imhotep_finance
+   ```
+
+2. Install dependencies
+   ```
+   pip install -r requirements.txt
+   ```
+
+3. Database Setup
+   - Create a MySQL or PostgreSQL database for the application
+   - Make sure you have a database user with appropriate permissions
+
+4. Environment Variables
+   Create a `.env` file in the root directory with the following variables:
+   ```
+   DATABASE_URL=mysql://username:password@localhost/database_name
+   MAIL_PASSWORD=your_email_service_password
+   EXCHANGE_API_KEY_PRIMARY=your_exchange_rate_api_key
+   SECRET_KEY=your_flask_secret_key
+   GOOGLE_CLIENT_ID=your_google_oauth_client_id
+   GOOGLE_CLIENT_SECRET=your_google_oauth_client_secret
+   ```
+
+5. Start the development server
+   ```
+   flask run --debug
+   ```
+
+## 📝 Code of Conduct
+
+Please read our [Code of Conduct](CODE_OF_CONDUCT.md) to understand the expectations for participation in our community.
+
+## 📄 License
+
+This project uses a dual-licensing approach:
+- GNU Affero General Public License v3.0 (AGPL-3.0) for non-commercial use and contributions
+- Commercial License for commercial use, redistribution, or use in commercial products/services
+
+For commercial licensing inquiries, please contact imhoteptech@outlook.com.
