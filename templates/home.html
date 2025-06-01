@@ -3,78 +3,154 @@
 {% block body %}
     {% include 'nav.html' %}
 
-    <div class="message-container">
-        {% if done %}
-            <div class="done-message">
-                {{ done }}
+    <!-- Notification Messages -->
+    {% if done %}
+        <div class="fixed top-4 right-4 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded shadow-md transition-opacity duration-500 ease-in-out" id="notification">
+            <div class="flex items-center">
+                <div class="py-1"><svg class="h-6 w-6 text-green-500 mr-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg></div>
+                <div>{{ done }}</div>
+                <button onclick="this.parentElement.parentElement.style.display='none'" class="ml-auto">
+                    <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20"><path d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" fill-rule="evenodd"></path></svg>
+                </button>
             </div>
-        {% endif %}
-    </div>
+        </div>
+        <script>
+            setTimeout(() => {
+                document.getElementById('notification').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('notification').style.display = 'none';
+                }, 500);
+            }, 5000);
+        </script>
+    {% endif %}
 
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-12 text-center">
-                <h1>{{ total_favorite_currency }} {{ favorite_currency }}</h1>
-            </div>
-        </div>
+    <div class="container py-5">
         <div class="row justify-content-center">
-            <div class="col-auto">
-                <form action="/deposit">
-                    <button type="submit"  class="btn-teal" title="Deposit">
-                        <i class="fas fa-plus"></i>
-                    </button>
-                </form>
-            </div>
-            <div class="col-auto">
-            </div>
-            <div class="col-auto">
-                <form action="/withdraw">
-                    <button type="submit"  class="btn-teal" title="withdraw">
-                        <i class="fas fa-minus"></i>
-                    </button>
-                </form>
-            </div>
-        </div>
+            <div class="col-md-10 col-lg-8">
+                <!-- Financial Dashboard Card -->
+                <div class="card shadow-lg rounded-3 overflow-hidden border-0">
+                    <!-- Balance Header with Wave Animation -->
+                    <div class="card-header p-0">
+                        <div style="background: linear-gradient(135deg, #20B2AA, #008080); height: 160px; position: relative; overflow: hidden;">
+                            <div style="position: absolute; bottom: 0; left: 0; width: 100%;">
+                                <!-- Animated Wave SVG -->
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" style="display: block;">
+                                    <path fill="rgba(255, 255, 255, 0.3)" fill-opacity="1" d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,202.7C672,203,768,181,864,186.7C960,192,1056,224,1152,218.7C1248,213,1344,171,1392,149.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                                </svg>
+                            </div>
+                            
+                            <!-- Balance Information -->
+                            <div class="text-center text-white position-relative" style="z-index: 1; padding-top: 20px;">
+                                <h6 class="text-uppercase fw-bold mb-1 text-white-50">Current Balance</h6>
+                                <h1 class="display-5 fw-bold mb-0">{{ total_favorite_currency }} {{ favorite_currency }}</h1>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="card-body bg-light py-4">
+                        <div class="row justify-content-center">
+                            <div class="col-10 col-sm-8">
+                                <div class="d-flex justify-content-between">
+                                    <a href="/deposit" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center">
+                                        <i class="fas fa-plus-circle me-2"></i> Deposit
+                                    </a>
+                                    <a href="/withdraw" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center">
+                                        <i class="fas fa-minus-circle me-2"></i> Withdraw
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Financial Health Section -->
+                    {% if score_txt %}
+                    <div class="card-body border-top">
+                        <div class="text-center">
+                            <h6 class="text-uppercase fw-bold mb-3 text-secondary">Financial Health</h6>
+                            
+                            <div class="d-inline-block position-relative mb-4">
+                                <!-- Circular Progress Indicator -->
+                                <div class="position-relative" style="width: 120px; height: 120px;">
+                                    {% if score_txt == "Below Target" %}
+                                        <div class="rounded-circle position-absolute w-100 h-100" style="border: 10px solid rgba(220, 53, 69, 0.2);"></div>
+                                        <div class="rounded-circle position-absolute w-100 h-100" style="border: 10px solid #dc3545; border-top-color: transparent; transform: rotate(-45deg);"></div>
+                                    {% elif score_txt == "On Target" %}
+                                        <div class="rounded-circle position-absolute w-100 h-100" style="border: 10px solid rgba(13, 110, 253, 0.2);"></div>
+                                        <div class="rounded-circle position-absolute w-100 h-100" style="border: 10px solid #0d6efd; border-right-color: transparent;"></div>
+                                    {% elif score_txt == "Above Target" %}
+                                        <div class="rounded-circle position-absolute w-100 h-100" style="border: 10px solid rgba(25, 135, 84, 0.2);"></div>
+                                        <div class="rounded-circle position-absolute w-100 h-100" style="border: 10px solid #198754;"></div>
+                                    {% endif %}
 
-        {% if score_txt == "Below Target" %}
-        <div class="row justify-content-center">
-            <div class="col-auto">
-                <br>
-                <h2 style="color: red;">{{ score_txt }}</h2>
-            </div>
-            <div class="col-auto">
-                <br>
-                <h2>{{ "{:,.2f}".format(score) }}</h2>
-            </div>
-        </div>
-        {% elif score_txt == "On Target" %}
-        <div class="row justify-content-center">
-            <div class="col-auto">
-                <br>
-                <h2>{{ score_txt }}</h2>
-            </div>
-            <div class="col-auto">
-                <br>
-                <h2>{{ "{:,.2f}".format(score) }}</h2>
-            </div>
-        </div>
-        {% elif score_txt == "Above Target" %}
-        <div class="row justify-content-center">
-            <div class="col-auto">
-                <br>
-                <h2 style="color: green;">{{ score_txt }}</h2>
-            </div>
-            <div class="col-auto">
-                <br>
-                <h2>{{ "{:,.2f}".format(score) }}</h2>
-            </div>
-        </div>
-        {% else %}
-        {% endif %}
-
-        <div class="row justify-content-center">
-            <div class="col-auto">
-                <a href="/settings/set_target" style="color: teal;">Target: {{ target }}</a>
+                                    <!-- Score Value -->
+                                    <div class="position-absolute top-50 start-50 translate-middle text-center">
+                                        <h3 class="mb-0 fw-bold">
+                                            {% if score_txt == "Below Target" %}
+                                                <span class="text-danger">{{ "{:,.2f}".format(score) }}</span>
+                                            {% elif score_txt == "On Target" %}
+                                                <span class="text-primary">{{ "{:,.2f}".format(score) }}</span>
+                                            {% elif score_txt == "Above Target" %}
+                                                <span class="text-success">{{ "{:,.2f}".format(score) }}</span>
+                                            {% endif %}
+                                        </h3>
+                                    </div>
+                                </div>
+                                
+                                <!-- Status Text -->
+                                <div class="mt-3">
+                                    <h5 class="fw-bold mb-0">
+                                        {% if score_txt == "Below Target" %}
+                                            <span class="text-danger">{{ score_txt }}</span>
+                                            <i class="fas fa-arrow-down text-danger ms-1"></i>
+                                        {% elif score_txt == "On Target" %}
+                                            <span class="text-primary">{{ score_txt }}</span>
+                                            <i class="fas fa-dot-circle text-primary ms-1"></i>
+                                        {% elif score_txt == "Above Target" %}
+                                            <span class="text-success">{{ score_txt }}</span>
+                                            <i class="fas fa-arrow-up text-success ms-1"></i>
+                                        {% endif %}
+                                    </h5>
+                                </div>
+                            </div>
+                            
+                            <!-- Target Setting Link -->
+                            <div class="mt-3">
+                                <a href="/settings/set_target" class="btn btn-outline-primary btn-sm rounded-pill">
+                                    <i class="fas fa-bullseye me-1"></i> Target: {{ target }}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Quick Tips Card -->
+                <div class="card mt-4 shadow-sm border-0">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="fas fa-lightbulb text-warning me-2"></i> Financial Tips</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-light rounded-circle p-2 me-3">
+                                <i class="fas fa-chart-line text-primary"></i>
+                            </div>
+                            <div>
+                                <p class="mb-0">Track your spending regularly to stay on budget.</p>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="bg-light rounded-circle p-2 me-3">
+                                <i class="fas fa-piggy-bank text-success"></i>
+                            </div>
+                            <div>
+                                <p class="mb-0">Set aside at least 20% of your income for savings.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
