@@ -80,7 +80,6 @@ def add_password_google_login():
 
     hashed_password = generate_password_hash(user_password)
 
-
     user_username = session.get("user_username")
     user_mail = session.get("user_mail")
     user_mail_verify = session.get("user_mail_verify")
@@ -105,21 +104,91 @@ def add_password_google_login():
 
     is_html = True
     body = f"""
-    <h3>Welcome to Imhotep Financial Manager, {user_username}!</h3>
-    <p>We are excited to have you on board. Imhotep Financial Manager is your go-to solution for managing your finances efficiently and effectively.</p>
-    <p>Here are some features you can explore:</p>
-    <ul>
-        <li>Track your expenses and income</li>
-        <li>Set financial goals</li>
-        <li>Generate financial reports</li>
-        <li>And much more!</li>
-    </ul>
-    <p>If you have any questions or need assistance, feel free to reach out to our support team.</p>
-    <p>Thank you for joining us, and we look forward to helping you achieve your financial goals.</p>
-    <p>Best regards,</p>
-    <p>The Imhotep Financial Manager Team</p>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Welcome to Imhotep Financial Manager</title>
+    </head>
+    <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background-color: #f8f9fa; margin: 0; padding: 0;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+            <!-- Header -->
+            <div style="background: linear-gradient(135deg, #51adac 0%, #428a89 100%); padding: 30px 20px; text-align: center;">
+                <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold;">
+                    🏛️ Imhotep Financial Manager
+                </h1>
+                <p style="color: rgba(255, 255, 255, 0.9); margin: 10px 0 0 0; font-size: 16px;">
+                    Your Trusted Financial Partner
+                </p>
+            </div>
+            
+            <!-- Content -->
+            <div style="padding: 40px 30px;">
+                <h2 style="color: #51adac; margin-bottom: 20px; font-size: 24px;">
+                    Welcome to Your Financial Journey, {user_username}! 🎉
+                </h2>
+                
+                <p style="font-size: 16px; margin-bottom: 20px; color: #555;">
+                    We're absolutely thrilled to have you join the Imhotep Financial Manager family! Your journey towards financial freedom and smart money management starts right here.
+                </p>
+                
+                <div style="background-color: #f8f9fa; border-left: 4px solid #51adac; padding: 20px; margin: 25px 0;">
+                    <h3 style="color: #51adac; margin-top: 0; font-size: 18px;">🚀 What You Can Do Next:</h3>
+                    <ul style="color: #555; padding-left: 20px;">
+                        <li style="margin-bottom: 8px;"><strong>Track Expenses:</strong> Monitor your daily spending with ease</li>
+                        <li style="margin-bottom: 8px;"><strong>Manage Income:</strong> Keep tabs on all your revenue streams</li>
+                        <li style="margin-bottom: 8px;"><strong>Set Financial Goals:</strong> Plan for your dreams and achieve them</li>
+                        <li style="margin-bottom: 8px;"><strong>Generate Reports:</strong> Get insights with detailed analytics</li>
+                        <li style="margin-bottom: 8px;"><strong>Multi-Currency Support:</strong> Work with 170+ currencies worldwide</li>
+                    </ul>
+                </div>
+                
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="https://yourapp.com/login" style="background: linear-gradient(135deg, #51adac 0%, #428a89 100%); color: #ffffff; padding: 15px 30px; text-decoration: none; border-radius: 25px; font-weight: bold; display: inline-block; transition: transform 0.3s ease;">
+                        🎯 Start Managing Your Finances
+                    </a>
+                </div>
+                
+                <div style="background-color: #e8f5f5; border-radius: 8px; padding: 20px; margin: 25px 0;">
+                    <h4 style="color: #51adac; margin-top: 0;">💡 Pro Tip:</h4>
+                    <p style="margin-bottom: 0; color: #555;">
+                        Start by setting up your first financial goal. Whether it's saving for a vacation, building an emergency fund, or investing for retirement, having a clear target makes all the difference!
+                    </p>
+                </div>
+                
+                <p style="font-size: 16px; color: #555; margin-bottom: 20px;">
+                    Need help getting started? Our support team is here to assist you every step of the way. Simply reply to this email or visit our help center.
+                </p>
+                
+                <p style="font-size: 16px; color: #555;">
+                    Here's to your financial success! 🌟
+                </p>
+            </div>
+            
+            <!-- Footer -->
+            <div style="background-color: #2f5a5a; color: #ffffff; padding: 25px 30px; text-align: center;">
+                <p style="margin: 0 0 15px 0; font-size: 16px; font-weight: bold;">
+                    The Imhotep Financial Manager Team
+                </p>
+                <p style="margin: 0 0 15px 0; font-size: 14px; opacity: 0.9;">
+                    Empowering your financial future, one decision at a time.
+                </p>
+                <div style="margin: 20px 0;">
+                    <a href="https://instagram.com/imhotep_tech" style="color: #ffffff; text-decoration: none; margin: 0 10px; font-size: 18px;">📱</a>
+                    <a href="https://x.com/imhoteptech1" style="color: #ffffff; text-decoration: none; margin: 0 10px; font-size: 18px;">🐦</a>
+                    <a href="mailto:imhoteptech@outlook.com" style="color: #ffffff; text-decoration: none; margin: 0 10px; font-size: 18px;">📧</a>
+                </div>
+                <p style="margin: 0; font-size: 12px; opacity: 0.7;">
+                    © 2025 Imhotep Financial Manager. All rights reserved.<br>
+                    Powered by Imhotep Tech
+                </p>
+            </div>
+        </div>
+    </body>
+    </html>
     """
-    success, error = send_mail(smtp_server, smtp_port, email_send, email_send_password, user_mail, "Welcome to Imhotep Financial Manager", body, is_html)
+    success, error = send_mail(smtp_server, smtp_port, email_send, email_send_password, user_mail, "🎉 Welcome to Imhotep Financial Manager - Your Journey Begins!", body, is_html)
     if error:
         print(error)
 

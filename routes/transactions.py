@@ -1,10 +1,12 @@
-from flask import render_template, redirect, session, request, Blueprint
+from flask import render_template, redirect, session, request, Blueprint, flash, flash
 from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
 from extensions import db
 from config import CSRFForm, Config
-from utils.user_info import select_user_photo, trans
+from utils.user_info import select_user_photo, trans, get_app_currencies
 from utils.currencies import show_networth, select_currencies
+from datetime import datetime
+import logging
 
 transactions_bp = Blueprint('transactions', __name__)
 
@@ -22,7 +24,12 @@ def deposit():
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         if request.method == "GET":
-            return render_template("deposit.html", user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
+            return render_template("deposit.html",
+                                    user_photo_path=user_photo_path,
+                                    total_favorite_currency=total_favorite_currency,
+                                    favorite_currency=favorite_currency,
+                                    form=CSRFForm(),
+                                    available_currencies = get_app_currencies())
         else:
 
             date = request.form.get("date")
@@ -189,7 +196,7 @@ def show_trans():
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
 
         trans_db, to_date,from_date, total_pages, page = trans(user_id)    
-    
+
         return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, to_date=to_date, from_date=from_date, total_pages=total_pages,page=page, form=CSRFForm())
 
 @transactions_bp.route("/edit_trans", methods=["POST", "GET"])
@@ -212,7 +219,13 @@ def edit_trans():
             ).fetchall()[0]
             total_favorite_currency, favorite_currency = show_networth()
             total_favorite_currency = f"{total_favorite_currency:,.2f}"
-            return render_template("edit_trans.html", trans_db = trans_db, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
+            return render_template("edit_trans.html",
+                                    trans_db = trans_db,
+                                    user_photo_path=user_photo_path,
+                                    total_favorite_currency=total_favorite_currency,
+                                    favorite_currency=favorite_currency,
+                                    form=CSRFForm(),
+                                    currency = trans_db[3])
 
         else:
 
@@ -231,10 +244,13 @@ def edit_trans():
             amount_db = float(amount_currency_db[0])
             status_db = amount_currency_db[2]
 
-            total_db = db.session.execute(
-                text("SELECT total from networth WHERE user_id = :user_id and currency = :currency"),
-                {"user_id" :user_id, "currency" :currency}
-            ).fetchone()[0]
+            if currency in select_currencies(user_id):
+                total_db = db.session.execute(
+                    text("SELECT total from networth WHERE user_id = :user_id and currency = :currency"),
+                    {"user_id" :user_id, "currency" :currency}
+                ).fetchone()[0]
+            else:
+                total_db = 0
 
             total_db = float(total_db)
 
@@ -254,7 +270,14 @@ def edit_trans():
                 ).fetchall()[0]
                 total_favorite_currency, favorite_currency = show_networth()
                 total_favorite_currency = f"{total_favorite_currency:,.2f}"
-                return render_template("edit_trans.html", trans_db = trans_db, user_photo_path=user_photo_path, error=error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
+                return render_template("edit_trans.html", 
+                                     trans_db = trans_db, 
+                                     user_photo_path=user_photo_path, 
+                                     error=error, 
+                                     total_favorite_currency=total_favorite_currency, 
+                                     favorite_currency=favorite_currency, 
+                                     form=CSRFForm(),
+                                     available_currencies = get_app_currencies())
 
             db.session.execute(
                 text("UPDATE trans SET  date = :date, trans_details = :trans_details, trans_details_link = :trans_details_link, amount = :amount WHERE trans_key = :trans_key"),
@@ -376,6 +399,8 @@ def delete_trans():
 
         return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, page = page,total_pages=total_pages,to_date=to_date, from_date=from_date, form=CSRFForm())
 
+
+#---------------------------------------------------------------------Still needs UI implementation-------------------------------------------------------
 @transactions_bp.route("/trash_trans", methods=["GET", "POST"])
 def trash_trans():
     if not session.get("logged_in"):

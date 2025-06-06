@@ -1,90 +1,191 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script src="{{ url_for('static', filename='main.js') }}"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
-    <meta charset="utf-8">
-    <link rel="shortcut icon" href="{{ url_for('static', filename='imhotep_finance.ico')}}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <meta name="description" content="Imhotep Financial Manager - Manage Finance with ease.">
-    <meta name="keywords" content="Finance, Financial Manager, Imhotep Finance, Imhotep Financial Manager">
-    <title>Imhotep Financial Manager</title>
-    <meta name="google-site-verification" content="t0C7WT8MTJ1gP87eh4Y7U9bkqPxRAnm1JxYLnDix6_Y" />
-</head>
+{% extends "layout.html" %}
 
-<body>
-  <!-- Navigation -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="/" style="color: white;">Imhotep Financial Manager</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="/login_page" style="color: white;">Login</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/register_page" style="color: white;">Sign Up</a>
-                </li>
-            </ul>
+{% block title %}Imhotep Financial Manager - Take Control of Your Finances{% endblock %}
+{% block description %}Transform your financial life with Imhotep Financial Manager. Track expenses, manage investments, and achieve your financial goals with our powerful yet simple tools.{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="gradient-bg hero-pattern min-h-screen flex items-center relative overflow-hidden">
+    <div class="absolute inset-0 bg-black opacity-20"></div>
+    
+    <!-- Floating Elements -->
+    <div class="absolute top-20 left-10 animate-float">
+        <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+            <i class="fas fa-dollar-sign text-white text-xl"></i>
         </div>
     </div>
-</nav>
-
-<!-- Hero Section -->
-<section class="hero-section">
-    <div class="container text-center">
-        <h1 class="animate__animated animate__fadeInDown">Welcome to Imhotep Financial Manager</h1>
-        <p class="lead animate__animated animate__fadeInUp">Take control of your financial future with our comprehensive financial management tools.</p>
-        <div class="mt-4">
-            <form action="/trial_login" method="POST" class="d-inline">
-                {{ form.hidden_tag() }}
-                <button type="submit" class="btn btn-primary btn-lg me-2">Try Now</button>
-            </form>
-            <a href="/register_page" class="btn btn-outline-light btn-lg me-2">Create Account Now for Free</a>
-            <a href="/login_page" class="btn btn-outline-light btn-lg">Login</a>
+    <div class="absolute top-40 right-20 animate-float" style="animation-delay: -2s;">
+        <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+            <i class="fas fa-chart-pie text-white"></i>
         </div>
+    </div>
+    <div class="absolute bottom-40 left-20 animate-float" style="animation-delay: -4s;">
+        <div class="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+            <i class="fas fa-coins text-white text-2xl"></i>
+        </div>
+    </div>
+    
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
+                Take Control of Your
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500">
+                    Financial Future
+                </span>
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-200 mb-8 leading-relaxed">
+                Simplify your financial management with powerful tools for tracking expenses, 
+                managing investments, and achieving your dreams.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
+                <a href="/register" 
+                   class="bg-white text-indigo-600 hover:bg-gray-100 font-semibold py-4 px-8 rounded-full text-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
+                    <i class="fas fa-rocket mr-2"></i>Get Started Free
+                </a>
+                <a href="/trial_login" 
+                   class="glass-effect text-white border-2 border-white hover:bg-white hover:text-indigo-600 font-semibold py-4 px-8 rounded-full text-lg transition-all duration-300 transform hover:scale-105">
+                    <i class="fas fa-play mr-2"></i>Try Demo
+                </a>
+            </div>
+            
+            <!-- Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
+                <div class="glass-effect rounded-lg p-6 text-center transform hover:scale-105 transition-all duration-300">
+                    <div class="text-3xl font-bold text-white mb-2">{{users_count}}+</div>
+                    <div class="text-gray-200">Happy Users</div>
+                </div>
+                <div class="glass-effect rounded-lg p-6 text-center transform hover:scale-105 transition-all duration-300">
+                    <div class="text-3xl font-bold text-white mb-2">170+</div>
+                    <div class="text-gray-200">Currencies Supported</div>
+                </div>
+                <div class="glass-effect rounded-lg p-6 text-center transform hover:scale-105 transition-all duration-300">
+                    <div class="text-3xl font-bold text-white mb-2">99.9%</div>
+                    <div class="text-gray-200">Uptime</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scroll Indicator -->
+    <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white animate-bounce">
+        <i class="fas fa-chevron-down text-2xl"></i>
     </div>
 </section>
 
 <!-- Features Section -->
-<section class="features-section">
-    <div class="container">
-        <h2 style="color: black;">Why Use Imhotep Financial Manager?</h2>
-        <div class="row">
-            <div class="col-md-4">
-                <div class="feature-card animate__animated animate__fadeIn">
-                    <i class="fas fa-chart-line"></i>
-                    <h3 style="color: black;">Track Your Expenses</h3>
-                    <p>Monitor your spending and stay on top of your finances.</p>
+<section class="py-20 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold text-gray-900 mb-4">
+                Why Choose Imhotep?
+            </h2>
+            <p class="text-xl text-gray-600">
+                Powerful features designed to make financial management effortless
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {% for feature in features %}
+            <div class="bg-white rounded-xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 text-center">
+                <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="{{ feature.icon }} text-2xl text-indigo-600"></i>
                 </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-4">{{ feature.title }}</h3>
+                <p class="text-gray-600">{{ feature.description }}</p>
             </div>
-            <div class="col-md-4">
-                <div class="feature-card animate__animated animate__fadeIn animate__delay-1s">
-                    <i class="fas fa-bullseye"></i>
-                    <h3 style="color: black;">Set Financial Goals</h3>
-                    <p>Define your financial objectives and achieve them with ease.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold text-gray-900 mb-4">
+                Get Started in 3 Simple Steps
+            </h2>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="text-center">
+                <div class="w-24 h-24 bg-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <span class="text-3xl font-bold text-white">1</span>
                 </div>
+                <h3 class="text-2xl font-semibold text-gray-900 mb-4">Sign Up</h3>
+                <p class="text-gray-600">Create your free account in less than 2 minutes</p>
             </div>
-            <div class="col-md-4">
-                <div class="feature-card animate__animated animate__fadeIn animate__delay-2s">
-                    <i class="fas fa-file-alt"></i>
-                    <h3 style="color: black;">Generate Reports</h3>
-                    <p>Create detailed financial reports to analyze your progress.</p>
+            <div class="text-center">
+                <div class="w-24 h-24 bg-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <span class="text-3xl font-bold text-white">2</span>
                 </div>
+                <h3 class="text-2xl font-semibold text-gray-900 mb-4">Connect</h3>
+                <p class="text-gray-600">Add your accounts and start tracking your finances</p>
+            </div>
+            <div class="text-center">
+                <div class="w-24 h-24 bg-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <span class="text-3xl font-bold text-white">3</span>
+                </div>
+                <h3 class="text-2xl font-semibold text-gray-900 mb-4">Achieve</h3>
+                <p class="text-gray-600">Reach your financial goals with our smart tools</p>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Footer -->
-{% include 'footer.html' %}
+<!-- Testimonials Section -->
+<section class="py-20 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold text-gray-900 mb-4">
+                What Our Users Say
+            </h2>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {% for testimonial in testimonials %}
+            <div class="bg-white rounded-xl p-8 shadow-lg">
+                <div class="flex mb-4">
+                    {% for i in range(testimonial.rating) %}
+                    <i class="fas fa-star text-yellow-400"></i>
+                    {% endfor %}
+                </div>
+                <p class="text-gray-600 mb-6 italic">"{{ testimonial.content }}"</p>
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mr-4">
+                        <span class="font-semibold text-indigo-600">{{ testimonial.name[0] }}</span>
+                    </div>
+                    <div>
+                        <div class="font-semibold text-gray-900">{{ testimonial.name }}</div>
+                        <div class="text-gray-500 text-sm">{{ testimonial.role }}</div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
 
-</body>
-</html>
+<!-- CTA Section -->
+<section class="py-20 gradient-bg text-white">
+    <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+        <h2 class="text-4xl font-bold mb-6">
+            Ready to Transform Your Financial Life?
+        </h2>
+        <p class="text-xl mb-8 opacity-90">
+            Join thousands of users who have already taken control of their finances with Imhotep.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="/register" 
+               class="bg-white text-indigo-600 hover:bg-gray-100 font-semibold py-4 px-8 rounded-full text-lg transition-all duration-300 transform hover:scale-105">
+                Start Your Journey
+            </a>
+            <a href="/login_page" 
+               class="border-2 border-white text-white hover:bg-white hover:text-indigo-600 font-semibold py-4 px-8 rounded-full text-lg transition-all duration-300 transform hover:scale-105">
+                Sign In
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

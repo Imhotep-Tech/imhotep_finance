@@ -1,37 +1,275 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script src="{{ url_for('static', filename='main.js') }}"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://kit.fontawesome.com/YOUR_KIT_ID.js" crossorigin="anonymous"></script>
-
-    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
-    <meta charset="utf-8">
-    <link rel="shortcut icon" href="{{ url_for('static', filename='imhotep_finance.ico')}}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <meta name="description" content="Imhotep Financial Manager - Manage Finance with ease.">
-    <meta name="keywords" content="Finance, Financial Manager, Imhotep Finance, Imhotep Financial Manager">
-    <title>Imhotep Financial Manager</title>
-    <meta name="google-site-verification" content="t0C7WT8MTJ1gP87eh4Y7U9bkqPxRAnm1JxYLnDix6_Y" />
-</head>
-<body>
-    <!-- Loading Screen -->
-    <div id="loading-overlay">
-        <div class="loader"></div>
-        <p>Loading...</p>
-    </div>
-
-    {% include 'nav.html' %}
-
-    <div class="content-container">
-        {% block body %}
-        {% endblock %}
-    </div>
+    <title>{% block title %}Imhotep Financial Manager{% endblock %}</title>
+    <meta name="description" content="{% block description %}Manage your finances efficiently with Imhotep Financial Manager{% endblock %}">
     
-    {% include 'footer.html' %}
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='imhotep_finance.ico') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='imhotep_finance.jpeg') }}">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'imhotep': {
+                            50: '#f0fffe',
+                            100: '#ccfffe',
+                            200: '#99fffc',
+                            300: '#5efffb',
+                            400: '#22f5f0',
+                            500: '#06d6d2',
+                            600: '#51adac',
+                            700: '#428a89',
+                            800: '#376e6d',
+                            900: '#2f5a5a',
+                            950: '#1a3535'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Custom Styles -->
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #51adac 0%, #428a89 100%);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Enhanced Dark Mode Styles */
+        .dark-mode {
+            background-color: #1a3535;
+            color: #62adac;
+        }
+        .dark-mode nav {
+            background-color: #2f5a5a !important;
+        }
+        .dark-mode .text-gray-800 {
+            color: #f0fffe !important;
+        }
+        .dark-mode .text-gray-700 {
+            color: #ccfffe !important;
+        }
+        .dark-mode .text-gray-600 {
+            color: #99fffc !important;
+        }
+        .dark-mode .text-gray-500 {
+            color: #5efffb !important;
+        }
+        .dark-mode .bg-white {
+            background-color: #2f5a5a !important;
+            color: #ffffff !important;
+        }
+        .dark-mode .bg-gray-50 {
+            background-color: #1a3535 !important;
+        }
+        .dark-mode .bg-gray-100 {
+            background-color: #376e6d !important;
+        }
+        .dark-mode .border-gray-200 {
+            border-color: #428a89 !important;
+        }
+        .dark-mode .border-gray-100 {
+            border-color: #376e6d !important;
+        }
+        
+        /* Dark Mode Dropdown/Popup Styles */
+        .dark-mode .group:hover > div[class*="absolute"] {
+            background-color: #2f5a5a !important;
+            border-color: #428a89 !important;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1) !important;
+        }
+        .dark-mode .group div[class*="absolute"] {
+            background-color: #2f5a5a !important;
+            border: 1px solid #428a89 !important;
+        }
+        .dark-mode .group div[class*="absolute"] a {
+            color: #ccfffe !important;
+        }
+        .dark-mode .group div[class*="absolute"] a:hover {
+            background-color: #376e6d !important;
+            color: #51adac !important;
+        }
+        
+        /* Dark Mode Mobile Menu */
+        .dark-mode #mobile-menu {
+            background-color: #2f5a5a !important;
+            border-color: #428a89 !important;
+        }
+        .dark-mode #mobile-menu .bg-white {
+            background-color: #2f5a5a !important;
+        }
+        .dark-mode #mobile-menu .border-gray-200 {
+            border-color: #428a89 !important;
+        }
+        .dark-mode #mobile-menu a {
+            color: #ccfffe !important;
+        }
+        .dark-mode #mobile-menu a:hover {
+            background-color: #376e6d !important;
+            color: #51adac !important;
+        }
+        .dark-mode #mobile-menu .text-gray-500 {
+            color: #99fffc !important;
+        }
+        .dark-mode #mobile-menu .text-gray-700 {
+            color: #ccfffe !important;
+        }
+        .dark-mode #mobile-menu .text-gray-800 {
+            color: #f0fffe !important;
+        }
+        
+        /* Dark Mode Cards and Components */
+        .dark-mode .metric-card,
+        .dark-mode .gradient-card,
+        .dark-mode .score-card {
+            background: linear-gradient(135deg, #2f5a5a 0%, #376e6d 100%) !important;
+            border-color: #428a89 !important;
+            color: #ffffff !important;
+        }
+        .dark-mode .metric-card:hover,
+        .dark-mode .gradient-card:hover,
+        .dark-mode .score-card:hover {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2) !important;
+        }
+        
+        /* Dark Mode Form Elements */
+        .dark-mode input,
+        .dark-mode select,
+        .dark-mode textarea {
+            background-color: #376e6d !important;
+            border-color: #428a89 !important;
+            color: #ffffff !important;
+        }
+        .dark-mode input::placeholder,
+        .dark-mode select::placeholder,
+        .dark-mode textarea::placeholder {
+            color: #99fffc !important;
+        }
+        .dark-mode input:focus,
+        .dark-mode select:focus,
+        .dark-mode textarea:focus {
+            border-color: #51adac !important;
+            box-shadow: 0 0 0 3px rgba(81, 173, 172, 0.3) !important;
+        }
+        
+        /* Dark Mode Shadows */
+        .dark-mode .shadow-sm {
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3) !important;
+        }
+        .dark-mode .shadow-lg {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2) !important;
+        }
+        .dark-mode .shadow-xl {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2) !important;
+        }
+        .dark-mode .shadow-2xl {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4) !important;
+        }
+        
+        /* Dark Mode Pattern Background */
+        .dark-mode .pattern-bg {
+            background-image: radial-gradient(circle at 1px 1px, rgba(81, 173, 172, 0.2) 1px, transparent 0) !important;
+        }
+        
+        /* Dark Mode Toggle Button */
+        .dark-mode #toggleDarkMode {
+            color: #51adac !important;
+        }
+        .dark-mode #toggleDarkMode:hover {
+            background-color: #376e6d !important;
+            color: #22f5f0 !important;
+        }
+        
+        /* Dark Mode Loading Overlay */
+        .dark-mode #loading-overlay {
+            background-color: rgba(26, 53, 53, 0.9) !important;
+        }
+        
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        .hero-pattern {
+            background-image: radial-gradient(circle at 1px 1px, rgba(81, 173, 172, 0.1) 1px, transparent 0);
+            background-size: 20px 20px;
+        }
+        .logo-img {
+            transition: transform 0.3s ease;
+        }
+        .logo-img:hover {
+            transform: scale(1.05);
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .dark-mode ::-webkit-scrollbar-track {
+            background: #2f5a5a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #51adac;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #428a89;
+        }
+    </style>
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="font-sans antialiased">
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="fixed inset-0 bg-imhotep-900 bg-opacity-75 flex items-center justify-center z-50" style="display: none;">
+        <div class="text-center">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+            <p class="text-white mt-4">Loading...</p>
+        </div>
+    </div>
 
+    <!-- Navigation -->
+    {% block navigation %}
+    
+    {% include 'includes/nav.html' %}
+    {% endblock %}
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    {% block footer %}
+    {% include 'includes/footer.html' %}
+    {% endblock %}
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+    {% block extra_scripts %}{% endblock %}
+    
+    <!-- CSRF Token -->
+    {% if form %}
+        {{ form.hidden_tag() }}
+    {% endif %}
 </body>
 </html>

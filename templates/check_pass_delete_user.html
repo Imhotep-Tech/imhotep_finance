@@ -1,30 +1,311 @@
 {% extends "layout.html" %}
 
-{% block body %}
+{% block title %}Delete Account - Imhotep Financial Manager{% endblock %}
+{% block description %}Confirm your password to proceed with account deletion{% endblock %}
 
-<div class="form-container">
-    <div class="message-container">
-        {% if error %}
-            <div class="error-message">
-                {{ error }}
+{% block extra_head %}
+<style>
+    /* Custom animations and effects */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+    
+    .animate-fade-in-up {
+        animation: fadeInUp 0.6s ease-out forwards;
+    }
+    
+    .animate-shake {
+        animation: shake 0.5s ease-in-out;
+    }
+    
+    .gradient-card {
+        background: linear-gradient(135deg, rgba(81, 173, 172, 0.1) 0%, rgba(66, 138, 137, 0.1) 100%);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(81, 173, 172, 0.2);
+    }
+    
+    .danger-card {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+    
+    .pattern-bg {
+        background-image: radial-gradient(circle at 1px 1px, rgba(81, 173, 172, 0.1) 1px, transparent 0);
+        background-size: 20px 20px;
+    }
+    
+    /* Prevent iOS zoom on input focus */
+    @media screen and (max-width: 767px) {
+        input[type="password"] {
+            font-size: 16px !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 pattern-bg">
+    <!-- Header Section -->
+    <div class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <nav class="flex" aria-label="Breadcrumb">
+                        <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                            <li class="inline-flex items-center">
+                                <a href="/home" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-imhotep-600">
+                                    <i class="fas fa-home mr-2"></i>
+                                    Dashboard
+                                </a>
+                            </li>
+                            <li>
+                                <div class="flex items-center">
+                                    <i class="fas fa-chevron-right text-gray-400 mx-2"></i>
+                                    <span class="text-sm font-medium text-gray-500">Delete Account</span>
+                                </div>
+                            </li>
+                        </ol>
+                    </nav>
+                    <h1 class="text-2xl font-bold text-gray-900 mt-2">Delete Account</h1>
+                    <p class="text-gray-600">Confirm your password to proceed with account deletion</p>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+                    </div>
+                </div>
             </div>
-        {% endif %}
+        </div>
     </div>
-    {% include 'back.html' %}
-    <p class="title">Check Password</p>
-    <form action="/delete_user/check_pass" method="post" class="form">
-      {{ form.hidden_tag() }}
-        <input type="hidden" name="user_id" value="{ user_id }">
-        <input type="password" class="input" placeholder="Old Password" name="check_pass" id = "password" required="">
-        <label for="password-toggle" class="password-toggle-btn">
-            <input type="checkbox" id="password-toggle" onclick="togglePasswordVisibility_all()">
-            <span class="checkmark">Show password</span>
-          </label>
-        <p class="page-link"></p>
-        <button class="form-btn" title="Submit">
-          <i class="fas fa-check"></i>
-      </button>
-    </form>
-  </div>
+    
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Warning Section -->
+        <div class="danger-card rounded-xl p-8 shadow-lg mb-8">
+            <div class="flex items-start space-x-4">
+                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-red-800 mb-3">⚠️ Account Deletion Warning</h2>
+                    <div class="text-red-700 space-y-2">
+                        <p class="font-semibold">This action is permanent and cannot be undone!</p>
+                        <div class="mt-4">
+                            <p class="font-medium mb-2">Deleting your account will permanently remove:</p>
+                            <ul class="space-y-1 ml-4">
+                                <li class="flex items-center"><i class="fas fa-times text-red-500 mr-2"></i>All your financial transactions</li>
+                                <li class="flex items-center"><i class="fas fa-times text-red-500 mr-2"></i>Your net worth data and analytics</li>
+                                <li class="flex items-center"><i class="fas fa-times text-red-500 mr-2"></i>All financial targets and goals</li>
+                                <li class="flex items-center"><i class="fas fa-times text-red-500 mr-2"></i>Your wishlist and preferences</li>
+                                <li class="flex items-center"><i class="fas fa-times text-red-500 mr-2"></i>Your profile and account settings</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
+        <!-- Account Summary -->
+        {% if total_favorite_currency and favorite_currency %}
+        <div class="gradient-card rounded-xl p-6 shadow-lg mb-8">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Your Account Summary</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-lg p-4 border border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Current Net Worth</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ total_favorite_currency }} {{ favorite_currency }}</p>
+                        </div>
+                        <div class="w-10 h-10 bg-imhotep-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-wallet text-imhotep-600"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg p-4 border border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Account Status</p>
+                            <p class="text-lg font-semibold text-green-600">Active</p>
+                        </div>
+                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-check-circle text-green-600"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Password Confirmation Form -->
+        <div class="bg-white rounded-xl p-8 shadow-lg">
+            <div class="mb-6">
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">Confirm Your Password</h3>
+                <p class="text-gray-600">Please enter your current password to proceed with account deletion.</p>
+            </div>
+
+            <!-- Error Messages -->
+            {% if error %}
+                <div class="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 flex items-start space-x-2 animate-shake">
+                    <i class="fas fa-exclamation-circle mt-0.5 text-red-500"></i>
+                    <span class="text-sm font-medium">{{ error }}</span>
+                </div>
+            {% endif %}
+
+            <form method="POST" action="/delete_user/check_pass" id="deleteForm" class="space-y-6">
+                {{ form.hidden_tag() }}
+                
+                <!-- Password Input -->
+                <div class="relative">
+                    <label for="check_pass" class="block text-sm font-medium text-gray-700 mb-2">
+                        Current Password
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-lock text-gray-400 transition-colors duration-200"></i>
+                        </div>
+                        <input type="password" 
+                               id="check_pass"
+                               name="check_pass" 
+                               class="w-full pl-10 pr-12 py-3 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-4 focus:ring-red-500/20 transition-all duration-200 text-gray-900 placeholder-gray-500 hover:border-gray-300 focus:outline-none"
+                               placeholder="Enter your current password"
+                               required>
+                        <button type="button" 
+                                onclick="togglePasswordVisibility('check_pass', 'password-toggle-icon')"
+                                class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-red-600 transition-colors duration-200 focus:outline-none">
+                            <i id="password-toggle-icon" class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row gap-4 pt-6">
+                    <button type="submit" 
+                            class="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-red-500/30 flex items-center justify-center space-x-2">
+                        <i class="fas fa-trash-alt"></i>
+                        <span>Confirm Deletion</span>
+                    </button>
+                    <a href="/home" 
+                       class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-gray-500/30 flex items-center justify-center space-x-2 text-center">
+                        <i class="fas fa-times"></i>
+                        <span>Cancel</span>
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Help Section -->
+        <div class="mt-8 bg-blue-50 rounded-xl p-6 border border-blue-200">
+            <div class="flex items-start space-x-3">
+                <i class="fas fa-info-circle text-blue-600 mt-0.5"></i>
+                <div>
+                    <h4 class="text-blue-800 font-semibold mb-2">Need Help?</h4>
+                    <p class="text-blue-700 text-sm mb-3">
+                        If you're having issues with your account or considering alternatives to deletion, our support team is here to help.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <a href="mailto:imhoteptech@outlook.com" 
+                           class="text-blue-600 hover:text-blue-700 font-medium text-sm underline">
+                            Contact Support
+                        </a>
+                        <span class="hidden sm:inline text-blue-400">•</span>
+                        <a href="/change_password" 
+                           class="text-blue-600 hover:text-blue-700 font-medium text-sm underline">
+                            Change Password Instead
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate cards on load
+    const cards = document.querySelectorAll('.danger-card, .gradient-card, .bg-white');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'all 0.6s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 150);
+    });
+    
+    // Enhanced form validation
+    const form = document.getElementById('deleteForm');
+    const passwordInput = document.getElementById('check_pass');
+    
+    passwordInput.addEventListener('input', function() {
+        if (this.value.length > 0) {
+            this.classList.remove('border-red-400');
+            this.classList.add('border-gray-200');
+        }
+    });
+    
+    // Confirmation dialog before submission
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (passwordInput.value.trim() === '') {
+            passwordInput.classList.add('border-red-400');
+            passwordInput.focus();
+            return;
+        }
+        
+        // Double confirmation
+        const confirmed = confirm(
+            '⚠️ FINAL WARNING ⚠️\n\n' +
+            'Are you absolutely sure you want to delete your account?\n\n' +
+            'This action is PERMANENT and CANNOT be undone!\n\n' +
+            'All your data will be lost forever.\n\n' +
+            'Click OK to proceed with deletion, or Cancel to go back.'
+        );
+        
+        if (confirmed) {
+            // Show loading state
+            const submitBtn = form.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+            
+            form.submit();
+        }
+    });
+    
+    // Focus animation for password input
+    passwordInput.addEventListener('focus', function() {
+        const icon = this.parentNode.querySelector('i.fa-lock');
+        if (icon) {
+            icon.classList.remove('text-gray-400');
+            icon.classList.add('text-red-500');
+        }
+    });
+    
+    passwordInput.addEventListener('blur', function() {
+        const icon = this.parentNode.querySelector('i.fa-lock');
+        if (icon && this.value.trim() === '') {
+            icon.classList.remove('text-red-500');
+            icon.classList.add('text-gray-400');
+        }
+    });
+});
+</script>
 {% endblock %}

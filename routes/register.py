@@ -1,4 +1,4 @@
-from flask import render_template, session, request, Blueprint
+from flask import render_template, session, request, Blueprint, redirect
 from config import Config, CSRFForm
 from extensions import db
 from sqlalchemy import text
@@ -12,8 +12,10 @@ register_bp = Blueprint('register', __name__)
 def register_page():
     return render_template("register.html", form=CSRFForm())
 
-@register_bp.route("/register", methods=["POST"])
+@register_bp.route("/register", methods=["POST", "GET"])
 def register():
+    if request.method == "GET":
+        return redirect("register_page")
     user_username = (request.form.get("user_username").strip()).lower()
     user_password = request.form.get("user_password")
     user_mail = request.form.get("user_mail").lower()
@@ -69,10 +71,11 @@ def mail_verification():
         return render_template("mail_verify.html", form=CSRFForm())
     else:
 
-        verification_code = request.form.get("verification_code").strip()
+        verification_code = request.form.get("verification_code").strip().lower()
         user_id = session.get("user_id")
         user_mail = request.form.get("user_mail")
         user_username = request.form.get("user_username")
+
         if verification_code == session.get("verification_code"):
             db.session.execute(
                 text("UPDATE users SET user_mail_verify = :user_mail_verify WHERE user_id = :user_id"), {"user_mail_verify" :"verified", "user_id": user_id}
@@ -80,20 +83,83 @@ def mail_verification():
             db.session.commit()
             is_html = True
             body = f"""
-            <h3>Email Verification</h3>
-            <p>Dear User,</p>
-            <p>Thank you for registering with Imhotep Financial Manager. To complete your registration, please use the following verification code:</p>
-            <h1>{verification_code}</h1>
-            <p>Please enter this code in the verification page to activate your account.</p>
-            <p>If you did not request this email, please ignore it.</p>
-            <p>Best regards,</p>
-            <p>The Imhotep Financial Manager Team</p>
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Email Verified - Imhotep Financial Manager</title>
+            </head>
+            <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background-color: #f8f9fa; margin: 0; padding: 0;">
+                <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                    <!-- Header -->
+                    <div style="background: linear-gradient(135deg, #51adac 0%, #428a89 100%); padding: 30px 20px; text-align: center;">
+                        <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold;">
+                            ✅ Email Verified Successfully!
+                        </h1>
+                        <p style="color: rgba(255, 255, 255, 0.9); margin: 10px 0 0 0; font-size: 16px;">
+                            Welcome to Imhotep Financial Manager
+                        </p>
+                    </div>
+                    
+                    <!-- Content -->
+                    <div style="padding: 40px 30px;">
+                        <h2 style="color: #51adac; margin-bottom: 20px; font-size: 24px;">
+                            Congratulations, {user_username}! 🎉
+                        </h2>
+                        
+                        <p style="font-size: 16px; margin-bottom: 20px; color: #555;">
+                            Your email address has been successfully verified! You can now access all features of Imhotep Financial Manager.
+                        </p>
+                        
+                        <div style="background-color: #e8f5f5; border-radius: 8px; padding: 20px; margin: 25px 0;">
+                            <h4 style="color: #51adac; margin-top: 0;">🚀 You're all set! Here's what you can do next:</h4>
+                            <ul style="color: #555; padding-left: 20px; margin-bottom: 0;">
+                                <li style="margin-bottom: 8px;">Set up your financial goals</li>
+                                <li style="margin-bottom: 8px;">Start tracking your expenses</li>
+                                <li style="margin-bottom: 8px;">Explore our powerful analytics tools</li>
+                                <li style="margin-bottom: 8px;">Connect with our community of financial achievers</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="text-align: center; margin: 30px 0;">
+                            <a href="https://yourapp.com/login_page" style="background: linear-gradient(135deg, #51adac 0%, #428a89 100%); color: #ffffff; padding: 15px 30px; text-decoration: none; border-radius: 25px; font-weight: bold; display: inline-block;">
+                                🎯 Start Managing Your Finances
+                            </a>
+                        </div>
+                        
+                        <p style="font-size: 16px; color: #555; margin-bottom: 20px;">
+                            Thank you for joining the Imhotep family! We're excited to help you achieve your financial goals.
+                        </p>
+                    </div>
+                    
+                    <!-- Footer -->
+                    <div style="background-color: #2f5a5a; color: #ffffff; padding: 25px 30px; text-align: center;">
+                        <p style="margin: 0 0 15px 0; font-size: 16px; font-weight: bold;">
+                            The Imhotep Financial Manager Team
+                        </p>
+                        <p style="margin: 0 0 15px 0; font-size: 14px; opacity: 0.9;">
+                            Your journey to financial freedom starts now!
+                        </p>
+                        <div style="margin: 20px 0;">
+                            <a href="https://instagram.com/imhotep_tech" style="color: #ffffff; text-decoration: none; margin: 0 10px; font-size: 18px;">📱</a>
+                            <a href="https://x.com/imhoteptech1" style="color: #ffffff; text-decoration: none; margin: 0 10px; font-size: 18px;">🐦</a>
+                            <a href="mailto:imhoteptech@outlook.com" style="color: #ffffff; text-decoration: none; margin: 0 10px; font-size: 18px;">📧</a>
+                        </div>
+                        <p style="margin: 0; font-size: 12px; opacity: 0.7;">
+                            © 2025 Imhotep Financial Manager. All rights reserved.<br>
+                            Powered by Imhotep Tech
+                        </p>
+                    </div>
+                </div>
+            </body>
+            </html>
             """
-            success, error = send_mail(smtp_server, smtp_port, email_send, email_send_password, user_mail, "Email Verification", body, is_html)
+            success, error = send_mail(smtp_server, smtp_port, email_send, email_send_password, user_mail, "✅ Email Verified - Welcome to Imhotep Financial Manager!", body, is_html)
             if error:
                 print(error)
-
-            success="Email verified successfully. You can now log in."
+                
+            success = "Email verified successfully. You can now log in."
             return render_template("login.html", success=success, form=CSRFForm())
 
         else:
