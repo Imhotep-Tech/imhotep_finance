@@ -1,11 +1,275 @@
 {% extends "layout.html" %}
 
-{% block body %}
-    {% include 'nav.html' %}
-    {% include 'back.html' %}
-    <ul>
-        {% for currency, amount in networth_details.items() %}
-            <h1>{{ "{:,.2f}".format(amount) }} {{ currency }}</h1>
-        {% endfor %}
-    </ul>
+{% block title %}Net Worth Details - Imhotep Financial Manager{% endblock %}
+{% block description %}View detailed breakdown of your net worth across all currencies and accounts{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Custom animations and effects */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+    }
+    
+    .animate-fade-in-up {
+        animation: fadeInUp 0.6s ease-out forwards;
+    }
+    
+    .animate-pulse-gentle {
+        animation: pulse 2s ease-in-out infinite;
+    }
+    
+    .gradient-card {
+        background: linear-gradient(135deg, rgba(81, 173, 172, 0.1) 0%, rgba(66, 138, 137, 0.1) 100%);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(81, 173, 172, 0.2);
+    }
+    
+    .metric-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        transition: all 0.3s ease;
+    }
+    
+    .metric-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    
+    .pattern-bg {
+        background-image: radial-gradient(circle at 1px 1px, rgba(81, 173, 172, 0.1) 1px, transparent 0);
+        background-size: 20px 20px;
+    }
+    
+    .currency-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        transition: all 0.3s ease;
+        border: 1px solid rgba(81, 173, 172, 0.1);
+    }
+    
+    .currency-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -5px rgba(0, 0, 0, 0.04);
+        border-color: rgba(81, 173, 172, 0.3);
+    }
+    
+    .currency-icon {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, #51adac 0%, #428a89 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 18px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 pattern-bg">
+    <!-- Header Section -->
+    <div class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <nav class="flex" aria-label="Breadcrumb">
+                        <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                            <li class="inline-flex items-center">
+                                <a href="/home" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-imhotep-600">
+                                    <i class="fas fa-home mr-2"></i>
+                                    Dashboard
+                                </a>
+                            </li>
+                            <li>
+                                <div class="flex items-center">
+                                    <i class="fas fa-chevron-right text-gray-400 mx-2"></i>
+                                    <span class="text-sm font-medium text-gray-500">Net Worth Details</span>
+                                </div>
+                            </li>
+                        </ol>
+                    </nav>
+                    <h1 class="text-2xl font-bold text-gray-900 mt-2">Net Worth Breakdown</h1>
+                    <p class="text-gray-600">Detailed view of your assets across all currencies</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Total Net Worth Summary -->
+        <div class="mb-8">
+            <div class="metric-card rounded-xl p-8 shadow-lg">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600 mb-2">Total Net Worth</p>
+                        <p class="text-4xl font-bold text-gray-900 mb-2">{{ total_favorite_currency }} {{ favorite_currency }}</p>
+                        <p class="text-sm text-gray-500">Converted to your preferred currency</p>
+                    </div>
+                    <div class="w-20 h-20 bg-gradient-to-r from-imhotep-500 to-imhotep-600 rounded-full flex items-center justify-center">
+                        <i class="fas fa-wallet text-white text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Currency Breakdown Section -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-semibold text-gray-900">Currency Breakdown</h2>
+                <div class="text-sm text-gray-500">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    {{ networth_details|length }} currencies in your portfolio
+                </div>
+            </div>
+            
+            {% if networth_details %}
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {% for currency, amount in networth_details.items() %}
+                    <div class="currency-card rounded-xl p-6 shadow-lg">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="currency-icon">
+                                {{ currency[:3] }}
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xs text-gray-500 uppercase tracking-wide">{{ currency }}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <p class="text-2xl font-bold text-gray-900">
+                                {{ "{:,.2f}".format(amount) }}
+                            </p>
+                            <p class="text-sm text-gray-600">{{ currency }}</p>
+                        </div>
+                        
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-gray-500">Balance</span>
+                            <div class="flex items-center">
+                                {% if amount > 0 %}
+                                    <span class="text-green-600 flex items-center">
+                                        <i class="fas fa-arrow-up mr-1"></i>
+                                        Positive
+                                    </span>
+                                {% elif amount < 0 %}
+                                    <span class="text-red-600 flex items-center">
+                                        <i class="fas fa-arrow-down mr-1"></i>
+                                        Negative
+                                    </span>
+                                {% else %}
+                                    <span class="text-gray-500 flex items-center">
+                                        <i class="fas fa-minus mr-1"></i>
+                                        Zero
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <!-- Empty State -->
+                <div class="gradient-card rounded-xl p-12 text-center">
+                    <div class="w-20 h-20 bg-imhotep-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-coins text-imhotep-600 text-3xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">No Financial Data Yet</h3>
+                    <p class="text-gray-600 mb-6">Start adding your income and expenses to see your net worth breakdown here.</p>
+                    <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                        <a href="/add_income" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition-colors inline-flex items-center">
+                            <i class="fas fa-plus mr-2"></i>Add Income
+                        </a>
+                        <a href="/add_expense" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg transition-colors inline-flex items-center">
+                            <i class="fas fa-minus mr-2"></i>Add Expense
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <a href="/show_history" class="gradient-card rounded-xl p-4 text-center hover:shadow-lg transition-all duration-300 group">
+                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-200 transition-colors">
+                    <i class="fas fa-history text-blue-600 text-xl"></i>
+                </div>
+                <p class="text-sm font-medium text-gray-900">View History</p>
+            </a>
+            
+            <a href="/show_chart" class="gradient-card rounded-xl p-4 text-center hover:shadow-lg transition-all duration-300 group">
+                <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-purple-200 transition-colors">
+                    <i class="fas fa-chart-pie text-purple-600 text-xl"></i>
+                </div>
+                <p class="text-sm font-medium text-gray-900">Analytics</p>
+            </a>
+            
+            <a href="/add_target" class="gradient-card rounded-xl p-4 text-center hover:shadow-lg transition-all duration-300 group">
+                <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-yellow-200 transition-colors">
+                    <i class="fas fa-target text-yellow-600 text-xl"></i>
+                </div>
+                <p class="text-sm font-medium text-gray-900">Set Target</p>
+            </a>
+            
+            <a href="/change_currency" class="gradient-card rounded-xl p-4 text-center hover:shadow-lg transition-all duration-300 group">
+                <div class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-indigo-200 transition-colors">
+                    <i class="fas fa-exchange-alt text-indigo-600 text-xl"></i>
+                </div>
+                <p class="text-sm font-medium text-gray-900">Change Currency</p>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate cards on load
+    const cards = document.querySelectorAll('.metric-card, .currency-card, .gradient-card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'all 0.6s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+    
+    // Add hover effects for currency cards
+    const currencyCards = document.querySelectorAll('.currency-card');
+    currencyCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.borderColor = 'rgba(81, 173, 172, 0.5)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.borderColor = 'rgba(81, 173, 172, 0.1)';
+        });
+    });
+    
+    // Add smooth transitions for hover effects
+    const hoverElements = document.querySelectorAll('.group, .metric-card, .currency-card, .gradient-card');
+    hoverElements.forEach(el => {
+        el.style.transition = 'all 0.3s ease';
+    });
+});
+</script>
 {% endblock %}

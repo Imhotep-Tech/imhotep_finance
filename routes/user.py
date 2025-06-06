@@ -134,18 +134,26 @@ def show_networth_details():
         try:
             user_photo_path = select_user_photo()
         except OperationalError:
-            error = "Welcome Back"
+            error = "Database connection error. Please try again."
             return render_template('error.html', error=error, form=CSRFForm())
+        
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
+        
         networth_details_db = db.session.execute(
-            text("SELECT currency, total FROM networth WHERE user_id = :user_id"),
+            text("SELECT currency, total FROM networth WHERE user_id = :user_id ORDER BY total DESC"),
             {"user_id": user_id}
         ).fetchall()
 
         networth_details = dict(networth_details_db)
-        return render_template("networth_details.html", networth_details=networth_details, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
+        
+        return render_template("networth_details.html", 
+                             networth_details=networth_details, 
+                             user_photo_path=user_photo_path, 
+                             total_favorite_currency=total_favorite_currency, 
+                             favorite_currency=favorite_currency, 
+                             form=CSRFForm())
 
 @user_bp.route("/delete_user", methods=["POST", "GET"])
 def delete_user():
@@ -225,7 +233,7 @@ def verify_delete_user():
         return render_template("check_pass_delete_user.html", error=error, form=CSRFForm())
     else:
 
-        verification_code = request.form.get("verification_code").strip()
+        verification_code = request.form.get("verification_code").strip().lower()
         user_id = session.get("user_id")
         if verification_code == session.get("verification_code"):
 

@@ -1,70 +1,441 @@
 {% extends "layout.html" %}
 
-{% block body %}
-    {% include 'nav.html' %}
-    <div class="message-container">
+{% block title %}Add Expense - Imhotep Financial Manager{% endblock %}
+{% block description %}Track your expenses and manage your spending with Imhotep Financial Manager{% endblock %}
 
-        {% if error %}
-        <div class="error-message">{{ error }}</div>
-        {% endif %}
+{% block extra_head %}
+<style>
+    .metric-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        transition: all 0.3s ease;
+        border: 1px solid #e2e8f0;
+    }
+    .metric-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    .pattern-bg {
+        background-image: radial-gradient(circle at 1px 1px, rgba(239, 68, 68, 0.1) 1px, transparent 0);
+        background-size: 20px 20px;
+    }
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    .animate-fade-in-up {
+        animation: fadeInUp 0.6s ease forwards;
+    }
+    /* Prevent iOS zoom on input focus */
+    @media screen and (max-width: 767px) {
+        input, select {
+            font-size: 16px !important;
+        }
+    }
+</style>
+{% endblock %}
 
-    </div>
-    
-    <form action="/withdraw" method="post" class="form-container">
-        {{ form.hidden_tag() }}
-        {% include 'back.html' %}
-        <div class="form-group">
-            <input type="date" class="input" placeholder="Date" name="date" id="dateInput">
-        </div>
-        <div class="form-group">
-            <input type="number" min="0" step="any" class="input" placeholder="Amount" name="amount" required="">
-        </div>
-        <div class="form-group">
-            <div class="input-group">
-                <input type="text" id="searchInput1" placeholder="Search Currency" class="input">
-                <select name="currency" id="CurrencySelect1" class="input" required>
-                    <option disabled selected>Currency</option>
-                    {% for currency in currency_all %}
-                        <option value="{{ currency }}">{{ currency }}</option>
-                    {% endfor %}
-                </select>
+{% block content %}
+<div class="min-h-screen bg-gray-50 pattern-bg">
+    <!-- Header Section -->
+    <div class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-minus text-red-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Add Expense</h1>
+                        <p class="text-gray-600 mt-1">Track your spending and manage your budget effectively</p>
+                    </div>
+                </div>
+                
+                <!-- Net Worth Display -->
+                <div class="hidden sm:flex items-center space-x-4">
+                    <div class="text-right">
+                        <p class="text-sm text-gray-500">Total Net Worth</p>
+                        <p class="text-lg font-bold text-imhotep-600">{{ total_favorite_currency }} {{ favorite_currency }}</p>
+                    </div>
+                    {% if user_photo_path %}
+                        <img src="{{ user_photo_path }}" alt="Profile" class="w-10 h-10 rounded-full border-2 border-imhotep-200">
+                    {% endif %}
+                </div>
             </div>
         </div>
-        <div class="form-group">
-            <input type="text" class="input" placeholder="Details" name="trans_details">
-        </div>
-        <div class="form-group">
-            <input type="text" class="input" placeholder="Link" name="trans_details_link">
-        </div>
-        <div class="form-group">
-            <button  class="btn-teal" type="submit" title="Submit">
-                    <i class="fas fa-check"></i>
-            </button>
-        </div>
-    </form>
+    </div>
 
-    <script>
-        const currencySelect1 = document.getElementById('CurrencySelect1');
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Quick Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="metric-card rounded-xl p-6 text-center">
+                <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-arrow-down text-red-600 text-lg"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-1">Quick Expense</h3>
+                <p class="text-gray-600 text-sm">Track your spending fast</p>
+            </div>
+            
+            <div class="metric-card rounded-xl p-6 text-center">
+                <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-receipt text-orange-600 text-lg"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-1">Smart Categories</h3>
+                <p class="text-gray-600 text-sm">Organize your expenses</p>
+            </div>
+            
+            <div class="metric-card rounded-xl p-6 text-center">
+                <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-chart-pie text-purple-600 text-lg"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-1">Budget Insights</h3>
+                <p class="text-gray-600 text-sm">Stay within limits</p>
+            </div>
+        </div>
 
-const originalOptions1 = [...currencySelect1.options];
+        <!-- Main Form Card -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+            <div class="bg-gradient-to-r from-red-500 to-red-600 px-6 py-4">
+                <h2 class="text-xl font-bold text-white flex items-center">
+                    <i class="fas fa-credit-card mr-2"></i>
+                    Expense Details
+                </h2>
+            </div>
+            
+            <div class="p-6 sm:p-8">
+                <!-- Error Message -->
+                {% if error %}
+                    <div class="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 flex items-start space-x-2">
+                        <i class="fas fa-exclamation-circle mt-0.5 text-red-500"></i>
+                        <span class="text-sm font-medium">{{ error }}</span>
+                    </div>
+                {% endif %}
 
-// Event listeners for the input fields
-searchInput1.addEventListener('input', () => {
-filterOptions(searchInput1, currencySelect1, originalOptions1);
+                <!-- Expense Form -->
+                <form method="POST" action="/withdraw" id="expenseForm" class="space-y-6">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Date Input -->
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">
+                                <i class="fas fa-calendar-alt mr-1 text-gray-400"></i>
+                                Date
+                            </label>
+                            <input type="date" 
+                                   name="date" 
+                                   id="dateInput"
+                                   class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-4 focus:ring-red-500/20 transition-all duration-200 text-gray-900 hover:border-gray-300 focus:outline-none"
+                                   required>
+                        </div>
+                        
+                        <!-- Amount Input -->
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">
+                                <i class="fas fa-dollar-sign mr-1 text-gray-400"></i>
+                                Amount
+                            </label>
+                            <input type="number" 
+                                   name="amount" 
+                                   step="0.01" 
+                                   min="0.01" 
+                                   class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-4 focus:ring-red-500/20 transition-all duration-200 text-gray-900 hover:border-gray-300 focus:outline-none"
+                                   placeholder="0.00"
+                                   required>
+                        </div>
+                    </div>
+                    
+                    <!-- Currency Selection -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">
+                            <i class="fas fa-coins mr-1 text-gray-400"></i>
+                            Currency
+                        </label>
+                        <select name="currency" 
+                                id="currencySelect" 
+                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-4 focus:ring-red-500/20 transition-all duration-200 text-gray-900 hover:border-gray-300 focus:outline-none"
+                                required>
+                            <option value="">Select Currency</option>
+                            {% for currency in currency_all %}
+                                <option value="{{ currency }}">{{ currency }} Available</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Description Input -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">
+                            <i class="fas fa-sticky-note mr-1 text-gray-400"></i>
+                            Description <span class="text-gray-400 text-xs">(Optional)</span>
+                        </label>
+                        <textarea name="trans_details" 
+                                  rows="3" 
+                                  class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-4 focus:ring-red-500/20 transition-all duration-200 text-gray-900 hover:border-gray-300 focus:outline-none resize-none"
+                                  placeholder="Add details about this expense (e.g., Groceries, Rent, Entertainment...)"></textarea>
+                    </div>
+                    
+                    <!-- Link Input (Optional) -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">
+                            <i class="fas fa-link mr-1 text-gray-400"></i>
+                            Receipt/Link <span class="text-gray-400 text-xs">(Optional)</span>
+                        </label>
+                        <input type="url" 
+                               name="trans_details_link" 
+                               class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-4 focus:ring-red-500/20 transition-all duration-200 text-gray-900 hover:border-gray-300 focus:outline-none"
+                               placeholder="https://example.com/receipt">
+                    </div>
+                    
+                    <!-- Submit Buttons -->
+                    <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                        <button type="submit" 
+                                class="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-red-500/30 flex items-center justify-center space-x-2">
+                            <i class="fas fa-minus"></i>
+                            <span>Add Expense</span>
+                        </button>
+                        
+                        <a href="/home" 
+                           class="flex-1 sm:flex-none bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-gray-400/30 flex items-center justify-center space-x-2">
+                            <i class="fas fa-times"></i>
+                            <span>Cancel</span>
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Quick Tips Card -->
+        <div class="mt-8 bg-gradient-to-r from-red-50 to-pink-50 rounded-2xl p-6 border border-red-200">
+            <div class="flex items-start space-x-3">
+                <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <i class="fas fa-lightbulb text-red-600 text-sm"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-red-900 mb-2">💡 Expense Tracking Tips</h3>
+                    <ul class="text-red-800 text-sm space-y-1">
+                        <li>• Keep receipts and add links for easy reference later</li>
+                        <li>• Use detailed descriptions to categorize your spending</li>
+                        <li>• Track small expenses too - they add up quickly</li>
+                        <li>• Review your spending patterns weekly to stay on budget</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <a href="/show_trans" 
+               class="metric-card rounded-xl p-4 flex items-center space-x-3 hover:bg-gray-50 transition-colors">
+                <div class="w-10 h-10 bg-imhotep-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-history text-imhotep-600"></i>
+                </div>
+                <div>
+                    <h4 class="font-medium text-gray-900">View History</h4>
+                    <p class="text-sm text-gray-600">See all transactions</p>
+                </div>
+            </a>
+            
+            <a href="/deposit" 
+               class="metric-card rounded-xl p-4 flex items-center space-x-3 hover:bg-gray-50 transition-colors">
+                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-plus text-green-600"></i>
+                </div>
+                <div>
+                    <h4 class="font-medium text-gray-900">Add Income</h4>
+                    <p class="text-sm text-gray-600">Record earnings</p>
+                </div>
+            </a>
+            
+            <a href="/show_chart" 
+               class="metric-card rounded-xl p-4 flex items-center space-x-3 hover:bg-gray-50 transition-colors">
+                <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-chart-pie text-purple-600"></i>
+                </div>
+                <div>
+                    <h4 class="font-medium text-gray-900">View Analytics</h4>
+                    <p class="text-sm text-gray-600">See spending patterns</p>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set today's date as default
+    const dateInput = document.getElementById('dateInput');
+    if (dateInput) {
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.value = today;
+    }
+    
+    // Set favorite currency as default if available
+    const favoriteCurrency = "{{ favorite_currency }}";
+    const currencySelect = document.getElementById('currencySelect');
+    if (currencySelect && favoriteCurrency) {
+        for (let i = 0; i < currencySelect.options.length; i++) {
+            if (currencySelect.options[i].value === favoriteCurrency) {
+                currencySelect.options[i].selected = true;
+                break;
+            }
+        }
+    }
+    
+    // Animate cards on load
+    const cards = document.querySelectorAll('.metric-card, .bg-white');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'all 0.6s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+    
+    // Form validation
+    const form = document.getElementById('expenseForm');
+    const amountInput = form.querySelector('input[name="amount"]');
+    const currencyInput = form.querySelector('select[name="currency"]');
+    
+    // Amount validation
+    amountInput.addEventListener('input', function() {
+        const value = parseFloat(this.value);
+        if (value <= 0 || isNaN(value)) {
+            this.classList.add('border-red-400');
+            this.classList.remove('border-green-400');
+        } else {
+            this.classList.add('border-green-400');
+            this.classList.remove('border-red-400');
+        }
+    });
+    
+    // Currency validation and balance check
+    currencyInput.addEventListener('change', function() {
+        if (this.value) {
+            this.classList.add('border-green-400');
+            this.classList.remove('border-red-400');
+            
+            // Show available balance for selected currency
+            const selectedOption = this.options[this.selectedIndex];
+            if (selectedOption.text.includes(' - ')) {
+                const balanceText = selectedOption.text.split(' - ')[1];
+                console.log('Available balance:', balanceText);
+            }
+        } else {
+            this.classList.add('border-red-400');
+            this.classList.remove('border-green-400');
+        }
+    });
+    
+    // Real-time balance validation
+    function validateBalance() {
+        const amount = parseFloat(amountInput.value);
+        const selectedCurrency = currencyInput.value;
+        
+        if (amount && selectedCurrency) {
+            const selectedOption = currencyInput.options[currencyInput.selectedIndex];
+            if (selectedOption.text.includes(' - ')) {
+                const balanceText = selectedOption.text.split(' - ')[1].replace(' Available', '');
+                const availableBalance = parseFloat(balanceText);
+                
+                if (amount > availableBalance) {
+                    amountInput.classList.add('border-red-400');
+                    amountInput.classList.remove('border-green-400');
+                    
+                    // Show warning message
+                    let warningDiv = document.getElementById('balance-warning');
+                    if (!warningDiv) {
+                        warningDiv = document.createElement('div');
+                        warningDiv.id = 'balance-warning';
+                        warningDiv.className = 'mt-2 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm flex items-center space-x-2';
+                        warningDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i><span>Amount exceeds available balance</span>';
+                        amountInput.parentNode.appendChild(warningDiv);
+                    }
+                } else {
+                    amountInput.classList.remove('border-red-400');
+                    amountInput.classList.add('border-green-400');
+                    
+                    // Remove warning message
+                    const warningDiv = document.getElementById('balance-warning');
+                    if (warningDiv) {
+                        warningDiv.remove();
+                    }
+                }
+            }
+        }
+    }
+    
+    amountInput.addEventListener('input', validateBalance);
+    currencyInput.addEventListener('change', validateBalance);
+    
+    // Form submission
+    form.addEventListener('submit', function(e) {
+        const amount = parseFloat(amountInput.value);
+        const currency = currencyInput.value;
+        
+        if (!amount || amount <= 0) {
+            e.preventDefault();
+            amountInput.focus();
+            amountInput.classList.add('border-red-400');
+            return;
+        }
+        
+        if (!currency) {
+            e.preventDefault();
+            currencyInput.focus();
+            currencyInput.classList.add('border-red-400');
+            return;
+        }
+        
+        // Show loading state
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i>Adding Expense...';
+        submitBtn.disabled = true;
+    });
+    
+    // Add quick amount buttons for common expenses
+    addQuickExpenseButtons();
 });
 
-document.addEventListener("DOMContentLoaded", function () {
-const doctorCategory = "{{ favorite_currency }}";
-
-const selectElement = document.getElementById("CurrencySelect1");
-const options = selectElement.options;
-
-for (let i = 0; i < options.length; i++) {
-if (options[i].value === doctorCategory) {
-    options[i].selected = true;
-    break;
+function addQuickExpenseButtons() {
+    const amountInput = document.querySelector('input[name="amount"]');
+    if (!amountInput) return;
+    
+    // Create quick amount buttons container
+    const quickAmountContainer = document.createElement('div');
+    quickAmountContainer.className = 'flex flex-wrap gap-2 mt-2';
+    quickAmountContainer.innerHTML = `
+        <button type="button" class="quick-amount-btn px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-lg transition-colors" data-amount="10">+10</button>
+        <button type="button" class="quick-amount-btn px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-lg transition-colors" data-amount="25">+25</button>
+        <button type="button" class="quick-amount-btn px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-lg transition-colors" data-amount="50">+50</button>
+        <button type="button" class="quick-amount-btn px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-lg transition-colors" data-amount="100">+100</button>
+        <button type="button" class="quick-amount-btn px-3 py-1 bg-red-100 hover:bg-red-200 text-red-700 text-sm rounded-lg transition-colors" onclick="document.querySelector('input[name=\\'amount\\']').value = ''">Clear</button>
+    `;
+    
+    // Insert after amount input
+    const amountContainer = amountInput.closest('.space-y-2');
+    if (amountContainer) {
+        amountContainer.appendChild(quickAmountContainer);
+        
+        // Add click handlers
+        quickAmountContainer.querySelectorAll('.quick-amount-btn[data-amount]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const amount = parseFloat(this.dataset.amount);
+                const currentAmount = parseFloat(amountInput.value) || 0;
+                amountInput.value = (currentAmount + amount).toFixed(2);
+                amountInput.dispatchEvent(new Event('input'));
+            });
+        });
+    }
 }
-}
-});
 </script>
 {% endblock %}

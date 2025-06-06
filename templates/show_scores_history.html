@@ -1,64 +1,324 @@
 {% extends "layout.html" %}
 
-{% block body %}
-    {% include 'nav.html' %}
-    <body>
-        <div class="container" style="flex-grow: 1; padding-top: 80px; overflow: auto;">
-            <div class="message-container">
-                {% if error %}
-                <div class="error-message">{{ error }}</div>
-                {% endif %}
-            </div>
+{% block title %}Score History - Imhotep Financial Manager{% endblock %}
+{% block description %}View your monthly financial performance scores and track your progress over time{% endblock %}
 
-            <div class="table-container" style="flex-grow: 1; overflow: auto;">
-                <table class="c">
-                    <thead>
-                        <tr>
-                            <th>Mounth</th>
-                            <th>Year</th>
-                            <th>Target</th>
-                            <th>Score</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for mounth in target_history %}
-                            <tr>
-                                <td>{{ mounth.mounth }}</td>
-                                <td>{{ mounth.year }}</td>
-                                <td>{{ mounth.target }}</td>
-                                <td>{{ "{:,.2f}".format(mounth.score|float) }}</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-             <!-- Pagination Controls -->
-             <div class="pagination">
-                <div class="pagination-controls">
-                    <!-- Previous Page Button -->
-                    {% if page > 1 %}
-                        <a href="{{ url_for('user.show_scores_history', page=page-1)}}" class="btn btn_page">Prev</a>
-                    {% else %}
-                        <span class="btn disabled btn_page">Prev</span>
-                    {% endif %}
-                    
-                    <!-- Dropdown Menu for Page Selection -->
-                    <select id="page-selector" onchange="updatePage()">
-                        {% for p in range(1, total_pages + 1) %}
-                            <option value="{{ url_for('user.show_scores_history', page=p) }}" {% if p == page %}selected{% endif %}>
-                                Page {{ p }}
-                            </option>
-                        {% endfor %}
-                    </select>
+{% block extra_head %}
+<style>
+    /* Custom animations and effects */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+    }
+    
+    .animate-fade-in-up {
+        animation: fadeInUp 0.6s ease-out forwards;
+    }
+    
+    .animate-pulse-gentle {
+        animation: pulse 2s ease-in-out infinite;
+    }
+    
+    .gradient-card {
+        background: linear-gradient(135deg, rgba(81, 173, 172, 0.1) 0%, rgba(66, 138, 137, 0.1) 100%);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(81, 173, 172, 0.2);
+    }
+    
+    .metric-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        transition: all 0.3s ease;
+    }
+    
+    .metric-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    
+    .pattern-bg {
+        background-image: radial-gradient(circle at 1px 1px, rgba(81, 173, 172, 0.1) 1px, transparent 0);
+        background-size: 20px 20px;
+    }
+    
+    .score-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        transition: all 0.3s ease;
+        border: 1px solid rgba(81, 173, 172, 0.1);
+    }
+    
+    .score-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -5px rgba(0, 0, 0, 0.04);
+        border-color: rgba(81, 173, 172, 0.3);
+    }
+    
+    .score-positive {
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(21, 128, 61, 0.1) 100%);
+        border-color: rgba(34, 197, 94, 0.3);
+    }
+    
+    .score-negative {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%);
+        border-color: rgba(239, 68, 68, 0.3);
+    }
+    
+    .score-neutral {
+        background: linear-gradient(135deg, rgba(234, 179, 8, 0.1) 0%, rgba(161, 98, 7, 0.1) 100%);
+        border-color: rgba(234, 179, 8, 0.3);
+    }
+    
+    /* Mobile responsive adjustments */
+    @media (max-width: 768px) {
+        .mobile-responsive-text {
+            font-size: 0.9rem;
+        }
+        
+        .mobile-responsive-card {
+            padding: 1rem;
+        }
+        
+        .mobile-responsive-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+    }
+</style>
+{% endblock %}
 
-                    <!-- Next Page Button -->
-                    {% if page < total_pages %}
-                        <a href="{{ url_for('user.show_scores_history', page=page+1) }}" class="btn btn_page">Next</a>
-                    {% else %}
-                        <span class="btn disabled btn_page">Next</span>
-                    {% endif %}
+{% block content %}
+<div class="min-h-screen bg-gray-50 pattern-bg">
+    <!-- Header Section -->
+    <div class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <nav class="flex" aria-label="Breadcrumb">
+                        <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                            <li class="inline-flex items-center">
+                                <a href="/home" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-imhotep-600">
+                                    <i class="fas fa-home mr-2"></i>
+                                    Dashboard
+                                </a>
+                            </li>
+                            <li>
+                                <div class="flex items-center">
+                                    <i class="fas fa-chevron-right text-gray-400 mx-2"></i>
+                                    <span class="text-sm font-medium text-gray-500">Score History</span>
+                                </div>
+                            </li>
+                        </ol>
+                    </nav>
+                    <h1 class="text-2xl font-bold text-gray-900 mt-2">Monthly Score History</h1>
+                    <p class="text-gray-600">Track your financial performance over time</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center animate-pulse-gentle">
+                        <i class="fas fa-trophy text-white text-xl"></i>
+                    </div>
                 </div>
             </div>
         </div>
-    </body>
+    </div>
+    
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Current Status Card -->
+        <div class="mb-8">
+            <div class="metric-card rounded-xl p-6 shadow-lg">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600 mb-2">Current Net Worth</p>
+                        <p class="text-3xl font-bold text-gray-900">{{ total_favorite_currency }} {{ favorite_currency }}</p>
+                        <p class="text-sm text-gray-500 mt-1">Your overall financial standing</p>
+                    </div>
+                    <div class="w-16 h-16 bg-gradient-to-r from-imhotep-500 to-imhotep-600 rounded-full flex items-center justify-center">
+                        <i class="fas fa-wallet text-white text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Scores History Section -->
+        {% if target_history %}
+            <div class="mb-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-semibold text-gray-900">Performance History</h2>
+                    <div class="text-sm text-gray-500">
+                        <i class="fas fa-calendar-alt mr-1"></i>
+                        {{ target_history|length }} months of data
+                    </div>
+                </div>
+                
+                <!-- Score Cards Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mobile-responsive-grid gap-6 mb-8">
+                    {% for record in target_history %}
+                    {% set month_names = [
+                        'January', 'February', 'March', 'April', 'May', 'June',
+                        'July', 'August', 'September', 'October', 'November', 'December'
+                    ] %}
+                    {% set month_name = month_names[record[1] - 1] %}
+                    {% set score = record[3] if record[3] is not none else 0 %}
+                    {% set score_class = 'score-positive' if score > 0 else 'score-negative' if score < 0 else 'score-neutral' %}
+                    {% set score_color = 'text-green-600' if score > 0 else 'text-red-600' if score < 0 else 'text-yellow-600' %}
+                    {% set score_icon = 'fa-arrow-up' if score > 0 else 'fa-arrow-down' if score < 0 else 'fa-minus' %}
+                    {% set score_bg = 'from-green-500 to-green-600' if score > 0 else 'from-red-500 to-red-600' if score < 0 else 'from-yellow-500 to-yellow-600' %}
+                    
+                    <div class="score-card {{ score_class }} rounded-xl p-4 mobile-responsive-card shadow-lg" data-score="{{ score }}">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-10 h-10 bg-gradient-to-r {{ score_bg }} rounded-full flex items-center justify-center">
+                                <i class="fas {{ score_icon }} text-white text-sm"></i>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xs text-gray-500 uppercase tracking-wide">{{ month_name }}</div>
+                                <div class="text-xs text-gray-600 font-medium">{{ record[2] }}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <p class="text-lg font-bold {{ score_color }} mobile-responsive-text">
+                                {{ "+" if score > 0 else "" }}{{ "{:,.2f}".format(score) }}
+                            </p>
+                            <p class="text-sm text-gray-600">Score vs Target</p>
+                        </div>
+                        
+                        <div class="text-xs text-gray-500">
+                            <div class="flex items-center justify-between">
+                                <span>Target:</span>
+                                <span class="font-medium">{{ "{:,.0f}".format(record[0]) }} {{ favorite_currency }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3 pt-3 border-t border-gray-200">
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="text-gray-500">Performance</span>
+                                <div class="flex items-center {{ score_color }}">
+                                    <i class="fas {{ score_icon }} mr-1"></i>
+                                    <span class="font-medium">
+                                        {% if score > 0 %}Above Target{% elif score < 0 %}Below Target{% else %}On Target{% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Pagination -->
+                {% if total_pages > 1 %}
+                <div class="flex items-center justify-between bg-white rounded-xl p-6 shadow-lg">
+                    <div class="flex items-center space-x-2 text-sm text-gray-600">
+                        <span>Page {{ page }} of {{ total_pages }}</span>
+                    </div>
+                    
+                    <div class="flex items-center space-x-2">
+                        {% if page > 1 %}
+                            <a href="?page={{ page - 1 }}" 
+                               class="bg-imhotep-600 hover:bg-imhotep-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center space-x-1 text-sm">
+                                <i class="fas fa-chevron-left"></i>
+                                <span class="hidden sm:inline">Previous</span>
+                            </a>
+                        {% endif %}
+                        
+                        <!-- Page numbers for larger screens -->
+                        <div class="hidden md:flex items-center space-x-1">
+                            {% for p in range(1, total_pages + 1) %}
+                                {% if p == page %}
+                                    <span class="bg-imhotep-600 text-white px-3 py-2 rounded-lg text-sm font-medium">{{ p }}</span>
+                                {% elif p <= 3 or p >= total_pages - 2 or (p >= page - 1 and p <= page + 1) %}
+                                    <a href="?page={{ p }}" 
+                                       class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-2 rounded-lg text-sm transition-colors">{{ p }}</a>
+                                {% elif p == 4 and page > 6 %}
+                                    <span class="text-gray-500 px-2">...</span>
+                                {% elif p == total_pages - 3 and page < total_pages - 5 %}
+                                    <span class="text-gray-500 px-2">...</span>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        
+                        {% if page < total_pages %}
+                            <a href="?page={{ page + 1 }}" 
+                               class="bg-imhotep-600 hover:bg-imhotep-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center space-x-1 text-sm">
+                                <span class="hidden sm:inline">Next</span>
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            
+        {% else %}
+            <!-- Empty State -->
+            <div class="gradient-card rounded-xl p-12 text-center shadow-lg">
+                <div class="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-chart-line text-purple-600 text-3xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-3">No Score History Yet</h3>
+                <p class="text-gray-600 mb-6">Start setting monthly targets to track your financial performance and build your score history.</p>
+                <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                    <a href="/add_target" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg transition-colors inline-flex items-center justify-center">
+                        <i class="fas fa-target mr-2"></i>Set Your First Target
+                    </a>
+                    <a href="/add_income" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-colors inline-flex items-center justify-center">
+                        <i class="fas fa-plus mr-2"></i>Add Income
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+        
+        <!-- Quick Actions -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <a href="/home" class="gradient-card rounded-xl p-4 text-center hover:shadow-lg transition-all duration-300 group">
+                <div class="w-12 h-12 bg-imhotep-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-imhotep-200 transition-colors">
+                    <i class="fas fa-home text-imhotep-600 text-xl"></i>
+                </div>
+                <p class="text-sm font-medium text-gray-900">Dashboard</p>
+            </a>
+            
+            <a href="/add_target" class="gradient-card rounded-xl p-4 text-center hover:shadow-lg transition-all duration-300 group">
+                <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-purple-200 transition-colors">
+                    <i class="fas fa-target text-purple-600 text-xl"></i>
+                </div>
+                <p class="text-sm font-medium text-gray-900">Set Target</p>
+            </a>
+            
+            <a href="/show_chart" class="gradient-card rounded-xl p-4 text-center hover:shadow-lg transition-all duration-300 group">
+                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-200 transition-colors">
+                    <i class="fas fa-chart-pie text-blue-600 text-xl"></i>
+                </div>
+                <p class="text-sm font-medium text-gray-900">Analytics</p>
+            </a>
+            
+            <a href="/show_networth_details" class="gradient-card rounded-xl p-4 text-center hover:shadow-lg transition-all duration-300 group">
+                <div class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-indigo-200 transition-colors">
+                    <i class="fas fa-wallet text-indigo-600 text-xl"></i>
+                </div>
+                <p class="text-sm font-medium text-gray-900">Net Worth</p>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Use the scores history functionality from main.js
+document.addEventListener('DOMContentLoaded', function() {
+    initializeScoresHistory();
+});
+</script>
 {% endblock %}

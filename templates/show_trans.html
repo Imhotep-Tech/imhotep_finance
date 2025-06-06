@@ -1,121 +1,709 @@
 {% extends "layout.html" %}
 
-{% block body %}
-    {% include 'nav.html' %}
-    <body>
-        <div class="container" style="flex-grow: 1; padding-top: 80px; overflow: auto;">
-            <div class="message-container">
-                {% if error %}
-                <div class="error-message">{{ error }}</div>
-                {% endif %}
-            </div>
+{% block title %}Transaction History - Imhotep Financial Manager{% endblock %}
+{% block description %}View and manage all your financial transactions with advanced filtering and search capabilities{% endblock %}
 
-            <div style="text-align: center;">
-                <table class="table-container">
-                    <thead>
-                        <tr>
-                            <td style="display: inline-block; vertical-align: top;">
-                                <form action="/trash_trans" method="get">
-                                    <button type="submit" class="btn-green" title="Trash">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                    </thead>
-                </table>
-            </div>
+{% block extra_head %}
+<style>
+    .metric-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        transition: all 0.3s ease;
+        border: 1px solid #e2e8f0;
+    }
+    .metric-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    .pattern-bg {
+        background-image: radial-gradient(circle at 1px 1px, rgba(81, 173, 172, 0.1) 1px, transparent 0);
+        background-size: 20px 20px;
+    }
+    .transaction-row {
+        transition: all 0.3s ease;
+    }
+    .transaction-row:hover {
+        transform: translateX(4px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    .mobile-card {
+        display: none;
+    }
+    .deposit-bg {
+        background: linear-gradient(135deg, #dcfce7 0%, #f0fdf4 100%);
+        border-left: 4px solid #22c55e;
+    }
+    .withdraw-bg {
+        background: linear-gradient(135deg, #fef2f2 0%, #fef7f7 100%);
+        border-left: 4px solid #ef4444;
+    }
+    
+    /* Mobile responsive styles */
+    @media (max-width: 768px) {
+        .desktop-table {
+            display: none;
+        }
+        .mobile-card {
+            display: block;
+        }
+        .transaction-row {
+            transform: none;
+        }
+        .transaction-row:hover {
+            transform: none;
+        }
+    }
+    
+    /* Prevent iOS zoom on input focus */
+    @media screen and (max-width: 767px) {
+        input, select {
+            font-size: 16px !important;
+        }
+    }
+    
+    /* Custom scrollbar for table */
+    .table-container::-webkit-scrollbar {
+        height: 8px;
+    }
+    .table-container::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 4px;
+    }
+    .table-container::-webkit-scrollbar-thumb {
+        background: #51adac;
+        border-radius: 4px;
+    }
+    .table-container::-webkit-scrollbar-thumb:hover {
+        background: #428a89;
+    }
+</style>
+{% endblock %}
 
-            <div class="table-container" style="flex-grow: 1; overflow: auto;">
-                <form action="/show_trans" method="get" id="date-form">
-                    <table>
-                        <tr>
-                            <th>
-                                From Date:
-                                <input type="date" name="from_date" value="{{ from_date }}">
-                            </th>
-                            <th>
-                                To Date:
-                                <input type="date" name="to_date" value="{{ to_date }}">
-                            </th>
-                            <th>
-                                <button class="form-btn" title="Submit" type="submit">
-                                    <i class="fas fa-check"></i>
-                                </button>
-                            </th>
-                        </tr>
-                    </table>
-                </form>
-                <table class="c">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Date</th>
-                            <th>Amount</th>
-                            <th>Currency</th>
-                            <th>Details</th>
-                            <th>Link</th>
-                            <th>Status</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for trans in trans_db %}
-                            <tr>
-                                <td>{{ trans.trans_id }}</td>
-                                <td>{{ trans.date }}</td>
-                                <td>{{ "{:,.2f}".format(trans.amount|float) }}</td>
-                                <td>{{ trans.currency }}</td>
-                                <td class="details-cell">{{ trans.trans_details }}</td>
-                                <td class="details-cell">
-                                    <a href="{{ trans.trans_details_link }}" target="_blank" title="{{ trans.trans_details_link }}">{{ trans.trans_details_link }}</a>
-                                </td>
-                                <td>{{ trans.trans_status }}</td>
-                                <td>
-                                    <form action="/edit_trans" method="get" style="display: inline;">
-                                        {{ form.hidden_tag() }}
-                                        <input type="hidden" name="trans_key" value="{{ trans.trans_key }}">
-                                        <button type="submit" class="btn-green" title="Edit">
-                                            <i class="fas fa-pen"></i>
-                                        </button>
-                                    </form>
-                                    <form action="/delete_trans" method="post" style="display: inline;">
-                                        {{ form.hidden_tag() }}
-                                        <input type="hidden" name="trans_key" value="{{ trans.trans_key }}">
-                                        <button type="submit" class="btn-red" title="Delete">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-             <!-- Pagination Controls -->
-             <div class="pagination">
-                <div class="pagination-controls">
-                    {% if page > 1 %}
-                        <a href="{{ url_for('transactions.show_trans', page=page-1, from_date=from_date, to_date=to_date) }}" class="btn btn_page">Prev</a>
-                    {% else %}
-                        <span class="btn disabled btn_page">Prev</span>
-                    {% endif %}
-            
-                    <select id="page-selector" onchange="updatePage()">
-                        {% for p in range(1, total_pages + 1) %}
-                            <option value="{{ url_for('transactions.show_trans', page=p, from_date=from_date, to_date=to_date) }}" {% if p == page %}selected{% endif %}>
-                                Page {{ p }}
-                            </option>
-                        {% endfor %}
-                    </select>
-            
-                    {% if page < total_pages %}
-                        <a href="{{ url_for('transactions.show_trans', page=page+1, from_date=from_date, to_date=to_date) }}" class="btn btn_page">Next</a>
-                    {% else %}
-                        <span class="btn disabled btn_page">Next</span>
+{% block content %}
+<div class="min-h-screen bg-gray-50 pattern-bg">
+    <!-- Header Section -->
+    <div class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-history text-indigo-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Transaction History</h1>
+                        <p class="text-gray-600 mt-1">Track and manage all your financial activities</p>
+                    </div>
+                </div>
+                
+                <!-- Net Worth Display -->
+                <div class="hidden sm:flex items-center space-x-4">
+                    <div class="text-right">
+                        <p class="text-sm text-gray-500">Total Net Worth</p>
+                        <p class="text-lg font-bold text-imhotep-600">{{ total_favorite_currency }} {{ favorite_currency }}</p>
+                    </div>
+                    {% if user_photo_path %}
+                        <img src="{{ user_photo_path }}" alt="Profile" class="w-10 h-10 rounded-full border-2 border-imhotep-200">
                     {% endif %}
                 </div>
             </div>
         </div>
-    </body>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Quick Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="metric-card rounded-xl p-6 text-center">
+                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-plus text-green-600 text-lg"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-1">Total Income</h3>
+                <p class="text-gray-600 text-sm" id="total-income">Calculating...</p>
+            </div>
+            
+            <div class="metric-card rounded-xl p-6 text-center">
+                <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-minus text-red-600 text-lg"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-1">Total Expenses</h3>
+                <p class="text-gray-600 text-sm" id="total-expenses">Calculating...</p>
+            </div>
+            
+            <div class="metric-card rounded-xl p-6 text-center">
+                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-balance-scale text-blue-600 text-lg"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-1">Net Flow</h3>
+                <p class="text-gray-600 text-sm" id="net-flow">Calculating...</p>
+            </div>
+            
+            <div class="metric-card rounded-xl p-6 text-center">
+                <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-list text-purple-600 text-lg"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-1">Total Transactions</h3>
+                <p class="text-gray-600 text-sm">{{ trans_db|length }}</p>
+            </div>
+        </div>
+
+        <!-- Filters and Actions -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-200 mb-8">
+            <div class="bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-4 rounded-t-2xl">
+                <h2 class="text-xl font-bold text-white flex items-center">
+                    <i class="fas fa-filter mr-2"></i>
+                    Filters & Actions
+                </h2>
+            </div>
+            
+            <div class="p-6">
+                <!-- Error Message -->
+                {% if error %}
+                    <div class="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 flex items-start space-x-2">
+                        <i class="fas fa-exclamation-circle mt-0.5 text-red-500"></i>
+                        <span class="text-sm font-medium">{{ error }}</span>
+                    </div>
+                {% endif %}
+
+                <form method="GET" action="/show_trans" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                        <!-- Date From -->
+                        <div class="space-y-1">
+                            <label class="block text-sm font-medium text-gray-700">From Date</label>
+                            <input type="date" 
+                                   name="from_date" 
+                                   value="{{ from_date }}"
+                                   class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 text-gray-900 text-sm">
+                        </div>
+                        
+                        <!-- Date To -->
+                        <div class="space-y-1">
+                            <label class="block text-sm font-medium text-gray-700">To Date</label>
+                            <input type="date" 
+                                   name="to_date" 
+                                   value="{{ to_date }}"
+                                   class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 text-gray-900 text-sm">
+                        </div>
+                        
+                        <!-- Transaction Type -->
+                        <div class="space-y-1">
+                            <label class="block text-sm font-medium text-gray-700">Type</label>
+                            <select name="trans_type" 
+                                    class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 text-gray-900 text-sm">
+                                <option value="">All Types</option>
+                                <option value="deposit">Income</option>
+                                <option value="withdraw">Expense</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Search -->
+                        <div class="space-y-1">
+                            <label class="block text-sm font-medium text-gray-700">Search</label>
+                            <input type="text" 
+                                   placeholder="Search description..."
+                                   id="searchInput"
+                                   class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 text-gray-900 text-sm">
+                        </div>
+                        
+                        <!-- Filter Button -->
+                        <div class="space-y-1">
+                            <label class="block text-sm font-medium text-gray-700 opacity-0">Filter</label>
+                            <button type="submit" 
+                                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 text-sm">
+                                <i class="fas fa-search mr-1"></i>
+                                Filter
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="flex flex-wrap gap-2 pt-4 border-t border-gray-200">
+                        <a href="/deposit" 
+                           class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200 text-sm">
+                            <i class="fas fa-plus mr-2"></i>Add Income
+                        </a>
+                        <a href="/withdraw" 
+                           class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200 text-sm">
+                            <i class="fas fa-minus mr-2"></i>Add Expense
+                        </a>
+                        <a href="/trash_trans" 
+                           class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors duration-200 text-sm">
+                            <i class="fas fa-trash mr-2"></i>Trash
+                        </a>
+                        <button type="button" 
+                                id="exportBtn"
+                                class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 text-sm">
+                            <i class="fas fa-download mr-2"></i>Export
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Transactions Table/Cards -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+            <div class="bg-gradient-to-r from-gray-600 to-gray-700 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-white flex items-center">
+                        <i class="fas fa-list-alt mr-2"></i>
+                        Transactions
+                        {% if trans_db %}
+                            <span class="ml-2 bg-white/20 px-2 py-1 rounded-full text-sm">{{ trans_db|length }}</span>
+                        {% endif %}
+                    </h2>
+                    
+                    <!-- Sort Options -->
+                    <div class="flex items-center space-x-2">
+                        <select id="sortSelect" 
+                                class="bg-white/10 border border-white/20 text-white rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-white/30">
+                            <option value="date-desc">Date (Newest)</option>
+                            <option value="date-asc">Date (Oldest)</option>
+                            <option value="amount-desc">Amount (High)</option>
+                            <option value="amount-asc">Amount (Low)</option>
+                            <option value="type">Type</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            {% if trans_db %}
+                <!-- Desktop Table -->
+                <div class="desktop-table overflow-x-auto table-container">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 border-b border-gray-200">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Currency</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionTableBody" class="divide-y divide-gray-200">
+                            {% for transaction in trans_db %}
+                            <tr class="transaction-row hover:bg-gray-50 transition-colors duration-200" 
+                                data-date="{{ transaction[4] }}" 
+                                data-amount="{{ transaction[5] }}" 
+                                data-type="{{ transaction[6] }}"
+                                data-description="{{ transaction[7] or '' }}">
+                                
+                                <!-- Date -->
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {{ transaction[4].strftime('%b %d, %Y') }}
+                                </td>
+                                
+                                <!-- Type -->
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {% if transaction[6] == 'deposit' %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            <i class="fas fa-plus mr-1"></i>Income
+                                        </span>
+                                    {% else %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                            <i class="fas fa-minus mr-1"></i>Expense
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                
+                                <!-- Amount -->
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold {% if transaction[6] == 'deposit' %}text-green-600{% else %}text-red-600{% endif %}">
+                                    {% if transaction[6] == 'deposit' %}+{% else %}-{% endif %}{{ "%.2f"|format(transaction[5]|float) }}
+                                </td>
+                                
+                                <!-- Currency -->
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-medium">
+                                    {{ transaction[3] }}
+                                </td>
+                                
+                                <!-- Description -->
+                                <td class="px-6 py-4 text-sm text-gray-700 max-w-xs">
+                                    <div class="truncate">
+                                        {% if transaction[7] %}
+                                            {{ transaction[7] }}
+                                        {% else %}
+                                            <span class="text-gray-400 italic">No description</span>
+                                        {% endif %}
+                                    </div>
+                                    {% if transaction[8] %}
+                                        <a href="{{ transaction[8] }}" target="_blank" 
+                                           class="text-indigo-600 hover:text-indigo-800 text-xs flex items-center mt-1">
+                                            <i class="fas fa-external-link-alt mr-1"></i>View Receipt
+                                        </a>
+                                    {% endif %}
+                                </td>
+                                
+                                <!-- Actions -->
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    <div class="flex items-center space-x-2">
+                                        <a href="/edit_trans?trans_key={{ transaction[1] }}" 
+                                           class="text-indigo-600 hover:text-indigo-800 transition-colors">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form method="POST" action="/delete_trans" class="inline" 
+                                              onsubmit="return confirm('Are you sure you want to delete this transaction?')">
+                                            {{ form.hidden_tag() }}
+                                            <input type="hidden" name="trans_key" value="{{ transaction[1] }}">
+                                            <button type="submit" 
+                                                    class="text-red-600 hover:text-red-800 transition-colors">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Mobile Cards -->
+                <div class="mobile-card space-y-4 p-4" id="mobileCardsContainer">
+                    {% for transaction in trans_db %}
+                    <div class="transaction-card border rounded-xl p-4 {% if transaction[6] == 'deposit' %}deposit-bg{% else %}withdraw-bg{% endif %}"
+                         data-date="{{ transaction[4] }}" 
+                         data-amount="{{ transaction[5] }}" 
+                         data-type="{{ transaction[6] }}"
+                         data-description="{{ transaction[7] or '' }}">
+                        
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center space-x-2">
+                                {% if transaction[6] == 'deposit' %}
+                                    <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-plus text-green-600 text-sm"></i>
+                                    </div>
+                                    <span class="font-medium text-green-800">Income</span>
+                                {% else %}
+                                    <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-minus text-red-600 text-sm"></i>
+                                    </div>
+                                    <span class="font-medium text-red-800">Expense</span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="text-right">
+                                <div class="text-lg font-bold {% if transaction[6] == 'deposit' %}text-green-600{% else %}text-red-600{% endif %}">
+                                    {% if transaction[6] == 'deposit' %}+{% else %}-{% endif %}{{ "%.2f"|format(transaction[5]|float) }} {{ transaction[3] }}
+                                </div>
+                                <div class="text-sm text-gray-500">{{ transaction[4].strftime('%b %d, %Y') }}</div>
+                            </div>
+                        </div>
+                        
+                        {% if transaction[7] %}
+                        <div class="mb-3">
+                            <p class="text-gray-700 text-sm">{{ transaction[7] }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if transaction[8] %}
+                        <div class="mb-3">
+                            <a href="{{ transaction[8] }}" target="_blank" 
+                               class="text-indigo-600 hover:text-indigo-800 text-xs flex items-center">
+                                <i class="fas fa-external-link-alt mr-1"></i>View Receipt
+                            </a>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="flex items-center justify-between pt-3 border-t border-gray-200">
+                            <div class="text-xs text-gray-500">
+                                Transaction ID: {{ transaction[1] }}
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <a href="/edit_trans?trans_key={{ transaction[1] }}" 
+                                   class="text-indigo-600 hover:text-indigo-800 text-sm flex items-center">
+                                    <i class="fas fa-edit mr-1"></i>Edit
+                                </a>
+                                <form method="POST" action="/delete_trans" class="inline" 
+                                      onsubmit="return confirm('Are you sure you want to delete this transaction?')">
+                                    {{ form.hidden_tag() }}
+                                    <input type="hidden" name="trans_key" value="{{ transaction[1] }}">
+                                    <button type="submit" 
+                                            class="text-red-600 hover:text-red-800 text-sm flex items-center">
+                                        <i class="fas fa-trash mr-1"></i>Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+            {% else %}
+                <!-- Empty State -->
+                <div class="p-12 text-center">
+                    <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-receipt text-gray-400 text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">No Transactions Found</h3>
+                    <p class="text-gray-600 mb-6">Start by adding your first transaction to track your finances.</p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <a href="/deposit" 
+                           class="inline-flex items-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors">
+                            <i class="fas fa-plus mr-2"></i>Add Income
+                        </a>
+                        <a href="/withdraw" 
+                           class="inline-flex items-center px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors">
+                            <i class="fas fa-minus mr-2"></i>Add Expense
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Pagination -->
+        {% if total_pages > 1 %}
+        <div class="mt-8 flex items-center justify-between">
+            <div class="text-sm text-gray-700">
+                Showing page {{ page }} of {{ total_pages }}
+            </div>
+            
+            <nav class="flex items-center space-x-2">
+                {% if page > 1 %}
+                    <a href="?page={{ page - 1 }}&from_date={{ from_date }}&to_date={{ to_date }}" 
+                       class="px-3 py-2 rounded-lg bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                {% endif %}
+                
+                {% for p in range(1, total_pages + 1) %}
+                    {% if p == page %}
+                        <span class="px-3 py-2 rounded-lg bg-indigo-600 text-white">{{ p }}</span>
+                    {% elif p == 1 or p == total_pages or (p >= page - 2 and p <= page + 2) %}
+                        <a href="?page={{ p }}&from_date={{ from_date }}&to_date={{ to_date }}" 
+                           class="px-3 py-2 rounded-lg bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
+                            {{ p }}
+                        </a>
+                    {% elif p == page - 3 or p == page + 3 %}
+                        <span class="px-3 py-2 text-gray-500">...</span>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page < total_pages %}
+                    <a href="?page={{ page + 1 }}&from_date={{ from_date }}&to_date={{ to_date }}" 
+                       class="px-3 py-2 rounded-lg bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                {% endif %}
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Calculate and display transaction statistics
+    calculateTransactionStats();
+    
+    // Initialize search functionality
+    initializeSearch();
+    
+    // Initialize sorting
+    initializeSorting();
+    
+    // Initialize export functionality
+    initializeExport();
+    
+    // Animate elements on load
+    animateElements();
+});
+
+function calculateTransactionStats() {
+    const transactions = document.querySelectorAll('.transaction-row, .transaction-card');
+    let totalIncome = 0;
+    let totalExpenses = 0;
+    
+    transactions.forEach(row => {
+        const amount = parseFloat(row.dataset.amount);
+        const type = row.dataset.type;
+        
+        if (type === 'deposit') {
+            totalIncome += amount;
+        } else {
+            totalExpenses += amount;
+        }
+    });
+    
+    const netFlow = totalIncome - totalExpenses;
+    
+    // Update stat cards
+    document.getElementById('total-income').textContent = formatCurrency(totalIncome);
+    document.getElementById('total-expenses').textContent = formatCurrency(totalExpenses);
+    
+    const netFlowElement = document.getElementById('net-flow');
+    netFlowElement.textContent = formatCurrency(Math.abs(netFlow));
+    netFlowElement.className = `text-gray-600 text-sm ${netFlow >= 0 ? 'text-green-600' : 'text-red-600'}`;
+}
+
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(amount);
+}
+
+function initializeSearch() {
+    const searchInput = document.getElementById('searchInput');
+    
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const transactions = document.querySelectorAll('.transaction-row, .transaction-card');
+        
+        transactions.forEach(transaction => {
+            const description = transaction.dataset.description.toLowerCase();
+            const isVisible = description.includes(searchTerm);
+            
+            if (transaction.classList.contains('transaction-row')) {
+                transaction.style.display = isVisible ? '' : 'none';
+            } else {
+                transaction.style.display = isVisible ? 'block' : 'none';
+            }
+        });
+        
+        // Recalculate stats for visible transactions
+        calculateVisibleTransactionStats();
+    });
+}
+
+function calculateVisibleTransactionStats() {
+    const visibleTransactions = document.querySelectorAll('.transaction-row:not([style*="display: none"]), .transaction-card:not([style*="display: none"])');
+    let totalIncome = 0;
+    let totalExpenses = 0;
+    
+    visibleTransactions.forEach(row => {
+        const amount = parseFloat(row.dataset.amount);
+        const type = row.dataset.type;
+        
+        if (type === 'deposit') {
+            totalIncome += amount;
+        } else {
+            totalExpenses += amount;
+        }
+    });
+    
+    const netFlow = totalIncome - totalExpenses;
+    
+    // Update stat cards
+    document.getElementById('total-income').textContent = formatCurrency(totalIncome);
+    document.getElementById('total-expenses').textContent = formatCurrency(totalExpenses);
+    
+    const netFlowElement = document.getElementById('net-flow');
+    netFlowElement.textContent = formatCurrency(Math.abs(netFlow));
+    netFlowElement.className = `text-gray-600 text-sm ${netFlow >= 0 ? 'text-green-600' : 'text-red-600'}`;
+}
+
+function initializeSorting() {
+    const sortSelect = document.getElementById('sortSelect');
+    
+    sortSelect.addEventListener('change', function() {
+        const sortBy = this.value;
+        sortTransactions(sortBy);
+    });
+}
+
+function sortTransactions(sortBy) {
+    const tableBody = document.getElementById('transactionTableBody');
+    const mobileContainer = document.getElementById('mobileCardsContainer');
+    
+    // Get all transaction elements
+    const tableRows = Array.from(tableBody?.querySelectorAll('.transaction-row') || []);
+    const mobileCards = Array.from(mobileContainer?.querySelectorAll('.transaction-card') || []);
+    
+    // Sort function
+    const sortFunction = (a, b) => {
+        switch (sortBy) {
+            case 'date-desc':
+                return new Date(b.dataset.date) - new Date(a.dataset.date);
+            case 'date-asc':
+                return new Date(a.dataset.date) - new Date(b.dataset.date);
+            case 'amount-desc':
+                return parseFloat(b.dataset.amount) - parseFloat(a.dataset.amount);
+            case 'amount-asc':
+                return parseFloat(a.dataset.amount) - parseFloat(b.dataset.amount);
+            case 'type':
+                return a.dataset.type.localeCompare(b.dataset.type);
+            default:
+                return 0;
+        }
+    };
+    
+    // Sort and reorder
+    if (tableRows.length > 0) {
+        tableRows.sort(sortFunction);
+        tableRows.forEach(row => tableBody.appendChild(row));
+    }
+    
+    if (mobileCards.length > 0) {
+        mobileCards.sort(sortFunction);
+        mobileCards.forEach(card => mobileContainer.appendChild(card));
+    }
+}
+
+function initializeExport() {
+    const exportBtn = document.getElementById('exportBtn');
+    
+    exportBtn.addEventListener('click', function() {
+        exportTransactions();
+    });
+}
+
+function exportTransactions() {
+    const transactions = document.querySelectorAll('.transaction-row');
+    if (transactions.length === 0) {
+        alert('No transactions to export');
+        return;
+    }
+    
+    let csvContent = 'Date,Type,Amount,Currency,Description\n';
+    
+    transactions.forEach(row => {
+        if (row.style.display !== 'none') {
+            const date = row.dataset.date;
+            const type = row.dataset.type;
+            const amount = row.dataset.amount;
+            const currency = row.querySelector('td:nth-child(4)').textContent.trim();
+            const description = row.dataset.description.replace(/"/g, '""');
+            
+            csvContent += `"${date}","${type}","${amount}","${currency}","${description}"\n`;
+        }
+    });
+    
+    // Create and download file
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `transactions_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+}
+
+function animateElements() {
+    const cards = document.querySelectorAll('.metric-card, .bg-white');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'all 0.6s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+    
+    // Animate table rows/cards
+    const transactions = document.querySelectorAll('.transaction-row, .transaction-card');
+    transactions.forEach((transaction, index) => {
+        transaction.style.opacity = '0';
+        transaction.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            transaction.style.transition = 'all 0.4s ease';
+            transaction.style.opacity = '1';
+            transaction.style.transform = 'translateY(0)';
+        }, 300 + (index * 50));
+    });
+}
+</script>
 {% endblock %}
