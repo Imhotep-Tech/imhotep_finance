@@ -1,0 +1,837 @@
+{% extends "layout.html" %}
+
+{% block title %}Version History - Imhotep Financial Manager{% endblock %}
+{% block description %}Explore the evolution of Imhotep Financial Manager through our comprehensive version history and feature updates{% endblock %}
+
+{% block extra_head %}
+<style>
+    .pattern-bg {
+        background-image: radial-gradient(circle at 1px 1px, rgba(81, 173, 172, 0.1) 1px, transparent 0);
+        background-size: 20px 20px;
+    }
+    
+    .timeline-item {
+        position: relative;
+        padding-left: 2rem;
+        margin-bottom: 3rem;
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.6s ease;
+    }
+    
+    .timeline-item.animate-in {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -2px;
+        top: 1.5rem;
+        width: 4px;
+        height: calc(100% + 1rem);
+        background: linear-gradient(to bottom, #51adac, #428a89);
+        border-radius: 2px;
+    }
+    
+    .timeline-item:last-child::before {
+        background: linear-gradient(to bottom, #51adac 0%, #51adac 60%, transparent 100%);
+    }
+    
+    .timeline-dot {
+        position: absolute;
+        left: -12px;
+        top: 1.25rem;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #51adac 0%, #428a89 100%);
+        border: 4px solid white;
+        box-shadow: 0 4px 12px rgba(81, 173, 172, 0.3);
+        z-index: 10;
+        transition: all 0.3s ease;
+    }
+    
+    .version-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border: 1px solid #e2e8f0;
+        border-left: 4px solid #51adac;
+        transition: all 0.3s ease;
+    }
+    
+    .version-card:hover {
+        transform: translateX(8px);
+        box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.1), 0 5px 15px -5px rgba(0, 0, 0, 0.05);
+        border-left-color: #428a89;
+    }
+    
+    /* Dark mode styles for version cards */
+    body.dark-mode .version-card {
+        background: linear-gradient(135deg, #2f5a5a 0%, #376e6d 100%);
+        border: 1px solid #428a89;
+        border-left: 4px solid #51adac;
+        color: #ffffff;
+    }
+    
+    body.dark-mode .version-card:hover {
+        background: linear-gradient(135deg, #376e6d 0%, #428a89 100%);
+        border-color: #51adac;
+        box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.3), 0 5px 15px -5px rgba(0, 0, 0, 0.2);
+    }
+    
+    body.dark-mode .timeline-dot {
+        border-color: #2f5a5a;
+    }
+    
+    .version-tag {
+        background: linear-gradient(135deg, #51adac 0%, #428a89 100%);
+        display: inline-flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        color: white;
+        font-weight: 600;
+        font-size: 0.875rem;
+        margin-bottom: 1rem;
+    }
+    
+    .feature-list {
+        list-style: none;
+        padding: 0;
+    }
+    
+    .feature-item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 0.75rem;
+        padding: 0.5rem;
+        border-radius: 8px;
+        transition: background-color 0.2s ease;
+    }
+    
+    .feature-item:hover {
+        background-color: #f8fafc;
+    }
+    
+    body.dark-mode .feature-item:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .feature-icon {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        width: 1.5rem;
+        height: 1.5rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 0.75rem;
+        margin-top: 0.125rem;
+        font-size: 0.75rem;
+        flex-shrink: 0;
+    }
+    
+    .stats-card {
+        background: linear-gradient(135deg, #51adac 0%, #428a89 100%);
+        color: white;
+        border-radius: 1rem;
+        padding: 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 25px -5px rgba(81, 173, 172, 0.3), 0 10px 10px -5px rgba(81, 173, 172, 0.2);
+    }
+    
+    body.dark-mode .stats-card {
+        background: linear-gradient(135deg, #2f5a5a 0%, #376e6d 100%);
+    }
+    
+    body.dark-mode .stats-card:hover {
+        background: linear-gradient(135deg, #376e6d 0%, #428a89 100%);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
+    }
+    
+    .stats-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        animation: shimmer 3s ease-in-out infinite;
+    }
+    
+    @keyframes shimmer {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(180deg); }
+    }
+    
+    .milestone-badge {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-block;
+        margin-left: 0.5rem;
+    }
+    
+    .current-version {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .current-version::after {
+        content: 'LATEST';
+        position: absolute;
+        top: 1rem;
+        right: -2rem;
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        padding: 0.25rem 3rem;
+        font-size: 0.75rem;
+        font-weight: bold;
+        transform: rotate(45deg);
+        box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+    }
+    
+    /* Dark mode text colors */
+    body.dark-mode .text-gray-900 {
+        color: #ffffff !important;
+    }
+    
+    body.dark-mode .text-gray-600 {
+        color: #d1d5db !important;
+    }
+    
+    body.dark-mode .text-gray-500 {
+        color: #9ca3af !important;
+    }
+    
+    body.dark-mode .bg-gray-100 {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+        color: #ffffff !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 pattern-bg">
+    <!-- Header Section -->
+    <div class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="text-center">
+                <div class="flex items-center justify-center mb-6">
+                    <div class="w-20 h-20 bg-gradient-to-r from-imhotep-500 to-imhotep-600 rounded-full flex items-center justify-center">
+                        <i class="fas fa-code-branch text-white text-3xl"></i>
+                    </div>
+                </div>
+                <h1 class="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">Version History</h1>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Discover the evolution of Imhotep Financial Manager through our journey of continuous improvement and innovation
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <!-- Statistics Section -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <div class="stats-card">
+                <div class="relative z-10">
+                    <div class="text-3xl font-bold mb-2">6</div>
+                    <div class="text-white/90">Major Versions</div>
+                </div>
+            </div>
+            <div class="stats-card">
+                <div class="relative z-10">
+                    <div class="text-3xl font-bold mb-2">50+</div>
+                    <div class="text-white/90">Features Added</div>
+                </div>
+            </div>
+            <div class="stats-card">
+                <div class="relative z-10">
+                    <div class="text-3xl font-bold mb-2">12</div>
+                    <div class="text-white/90">Months of Development</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="relative">
+            <!-- Version 6.0 - Current -->
+            <div class="timeline-item current-version">
+                <div class="timeline-dot"></div>
+                <div class="version-card rounded-xl p-8 shadow-lg">
+                    <div class="version-tag">
+                        <i class="fas fa-star mr-2"></i>
+                        Version 6.0.0
+                        <span class="milestone-badge">CURRENT</span>
+                    </div>
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2 md:mb-0">Enhanced Error Handling & User Experience</h3>
+                        <span class="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">June 2025</span>
+                    </div>
+                    <p class="text-gray-600 mb-6 leading-relaxed">
+                        Major overhaul focusing on error handling, user experience improvements, and system reliability with beautiful error pages and enhanced navigation.
+                    </p>
+                    <ul class="feature-list">
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                            <span>Comprehensive error handling system with custom error pages</span>
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-mobile-alt"></i></div>
+                            <span>Enhanced mobile navigation with improved responsiveness</span>
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-palette"></i></div>
+                            <span>Refined UI/UX with modern design patterns</span>
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+                            <span>Advanced security measures and CSRF protection</span>
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-tachometer-alt"></i></div>
+                            <span>Performance optimizations and loading improvements</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Version 5.0 -->
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="version-card rounded-xl p-8 shadow-lg">
+                    <div class="version-tag">
+                        <i class="fas fa-rocket mr-2"></i>
+                        Version 5.0.0
+                    </div>
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2 md:mb-0">Speed & Security Revolution</h3>
+                        <span class="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">January 28, 2025</span>
+                    </div>
+                    <ul class="feature-list">
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-tachometer-alt"></i></div>
+                            <span>Significantly improved application speed and performance</span>
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-code"></i></div>
+                            <span>Enhanced code readability and maintainability</span>
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+                            <span>Major security improvements and vulnerability fixes</span>
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-file-contract"></i></div>
+                            <span>Added comprehensive Terms & Conditions page</span>
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-user-shield"></i></div>
+                            <span>Implemented Privacy Policy for user data protection</span>
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-user-plus"></i></div>
+                            <span>Introduced trial user feature for testing without registration</span>
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-mobile-alt"></i></div>
+                            <span>Enhanced footer UI for better mobile experience</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Version 4.3.1 -->
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="version-card rounded-xl p-8 shadow-lg">
+                    <div class="version-tag">
+                        <i class="fas fa-calculator mr-2"></i>
+                        Version 4.3.1
+                    </div>
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2 md:mb-0">Precision & User Experience</h3>
+                        <span class="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">October 16, 2024</span>
+                    </div>
+                    <ul class="feature-list">
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-decimal"></i></div>
+                            <span>Added support for decimal numbers and floating-point calculations</span>
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-clock"></i></div>
+                            <span>Auto-hide notification messages after 5 seconds</span>
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-lock"></i></div>
+                            <span>Additional security enhancements and improvements</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Version 4.3 -->
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="version-card rounded-xl p-8 shadow-lg">
+                    <div class="version-tag">
+                        <i class="fab fa-google mr-2"></i>
+                        Version 4.3.0
+                    </div>
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2 md:mb-0">Google Integration & Performance</h3>
+                        <span class="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">October 11, 2024</span>
+                    </div>
+                    <ul class="feature-list">
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fab fa-google"></i></div>
+                            <span>Google OAuth integration for seamless sign-in</span>
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-trophy"></i></div>
+                            <span>Comprehensive score history tracking</span>
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-sort"></i></div>
+                            <span>Smart transaction sorting by date proximity</span>
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-pages"></i></div>
+                            <span>Pagination system for faster page loads</span>
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-bug"></i></div>
+                            <span>Multiple bug fixes and stability improvements</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Version 4.2 -->
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="version-card rounded-xl p-8 shadow-lg">
+                    <div class="version-tag">
+                        <i class="fas fa-database mr-2"></i>
+                        Version 4.2.0
+                    </div>
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2 md:mb-0">Authentication & Backup Systems</h3>
+                        <span class="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">September 14, 2024</span>
+                    </div>
+                    <ul class="feature-list">
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fab fa-google"></i></div>
+                            <span>Google account registration system</span>
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-cloud-backup"></i></div>
+                            <span>Automated database backup system</span>
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+                            <span>Major security and performance optimizations</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Version 4.1 -->
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="version-card rounded-xl p-8 shadow-lg">
+                    <div class="version-tag">
+                        <i class="fas fa-moon mr-2"></i>
+                        Version 4.1.0
+                    </div>
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2 md:mb-0">Dark Mode & Desktop Optimization</h3>
+                        <span class="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">August 13, 2024</span>
+                    </div>
+                    <ul class="feature-list">
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-moon"></i></div>
+                            <span>Dark mode theme implementation</span>
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-desktop"></i></div>
+                            <span>Background processes for desktop applications</span>
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-rocket"></i></div>
+                            <span>Reduced application launch times</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Version 4.0 -->
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="version-card rounded-xl p-8 shadow-lg">
+                    <div class="version-tag">
+                        <i class="fas fa-download mr-2"></i>
+                        Version 4.0.0
+                        <span class="milestone-badge">MAJOR</span>
+                    </div>
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2 md:mb-0">Native Desktop Applications</h3>
+                        <span class="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">July 31, 2024</span>
+                    </div>
+                    <ul class="feature-list">
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-desktop"></i></div>
+                            <span>Native .exe and .dmg desktop applications</span>
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-trash-restore"></i></div>
+                            <span>Trash system for deleted items recovery</span>
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-map"></i></div>
+                            <span>SEO-optimized sitemap implementation</span>
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-paint-brush"></i></div>
+                            <span>Redesigned login interface</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Version 3.1 -->
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="version-card rounded-xl p-8 shadow-lg">
+                    <div class="version-tag">
+                        <i class="fas fa-user-shield mr-2"></i>
+                        Version 3.1.0
+                    </div>
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2 md:mb-0">User Management & Security</h3>
+                        <span class="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">July 27, 2024</span>
+                    </div>
+                    <ul class="feature-list">
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-user-times"></i></div>
+                            <span>Account deletion functionality</span>
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-spinner"></i></div>
+                            <span>Loading animations and themes</span>
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-user-check"></i></div>
+                            <span>"Stay logged in" persistent sessions</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Version 3.0 -->
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="version-card rounded-xl p-8 shadow-lg">
+                    <div class="version-tag">
+                        <i class="fab fa-android mr-2"></i>
+                        Version 3.0.0
+                        <span class="milestone-badge">MAJOR</span>
+                    </div>
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2 md:mb-0">Mobile Platform & Financial Goals</h3>
+                        <span class="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">July 22, 2024</span>
+                    </div>
+                    <ul class="feature-list">
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fab fa-android"></i></div>
+                            <span>Android APK mobile application</span>
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-bullseye"></i></div>
+                            <span>Monthly savings targets and goals</span>
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-download"></i></div>
+                            <span>Dedicated download page and app distribution</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Version 2.1 -->
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="version-card rounded-xl p-8 shadow-lg">
+                    <div class="version-tag">
+                        <i class="fas fa-coins mr-2"></i>
+                        Version 2.1.0
+                    </div>
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2 md:mb-0">Currency Intelligence</h3>
+                        <span class="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">July 9, 2024</span>
+                    </div>
+                    <ul class="feature-list">
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-star"></i></div>
+                            <span>Auto-selection of user's favorite currency in forms</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Version 2.0 -->
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="version-card rounded-xl p-8 shadow-lg">
+                    <div class="version-tag">
+                        <i class="fas fa-calendar mr-2"></i>
+                        Version 2.0.0
+                        <span class="milestone-badge">MAJOR</span>
+                    </div>
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2 md:mb-0">Enhanced UI & Date Controls</h3>
+                        <span class="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">July 1, 2024</span>
+                    </div>
+                    <ul class="feature-list">
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-calendar-alt"></i></div>
+                            <span>Custom date selection for transaction viewing</span>
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-paint-brush"></i></div>
+                            <span>Redesigned button styles and UI elements</span>
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-bug"></i></div>
+                            <span>Comprehensive UI/UX bug fixes</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Version 1.0 -->
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="version-card rounded-xl p-8 shadow-lg border-l-yellow-500">
+                    <div class="version-tag" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                        <i class="fas fa-flag mr-2"></i>
+                        Version 1.0.0
+                        <span class="milestone-badge" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">LAUNCH</span>
+                    </div>
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2 md:mb-0">Foundation Release</h3>
+                        <span class="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">June 27, 2024</span>
+                    </div>
+                    <p class="text-gray-600 mb-6 leading-relaxed">
+                        The foundation of Imhotep Financial Manager - a comprehensive financial management solution designed to help users take control of their finances with precision and ease.
+                    </p>
+                    <ul class="feature-list">
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-tachometer-alt"></i></div>
+                            <span>Personalized financial dashboard with net worth tracking</span>
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-heart"></i></div>
+                            <span>Wishlist management and goal prioritization</span>
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-exchange-alt"></i></div>
+                            <span>Comprehensive transaction tracking and categorization</span>
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-globe"></i></div>
+                            <span>Live currency conversion with real-time exchange rates</span>
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-lock"></i></div>
+                            <span>Secure user authentication and profile management</span>
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-mobile-alt"></i></div>
+                            <span>Responsive design for seamless cross-device experience</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Call to Action -->
+        <div class="text-center mt-16">
+            <div class="bg-gradient-to-r from-imhotep-500 to-imhotep-600 rounded-2xl p-8 text-white">
+                <h2 class="text-3xl font-bold mb-4">Ready to experience the latest version?</h2>
+                <p class="text-xl mb-6 text-white/90">Join thousands of users managing their finances with Imhotep Financial Manager</p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="/register" class="bg-white text-imhotep-600 px-8 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-colors">
+                        Get Started Free
+                    </a>
+                    <a href="/download" class="bg-white/20 text-white px-8 py-3 rounded-xl font-semibold hover:bg-white/30 transition-colors border border-white/30">
+                        Download App
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Intersection Observer for timeline animations
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate-in');
+            }
+        });
+    }, {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    });
+
+    // Observe all timeline items
+    document.querySelectorAll('.timeline-item').forEach(item => {
+        observer.observe(item);
+    });
+
+    // Add smooth scrolling for any anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+
+    // Add hover effects for feature items
+    document.querySelectorAll('.feature-item').forEach(item => {
+        item.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateX(4px)';
+        });
+        
+        item.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateX(0)';
+        });
+    });
+    
+    // Apply dark mode styles to cards if dark mode is enabled
+    function applyDarkModeStyles() {
+        const versionCards = document.querySelectorAll('.version-card');
+        const statsCards = document.querySelectorAll('.stats-card');
+        const timelineDots = document.querySelectorAll('.timeline-dot');
+        
+        if (document.body.classList.contains('dark-mode')) {
+            versionCards.forEach(card => {
+                card.style.background = 'linear-gradient(135deg, #2f5a5a 0%, #376e6d 100%)';
+                card.style.borderColor = '#428a89';
+                card.style.color = '#ffffff';
+            });
+            
+            statsCards.forEach(card => {
+                card.style.background = 'linear-gradient(135deg, #2f5a5a 0%, #376e6d 100%)';
+            });
+            
+            timelineDots.forEach(dot => {
+                dot.style.borderColor = '#2f5a5a';
+            });
+        } else {
+            versionCards.forEach(card => {
+                card.style.background = 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)';
+                card.style.borderColor = '#e2e8f0';
+                card.style.color = '';
+            });
+            
+            statsCards.forEach(card => {
+                card.style.background = 'linear-gradient(135deg, #51adac 0%, #428a89 100%)';
+            });
+            
+            timelineDots.forEach(dot => {
+                dot.style.borderColor = 'white';
+            });
+        }
+    }
+    
+    // Apply dark mode styles on load
+    applyDarkModeStyles();
+    
+    // Listen for dark mode toggle
+    const darkModeObserver = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                applyDarkModeStyles();
+            }
+        });
+    });
+    
+    darkModeObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class']
+    });
+    
+    // Animate cards on load
+    const cards = document.querySelectorAll('.version-card, .stats-card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'all 0.6s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+    
+    // Enhanced hover effects for version cards
+    const versionCards = document.querySelectorAll('.version-card');
+    versionCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            if (document.body.classList.contains('dark-mode')) {
+                this.style.background = 'linear-gradient(135deg, #376e6d 0%, #428a89 100%)';
+                this.style.borderColor = '#51adac';
+            }
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            if (document.body.classList.contains('dark-mode')) {
+                this.style.background = 'linear-gradient(135deg, #2f5a5a 0%, #376e6d 100%)';
+                this.style.borderColor = '#428a89';
+            }
+        });
+    });
+    
+    // Enhanced hover effects for stats cards
+    const statsCards = document.querySelectorAll('.stats-card');
+    statsCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            if (document.body.classList.contains('dark-mode')) {
+                this.style.background = 'linear-gradient(135deg, #376e6d 0%, #428a89 100%)';
+            }
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            if (document.body.classList.contains('dark-mode')) {
+                this.style.background = 'linear-gradient(135deg, #2f5a5a 0%, #376e6d 100%)';
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
