@@ -5,33 +5,9 @@
 
 {% block extra_head %}
 <style>
-    /* Custom animations and effects */
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    @keyframes pulse {
-        0%, 100% {
-            transform: scale(1);
-        }
-        50% {
-            transform: scale(1.05);
-        }
-    }
-    
-    .animate-fade-in-up {
-        animation: fadeInUp 0.6s ease-out forwards;
-    }
-    
-    .animate-pulse-gentle {
-        animation: pulse 2s ease-in-out infinite;
+    .pattern-bg {
+        background-image: radial-gradient(circle at 1px 1px, rgba(81, 173, 172, 0.1) 1px, transparent 0);
+        background-size: 20px 20px;
     }
     
     .gradient-card {
@@ -40,162 +16,213 @@
         border: 1px solid rgba(81, 173, 172, 0.2);
     }
     
+    .networth-card {
+        background: linear-gradient(135deg, #51adac 0%, #428a89 100%);
+    }
+    
     .metric-card {
         background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
         transition: all 0.3s ease;
     }
     
     .metric-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
     }
     
-    .pattern-bg {
-        background-image: radial-gradient(circle at 1px 1px, rgba(81, 173, 172, 0.1) 1px, transparent 0);
-        background-size: 20px 20px;
+    .score-positive {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     }
     
-    /* Navigation improvements */
-    .nav-item {
-        position: relative;
-        transition: all 0.3s ease;
+    .score-negative {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
     }
     
-    .nav-item::after {
-        content: '';
-        position: absolute;
-        bottom: -2px;
-        left: 50%;
-        width: 0;
-        height: 2px;
-        background: #51adac;
-        transition: all 0.3s ease;
-        transform: translateX(-50%);
-    }
-    
-    .nav-item:hover::after,
-    .nav-item.active::after {
-        width: 100%;
+    .score-neutral {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="min-h-screen bg-gray-50 pattern-bg">
-    <!-- Welcome Header -->
-    <div class="bg-white shadow-sm">
+    <!-- Header Section -->
+    <div class="bg-white shadow-sm border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div class="flex items-center justify-between">
                 <div>
                     <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Welcome back!</h1>
-                    <p class="text-gray-600 mt-1">Here's what's happening with your finances today.</p>
+                    <p class="text-gray-600 mt-1">Here's your financial overview</p>
                 </div>
                 <div class="hidden sm:flex items-center space-x-4">
-                    <div class="text-right">
-                        <p class="text-sm text-gray-500">Total Net Worth</p>
-                        <p class="text-2xl font-bold text-imhotep-600">{{ total_favorite_currency }} {{ favorite_currency }}</p>
-                    </div>
                     {% if user_photo_path %}
-                        <img src="{{ user_photo_path }}" alt="Profile" class="w-12 h-12 rounded-full border-2 border-imhotep-200">
+                        <img src="{{ url_for('static', filename='user_photo/' + user_photo_path) }}" alt="Profile" class="w-10 h-10 rounded-full border-2 border-imhotep-200">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='avatar-anonymous-300x300.png') }}" alt="Profile" class="w-10 h-10 rounded-full border-2 border-imhotep-200">
                     {% endif %}
                 </div>
             </div>
         </div>
     </div>
     
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        
+        <!-- Net Worth Section -->
+        <div class="networth-card rounded-2xl p-8 text-white shadow-lg">
+            <div class="text-center">
+                <div class="flex items-center justify-center mb-4">
+                    <i class="fas fa-wallet text-4xl text-white/80"></i>
+                </div>
+                <h2 class="text-lg font-medium text-white/90 mb-2">Total Net Worth</h2>
+                <p class="text-5xl font-bold mb-2">{{ total_favorite_currency }}</p>
+                <p class="text-xl text-white/90">{{ favorite_currency }}</p>
+            </div>
+        </div>
+
         <!-- Quick Actions -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <a href="/deposit" class="metric-card rounded-xl p-6 text-center hover:shadow-lg transition-all duration-300 group">
-                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-green-200 transition-colors">
-                    <i class="fas fa-plus text-green-600 text-2xl"></i>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <a href="/deposit" class="metric-card rounded-xl p-6 hover:shadow-lg transition-all duration-300 group">
+                <div class="flex items-center space-x-4">
+                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center group-hover:bg-green-200 transition-colors">
+                        <i class="fas fa-plus text-green-600 text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-1">Add Income</h3>
+                        <p class="text-gray-600">Record your earnings and financial growth</p>
+                    </div>
                 </div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">Add Income</h3>
-                <p class="text-gray-600">Record your earnings and track your financial growth</p>
             </a>
             
-            <a href="/withdraw" class="metric-card rounded-xl p-6 text-center hover:shadow-lg transition-all duration-300 group">
-                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-red-200 transition-colors">
-                    <i class="fas fa-minus text-red-600 text-2xl"></i>
+            <a href="/withdraw" class="metric-card rounded-xl p-6 hover:shadow-lg transition-all duration-300 group">
+                <div class="flex items-center space-x-4">
+                    <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center group-hover:bg-red-200 transition-colors">
+                        <i class="fas fa-minus text-red-600 text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-1">Add Expense</h3>
+                        <p class="text-gray-600">Track your spending and manage budget</p>
+                    </div>
                 </div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">Add Expense</h3>
-                <p class="text-gray-600">Track your spending and manage your budget</p>
-            </a>
-            
-            <a href="/show_chart" class="metric-card rounded-xl p-6 text-center hover:shadow-lg transition-all duration-300 group">
-                <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200 transition-colors">
-                    <i class="fas fa-chart-pie text-blue-600 text-2xl"></i>
-                </div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">View Analytics</h3>
-                <p class="text-gray-600">Analyze your financial patterns and trends</p>
             </a>
         </div>
 
-        <!-- Financial Overview Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <!-- Net Worth Card -->
-            <div class="gradient-card rounded-xl p-6 text-white">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-white/80">Net Worth</p>
-                        <p class="text-2xl font-bold">{{ total_favorite_currency }}</p>
-                        <p class="text-sm text-white/70">{{ favorite_currency }}</p>
+        <!-- Monthly Target Score Section -->
+        {% if score_txt %}
+        <div class="{% if score > 0 %}score-positive{% elif score < 0 %}score-negative{% else %}score-neutral{% endif %} rounded-2xl p-8 text-white shadow-lg">
+            <div class="text-center">
+                <div class="flex items-center justify-center mb-4">
+                    <i class="fas fa-{% if score > 0 %}trophy{% elif score < 0 %}chart-line{% else %}bullseye{% endif %} text-4xl text-white/80"></i>
+                </div>
+                <h2 class="text-2xl font-bold mb-2">Monthly Target Status</h2>
+                <p class="text-lg text-white/90 mb-4">{{ score_txt }}</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                    <div class="bg-white/20 rounded-xl p-4 backdrop-blur-sm">
+                        <p class="text-white/80 text-sm">Target Amount</p>
+                        <p class="text-2xl font-bold">{{ target }} {{ favorite_currency }}</p>
                     </div>
-                    <i class="fas fa-wallet text-3xl text-white/60"></i>
+                    
+                    <div class="bg-white/20 rounded-xl p-4 backdrop-blur-sm">
+                        <p class="text-white/80 text-sm">Current Score</p>
+                        <p class="text-2xl font-bold">{% if score > 0 %}+{% endif %}{{ "%.2f"|format(score) }} {{ favorite_currency }}</p>
+                    </div>
+                    
+                    <div class="bg-white/20 rounded-xl p-4 backdrop-blur-sm">
+                        <p class="text-white/80 text-sm">Status</p>
+                        <p class="text-xl font-bold">
+                            {% if score > 0 %}
+                                Above Target
+                            {% elif score < 0 %}
+                                Below Target
+                            {% else %}
+                                On Target
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="mt-6">
+                    <a href="/show_scores_history" class="inline-flex items-center px-6 py-3 bg-white/20 hover:bg-white/30 rounded-xl transition-all duration-200 backdrop-blur-sm">
+                        <i class="fas fa-history mr-2"></i>
+                        View Target History
+                    </a>
                 </div>
             </div>
-            
-            <!-- Quick Stats -->
+        </div>
+        {% endif %}
+
+        <!-- Quick Links Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <a href="/show_trans" class="metric-card rounded-xl p-6 hover:shadow-lg transition-all duration-300">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-gray-600">Transactions</p>
-                        <p class="text-xl font-bold text-gray-900">View All</p>
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <i class="fas fa-history text-blue-600"></i>
                     </div>
-                    <i class="fas fa-history text-2xl text-imhotep-600"></i>
+                    <h3 class="font-semibold text-gray-900">Transactions</h3>
+                    <p class="text-sm text-gray-600 mt-1">View All</p>
                 </div>
             </a>
             
             <a href="/show_networth_details" class="metric-card rounded-xl p-6 hover:shadow-lg transition-all duration-300">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-gray-600">Details</p>
-                        <p class="text-xl font-bold text-gray-900">Net Worth</p>
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <i class="fas fa-chart-line text-purple-600"></i>
                     </div>
-                    <i class="fas fa-chart-line text-2xl text-imhotep-600"></i>
+                    <h3 class="font-semibold text-gray-900">Net Worth</h3>
+                    <p class="text-sm text-gray-600 mt-1">Details</p>
                 </div>
             </a>
             
-            <a href="/add_target" class="metric-card rounded-xl p-6 hover:shadow-lg transition-all duration-300">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-gray-600">Goals</p>
-                        <p class="text-xl font-bold text-gray-900">Set Target</p>
+            <a href="/show_chart" class="metric-card rounded-xl p-6 hover:shadow-lg transition-all duration-300">
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <i class="fas fa-chart-pie text-orange-600"></i>
                     </div>
-                    <i class="fas fa-bullseye text-2xl text-imhotep-600"></i>
+                    <h3 class="font-semibold text-gray-900">Analytics</h3>
+                    <p class="text-sm text-gray-600 mt-1">Charts</p>
+                </div>
+            </a>
+            
+            <a href="/settings/set_target" class="metric-card rounded-xl p-6 hover:shadow-lg transition-all duration-300">
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <i class="fas fa-bullseye text-green-600"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-900">Set Target</h3>
+                    <p class="text-sm text-gray-600 mt-1">Goals</p>
                 </div>
             </a>
         </div>
 
-        <!-- Recent Activity Section -->
-        <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
-            <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                <i class="fas fa-clock mr-2 text-imhotep-600"></i>
-                Recent Activity
-            </h2>
-            <div class="text-center py-8">
-                <i class="fas fa-chart-line text-4xl text-gray-300 mb-4"></i>
-                <p class="text-gray-500">Start by adding your first transaction</p>
-                <div class="mt-4 space-x-4">
-                    <a href="/deposit" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                        <i class="fas fa-plus mr-2"></i>Add Income
+        <!-- Getting Started Section (if no target set) -->
+        {% if not score_txt %}
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-8">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-imhotep-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-rocket text-imhotep-600 text-2xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">Get Started with Your Financial Journey</h2>
+                <p class="text-gray-600 mb-6">Start tracking your finances by adding your first transaction or setting a monthly target.</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto">
+                    <a href="/deposit" class="flex flex-col items-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
+                        <i class="fas fa-plus text-green-600 text-xl mb-2"></i>
+                        <span class="font-medium text-green-700">Add Income</span>
                     </a>
-                    <a href="/withdraw" class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-                        <i class="fas fa-minus mr-2"></i>Add Expense
+                    
+                    <a href="/withdraw" class="flex flex-col items-center p-4 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">
+                        <i class="fas fa-minus text-red-600 text-xl mb-2"></i>
+                        <span class="font-medium text-red-700">Add Expense</span>
+                    </a>
+                    
+                    <a href="/settings/set_target" class="flex flex-col items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors">
+                        <i class="fas fa-bullseye text-purple-600 text-xl mb-2"></i>
+                        <span class="font-medium text-purple-700">Set Target</span>
                     </a>
                 </div>
             </div>
         </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
@@ -203,25 +230,8 @@
 {% block extra_scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    
-    // Ensure page content is always visible
-    const mainContent = document.querySelector('main');
-    const body = document.body;
-    
-    // Remove any stuck mobile menu classes on page load
-    body.classList.remove('mobile-menu-open');
-    body.style.top = '';
-    body.style.position = '';
-    body.style.overflow = '';
-    
-    // Ensure main content is visible
-    if (mainContent) {
-        mainContent.style.display = 'block';
-        mainContent.style.visibility = 'visible';
-    }
-    
-    // Animate cards on load
-    const cards = document.querySelectorAll('.metric-card, .gradient-card');
+    // Simple card animation on load
+    const cards = document.querySelectorAll('.metric-card, .networth-card, .score-positive, .score-negative, .score-neutral');
     cards.forEach((card, index) => {
         card.style.opacity = '0';
         card.style.transform = 'translateY(20px)';
@@ -232,57 +242,6 @@ document.addEventListener('DOMContentLoaded', function() {
             card.style.transform = 'translateY(0)';
         }, index * 100);
     });
-    
-    // Add smooth transitions for hover effects
-    const hoverElements = document.querySelectorAll('.group, .metric-card, .gradient-card');
-    hoverElements.forEach(el => {
-        el.style.transition = 'all 0.3s ease';
-    });
-    
-    // Quick Add button functionality
-    const quickAddBtn = document.querySelector('button:has(.fa-plus)');
-    if (quickAddBtn) {
-        quickAddBtn.addEventListener('click', function() {
-            const choice = confirm('Quick Add:\n1. Income (OK)\n2. Expense (Cancel)');
-            window.location.href = choice ? '/add_income' : '/add_expense';
-        });
-    }
-});
-
-// Add a page visibility handler to ensure content is always restored
-window.addEventListener('pageshow', function(event) {
-    const body = document.body;
-    const mainContent = document.querySelector('main');
-    
-    // Clean up any mobile menu artifacts
-    body.classList.remove('mobile-menu-open');
-    body.style.top = '';
-    body.style.position = '';
-    body.style.overflow = '';
-    
-    // Ensure content is visible
-    if (mainContent) {
-        mainContent.style.display = 'block';
-        mainContent.style.visibility = 'visible';
-    }
-});
-
-// Handle browser back/forward buttons
-window.addEventListener('popstate', function(event) {
-    const body = document.body;
-    const mainContent = document.querySelector('main');
-    
-    // Clean up mobile menu state
-    body.classList.remove('mobile-menu-open');
-    body.style.top = '';
-    body.style.position = '';
-    body.style.overflow = '';
-    
-    // Ensure content visibility
-    if (mainContent) {
-        mainContent.style.display = 'block';
-        mainContent.style.visibility = 'visible';
-    }
 });
 </script>
 {% endblock %}

@@ -3,7 +3,6 @@ import requests
 from config import Config
 
 def save_profile_picture(picture_url, user_id):
-    """Downloads and saves the user's Google profile picture to the server using the user ID."""
     try:
         if not os.path.exists(Config.UPLOAD_FOLDER_PHOTO):
             os.makedirs(Config.UPLOAD_FOLDER_PHOTO)

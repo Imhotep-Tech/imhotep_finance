@@ -1,0 +1,174 @@
+{% extends "layout.html" %}
+
+{% block title %}Verify Password - Imhotep Financial Manager{% endblock %}
+{% block description %}Verify your current password to proceed with security changes{% endblock %}
+
+{% block extra_head %}
+<style>
+    .pattern-bg {
+        background-image: radial-gradient(circle at 1px 1px, rgba(81, 173, 172, 0.1) 1px, transparent 0);
+        background-size: 20px 20px;
+    }
+    
+    .gradient-card {
+        background: linear-gradient(135deg, rgba(81, 173, 172, 0.1) 0%, rgba(66, 138, 137, 0.1) 100%);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(81, 173, 172, 0.2);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 pattern-bg">
+    <!-- Header Section -->
+    <div class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-shield-alt text-red-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Security Verification</h1>
+                        <p class="text-gray-600 mt-1">Verify your current password to proceed</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Navigation -->
+        <div class="mb-6">
+            <a href="/settings" class="inline-flex items-center text-imhotep-600 hover:text-imhotep-700 transition-colors">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Back to Settings
+            </a>
+        </div>
+
+        <!-- Error Message -->
+        {% if error %}
+            <div class="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 flex items-start space-x-2">
+                <i class="fas fa-exclamation-circle mt-0.5 text-red-500"></i>
+                <span class="text-sm font-medium">{{ error }}</span>
+            </div>
+        {% endif %}
+
+        <!-- Security Info Card -->
+        <div class="gradient-card rounded-xl p-8 shadow-lg mb-8">
+            <div class="flex items-start space-x-4">
+                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-lock text-red-600 text-2xl"></i>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-3">Password Verification Required</h2>
+                    <div class="text-gray-700">
+                        <p class="mb-3">For your security, please verify your current password before making changes to your account.</p>
+                        <div class="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                            <p class="text-yellow-800 text-sm">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                This is a security measure to protect your account from unauthorized access.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Password Verification Form Card -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+            <div class="bg-gradient-to-r from-red-500 to-red-600 px-6 py-4">
+                <h2 class="text-xl font-bold text-white flex items-center">
+                    <i class="fas fa-key mr-2"></i>
+                    Enter Current Password
+                </h2>
+            </div>
+            
+            <div class="p-6 sm:p-8">
+                <form method="POST" action="/settings/security_check" id="passwordForm" class="space-y-6">
+                    {{ form.hidden_tag() }}
+                    
+                    <!-- Password Input -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">
+                            <i class="fas fa-lock mr-1 text-gray-400"></i>
+                            Current Password
+                        </label>
+                        <div class="relative">
+                            <input type="password" 
+                                   name="check_pass" 
+                                   id="check_pass"
+                                   class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-imhotep-600 focus:ring-4 focus:ring-imhotep-600/20 transition-all duration-200 text-gray-900 hover:border-gray-300 focus:outline-none pr-12"
+                                   placeholder="Enter your current password"
+                                   required
+                                   autocomplete="current-password">
+                            <button type="button" 
+                                    onclick="togglePassword('check_pass')"
+                                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-eye" id="toggleIcon"></i>
+                            </button>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-1">
+                            Enter the password you currently use to log in
+                        </p>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                        <button type="submit" 
+                                class="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-red-500/30 flex items-center justify-center space-x-2">
+                            <i class="fas fa-shield-check"></i>
+                            <span>Verify Password</span>
+                        </button>
+                        
+                        <a href="/settings" 
+                           class="flex-1 sm:flex-none bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-gray-400/30 flex items-center justify-center space-x-2">
+                            <i class="fas fa-times"></i>
+                            <span>Cancel</span>
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Security Notice -->
+        <div class="mt-6 bg-blue-50 rounded-xl p-4 border border-blue-200">
+            <div class="flex items-center space-x-2 text-blue-700">
+                <i class="fas fa-shield-alt"></i>
+                <span class="text-sm font-medium">
+                    Your password is encrypted and secure. We never store or display your actual password.
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function togglePassword(inputId) {
+    const input = document.getElementById(inputId);
+    const icon = document.getElementById('toggleIcon');
+    
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('passwordForm');
+    
+    form.addEventListener('submit', function(e) {
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i>Verifying...';
+        submitBtn.disabled = true;
+    });
+});
+</script>
+{% endblock %}

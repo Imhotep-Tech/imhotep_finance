@@ -62,9 +62,13 @@
                         <p class="text-sm text-gray-500">Total Net Worth</p>
                         <p class="text-lg font-bold text-imhotep-600">{{ total_favorite_currency }} {{ favorite_currency }}</p>
                     </div>
+                    <div class="hidden sm:flex items-center space-x-4">
                     {% if user_photo_path %}
-                        <img src="{{ user_photo_path }}" alt="Profile" class="w-10 h-10 rounded-full border-2 border-imhotep-200">
+                        <img src="{{ url_for('static', filename='user_photo/' + user_photo_path) }}" alt="Profile" class="w-10 h-10 rounded-full border-2 border-imhotep-200">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='avatar-anonymous-300x300.png') }}" alt="Profile" class="w-10 h-10 rounded-full border-2 border-imhotep-200">
                     {% endif %}
+                </div>
                 </div>
             </div>
         </div>
@@ -300,142 +304,17 @@ document.addEventListener('DOMContentLoaded', function() {
             card.style.transform = 'translateY(0)';
         }, index * 100);
     });
-    
-    // Form validation
-    const form = document.getElementById('expenseForm');
-    const amountInput = form.querySelector('input[name="amount"]');
-    const currencyInput = form.querySelector('select[name="currency"]');
-    
-    // Amount validation
-    amountInput.addEventListener('input', function() {
-        const value = parseFloat(this.value);
-        if (value <= 0 || isNaN(value)) {
-            this.classList.add('border-red-400');
-            this.classList.remove('border-green-400');
-        } else {
-            this.classList.add('border-green-400');
-            this.classList.remove('border-red-400');
-        }
-    });
-    
-    // Currency validation and balance check
-    currencyInput.addEventListener('change', function() {
-        if (this.value) {
-            this.classList.add('border-green-400');
-            this.classList.remove('border-red-400');
-            
-            // Show available balance for selected currency
-            const selectedOption = this.options[this.selectedIndex];
-            if (selectedOption.text.includes(' - ')) {
-                const balanceText = selectedOption.text.split(' - ')[1];
-                console.log('Available balance:', balanceText);
-            }
-        } else {
-            this.classList.add('border-red-400');
-            this.classList.remove('border-green-400');
-        }
-    });
-    
-    // Real-time balance validation
-    function validateBalance() {
-        const amount = parseFloat(amountInput.value);
-        const selectedCurrency = currencyInput.value;
-        
-        if (amount && selectedCurrency) {
-            const selectedOption = currencyInput.options[currencyInput.selectedIndex];
-            if (selectedOption.text.includes(' - ')) {
-                const balanceText = selectedOption.text.split(' - ')[1].replace(' Available', '');
-                const availableBalance = parseFloat(balanceText);
-                
-                if (amount > availableBalance) {
-                    amountInput.classList.add('border-red-400');
-                    amountInput.classList.remove('border-green-400');
-                    
-                    // Show warning message
-                    let warningDiv = document.getElementById('balance-warning');
-                    if (!warningDiv) {
-                        warningDiv = document.createElement('div');
-                        warningDiv.id = 'balance-warning';
-                        warningDiv.className = 'mt-2 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm flex items-center space-x-2';
-                        warningDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i><span>Amount exceeds available balance</span>';
-                        amountInput.parentNode.appendChild(warningDiv);
-                    }
-                } else {
-                    amountInput.classList.remove('border-red-400');
-                    amountInput.classList.add('border-green-400');
-                    
-                    // Remove warning message
-                    const warningDiv = document.getElementById('balance-warning');
-                    if (warningDiv) {
-                        warningDiv.remove();
-                    }
-                }
-            }
-        }
-    }
-    
-    amountInput.addEventListener('input', validateBalance);
-    currencyInput.addEventListener('change', validateBalance);
-    
+
     // Form submission
     form.addEventListener('submit', function(e) {
-        const amount = parseFloat(amountInput.value);
-        const currency = currencyInput.value;
-        
-        if (!amount || amount <= 0) {
-            e.preventDefault();
-            amountInput.focus();
-            amountInput.classList.add('border-red-400');
-            return;
-        }
-        
-        if (!currency) {
-            e.preventDefault();
-            currencyInput.focus();
-            currencyInput.classList.add('border-red-400');
-            return;
-        }
-        
+
         // Show loading state
         const submitBtn = form.querySelector('button[type="submit"]');
         submitBtn.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i>Adding Expense...';
         submitBtn.disabled = true;
     });
     
-    // Add quick amount buttons for common expenses
-    addQuickExpenseButtons();
 });
 
-function addQuickExpenseButtons() {
-    const amountInput = document.querySelector('input[name="amount"]');
-    if (!amountInput) return;
-    
-    // Create quick amount buttons container
-    const quickAmountContainer = document.createElement('div');
-    quickAmountContainer.className = 'flex flex-wrap gap-2 mt-2';
-    quickAmountContainer.innerHTML = `
-        <button type="button" class="quick-amount-btn px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-lg transition-colors" data-amount="10">+10</button>
-        <button type="button" class="quick-amount-btn px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-lg transition-colors" data-amount="25">+25</button>
-        <button type="button" class="quick-amount-btn px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-lg transition-colors" data-amount="50">+50</button>
-        <button type="button" class="quick-amount-btn px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-lg transition-colors" data-amount="100">+100</button>
-        <button type="button" class="quick-amount-btn px-3 py-1 bg-red-100 hover:bg-red-200 text-red-700 text-sm rounded-lg transition-colors" onclick="document.querySelector('input[name=\\'amount\\']').value = ''">Clear</button>
-    `;
-    
-    // Insert after amount input
-    const amountContainer = amountInput.closest('.space-y-2');
-    if (amountContainer) {
-        amountContainer.appendChild(quickAmountContainer);
-        
-        // Add click handlers
-        quickAmountContainer.querySelectorAll('.quick-amount-btn[data-amount]').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const amount = parseFloat(this.dataset.amount);
-                const currentAmount = parseFloat(amountInput.value) || 0;
-                amountInput.value = (currentAmount + amount).toFixed(2);
-                amountInput.dispatchEvent(new Event('input'));
-            });
-        });
-    }
-}
 </script>
 {% endblock %}
