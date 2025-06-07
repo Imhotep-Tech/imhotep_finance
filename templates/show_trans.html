@@ -113,40 +113,6 @@
     </div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Quick Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div class="metric-card rounded-xl p-6 text-center">
-                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <i class="fas fa-plus text-green-600 text-lg"></i>
-                </div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-1">Total Income</h3>
-                <p class="text-gray-600 text-sm" id="total-income">Calculating...</p>
-            </div>
-            
-            <div class="metric-card rounded-xl p-6 text-center">
-                <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <i class="fas fa-minus text-red-600 text-lg"></i>
-                </div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-1">Total Expenses</h3>
-                <p class="text-gray-600 text-sm" id="total-expenses">Calculating...</p>
-            </div>
-            
-            <div class="metric-card rounded-xl p-6 text-center">
-                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <i class="fas fa-balance-scale text-blue-600 text-lg"></i>
-                </div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-1">Net Flow</h3>
-                <p class="text-gray-600 text-sm" id="net-flow">Calculating...</p>
-            </div>
-            
-            <div class="metric-card rounded-xl p-6 text-center">
-                <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <i class="fas fa-list text-purple-600 text-lg"></i>
-                </div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-1">Total Transactions</h3>
-                <p class="text-gray-600 text-sm">{{ trans_db|length }}</p>
-            </div>
-        </div>
 
         <!-- Filters and Actions -->
         <div class="bg-white rounded-2xl shadow-lg border border-gray-200 mb-8">
@@ -183,26 +149,6 @@
                             <input type="date" 
                                    name="to_date" 
                                    value="{{ to_date }}"
-                                   class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 text-gray-900 text-sm">
-                        </div>
-                        
-                        <!-- Transaction Type -->
-                        <div class="space-y-1">
-                            <label class="block text-sm font-medium text-gray-700">Type</label>
-                            <select name="trans_type" 
-                                    class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 text-gray-900 text-sm">
-                                <option value="">All Types</option>
-                                <option value="deposit">Income</option>
-                                <option value="withdraw">Expense</option>
-                            </select>
-                        </div>
-                        
-                        <!-- Search -->
-                        <div class="space-y-1">
-                            <label class="block text-sm font-medium text-gray-700">Search</label>
-                            <input type="text" 
-                                   placeholder="Search description..."
-                                   id="searchInput"
                                    class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 text-gray-900 text-sm">
                         </div>
                         
@@ -252,18 +198,6 @@
                             <span class="ml-2 bg-white/20 px-2 py-1 rounded-full text-sm">{{ trans_db|length }}</span>
                         {% endif %}
                     </h2>
-                    
-                    <!-- Sort Options -->
-                    <div class="flex items-center space-x-2">
-                        <select id="sortSelect" 
-                                class="bg-white/10 border border-white/20 text-white rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-white/30">
-                            <option value="date-desc">Date (Newest)</option>
-                            <option value="date-asc">Date (Oldest)</option>
-                            <option value="amount-desc">Amount (High)</option>
-                            <option value="amount-asc">Amount (Low)</option>
-                            <option value="type">Type</option>
-                        </select>
-                    </div>
                 </div>
             </div>
             
@@ -511,176 +445,11 @@ document.addEventListener('DOMContentLoaded', function() {
     animateElements();
 });
 
-function calculateTransactionStats() {
-    const transactions = document.querySelectorAll('.transaction-row, .transaction-card');
-    let totalIncome = 0;
-    let totalExpenses = 0;
-    
-    transactions.forEach(row => {
-        const amount = parseFloat(row.dataset.amount);
-        const type = row.dataset.type;
-        
-        if (type === 'deposit') {
-            totalIncome += amount;
-        } else {
-            totalExpenses += amount;
-        }
-    });
-    
-    const netFlow = totalIncome - totalExpenses;
-    
-    // Update stat cards
-    document.getElementById('total-income').textContent = formatCurrency(totalIncome);
-    document.getElementById('total-expenses').textContent = formatCurrency(totalExpenses);
-    
-    const netFlowElement = document.getElementById('net-flow');
-    netFlowElement.textContent = formatCurrency(Math.abs(netFlow));
-    netFlowElement.className = `text-gray-600 text-sm ${netFlow >= 0 ? 'text-green-600' : 'text-red-600'}`;
-}
-
 function formatCurrency(amount) {
     return new Intl.NumberFormat('en-US', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
     }).format(amount);
-}
-
-function initializeSearch() {
-    const searchInput = document.getElementById('searchInput');
-    
-    searchInput.addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
-        const transactions = document.querySelectorAll('.transaction-row, .transaction-card');
-        
-        transactions.forEach(transaction => {
-            const description = transaction.dataset.description.toLowerCase();
-            const isVisible = description.includes(searchTerm);
-            
-            if (transaction.classList.contains('transaction-row')) {
-                transaction.style.display = isVisible ? '' : 'none';
-            } else {
-                transaction.style.display = isVisible ? 'block' : 'none';
-            }
-        });
-        
-        // Recalculate stats for visible transactions
-        calculateVisibleTransactionStats();
-    });
-}
-
-function calculateVisibleTransactionStats() {
-    const visibleTransactions = document.querySelectorAll('.transaction-row:not([style*="display: none"]), .transaction-card:not([style*="display: none"])');
-    let totalIncome = 0;
-    let totalExpenses = 0;
-    
-    visibleTransactions.forEach(row => {
-        const amount = parseFloat(row.dataset.amount);
-        const type = row.dataset.type;
-        
-        if (type === 'deposit') {
-            totalIncome += amount;
-        } else {
-            totalExpenses += amount;
-        }
-    });
-    
-    const netFlow = totalIncome - totalExpenses;
-    
-    // Update stat cards
-    document.getElementById('total-income').textContent = formatCurrency(totalIncome);
-    document.getElementById('total-expenses').textContent = formatCurrency(totalExpenses);
-    
-    const netFlowElement = document.getElementById('net-flow');
-    netFlowElement.textContent = formatCurrency(Math.abs(netFlow));
-    netFlowElement.className = `text-gray-600 text-sm ${netFlow >= 0 ? 'text-green-600' : 'text-red-600'}`;
-}
-
-function initializeSorting() {
-    const sortSelect = document.getElementById('sortSelect');
-    
-    sortSelect.addEventListener('change', function() {
-        const sortBy = this.value;
-        sortTransactions(sortBy);
-    });
-}
-
-function sortTransactions(sortBy) {
-    const tableBody = document.getElementById('transactionTableBody');
-    const mobileContainer = document.getElementById('mobileCardsContainer');
-    
-    // Get all transaction elements
-    const tableRows = Array.from(tableBody?.querySelectorAll('.transaction-row') || []);
-    const mobileCards = Array.from(mobileContainer?.querySelectorAll('.transaction-card') || []);
-    
-    // Sort function
-    const sortFunction = (a, b) => {
-        switch (sortBy) {
-            case 'date-desc':
-                return new Date(b.dataset.date) - new Date(a.dataset.date);
-            case 'date-asc':
-                return new Date(a.dataset.date) - new Date(b.dataset.date);
-            case 'amount-desc':
-                return parseFloat(b.dataset.amount) - parseFloat(a.dataset.amount);
-            case 'amount-asc':
-                return parseFloat(a.dataset.amount) - parseFloat(b.dataset.amount);
-            case 'type':
-                return a.dataset.type.localeCompare(b.dataset.type);
-            default:
-                return 0;
-        }
-    };
-    
-    // Sort and reorder
-    if (tableRows.length > 0) {
-        tableRows.sort(sortFunction);
-        tableRows.forEach(row => tableBody.appendChild(row));
-    }
-    
-    if (mobileCards.length > 0) {
-        mobileCards.sort(sortFunction);
-        mobileCards.forEach(card => mobileContainer.appendChild(card));
-    }
-}
-
-function initializeExport() {
-    const exportBtn = document.getElementById('exportBtn');
-    
-    exportBtn.addEventListener('click', function() {
-        exportTransactions();
-    });
-}
-
-function exportTransactions() {
-    const transactions = document.querySelectorAll('.transaction-row');
-    if (transactions.length === 0) {
-        alert('No transactions to export');
-        return;
-    }
-    
-    let csvContent = 'Date,Type,Amount,Currency,Description\n';
-    
-    transactions.forEach(row => {
-        if (row.style.display !== 'none') {
-            const date = row.dataset.date;
-            const type = row.dataset.type;
-            const amount = row.dataset.amount;
-            const currency = row.querySelector('td:nth-child(4)').textContent.trim();
-            const description = row.dataset.description.replace(/"/g, '""');
-            
-            csvContent += `"${date}","${type}","${amount}","${currency}","${description}"\n`;
-        }
-    });
-    
-    // Create and download file
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `transactions_${new Date().toISOString().split('T')[0]}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
 }
 
 function animateElements() {
