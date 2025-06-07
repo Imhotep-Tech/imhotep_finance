@@ -31,7 +31,7 @@ class Config:
 
     # the file config
     MAX_CONTENT_LENGTH = 3 * 1024 * 1024
-    UPLOAD_FOLDER = os.path.join(os.getcwd(), "static", "user_photo")
+    UPLOAD_FOLDER_PHOTO = os.path.join(os.getcwd(), "static", "user_photo")
     ALLOWED_EXTENSIONS = ("png", "jpg", "jpeg")
 
     #the password mail

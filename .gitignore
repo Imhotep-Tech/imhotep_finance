@@ -4,3 +4,4 @@ __pycache__/
 electron_app/node_modules/
 electron_app/dist/
 .env
+static/user_photo/

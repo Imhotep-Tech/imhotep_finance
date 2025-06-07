@@ -1,7 +1,7 @@
 from flask import session, redirect, render_template, request, Blueprint
 from config import CSRFForm, Config
 from extensions import db
-from utils.user_info import select_user_photo, select_user_data
+from utils.user_info import select_user_photo, select_user_data, get_app_currencies
 from utils.currencies import show_networth, select_favorite_currency
 from utils.security import security_check
 from sqlalchemy import text
@@ -141,7 +141,7 @@ def mail_verification_change_mail():
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
         user_id = session.get("user_id")
 
-        verification_code = request.form.get("verification_code").strip()
+        verification_code = request.form.get("verification_code").strip().lower()
         user_mail = request.form.get("user_mail")
         user_username = request.form.get("user_username")
         user_mail_db = request.form.get("user_mail_db")
@@ -265,7 +265,12 @@ def favorite_currency():
             favorite_currency = select_favorite_currency(user_id)
             total_favorite_currency, favorite_currency = show_networth()
             total_favorite_currency = f"{total_favorite_currency:,.2f}"
-            return render_template("favorite_currency.html", favorite_currency=favorite_currency, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, form=CSRFForm())
+            return render_template("favorite_currency.html",
+                                    favorite_currency=favorite_currency,
+                                      user_photo_path=user_photo_path,
+                                        total_favorite_currency=total_favorite_currency,
+                                          form=CSRFForm(),
+                                        currencies_data = get_app_currencies())
         else:
             total_favorite_currency, favorite_currency = show_networth()
             total_favorite_currency = f"{total_favorite_currency:,.2f}"
@@ -280,7 +285,14 @@ def favorite_currency():
             db.session.commit()
 
             done = f"Your favorite currency is {favorite_currency} now"
-            return render_template("favorite_currency.html", done=done, favorite_currency=favorite_currency, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, form=CSRFForm())
+            return render_template("favorite_currency.html",
+                                    done=done,
+                                    favorite_currency=favorite_currency,
+                                    user_photo_path=user_photo_path,
+                                    total_favorite_currency=total_favorite_currency,
+                                    form=CSRFForm(),
+                                    currencies_data = get_app_currencies()
+                                    )
 
 @settings_bp.route("/settings/security_check", methods=["POST", "GET"])
 def security_check_password():

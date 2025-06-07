@@ -70,7 +70,7 @@
                             </button>
                             <div class="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 border border-gray-200">
                                 <div class="py-1">
-                                    <a href="/add_target" class="block px-4 py-2 text-sm text-gray-700 hover:bg-imhotep-50 hover:text-imhotep-600">
+                                    <a href="/settings/set_target" class="block px-4 py-2 text-sm text-gray-700 hover:bg-imhotep-50 hover:text-imhotep-600">
                                         <i class="fas fa-target mr-2"></i>Set Target
                                     </a>
                                     <a href="/add_wish" class="block px-4 py-2 text-sm text-gray-700 hover:bg-imhotep-50 hover:text-imhotep-600">
@@ -78,6 +78,9 @@
                                     </a>
                                     <a href="/filter_year_wishlist" class="block px-4 py-2 text-sm text-gray-700 hover:bg-imhotep-50 hover:text-imhotep-600">
                                         <i class="fas fa-list mr-2"></i>View Wishlist
+                                    </a>
+                                    <a href="/trash_wishlist" class="block px-4 py-2 text-sm text-gray-700 hover:bg-imhotep-50 hover:text-imhotep-600">
+                                        <i class="fas fa-trash text-gray-500 mr-2"></i>Trash
                                     </a>
                                 </div>
                             </div>
@@ -91,13 +94,13 @@
                             </button>
                             <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 border border-gray-200">
                                 <div class="py-1">
-                                    <a href="/change_currency" class="block px-4 py-2 text-sm text-gray-700 hover:bg-imhotep-50 hover:text-imhotep-600">
+                                    <a href="/settings/personal_info" class="text-gray-700 hover:text-imhotep-600 hover:bg-gray-50 block px-6 py-2 rounded-md text-base font-medium">
+                                        <i class="fas fa-user mr-2"></i>Profile
+                                    </a>
+                                    <a href="/settings/favorite_currency" class="block px-4 py-2 text-sm text-gray-700 hover:bg-imhotep-50 hover:text-imhotep-600">
                                         <i class="fas fa-dollar-sign mr-2"></i>Change Currency
                                     </a>
-                                    <a href="/change_photo" class="block px-4 py-2 text-sm text-gray-700 hover:bg-imhotep-50 hover:text-imhotep-600">
-                                        <i class="fas fa-camera mr-2"></i>Change Photo
-                                    </a>
-                                    <a href="/change_password" class="block px-4 py-2 text-sm text-gray-700 hover:bg-imhotep-50 hover:text-imhotep-600">
+                                    <a href="/settings/security_check" class="block px-4 py-2 text-sm text-gray-700 hover:bg-imhotep-50 hover:text-imhotep-600">
                                         <i class="fas fa-key mr-2"></i>Change Password
                                     </a>
                                     <div class="border-t border-gray-100"></div>
@@ -113,11 +116,16 @@
                     <div class="hidden md:flex items-center space-x-3">
                         <!-- User Avatar -->
                         <div class="relative">
-                            <img src="{{ user_photo_path if user_photo_path else url_for('static', filename='default-avatar.png') }}" 
-                                alt="Profile" 
-                                class="h-8 w-8 rounded-full border-2 border-imhotep-200 hover:border-imhotep-400 transition-colors cursor-pointer">
+                            {% if not user_photo_path %}
+                                <img src="{{url_for('static', filename='avatar-anonymous-300x300.png') }}" 
+                                    alt="Profile" 
+                                    class="h-8 w-8 rounded-full border-2 border-imhotep-200 hover:border-imhotep-400 transition-colors cursor-pointer">
+                            {% else %}
+                                <img src="{{ url_for('static', filename='user_photo/' + user_photo_path) }}" 
+                                    alt="Profile" 
+                                    class="h-8 w-8 rounded-full border-2 border-imhotep-200 hover:border-imhotep-400 transition-colors cursor-pointer">
+                            {% endif %}
                         </div>
-                        
                         <!-- Logout -->
                         <a href="/logout" class="bg-imhotep-600 hover:bg-imhotep-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
                             <i class="fas fa-sign-out-alt mr-1"></i>Logout
@@ -184,7 +192,7 @@
                 <!-- Goals Section -->
                 <div class="space-y-1">
                     <div class="px-3 py-2 text-sm font-medium text-gray-500 uppercase tracking-wider">Goals</div>
-                    <a href="/add_target" class="text-gray-700 hover:text-imhotep-600 hover:bg-gray-50 block px-6 py-2 rounded-md text-base font-medium">
+                    <a href="/settings/set_target" class="text-gray-700 hover:text-imhotep-600 hover:bg-gray-50 block px-6 py-2 rounded-md text-base font-medium">
                         <i class="fas fa-target mr-2"></i>Set Target
                     </a>
                     <a href="/add_wish" class="text-gray-700 hover:text-imhotep-600 hover:bg-gray-50 block px-6 py-2 rounded-md text-base font-medium">
@@ -193,18 +201,21 @@
                     <a href="/filter_year_wishlist" class="text-gray-700 hover:text-imhotep-600 hover:bg-gray-50 block px-6 py-2 rounded-md text-base font-medium">
                         <i class="fas fa-list mr-2"></i>View Wishlist
                     </a>
+                    <a href="/trash_wishlist" class="text-gray-700 hover:text-imhotep-600 hover:bg-gray-50 block px-6 py-2 rounded-md text-base font-medium">
+                        <i class="fas fa-trash text-gray-500 mr-2"></i>Trash
+                    </a>
                 </div>
                 
                 <!-- Settings Section -->
                 <div class="space-y-1 border-t border-gray-200 pt-3">
                     <div class="px-3 py-2 text-sm font-medium text-gray-500 uppercase tracking-wider">Settings</div>
-                    <a href="/change_currency" class="text-gray-700 hover:text-imhotep-600 hover:bg-gray-50 block px-6 py-2 rounded-md text-base font-medium">
+                    <a href="/settings/favorite_currency" class="text-gray-700 hover:text-imhotep-600 hover:bg-gray-50 block px-6 py-2 rounded-md text-base font-medium">
                         <i class="fas fa-dollar-sign mr-2"></i>Currency
                     </a>
-                    <a href="/change_photo" class="text-gray-700 hover:text-imhotep-600 hover:bg-gray-50 block px-6 py-2 rounded-md text-base font-medium">
-                        <i class="fas fa-camera mr-2"></i>Change Photo
+                    <a href="/settings/personal_info" class="text-gray-700 hover:text-imhotep-600 hover:bg-gray-50 block px-6 py-2 rounded-md text-base font-medium">
+                        <i class="fas fa-user mr-2"></i>Profile
                     </a>
-                    <a href="/change_password" class="text-gray-700 hover:text-imhotep-600 hover:bg-gray-50 block px-6 py-2 rounded-md text-base font-medium">
+                    <a href="/settings/security_check" class="text-gray-700 hover:text-imhotep-600 hover:bg-gray-50 block px-6 py-2 rounded-md text-base font-medium">
                         <i class="fas fa-key mr-2"></i>Password
                     </a>
                     <a href="/delete_user" class="text-red-600 hover:text-red-700 hover:bg-red-50 block px-6 py-2 rounded-md text-base font-medium">

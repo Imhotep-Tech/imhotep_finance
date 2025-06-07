@@ -66,7 +66,9 @@
                 <!-- User Info -->
                 <div class="hidden sm:flex items-center space-x-4">
                     {% if user_photo_path %}
-                        <img src="{{ user_photo_path }}" alt="Profile" class="w-10 h-10 rounded-full border-2 border-imhotep-200">
+                        <img src="{{ url_for('static', filename='user_photo/' + user_photo_path) }}" alt="Profile" class="w-10 h-10 rounded-full border-2 border-imhotep-200">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='avatar-anonymous-300x300.png') }}" alt="Profile" class="w-10 h-10 rounded-full border-2 border-imhotep-200">
                     {% endif %}
                 </div>
             </div>
