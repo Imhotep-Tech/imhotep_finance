@@ -1,7 +1,7 @@
 from flask import render_template, redirect, session, request, Blueprint
 from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
-from utils.user_info import select_user_data, select_user_photo, select_years_wishlist, wishlist_page
+from utils.user_info import select_user_data, select_user_photo, select_years_wishlist, wishlist_page, get_app_currencies
 from utils.currencies import show_networth, select_currencies
 from datetime import date
 from extensions import db
@@ -25,6 +25,7 @@ def filter_year_wishlist():
             total_favorite_currency = f"{total_favorite_currency:,.2f}"
             user_id = session.get("user_id")
             year = request.args.get("year")
+            
             if year is None:
                 today = date.today()
                 year = today.year
@@ -35,7 +36,6 @@ def filter_year_wishlist():
                     ).fetchall()
 
             all_years = select_years_wishlist(user_id)
-
             return render_template("wishlist.html", user_photo_path=user_photo_path, wishlist_db=wishlist_db, year=year, all_years=all_years, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
 
 #a route to add a wish to the database
@@ -55,7 +55,12 @@ def add_wish():
         user_id = session.get("user_id")
         if request.method == "GET":
             year = request.form.get("year")
-            return render_template("add_wish.html", user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
+            return render_template("add_wish.html",
+                                    user_photo_path=user_photo_path,
+                                    total_favorite_currency=total_favorite_currency,
+                                    favorite_currency=favorite_currency,
+                                    form=CSRFForm(),
+                                    currencies_data = get_app_currencies())
         else:
             user_id = session.get("user_id")
             price = request.form.get("price")
@@ -257,7 +262,13 @@ def edit_wish():
                 text("SELECT year, price, currency, wish_details, link, wish_key FROM wishlist WHERE wish_key = :wish_key"),
                 {"wish_key" :wish_key}
             ).fetchone()
-            return render_template("edit_wish.html", wish_db=wish_db,user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
+            return render_template("edit_wish.html",
+                                    wish_db=wish_db,
+                                    user_photo_path=user_photo_path,
+                                      total_favorite_currency=total_favorite_currency,
+                                        favorite_currency=favorite_currency,
+                                          form=CSRFForm(),
+                                          currencies_data=get_app_currencies())
         else:
 
             wish_key = request.form.get("wish_key")

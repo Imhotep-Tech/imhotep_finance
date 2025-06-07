@@ -1,0 +1,254 @@
+{% extends "layout.html" %}
+
+{% block title %}Wishlist Trash - Imhotep Financial Manager{% endblock %}
+{% block description %}Manage your deleted wishlist items{% endblock %}
+
+{% block extra_head %}
+<style>
+    .trash-card {
+        background: linear-gradient(135deg, #fef7f7 0%, #fdf2f2 100%);
+        transition: all 0.3s ease;
+    }
+    
+    .trash-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    
+    .animate-fade-in {
+        animation: fadeIn 0.6s ease-out forwards;
+    }
+    
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .status-deleted {
+        background-color: #fee2e2;
+        color: #dc2626;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 pattern-bg">
+    <!-- Header -->
+    <div class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center">
+                        <i class="fas fa-trash text-red-600 mr-3"></i>
+                        Wishlist Trash
+                    </h1>
+                    <p class="text-gray-600 mt-1">Restore or permanently delete your wishlist items</p>
+                </div>
+                <div class="mt-4 sm:mt-0 flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+                    <div class="text-right">
+                        <p class="text-sm text-gray-500">Net Worth</p>
+                        <p class="text-xl font-bold text-imhotep-600">{{ total_favorite_currency }} {{ favorite_currency }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Actions Bar -->
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6 mb-8">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div class="flex items-center space-x-4">
+                    <span class="text-lg font-semibold text-gray-900">
+                        {% if trash_wishlist_data and trash_wishlist_data|length > 0 %}
+                            {{ trash_wishlist_data|length }} item{{ 's' if trash_wishlist_data|length != 1 else '' }} in trash
+                        {% else %}
+                            Trash is empty
+                        {% endif %}
+                    </span>
+                </div>
+
+                <!-- Back to Wishlist Button -->
+                <a href="/filter_year_wishlist" class="inline-flex items-center px-6 py-3 bg-imhotep-600 hover:bg-imhotep-700 text-white rounded-lg transition-colors shadow-lg hover:shadow-xl">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Back to Wishlist
+                </a>
+            </div>
+        </div>
+
+        <!-- Trash Items -->
+        {% if trash_wishlist_data and trash_wishlist_data|length > 0 %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="trashGrid">
+            {% for item in trash_wishlist_data %}
+            <div class="trash-card rounded-xl p-6 border border-red-200 animate-fade-in" data-trash-id="{{ item[0] }}">
+                <!-- Status Badge -->
+                <div class="flex items-center justify-between mb-4">
+                    <span class="px-3 py-1 rounded-full text-xs font-medium status-deleted">
+                        <i class="fas fa-trash mr-1"></i>Deleted
+                    </span>
+                    <div class="flex items-center space-x-2">
+                        <!-- Restore Button -->
+                        <form method="post" action="/trash_wishlist" class="inline-block">
+                            {{ form.hidden_tag() }}
+                            <input type="hidden" name="wish_trash_key" value="{{ item[0] }}">
+                            <button type="submit" class="inline-flex items-center px-2 py-1 text-xs bg-green-100 hover:bg-green-200 text-green-700 rounded transition-colors">
+                                <i class="fas fa-undo mr-1"></i>Restore
+                            </button>
+                        </form>
+                        
+                        <!-- Permanent Delete Button -->
+                        <form method="post" action="/delete_trash_wishlist" class="inline-block" onsubmit="return confirm('Are you sure you want to permanently delete this item? This action cannot be undone!')">
+                            {{ form.hidden_tag() }}
+                            <input type="hidden" name="wish_trash_key" value="{{ item[0] }}">
+                            <button type="submit" class="inline-flex items-center px-2 py-1 text-xs bg-red-100 hover:bg-red-200 text-red-700 rounded transition-colors">
+                                <i class="fas fa-times mr-1"></i>Delete Forever
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Item Details -->
+                <div class="space-y-3">
+                    <h3 class="text-lg font-semibold text-gray-900 line-clamp-2">
+                        {{ item[6] if item[6] else 'Wishlist Item' }}
+                    </h3>
+                    
+                    <!-- Price -->
+                    <div class="flex items-center justify-between">
+                        <span class="text-2xl font-bold text-red-600">
+                            {{ '{:,.2f}'.format(item[4]|float) }} {{ item[3] }}
+                        </span>
+                        <span class="text-sm text-gray-500">{{ item[7] }}</span>
+                    </div>
+
+                    <!-- Link (if available) -->
+                    {% if item[5] %}
+                    <a href="{{ item[5] }}" target="_blank" class="inline-flex items-center text-sm text-imhotep-600 hover:text-imhotep-700 transition-colors">
+                        <i class="fas fa-external-link-alt mr-1"></i>
+                        View Item
+                    </a>
+                    {% endif %}
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="mt-6 pt-4 border-t border-red-100 grid grid-cols-2 gap-2">
+                    <!-- Restore Button -->
+                    <form method="post" action="/trash_wishlist" class="w-full">
+                        {{ form.hidden_tag() }}
+                        <input type="hidden" name="wish_trash_key" value="{{ item[0] }}">
+                        <button type="submit" class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center justify-center text-sm">
+                            <i class="fas fa-undo mr-2"></i>
+                            Restore
+                        </button>
+                    </form>
+                    
+                    <!-- Delete Forever Button -->
+                    <form method="post" action="/delete_trash_wishlist" class="w-full" onsubmit="return confirm('Permanently delete this item?')">
+                        {{ form.hidden_tag() }}
+                        <input type="hidden" name="wish_trash_key" value="{{ item[0] }}">
+                        <button type="submit" class="w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors flex items-center justify-center text-sm">
+                            <i class="fas fa-times mr-2"></i>
+                            Delete Forever
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <!-- Empty State -->
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-12 text-center">
+            <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-trash text-gray-400 text-3xl"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-3">Trash is empty</h3>
+            <p class="text-gray-600 mb-6 max-w-md mx-auto">No deleted wishlist items found. When you delete items from your wishlist, they'll appear here for 30 days before being permanently removed.</p>
+            <div class="space-y-3 sm:space-y-0 sm:space-x-4 sm:flex sm:justify-center">
+                <a href="/wishlist" class="inline-flex items-center px-6 py-3 bg-imhotep-600 hover:bg-imhotep-700 text-white rounded-lg transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Wishlist
+                </a>
+                <a href="/add_wish" class="inline-flex items-center px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors">
+                    <i class="fas fa-plus mr-2"></i>Add New Item
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Simple animation for trash cards
+    const cards = document.querySelectorAll('.trash-card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'all 0.6s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+    
+    // Simple form submission loading
+    const forms = document.querySelectorAll('form[action*="trash_wishlist"], form[action*="delete_trash_wishlist"]');
+    forms.forEach(form => {
+        form.addEventListener('submit', function() {
+            const button = form.querySelector('button[type="submit"]');
+            if (button) {
+                button.disabled = true;
+                const originalText = button.innerHTML;
+                
+                if (form.action.includes('delete_trash_wishlist')) {
+                    button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Deleting...';
+                } else {
+                    button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Restoring...';
+                }
+            }
+        });
+    });
+    
+    // Add hover effects for desktop
+    const trashCards = document.querySelectorAll('.trash-card');
+    trashCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-8px)';
+            this.style.boxShadow = '0 25px 50px -12px rgba(0, 0, 0, 0.15)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+            this.style.boxShadow = '';
+        });
+    });
+    
+    // Mobile touch interactions
+    trashCards.forEach(card => {
+        card.addEventListener('touchstart', function() {
+            this.style.transform = 'translateY(-2px) scale(0.98)';
+            this.style.transition = 'all 0.1s ease';
+        });
+        
+        card.addEventListener('touchend', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+            this.style.transition = 'all 0.3s ease';
+        });
+        
+        card.addEventListener('touchcancel', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+            this.style.transition = 'all 0.3s ease';
+        });
+    });
+});
+</script>
+{% endblock %}

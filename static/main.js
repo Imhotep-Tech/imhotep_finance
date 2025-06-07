@@ -22,7 +22,6 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeDarkMode();
     initializeFormValidation();
     initializeCurrencyFilters();
-    initializeYearSelect();
     initializePageSpecificFeatures();
     
     // Clean up any mobile menu artifacts on page load
@@ -34,9 +33,16 @@ document.addEventListener('DOMContentLoaded', function() {
 // ============================================================================
 
 function initializeLoadingHandlers() {
-    // Show loading on form submission
+    // Show loading on form submission (but exclude year filter forms)
     const forms = document.querySelectorAll('form');
     forms.forEach(form => {
+        // Skip year filter forms to avoid conflicts
+        if (form.action.includes('filter_year_wishlist') || 
+            form.action.includes('filter_year') ||
+            form.querySelector('select[name="year"]')) {
+            return; // Skip this form
+        }
+        
         form.addEventListener('submit', showLoadingScreen);
     });
     
@@ -380,27 +386,6 @@ function preselectCurrency(selectElementId, favoriteCurrency) {
 }
 
 // ============================================================================
-// YEAR SELECT INITIALIZATION
-// ============================================================================
-
-function initializeYearSelect() {
-    const yearSelect = document.getElementById('yearSelect');
-    if (!yearSelect) return;
-    
-    const currentYear = new Date().getFullYear();
-    const startYear = currentYear - 50;
-    const endYear = currentYear + 50;
-    
-    for (let year = startYear; year <= endYear; year++) {
-        const option = document.createElement('option');
-        option.value = year;
-        option.textContent = year;
-        if (year === currentYear) option.selected = true;
-        yearSelect.appendChild(option);
-    }
-}
-
-// ============================================================================
 // PAGE-SPECIFIC FEATURES
 // ============================================================================
 
@@ -435,6 +420,11 @@ function initializePageSpecificFeatures() {
     // Trash page
     if (currentPath === '/trash_trans') {
         initializeTrashPage();
+    }
+    
+    // Wishlist page
+    if (currentPath.includes('wishlist') || currentPath.includes('filter_year_wishlist')) {
+        initializeWishlistPage();
     }
     
     // Set today's date for date inputs
@@ -747,8 +737,8 @@ window.addEventListener('pageshow', cleanupMobileMenuState);
 window.addEventListener('popstate', cleanupMobileMenuState);
 
 // Touch events for better mobile interaction
-const touchElements = document.querySelectorAll('button, a, .cursor-pointer');
-touchElements.forEach(element => {
+const touchElementsList = document.querySelectorAll('button, a, .cursor-pointer');
+touchElementsList.forEach(element => {
     element.addEventListener('touchstart', function() {
         this.style.transform = 'scale(0.95)';
     });
@@ -802,6 +792,41 @@ function initializeWithdrawPage() {
     
     // Add balance validation
     setupBalanceValidation();
+}
+
+function animateFormElements() {
+    const formElements = document.querySelectorAll('.space-y-2, .bg-white');
+    formElements.forEach((element, index) => {
+        element.style.opacity = '0';
+        element.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            element.style.transition = 'all 0.6s ease';
+            element.style.opacity = '1';
+            element.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+}
+
+function setupAmountInput() {
+    const amountInput = document.querySelector('input[name="amount"]');
+    if (!amountInput) return;
+    
+    amountInput.addEventListener('input', function() {
+        // Format number with commas
+        let value = this.value.replace(/,/g, '');
+        if (!isNaN(value) && value !== '') {
+            this.value = parseFloat(value).toLocaleString();
+        }
+    });
+    
+    amountInput.addEventListener('blur', function() {
+        // Ensure proper decimal formatting
+        let value = this.value.replace(/,/g, '');
+        if (!isNaN(value) && value !== '') {
+            this.value = parseFloat(value).toFixed(2);
+        }
+    });
 }
 
 function addQuickExpenseButtons() {
@@ -943,472 +968,106 @@ function initializeTransactionHistoryPage() {
     
     // Initialize advanced filtering
     initializeAdvancedFiltering();
-    
-    // Initialize bulk actions
-    initializeBulkActions();
-    
-    // Initialize keyboard shortcuts
-    initializeKeyboardShortcuts();
 }
 
 function animateTransactionElements() {
-    const cards = document.querySelectorAll('.metric-card, .bg-white');
-    cards.forEach((card, index) => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(20px)';
+    const rows = document.querySelectorAll('.transaction-row, .transaction-card');
+    rows.forEach((row, index) => {
+        row.style.opacity = '0';
+        row.style.transform = 'translateY(10px)';
         
         setTimeout(() => {
-            card.style.transition = 'all 0.6s ease';
-            card.style.opacity = '1';
-            card.style.transform = 'translateY(0)';
+            row.style.transition = 'all 0.6s ease';
+            row.style.opacity = '1';
+            row.style.transform = 'translateY(0)';
         }, index * 100);
-    });
-    
-    // Animate transaction rows/cards with staggered effect
-    const transactions = document.querySelectorAll('.transaction-row, .transaction-card');
-    transactions.forEach((transaction, index) => {
-        transaction.style.opacity = '0';
-        transaction.style.transform = 'translateY(20px)';
-        
-        setTimeout(() => {
-            transaction.style.transition = 'all 0.4s ease';
-            transaction.style.opacity = '1';
-            transaction.style.transform = 'translateY(0)';
-        }, 300 + (index * 30)); // Faster stagger for many items
     });
 }
 
 function handleResponsiveTable() {
-    function adjustForMobile() {
-        const isMobile = window.innerWidth < 768;
-        const desktopTable = document.querySelector('.desktop-table');
-        const mobileCards = document.querySelector('.mobile-card');
-        
-        if (desktopTable && mobileCards) {
-            if (isMobile) {
-                desktopTable.style.display = 'none';
-                mobileCards.style.display = 'block';
-            } else {
-                desktopTable.style.display = 'block';
-                mobileCards.style.display = 'none';
-            }
-        }
-    }
-    
-    // Initial check
-    adjustForMobile();
-    
-    // Handle resize
-    let resizeTimeout;
-    window.addEventListener('resize', function() {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(adjustForMobile, 250);
-    });
-    
-    // Handle orientation change
-    window.addEventListener('orientationchange', function() {
-        setTimeout(adjustForMobile, 300);
+    const tables = document.querySelectorAll('table');
+    tables.forEach(table => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'table-responsive';
+        table.parentNode.insertBefore(wrapper, table);
+        wrapper.appendChild(table);
     });
 }
 
 function initializeAdvancedFiltering() {
-    // Add currency filter
-    addCurrencyFilter();
+    // Only initialize if the filter form exists
+    const filterForm = document.getElementById('filterForm');
+    if (!filterForm) return;
     
-    // Add amount range filter
-    addAmountRangeFilter();
+    // Show loading on form submission
+    filterForm.addEventListener('submit', showLoadingScreen);
     
-    // Enhanced search with debouncing
-    enhanceSearchFunctionality();
-}
-
-function addCurrencyFilter() {
-    const transactions = document.querySelectorAll('.transaction-row, .transaction-card');
-    const currencies = new Set();
-    
-    transactions.forEach(transaction => {
-        const currencyCell = transaction.querySelector('td:nth-child(4)');
-        if (currencyCell) {
-            currencies.add(currencyCell.textContent.trim());
-        } else {
-            // For mobile cards, extract currency from amount text
-            const amountText = transaction.querySelector('.text-lg')?.textContent;
-            if (amountText) {
-                const currency = amountText.match(/[A-Z]{3}$/);
-                if (currency) currencies.add(currency[0]);
-            }
-        }
-    });
-    
-    if (currencies.size > 1) {
-        // Add currency filter to filter section
-        const filterGrid = document.querySelector('.grid.grid-cols-1.md\\:grid-cols-3.lg\\:grid-cols-5');
-        if (filterGrid) {
-            const currencyFilter = document.createElement('div');
-            currencyFilter.className = 'space-y-1';
-            currencyFilter.innerHTML = `
-                <label class="block text-sm font-medium text-gray-700">Currency</label>
-                <select id="currencyFilter" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 text-gray-900 text-sm">
-                    <option value="">All Currencies</option>
-                    ${Array.from(currencies).map(currency => `<option value="${currency}">${currency}</option>`).join('')}
-                </select>
-            `;
-            
-            // Insert after search field
-            const searchField = filterGrid.children[3];
-            filterGrid.insertBefore(currencyFilter, searchField.nextSibling);
-            
-            // Add event listener
-            document.getElementById('currencyFilter').addEventListener('change', applyAllFilters);
-        }
-    }
-}
-
-function addAmountRangeFilter() {
-    // Add amount range inputs to advanced filters
-    const filtersSection = document.querySelector('.p-6');
-    if (filtersSection) {
-        const advancedFilters = document.createElement('div');
-        advancedFilters.className = 'mt-4 pt-4 border-t border-gray-200';
-        advancedFilters.innerHTML = `
-            <div class="flex items-center justify-between mb-3">
-                <h4 class="text-sm font-medium text-gray-700">Advanced Filters</h4>
-                <button type="button" id="toggleAdvanced" class="text-indigo-600 hover:text-indigo-800 text-sm">
-                    <i class="fas fa-chevron-down mr-1"></i>Show
-                </button>
-            </div>
-            <div id="advancedFiltersContent" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="space-y-1">
-                    <label class="block text-sm font-medium text-gray-700">Min Amount</label>
-                    <input type="number" id="minAmount" step="0.01" placeholder="0.00" 
-                           class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 text-gray-900 text-sm">
-                </div>
-                <div class="space-y-1">
-                    <label class="block text-sm font-medium text-gray-700">Max Amount</label>
-                    <input type="number" id="maxAmount" step="0.01" placeholder="999999.99"
-                           class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 text-gray-900 text-sm">
-                </div>
-            </div>
-        `;
+    // Year filter functionality
+    const yearSelect = document.getElementById('YearSelect');
+    if (yearSelect) {
+        const originalOptions = [...yearSelect.options];
         
-        filtersSection.appendChild(advancedFilters);
-        
-        // Toggle advanced filters
-        document.getElementById('toggleAdvanced').addEventListener('click', function() {
-            const content = document.getElementById('advancedFiltersContent');
-            const isHidden = content.classList.contains('hidden');
-            
-            content.classList.toggle('hidden');
-            this.innerHTML = isHidden 
-                ? '<i class="fas fa-chevron-up mr-1"></i>Hide'
-                : '<i class="fas fa-chevron-down mr-1"></i>Show';
-        });
-        
-        // Add event listeners for amount filters
-        document.getElementById('minAmount').addEventListener('input', debounce(applyAllFilters, 300));
-        document.getElementById('maxAmount').addEventListener('input', debounce(applyAllFilters, 300));
-    }
-}
-
-function enhanceSearchFunctionality() {
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-        // Remove existing event listeners and add debounced version
-        const newSearchInput = searchInput.cloneNode(true);
-        searchInput.parentNode.replaceChild(newSearchInput, searchInput);
-        
-        newSearchInput.addEventListener('input', debounce(applyAllFilters, 300));
-        
-        // Add search suggestions
-        addSearchSuggestions(newSearchInput);
-    }
-}
-
-function addSearchSuggestions(searchInput) {
-    const transactions = document.querySelectorAll('.transaction-row, .transaction-card');
-    const descriptions = new Set();
-    
-    transactions.forEach(transaction => {
-        const description = transaction.dataset.description;
-        if (description && description.trim()) {
-            descriptions.add(description.trim());
-        }
-    });
-    
-    // Create datalist for search suggestions
-    const datalist = document.createElement('datalist');
-    datalist.id = 'searchSuggestions';
-    descriptions.forEach(desc => {
-        const option = document.createElement('option');
-        option.value = desc;
-        datalist.appendChild(option);
-    });
-    
-    document.body.appendChild(datalist);
-    searchInput.setAttribute('list', 'searchSuggestions');
-}
-
-function applyAllFilters() {
-    const searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || '';
-    const typeFilter = document.querySelector('select[name="trans_type"]')?.value || '';
-    const currencyFilter = document.getElementById('currencyFilter')?.value || '';
-    const minAmount = parseFloat(document.getElementById('minAmount')?.value) || 0;
-    const maxAmount = parseFloat(document.getElementById('maxAmount')?.value) || Infinity;
-    
-    const transactions = document.querySelectorAll('.transaction-row, .transaction-card');
-    let visibleCount = 0;
-    
-    transactions.forEach(transaction => {
-        const description = transaction.dataset.description.toLowerCase();
-        const type = transaction.dataset.type;
-        const amount = parseFloat(transaction.dataset.amount);
-        
-        // Get currency for this transaction
-        let currency = '';
-        if (transaction.classList.contains('transaction-row')) {
-            currency = transaction.querySelector('td:nth-child(4)')?.textContent.trim() || '';
-        } else {
-            const amountText = transaction.querySelector('.text-lg')?.textContent;
-            const currencyMatch = amountText?.match(/[A-Z]{3}$/);
-            currency = currencyMatch ? currencyMatch[0] : '';
-        }
-        
-        const matchesSearch = description.includes(searchTerm);
-        const matchesType = !typeFilter || type === typeFilter;
-        const matchesCurrency = !currencyFilter || currency === currencyFilter;
-        const matchesAmount = amount >= minAmount && amount <= maxAmount;
-        
-        const isVisible = matchesSearch && matchesType && matchesCurrency && matchesAmount;
-        
-        if (transaction.classList.contains('transaction-row')) {
-            transaction.style.display = isVisible ? '' : 'none';
-        } else {
-            transaction.style.display = isVisible ? 'block' : 'none';
-        }
-        
-        if (isVisible) visibleCount++;
-    });
-    
-    // Update stats for visible transactions
-    calculateVisibleTransactionStats();
-    
-    // Show/hide empty state
-    updateEmptyState(visibleCount);
-}
-
-function updateEmptyState(visibleCount) {
-    let emptyState = document.getElementById('filterEmptyState');
-    
-    if (visibleCount === 0) {
-        if (!emptyState) {
-            emptyState = document.createElement('div');
-            emptyState.id = 'filterEmptyState';
-            emptyState.className = 'p-8 text-center border-t border-gray-200';
-            emptyState.innerHTML = `
-                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-search text-gray-400 text-2xl"></i>
-                </div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">No transactions match your filters</h3>
-                <p class="text-gray-600 mb-4">Try adjusting your search criteria or clearing some filters.</p>
-                <button onclick="clearAllFilters()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
-                    Clear All Filters
-                </button>
-            `;
-            
-            const tableContainer = document.querySelector('.bg-white.rounded-2xl.shadow-lg');
-            if (tableContainer) {
-                tableContainer.appendChild(emptyState);
-            }
-        }
-        emptyState.style.display = 'block';
-    } else if (emptyState) {
-        emptyState.style.display = 'none';
-    }
-}
-
-function clearAllFilters() {
-    // Clear all filter inputs
-    document.getElementById('searchInput').value = '';
-    const typeFilter = document.querySelector('select[name="trans_type"]');
-    if (typeFilter) typeFilter.value = '';
-    const currencyFilter = document.getElementById('currencyFilter');
-    if (currencyFilter) currencyFilter.value = '';
-    const minAmount = document.getElementById('minAmount');
-    if (minAmount) minAmount.value = '';
-    const maxAmount = document.getElementById('maxAmount');
-    if (maxAmount) maxAmount.value = '';
-    
-    // Reapply filters (which will show all transactions)
-    applyAllFilters();
-}
-
-function initializeBulkActions() {
-    // Add select all functionality for bulk operations
-    const tableHeader = document.querySelector('thead tr');
-    if (tableHeader) {
-        const selectAllTh = document.createElement('th');
-        selectAllTh.className = 'px-6 py-4 text-left';
-        selectAllTh.innerHTML = `
-            <input type="checkbox" id="selectAll" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-        `;
-        tableHeader.insertBefore(selectAllTh, tableHeader.firstChild);
-        
-        // Add checkboxes to each row
-        const rows = document.querySelectorAll('.transaction-row');
-        rows.forEach(row => {
-            const selectTd = document.createElement('td');
-            selectTd.className = 'px-6 py-4';
-            selectTd.innerHTML = `
-                <input type="checkbox" class="transaction-checkbox rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" value="${row.querySelector('input[name="trans_key"]')?.value || ''}">
-            `;
-            row.insertBefore(selectTd, row.firstChild);
-        });
-        
-        // Add bulk actions bar
-        addBulkActionsBar();
-        
-        // Handle select all
-        document.getElementById('selectAll').addEventListener('change', function() {
-            const checkboxes = document.querySelectorAll('.transaction-checkbox');
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = this.checked;
+        // Filter years based on search input
+        const searchInput = document.getElementById('searchInput1');
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const searchText = this.value.toLowerCase();
+                yearSelect.innerHTML = '';
+                
+                // Add the default option
+                const defaultOption = document.createElement('option');
+                defaultOption.disabled = true;
+                defaultOption.selected = true;
+                defaultOption.textContent = 'Years';
+                yearSelect.appendChild(defaultOption);
+                
+                const filteredOptions = originalOptions.filter(option => {
+                    // Skip the default "Years" option
+                    return !option.disabled && option.textContent.toLowerCase().includes(searchText);
+                });
+                
+                if (filteredOptions.length === 0) {
+                    const noMatchOption = document.createElement('option');
+                    noMatchOption.disabled = true;
+                    noMatchOption.textContent = 'No Match';
+                    yearSelect.appendChild(noMatchOption);
+                } else {
+                    filteredOptions.forEach(option => {
+                        const newOption = option.cloneNode(true);
+                        yearSelect.appendChild(newOption);
+                    });
+                }
             });
-            updateBulkActionsBar();
-        });
-        
-        // Handle individual checkboxes
-        document.querySelectorAll('.transaction-checkbox').forEach(checkbox => {
-            checkbox.addEventListener('change', updateBulkActionsBar);
-        });
-    }
-}
-
-function addBulkActionsBar() {
-    const bulkBar = document.createElement('div');
-    bulkBar.id = 'bulkActionsBar';
-    bulkBar.className = 'hidden fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-white shadow-xl rounded-lg border border-gray-200 px-6 py-3 z-50';
-    bulkBar.innerHTML = `
-        <div class="flex items-center space-x-4">
-            <span id="selectedCount" class="text-sm text-gray-600">0 selected</span>
-            <button onclick="bulkDelete()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm">
-                <i class="fas fa-trash mr-1"></i>Delete Selected
-            </button>
-            <button onclick="clearSelection()" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm">
-                Clear
-            </button>
-        </div>
-    `;
-    document.body.appendChild(bulkBar);
-}
-
-function updateBulkActionsBar() {
-    const selectedCheckboxes = document.querySelectorAll('.transaction-checkbox:checked');
-    const bulkBar = document.getElementById('bulkActionsBar');
-    const selectedCount = document.getElementById('selectedCount');
-    
-    if (selectedCheckboxes.length > 0) {
-        bulkBar.classList.remove('hidden');
-        selectedCount.textContent = `${selectedCheckboxes.length} selected`;
-    } else {
-        bulkBar.classList.add('hidden');
-    }
-}
-
-function clearSelection() {
-    document.querySelectorAll('.transaction-checkbox').forEach(checkbox => {
-        checkbox.checked = false;
-    });
-    document.getElementById('selectAll').checked = false;
-    updateBulkActionsBar();
-}
-
-function bulkDelete() {
-    const selectedCheckboxes = document.querySelectorAll('.transaction-checkbox:checked');
-    if (selectedCheckboxes.length === 0) return;
-    
-    if (confirm(`Are you sure you want to delete ${selectedCheckboxes.length} transaction(s)?`)) {
-        // Here you would implement the bulk delete functionality
-        // For now, just show a message
-        alert('Bulk delete functionality would be implemented here');
-    }
-}
-
-function initializeKeyboardShortcuts() {
-    document.addEventListener('keydown', function(e) {
-        // Only if not typing in an input
-        if (e.target.tagName.toLowerCase() === 'input' || e.target.tagName.toLowerCase() === 'textarea') {
-            return;
         }
-        
-        switch (e.key) {
-            case '/':
-                e.preventDefault();
-                document.getElementById('searchInput')?.focus();
-                break;
-            case 'n':
-                if (e.ctrlKey || e.metaKey) {
-                    e.preventDefault();
-                    window.location.href = '/deposit';
-                }
-                break;
-            case 'e':
-                if (e.ctrlKey || e.metaKey) {
-                    e.preventDefault();
-                    window.location.href = '/withdraw';
-                }
-                break;
-            case 'Escape':
-                clearAllFilters();
-                break;
-        }
-    });
-    
-    // Add keyboard shortcut hints
-    addKeyboardShortcutHints();
-}
-
-function addKeyboardShortcutHints() {
-    const hintsContainer = document.createElement('div');
-    hintsContainer.className = 'fixed bottom-4 right-4 bg-white shadow-lg rounded-lg p-3 text-xs text-gray-600 border border-gray-200 z-40';
-    hintsContainer.innerHTML = `
-        <div class="font-medium mb-2">Keyboard Shortcuts:</div>
-        <div>/ - Focus search</div>
-        <div>Ctrl+N - Add income</div>
-        <div>Ctrl+E - Add expense</div>
-        <div>Esc - Clear filters</div>
-    `;
-    
-    // Auto-hide after 5 seconds
-    setTimeout(() => {
-        hintsContainer.style.opacity = '0.3';
-    }, 5000);
-    
-    document.body.appendChild(hintsContainer);
+    }
 }
 
 // ============================================================================
-// TRASH PAGE FUNCTIONALITY
+// WISHLIST PAGE FUNCTIONALITY
 // ============================================================================
 
-function initializeTrashPage() {
-    // Animate elements on load
-    animateTrashElements();
+function initializeWishlistPage() {
+    // Animate wishlist cards on load
+    animateWishlistCards();
     
-    // Initialize bulk selection
-    initializeBulkSelection();
+    // Initialize mobile interactions
+    addMobileWishlistInteractions();
     
-    // Initialize keyboard shortcuts for trash
-    initializeTrashKeyboardShortcuts();
+    // Initialize form submissions with loading
+    setupWishlistFormHandlers();
     
-    // Initialize responsive handling
-    handleTrashResponsiveness();
+    // Initialize responsive behavior
+    handleWishlistResponsiveness();
+    
+    // Remove the status filter initialization as it's not needed for wishlist
+    // initializeStatusFilter();
 }
 
-function animateTrashElements() {
-    const cards = document.querySelectorAll('.metric-card, .bg-white');
+function animateWishlistCards() {
+    const cards = document.querySelectorAll('.wishlist-card');
     cards.forEach((card, index) => {
         card.style.opacity = '0';
-        card.style.transform = 'translateY(20px)';
+        card.style.transform = 'translateY(10px)';
         
         setTimeout(() => {
             card.style.transition = 'all 0.6s ease';
@@ -1416,302 +1075,193 @@ function animateTrashElements() {
             card.style.transform = 'translateY(0)';
         }, index * 100);
     });
+}
+
+function addMobileWishlistInteractions() {
+    const wishlistCards = document.querySelectorAll('.wishlist-card');
     
-    // Animate transaction rows/cards with staggered effect
-    const transactions = document.querySelectorAll('.transaction-row');
-    transactions.forEach((transaction, index) => {
-        transaction.style.opacity = '0';
-        transaction.style.transform = 'translateX(-20px)';
+    wishlistCards.forEach(card => {
+        // Touch interactions for mobile
+        card.addEventListener('touchstart', function() {
+            this.style.transform = 'translateY(-2px) scale(0.98)';
+            this.style.transition = 'all 0.1s ease';
+        });
         
-        setTimeout(() => {
-            transaction.style.transition = 'all 0.4s ease';
-            transaction.style.opacity = '1';
-            transaction.style.transform = 'translateX(0)';
-        }, 300 + (index * 50));
+        card.addEventListener('touchend', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+            this.style.transition = 'all 0.3s ease';
+        });
+        
+        card.addEventListener('touchcancel', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+            this.style.transition = 'all 0.3s ease';
+        });
+        
+        // Enhanced hover effects for desktop
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-8px)';
+            this.style.boxShadow = '0 25px 50px -12px rgba(0, 0, 0, 0.15)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+            this.style.boxShadow = '';
+        });
     });
 }
 
-function initializeBulkSelection() {
-    // Enhanced select all functionality
-    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
-    const selectAllBtn = document.getElementById('selectAllBtn');
+function setupWishlistFormHandlers() {
+    // Only handle wishlist action forms (mark as purchased/pending, delete) 
+    // DO NOT handle year filter forms - let them work with pure HTML
+    const wishlistActionForms = document.querySelectorAll('form[action*="check_wish"], form[action*="delete_wish"]');
     
-    if (selectAllCheckbox) {
-        selectAllCheckbox.addEventListener('change', function() {
-            const checkboxes = document.querySelectorAll('.transaction-checkbox');
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = this.checked;
+    wishlistActionForms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            const button = form.querySelector('button[type="submit"]');
+            if (!button) return;
+            
+            const originalText = button.innerHTML;
+            
+            // Show loading state
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+            
+            // Show loading overlay
+            showLoadingScreen();
+            
+        });
+    });
+    
+    // Set up year filter functionality
+    setupYearFilterForWishlist();
+}
+
+function setupYearFilterForWishlist() {
+    const searchInput = document.getElementById('searchInput1');
+    const yearSelect = document.getElementById('YearSelect');
+    
+    if (searchInput && yearSelect) {
+        const originalOptions = [...yearSelect.options];
+        
+        // Filter years based on search input
+        searchInput.addEventListener('input', function() {
+            const searchText = this.value.toLowerCase();
+            yearSelect.innerHTML = '';
+            
+            // Add the default option
+            const defaultOption = document.createElement('option');
+            defaultOption.disabled = true;
+            defaultOption.selected = true;
+            defaultOption.textContent = 'Years';
+            yearSelect.appendChild(defaultOption);
+            
+            const filteredOptions = originalOptions.filter(option => {
+                // Skip the default "Years" option
+                return !option.disabled && option.textContent.toLowerCase().includes(searchText);
             });
-            updateBulkActionsDisplay();
-        });
-    }
-    
-    if (selectAllBtn) {
-        selectAllBtn.addEventListener('click', function() {
-            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
-            if (selectAllCheckbox) {
-                selectAllCheckbox.checked = !selectAllCheckbox.checked;
-                selectAllCheckbox.dispatchEvent(new Event('change'));
-            }
-        });
-    }
-    
-    // Individual checkbox handlers
-    document.querySelectorAll('.transaction-checkbox').forEach(checkbox => {
-        checkbox.addEventListener('change', updateBulkActionsDisplay);
-    });
-}
-
-function updateBulkActionsDisplay() {
-    const checkedBoxes = document.querySelectorAll('.transaction-checkbox:checked');
-    const bulkRestoreBtn = document.getElementById('bulkRestoreBtn');
-    const selectAllBtn = document.getElementById('selectAllBtn');
-    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
-    const allCheckboxes = document.querySelectorAll('.transaction-checkbox');
-    
-    const selectedCount = checkedBoxes.length;
-    const totalCount = allCheckboxes.length;
-    
-    // Update bulk restore button
-    if (bulkRestoreBtn) {
-        bulkRestoreBtn.disabled = selectedCount === 0;
-        bulkRestoreBtn.innerHTML = selectedCount > 0 
-            ? `<i class="fas fa-undo mr-1"></i>Restore Selected (${selectedCount})` 
-            : '<i class="fas fa-undo mr-1"></i>Restore Selected';
-    }
-    
-    // Update select all button text
-    if (selectAllBtn) {
-        selectAllBtn.innerHTML = selectedCount > 0 
-            ? '<i class="fas fa-times mr-1"></i>Deselect All' 
-            : '<i class="fas fa-check-square mr-1"></i>Select All';
-    }
-    
-    // Update select all checkbox state
-    if (selectAllCheckbox && totalCount > 0) {
-        selectAllCheckbox.indeterminate = selectedCount > 0 && selectedCount < totalCount;
-        selectAllCheckbox.checked = selectedCount === totalCount;
-    }
-    
-    // Update visual feedback for selected rows
-    allCheckboxes.forEach(checkbox => {
-        const row = checkbox.closest('tr, .border');
-        if (row) {
-            if (checkbox.checked) {
-                row.classList.add('bg-red-50', 'border-red-200');
+            
+            if (filteredOptions.length === 0) {
+                const noMatchOption = document.createElement('option');
+                noMatchOption.disabled = true;
+                noMatchOption.textContent = 'No Match';
+                yearSelect.appendChild(noMatchOption);
             } else {
-                row.classList.remove('bg-red-50', 'border-red-200');
+                filteredOptions.forEach(option => {
+                    const newOption = option.cloneNode(true);
+                    yearSelect.appendChild(newOption);
+                });
             }
-        }
-    });
-}
-
-function initializeTrashKeyboardShortcuts() {
-    document.addEventListener('keydown', function(e) {
-        // Only if not typing in an input
-        if (e.target.tagName.toLowerCase() === 'input' || e.target.tagName.toLowerCase() === 'textarea') {
-            return;
-        }
+        });
         
-        switch (e.key) {
-            case 'a':
-                if (e.ctrlKey || e.metaKey) {
-                    e.preventDefault();
-                    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
-                    if (selectAllCheckbox) {
-                        selectAllCheckbox.checked = !selectAllCheckbox.checked;
-                        selectAllCheckbox.dispatchEvent(new Event('change'));
-                    }
-                }
-                break;
-            case 'r':
-                if (e.ctrlKey || e.metaKey) {
-                    e.preventDefault();
-                    const bulkRestoreBtn = document.getElementById('bulkRestoreBtn');
-                    if (bulkRestoreBtn && !bulkRestoreBtn.disabled) {
-                        bulkRestoreBtn.click();
-                    }
-                }
-                break;
-            case 'Delete':
-                if (e.ctrlKey || e.metaKey) {
-                    e.preventDefault();
-                    const emptyTrashBtn = document.querySelector('[onclick="confirmEmptyTrash()"]');
-                    if (emptyTrashBtn) {
-                        emptyTrashBtn.click();
-                    }
-                }
-                break;
-            case '/':
-                e.preventDefault();
-                const searchInput = document.querySelector('input[name="search"]');
-                if (searchInput) {
-                    searchInput.focus();
-                }
-                break;
-        }
-    });
-}
-
-function handleTrashResponsiveness() {
-    function adjustForMobile() {
-        const isMobile = window.innerWidth < 768;
-        const desktopTable = document.querySelector('.hidden.md\\:block');
-        const mobileCards = document.querySelector('.md\\:hidden');
-        
-        // Add mobile-specific enhancements
-        if (isMobile) {
-            // Enhance mobile card interactions
-            document.querySelectorAll('.md\\:hidden .border').forEach(card => {
-                card.addEventListener('touchstart', function() {
-                    this.style.transform = 'scale(0.98)';
-                });
-                
-                card.addEventListener('touchend', function() {
-                    this.style.transform = 'scale(1)';
-                });
+        // Handle form submission with loading
+        const filterForm = document.getElementById('filterForm');
+        if (filterForm) {
+            filterForm.addEventListener('submit', function(e) {
+                showLoadingScreen();
             });
         }
     }
-    
-    adjustForMobile();
-    
-    let resizeTimeout;
-    window.addEventListener('resize', function() {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(adjustForMobile, 250);
-    });
 }
 
-// Enhanced modal functionality for trash
-function showTrashModal(title, message, confirmCallback, dangerMode = false) {
-    const modal = document.getElementById('confirmModal');
-    if (!modal) return;
+// ============================================================================
+// MOBILE MENU STATE CLEANUP
+// ============================================================================
+
+function cleanupMobileMenuState() {
+    const body = document.body;
+    body.classList.remove('mobile-menu-open');
+    body.style.overflow = '';
+    body.style.position = '';
+    body.style.top = '';
     
-    const modalTitle = document.getElementById('modalTitle');
-    const modalMessage = document.getElementById('modalMessage');
-    const confirmButton = document.getElementById('confirmButton');
-    
-    modalTitle.textContent = title;
-    modalMessage.textContent = message;
-    
-    // Update button styling based on danger mode
-    if (dangerMode) {
-        confirmButton.className = 'flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors';
+    const mainContent = document.querySelector('main');
+    if (mainContent) {
+        mainContent.style.display = 'block';
+        mainContent.style.visibility = 'visible';
+    }
+}
+
+// ============================================================================
+// LEGACY SUPPORT AND UTILITY FUNCTIONS
+// ============================================================================
+
+// Auto-hide messages after 5 seconds
+setTimeout(function() {
+    document.querySelectorAll('.done-message, .error-message').forEach(message => {
+        if (message) message.style.display = 'none';
+    });
+}, 5000);
+
+// Online/Offline status handling
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+
+function updateOnlineStatus() {
+    if (!navigator.onLine) {
+        document.body.innerHTML = '<h1>You are offline</h1><p>Database connection is unavailable. Please check your internet connection.</p>';
     } else {
-        confirmButton.className = 'flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors';
+        location.reload();
     }
-    
-    // Remove any existing event listeners
-    const newConfirmButton = confirmButton.cloneNode(true);
-    confirmButton.parentNode.replaceChild(newConfirmButton, confirmButton);
-    
-    // Add new event listener
-    newConfirmButton.addEventListener('click', function() {
-        hideTrashModal();
-        if (confirmCallback) confirmCallback();
+}
+
+// Page navigation cleanup
+window.addEventListener('beforeunload', cleanupMobileMenuState);
+window.addEventListener('pageshow', cleanupMobileMenuState);
+window.addEventListener('popstate', cleanupMobileMenuState);
+
+// Touch events for better mobile interaction
+const touchElements = document.querySelectorAll('button, a, .cursor-pointer');
+touchElements.forEach(element => {
+    element.addEventListener('touchstart', function() {
+        this.style.transform = 'scale(0.95)';
     });
     
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
+    element.addEventListener('touchend', function() {
+        this.style.transform = '';
+    });
     
-    // Focus on confirm button for keyboard navigation
-    setTimeout(() => newConfirmButton.focus(), 100);
-}
+    element.addEventListener('touchcancel', function() {
+        this.style.transform = '';
+    });
+});
 
-function hideTrashModal() {
-    const modal = document.getElementById('confirmModal');
-    if (modal) {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
+// Focus handling for accessibility
+document.addEventListener('focusin', function(e) {
+    if (e.target.matches('input, textarea, select')) {
+        e.target.style.outline = '2px solid #51adac';
     }
-}
+});
 
-// Utility function for smooth state transitions
-function animateRowRemoval(element) {
-    element.style.transition = 'all 0.3s ease';
-    element.style.opacity = '0';
-    element.style.transform = 'translateX(-100%)';
-    
-    setTimeout(() => {
-        element.remove();
-    }, 300);
-}
-
-// Auto-save search and filter state
-function saveTrashFilterState() {
-    const searchInput = document.querySelector('input[name="search"]');
-    const typeSelect = document.querySelector('select[name="trans_type"]');
-    const currencySelect = document.querySelector('select[name="currency"]');
-    
-    if (searchInput || typeSelect || currencySelect) {
-        const state = {
-            search: searchInput?.value || '',
-            type: typeSelect?.value || '',
-            currency: currencySelect?.value || ''
-        };
-        
-        localStorage.setItem('trashFilterState', JSON.stringify(state));
+document.addEventListener('focusout', function(e) {
+    if (e.target.matches('input, textarea, select')) {
+        e.target.style.outline = '';
     }
-}
+});
 
-function restoreTrashFilterState() {
-    const savedState = localStorage.getItem('trashFilterState');
-    if (savedState) {
-        try {
-            const state = JSON.parse(savedState);
-            
-            const searchInput = document.querySelector('input[name="search"]');
-            const typeSelect = document.querySelector('select[name="trans_type"]');
-            const currencySelect = document.querySelector('select[name="currency"]');
-            
-            if (searchInput && state.search) searchInput.value = state.search;
-            if (typeSelect && state.type) typeSelect.value = state.type;
-            if (currencySelect && state.currency) currencySelect.value = state.currency;
-        } catch (e) {
-            console.log('Error restoring filter state:', e);
-        }
-    }
-}
-
-// Add notification system for trash actions
-function showTrashNotification(message, type = 'success') {
-    const notification = document.createElement('div');
-    notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 transform transition-all duration-300 ${
-        type === 'success' ? 'bg-green-600 text-white' : 
-        type === 'error' ? 'bg-red-600 text-white' : 
-        'bg-blue-600 text-white'
-    }`;
-    notification.textContent = message;
-    
-    // Initial state (off-screen)
-    notification.style.transform = 'translateX(100%)';
-    
-    document.body.appendChild(notification);
-    
-    // Animate in
-    setTimeout(() => {
-        notification.style.transform = 'translateX(0)';
-    }, 10);
-    
-    // Auto-remove after 3 seconds
-    setTimeout(() => {
-        notification.style.transform = 'translateX(100%)';
-        setTimeout(() => {
-            notification.remove();
-        }, 300);
-    }, 3000);
-}
-
-// Utility function for debouncing
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
+// Ensure viewport meta tag exists for mobile
+if (!document.querySelector('meta[name="viewport"]')) {
+    const metaViewport = document.createElement('meta');
+    metaViewport.name = 'viewport';
+    metaViewport.content = 'width=device-width, initial-scale=1.0, user-scalable=no';
+    document.head.appendChild(metaViewport);
 }
