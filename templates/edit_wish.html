@@ -1,0 +1,225 @@
+{% extends "layout.html" %}
+
+{% block title %}Edit Wishlist Item - Imhotep Financial Manager{% endblock %}
+{% block description %}Edit your wishlist item details{% endblock %}
+
+{% block extra_head %}
+<style>
+    .form-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        transition: all 0.3s ease;
+    }
+    
+    .input-field {
+        transition: all 0.2s ease;
+    }
+    
+    .input-field:focus {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .animate-fade-in {
+        animation: fadeIn 0.6s ease-out forwards;
+    }
+    
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 pattern-bg">
+    <!-- Header -->
+    <div class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center">
+                        <i class="fas fa-edit text-imhotep-600 mr-3"></i>
+                        Edit Wishlist Item
+                    </h1>
+                    <p class="text-gray-600 mt-1">Update your wishlist item details</p>
+                </div>
+                <div class="mt-4 sm:mt-0 flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+                    <div class="text-right">
+                        <p class="text-sm text-gray-500">Net Worth</p>
+                        <p class="text-xl font-bold text-imhotep-600">{{ total_favorite_currency }} {{ favorite_currency }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Form Card -->
+        <div class="form-card rounded-xl shadow-lg border border-gray-200 p-8 animate-fade-in">
+            <form method="post" action="/edit_wish" class="space-y-6">
+                {{ form.hidden_tag() }}
+                <input type="hidden" name="wish_key" value="{{ wish_db[5] }}">
+
+                <!-- Year -->
+                <div class="space-y-2">
+                    <label for="year" class="block text-sm font-medium text-gray-700">
+                        <i class="fas fa-calendar-alt text-imhotep-500 mr-2"></i>Year
+                    </label>
+                    <input type="number" 
+                           id="year" 
+                           name="year" 
+                           value="{{ wish_db[0] }}"
+                           min="2020" 
+                           max="2050" 
+                           required 
+                           class="input-field w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-imhotep-500 focus:ring-2 focus:ring-imhotep-500/20 transition-all duration-200 text-gray-900">
+                </div>
+
+                <!-- Price -->
+                <div class="space-y-2">
+                    <label for="price" class="block text-sm font-medium text-gray-700">
+                        <i class="fas fa-dollar-sign text-imhotep-500 mr-2"></i>Price
+                    </label>
+                    <input type="number" 
+                           id="price" 
+                           name="price" 
+                           value="{{ wish_db[1] }}"
+                           step="0.01" 
+                           min="0" 
+                           required 
+                           class="input-field w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-imhotep-500 focus:ring-2 focus:ring-imhotep-500/20 transition-all duration-200 text-gray-900">
+                </div>
+
+                <!-- Currency with Search -->
+                <div class="space-y-2">
+                    <label for="currency" class="block text-sm font-medium text-gray-700">
+                        <i class="fas fa-money-bill-wave text-imhotep-500 mr-2"></i>Currency
+                    </label>
+                    <div class="relative">
+                        <input type="text" 
+                               id="searchInput1" 
+                               placeholder="Search currency..." 
+                               class="input-field w-full px-4 py-2 border-2 border-gray-200 rounded-t-lg focus:border-imhotep-500 focus:ring-2 focus:ring-imhotep-500/20 transition-all duration-200 text-gray-900 text-sm">
+                        <select name="currency" 
+                                id="CurrencySelect1" 
+                                required 
+                                class="input-field w-full px-4 py-3 border-2 border-t-0 border-gray-200 rounded-b-lg focus:border-imhotep-500 focus:ring-2 focus:ring-imhotep-500/20 transition-all duration-200 text-gray-900">
+                            <option value="">Select Currency</option>
+                            {% for currency in currencies_data %}
+                                <option value="{{ currency }}" {% if wish_db[2] == currency %}selected{% endif %}>{{ currency }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Details -->
+                <div class="space-y-2">
+                    <label for="details" class="block text-sm font-medium text-gray-700">
+                        <i class="fas fa-align-left text-imhotep-500 mr-2"></i>Item Details
+                    </label>
+                    <textarea id="details" 
+                              name="details" 
+                              rows="4" 
+                              required 
+                              placeholder="Describe your wishlist item..."
+                              class="input-field w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-imhotep-500 focus:ring-2 focus:ring-imhotep-500/20 transition-all duration-200 text-gray-900 resize-none">{{ wish_db[3] }}</textarea>
+                </div>
+
+                <!-- Link -->
+                <div class="space-y-2">
+                    <label for="link" class="block text-sm font-medium text-gray-700">
+                        <i class="fas fa-link text-imhotep-500 mr-2"></i>Link (Optional)
+                    </label>
+                    <input type="url" 
+                           id="link" 
+                           name="link" 
+                           value="{{ wish_db[4] if wish_db[4] }}"
+                           placeholder="https://example.com/product"
+                           class="input-field w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-imhotep-500 focus:ring-2 focus:ring-imhotep-500/20 transition-all duration-200 text-gray-900">
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row gap-4 pt-6">
+                    <button type="submit" 
+                            class="flex-1 px-6 py-3 bg-imhotep-600 hover:bg-imhotep-700 text-white rounded-lg transition-colors shadow-lg hover:shadow-xl flex items-center justify-center">
+                        <i class="fas fa-save mr-2"></i>
+                        Update Item
+                    </button>
+                    
+                    <a href="/wishlist" 
+                       class="flex-1 px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors shadow-lg hover:shadow-xl flex items-center justify-center">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to Wishlist
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Simple currency search functionality
+    const searchInput = document.getElementById('searchInput1');
+    const currencySelect = document.getElementById('CurrencySelect1');
+    
+    if (searchInput && currencySelect) {
+        const originalOptions = [...currencySelect.options];
+        
+        searchInput.addEventListener('input', function() {
+            const searchText = this.value.toLowerCase();
+            currencySelect.innerHTML = '';
+            
+            const filteredOptions = originalOptions.filter(option => 
+                option.textContent.toLowerCase().includes(searchText) || option.value.toLowerCase().includes(searchText)
+            );
+            
+            if (filteredOptions.length === 0) {
+                const noMatchOption = document.createElement('option');
+                noMatchOption.disabled = true;
+                noMatchOption.textContent = 'No matches found';
+                currencySelect.appendChild(noMatchOption);
+            } else {
+                filteredOptions.forEach(option => {
+                    const newOption = option.cloneNode(true);
+                    currencySelect.appendChild(newOption);
+                });
+            }
+        });
+    }
+    
+    // Add loading state to form submission
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function() {
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Updating...';
+            }
+        });
+    }
+    
+    // Auto-resize textarea
+    const textarea = document.getElementById('details');
+    if (textarea) {
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        });
+        
+        // Initial resize
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+    }
+});
+</script>
+{% endblock %}
