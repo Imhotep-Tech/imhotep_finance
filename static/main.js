@@ -182,7 +182,7 @@ function applyDarkModeToMobileMenu() {
 
 function applyDarkModeToComponents() {
     // Apply to cards
-    const cards = document.querySelectorAll('.metric-card, .gradient-card, .score-card, .bg-white');
+    const cards = document.querySelectorAll('.metric-card, .gradient-card, .score-card, .currency-card, .bg-white');
     cards.forEach(card => {
         if (!card.classList.contains('fixed')) {
             card.style.background = 'linear-gradient(135deg, #2f5a5a 0%, #376e6d 100%)';
@@ -241,7 +241,7 @@ function removeDarkModeFromNavigation() {
     });
     
     // Reset cards and forms
-    document.querySelectorAll('.metric-card, .gradient-card, .score-card, .bg-white, input, select, textarea').forEach(element => {
+    document.querySelectorAll('.metric-card, .gradient-card, .score-card, .currency-card, .bg-white, input, select, textarea').forEach(element => {
         if (!element.classList.contains('fixed')) {
             element.style.background = '';
             element.style.backgroundColor = '';

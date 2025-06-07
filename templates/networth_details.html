@@ -257,13 +257,30 @@ document.addEventListener('DOMContentLoaded', function() {
     const currencyCards = document.querySelectorAll('.currency-card');
     currencyCards.forEach(card => {
         card.addEventListener('mouseenter', function() {
-            this.style.borderColor = 'rgba(81, 173, 172, 0.5)';
+            if (document.body.classList.contains('dark-mode')) {
+                this.style.borderColor = 'rgba(81, 173, 172, 0.5)';
+            } else {
+                this.style.borderColor = 'rgba(81, 173, 172, 0.5)';
+            }
         });
         
         card.addEventListener('mouseleave', function() {
-            this.style.borderColor = 'rgba(81, 173, 172, 0.1)';
+            if (document.body.classList.contains('dark-mode')) {
+                this.style.borderColor = '#428a89';
+            } else {
+                this.style.borderColor = 'rgba(81, 173, 172, 0.1)';
+            }
         });
     });
+    
+    // Apply dark mode to currency cards if dark mode is enabled
+    if (document.body.classList.contains('dark-mode')) {
+        currencyCards.forEach(card => {
+            card.style.background = 'linear-gradient(135deg, #2f5a5a 0%, #376e6d 100%)';
+            card.style.borderColor = '#428a89';
+            card.style.color = '#ffffff';
+        });
+    }
     
     // Add smooth transitions for hover effects
     const hoverElements = document.querySelectorAll('.group, .metric-card, .currency-card, .gradient-card');
