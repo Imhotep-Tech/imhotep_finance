@@ -432,6 +432,11 @@ function initializePageSpecificFeatures() {
         initializeTransactionHistoryPage();
     }
     
+    // Trash page
+    if (currentPath === '/trash_trans') {
+        initializeTrashPage();
+    }
+    
     // Set today's date for date inputs
     const dateInput = document.getElementById('dateInput');
     if (dateInput) {
@@ -1379,6 +1384,323 @@ function addKeyboardShortcutHints() {
     }, 5000);
     
     document.body.appendChild(hintsContainer);
+}
+
+// ============================================================================
+// TRASH PAGE FUNCTIONALITY
+// ============================================================================
+
+function initializeTrashPage() {
+    // Animate elements on load
+    animateTrashElements();
+    
+    // Initialize bulk selection
+    initializeBulkSelection();
+    
+    // Initialize keyboard shortcuts for trash
+    initializeTrashKeyboardShortcuts();
+    
+    // Initialize responsive handling
+    handleTrashResponsiveness();
+}
+
+function animateTrashElements() {
+    const cards = document.querySelectorAll('.metric-card, .bg-white');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'all 0.6s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+    
+    // Animate transaction rows/cards with staggered effect
+    const transactions = document.querySelectorAll('.transaction-row');
+    transactions.forEach((transaction, index) => {
+        transaction.style.opacity = '0';
+        transaction.style.transform = 'translateX(-20px)';
+        
+        setTimeout(() => {
+            transaction.style.transition = 'all 0.4s ease';
+            transaction.style.opacity = '1';
+            transaction.style.transform = 'translateX(0)';
+        }, 300 + (index * 50));
+    });
+}
+
+function initializeBulkSelection() {
+    // Enhanced select all functionality
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    const selectAllBtn = document.getElementById('selectAllBtn');
+    
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('.transaction-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+            updateBulkActionsDisplay();
+        });
+    }
+    
+    if (selectAllBtn) {
+        selectAllBtn.addEventListener('click', function() {
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+            if (selectAllCheckbox) {
+                selectAllCheckbox.checked = !selectAllCheckbox.checked;
+                selectAllCheckbox.dispatchEvent(new Event('change'));
+            }
+        });
+    }
+    
+    // Individual checkbox handlers
+    document.querySelectorAll('.transaction-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', updateBulkActionsDisplay);
+    });
+}
+
+function updateBulkActionsDisplay() {
+    const checkedBoxes = document.querySelectorAll('.transaction-checkbox:checked');
+    const bulkRestoreBtn = document.getElementById('bulkRestoreBtn');
+    const selectAllBtn = document.getElementById('selectAllBtn');
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    const allCheckboxes = document.querySelectorAll('.transaction-checkbox');
+    
+    const selectedCount = checkedBoxes.length;
+    const totalCount = allCheckboxes.length;
+    
+    // Update bulk restore button
+    if (bulkRestoreBtn) {
+        bulkRestoreBtn.disabled = selectedCount === 0;
+        bulkRestoreBtn.innerHTML = selectedCount > 0 
+            ? `<i class="fas fa-undo mr-1"></i>Restore Selected (${selectedCount})` 
+            : '<i class="fas fa-undo mr-1"></i>Restore Selected';
+    }
+    
+    // Update select all button text
+    if (selectAllBtn) {
+        selectAllBtn.innerHTML = selectedCount > 0 
+            ? '<i class="fas fa-times mr-1"></i>Deselect All' 
+            : '<i class="fas fa-check-square mr-1"></i>Select All';
+    }
+    
+    // Update select all checkbox state
+    if (selectAllCheckbox && totalCount > 0) {
+        selectAllCheckbox.indeterminate = selectedCount > 0 && selectedCount < totalCount;
+        selectAllCheckbox.checked = selectedCount === totalCount;
+    }
+    
+    // Update visual feedback for selected rows
+    allCheckboxes.forEach(checkbox => {
+        const row = checkbox.closest('tr, .border');
+        if (row) {
+            if (checkbox.checked) {
+                row.classList.add('bg-red-50', 'border-red-200');
+            } else {
+                row.classList.remove('bg-red-50', 'border-red-200');
+            }
+        }
+    });
+}
+
+function initializeTrashKeyboardShortcuts() {
+    document.addEventListener('keydown', function(e) {
+        // Only if not typing in an input
+        if (e.target.tagName.toLowerCase() === 'input' || e.target.tagName.toLowerCase() === 'textarea') {
+            return;
+        }
+        
+        switch (e.key) {
+            case 'a':
+                if (e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+                    if (selectAllCheckbox) {
+                        selectAllCheckbox.checked = !selectAllCheckbox.checked;
+                        selectAllCheckbox.dispatchEvent(new Event('change'));
+                    }
+                }
+                break;
+            case 'r':
+                if (e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    const bulkRestoreBtn = document.getElementById('bulkRestoreBtn');
+                    if (bulkRestoreBtn && !bulkRestoreBtn.disabled) {
+                        bulkRestoreBtn.click();
+                    }
+                }
+                break;
+            case 'Delete':
+                if (e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    const emptyTrashBtn = document.querySelector('[onclick="confirmEmptyTrash()"]');
+                    if (emptyTrashBtn) {
+                        emptyTrashBtn.click();
+                    }
+                }
+                break;
+            case '/':
+                e.preventDefault();
+                const searchInput = document.querySelector('input[name="search"]');
+                if (searchInput) {
+                    searchInput.focus();
+                }
+                break;
+        }
+    });
+}
+
+function handleTrashResponsiveness() {
+    function adjustForMobile() {
+        const isMobile = window.innerWidth < 768;
+        const desktopTable = document.querySelector('.hidden.md\\:block');
+        const mobileCards = document.querySelector('.md\\:hidden');
+        
+        // Add mobile-specific enhancements
+        if (isMobile) {
+            // Enhance mobile card interactions
+            document.querySelectorAll('.md\\:hidden .border').forEach(card => {
+                card.addEventListener('touchstart', function() {
+                    this.style.transform = 'scale(0.98)';
+                });
+                
+                card.addEventListener('touchend', function() {
+                    this.style.transform = 'scale(1)';
+                });
+            });
+        }
+    }
+    
+    adjustForMobile();
+    
+    let resizeTimeout;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(adjustForMobile, 250);
+    });
+}
+
+// Enhanced modal functionality for trash
+function showTrashModal(title, message, confirmCallback, dangerMode = false) {
+    const modal = document.getElementById('confirmModal');
+    if (!modal) return;
+    
+    const modalTitle = document.getElementById('modalTitle');
+    const modalMessage = document.getElementById('modalMessage');
+    const confirmButton = document.getElementById('confirmButton');
+    
+    modalTitle.textContent = title;
+    modalMessage.textContent = message;
+    
+    // Update button styling based on danger mode
+    if (dangerMode) {
+        confirmButton.className = 'flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors';
+    } else {
+        confirmButton.className = 'flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors';
+    }
+    
+    // Remove any existing event listeners
+    const newConfirmButton = confirmButton.cloneNode(true);
+    confirmButton.parentNode.replaceChild(newConfirmButton, confirmButton);
+    
+    // Add new event listener
+    newConfirmButton.addEventListener('click', function() {
+        hideTrashModal();
+        if (confirmCallback) confirmCallback();
+    });
+    
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    
+    // Focus on confirm button for keyboard navigation
+    setTimeout(() => newConfirmButton.focus(), 100);
+}
+
+function hideTrashModal() {
+    const modal = document.getElementById('confirmModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+}
+
+// Utility function for smooth state transitions
+function animateRowRemoval(element) {
+    element.style.transition = 'all 0.3s ease';
+    element.style.opacity = '0';
+    element.style.transform = 'translateX(-100%)';
+    
+    setTimeout(() => {
+        element.remove();
+    }, 300);
+}
+
+// Auto-save search and filter state
+function saveTrashFilterState() {
+    const searchInput = document.querySelector('input[name="search"]');
+    const typeSelect = document.querySelector('select[name="trans_type"]');
+    const currencySelect = document.querySelector('select[name="currency"]');
+    
+    if (searchInput || typeSelect || currencySelect) {
+        const state = {
+            search: searchInput?.value || '',
+            type: typeSelect?.value || '',
+            currency: currencySelect?.value || ''
+        };
+        
+        localStorage.setItem('trashFilterState', JSON.stringify(state));
+    }
+}
+
+function restoreTrashFilterState() {
+    const savedState = localStorage.getItem('trashFilterState');
+    if (savedState) {
+        try {
+            const state = JSON.parse(savedState);
+            
+            const searchInput = document.querySelector('input[name="search"]');
+            const typeSelect = document.querySelector('select[name="trans_type"]');
+            const currencySelect = document.querySelector('select[name="currency"]');
+            
+            if (searchInput && state.search) searchInput.value = state.search;
+            if (typeSelect && state.type) typeSelect.value = state.type;
+            if (currencySelect && state.currency) currencySelect.value = state.currency;
+        } catch (e) {
+            console.log('Error restoring filter state:', e);
+        }
+    }
+}
+
+// Add notification system for trash actions
+function showTrashNotification(message, type = 'success') {
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 transform transition-all duration-300 ${
+        type === 'success' ? 'bg-green-600 text-white' : 
+        type === 'error' ? 'bg-red-600 text-white' : 
+        'bg-blue-600 text-white'
+    }`;
+    notification.textContent = message;
+    
+    // Initial state (off-screen)
+    notification.style.transform = 'translateX(100%)';
+    
+    document.body.appendChild(notification);
+    
+    // Animate in
+    setTimeout(() => {
+        notification.style.transform = 'translateX(0)';
+    }, 10);
+    
+    // Auto-remove after 3 seconds
+    setTimeout(() => {
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 3000);
 }
 
 // Utility function for debouncing

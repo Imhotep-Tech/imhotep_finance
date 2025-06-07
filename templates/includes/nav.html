@@ -6,7 +6,6 @@
                     <img src="{{ url_for('static', filename='imhotep_finance.jpeg') }}" 
                          alt="Imhotep Finance Logo" 
                          class="h-8 w-8 mr-2 logo-img">
-                    <span class="font-bold text-xl text-gray-800 group-hover:text-imhotep-600 transition-colors">Imhotep Finance</span>
                 </a>
             </div>
             
@@ -34,6 +33,9 @@
                                     </a>
                                     <a href="/show_trans" class="block px-4 py-2 text-sm text-gray-700 hover:bg-imhotep-50 hover:text-imhotep-600">
                                         <i class="fas fa-history mr-2"></i>Transaction History
+                                    </a>
+                                    <a href="/trash_trans" class="block px-4 py-2 text-sm text-gray-700 hover:bg-imhotep-50 hover:text-imhotep-600">
+                                        <i class="fas fa-trash text-gray-500 mr-2"></i>Trash
                                     </a>
                                 </div>
                             </div>
@@ -159,6 +161,9 @@
                     </a>
                     <a href="/show_trans" class="text-gray-700 hover:text-imhotep-600 hover:bg-gray-50 block px-6 py-2 rounded-md text-base font-medium">
                         <i class="fas fa-history mr-2"></i>History
+                    </a>
+                    <a href="/trash_trans" class="text-gray-700 hover:text-imhotep-600 hover:bg-gray-50 block px-6 py-2 rounded-md text-base font-medium">
+                        <i class="fas fa-trash text-gray-500 mr-2"></i>Trash
                     </a>
                 </div>
                 

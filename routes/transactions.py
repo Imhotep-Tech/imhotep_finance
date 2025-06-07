@@ -1,4 +1,4 @@
-from flask import render_template, redirect, session, request, Blueprint, flash, flash
+from flask import render_template, redirect, session, request, Blueprint, flash, flash, url_for
 from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
 from extensions import db
@@ -400,7 +400,6 @@ def delete_trans():
         return render_template("show_trans.html", trans_db=trans_db, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, page = page,total_pages=total_pages,to_date=to_date, from_date=from_date, form=CSRFForm())
 
 
-#---------------------------------------------------------------------Still needs UI implementation-------------------------------------------------------
 @transactions_bp.route("/trash_trans", methods=["GET", "POST"])
 def trash_trans():
     if not session.get("logged_in"):
