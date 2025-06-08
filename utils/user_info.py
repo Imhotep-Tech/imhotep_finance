@@ -108,3 +108,26 @@ def get_app_currencies():
         "ZWL"
     ]
     return currencies
+
+def get_user_categories(trans_status, user_id):
+    if not user_id or not trans_status:
+        return []
+
+    user_categories = db.session.execute(
+        text("""
+            SELECT category, COUNT(*) as frequency_of_category
+            FROM trans 
+            WHERE user_id = :user_id 
+            AND trans_status = :trans_status 
+            AND category IS NOT NULL 
+            AND category != ''
+            GROUP BY category 
+            ORDER BY frequency_of_category DESC 
+            LIMIT 15
+        """),
+        {"user_id": user_id, "trans_status": trans_status}
+    ).fetchall()
+
+    # Extract just the category names from the result
+    categories = [row[0] for row in user_categories] if user_categories else []
+    return categories

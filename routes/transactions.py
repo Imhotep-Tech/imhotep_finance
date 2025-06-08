@@ -3,7 +3,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
 from extensions import db
 from config import CSRFForm, Config
-from utils.user_info import select_user_photo, trans, get_app_currencies
+from utils.user_info import select_user_photo, trans, get_app_currencies, get_user_categories
 from utils.currencies import show_networth, select_currencies
 from datetime import datetime
 import logging
@@ -21,15 +21,21 @@ def deposit():
             error = "Welcome Back"
             return render_template('error.html', error=error, form=CSRFForm())
         
+        user_id = session.get("user_id")
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
+
+        # Get user's most frequent income categories
+        user_categories = get_user_categories("deposit", user_id)
+
         if request.method == "GET":
             return render_template("deposit.html",
                                     user_photo_path=user_photo_path,
                                     total_favorite_currency=total_favorite_currency,
                                     favorite_currency=favorite_currency,
                                     form=CSRFForm(),
-                                    available_currencies = get_app_currencies())
+                                    available_currencies=get_app_currencies(),
+                                    user_categories=user_categories)
         else:
 
             date = request.form.get("date")
@@ -37,6 +43,7 @@ def deposit():
             currency = request.form.get("currency")
             user_id = session.get("user_id")
             trans_details = request.form.get("trans_details")
+            category = request.form.get("category")
 
             if currency is None or amount is None :
                 error = "You have to choose the currency!"
@@ -68,8 +75,8 @@ def deposit():
                 networth_id = 1
 
             db.session.execute(
-                text("INSERT INTO trans (date, trans_key, amount, currency, user_id, trans_id, trans_status, trans_details) VALUES (:date, :trans_key, :amount, :currency, :user_id, :trans_id, :trans_status, :trans_details)"),
-                  {"date": date,"trans_key":trans_key, "amount": amount, "currency": currency, "user_id": user_id, "trans_id": trans_id, "trans_status": "deposit", "trans_details": trans_details}
+                text("INSERT INTO trans (date, trans_key, amount, currency, user_id, trans_id, trans_status, trans_details, category) VALUES (:date, :trans_key, :amount, :currency, :user_id, :trans_id, :trans_status, :trans_details, :category)"),
+                  {"date": date,"trans_key":trans_key, "amount": amount, "currency": currency, "user_id": user_id, "trans_id": trans_id, "trans_status": "deposit", "trans_details": trans_details, "category":category}
             )
             db.session.commit()
 
@@ -110,24 +117,40 @@ def withdraw():
             return render_template('error.html', error=error, form=CSRFForm())
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
+        
+        user_id = session.get("user_id")
+        user_categories = get_user_categories("withdraw", user_id)
+        
         if request.method == "GET":
-            user_id = session.get("user_id")
             currency_all = select_currencies(user_id)
-            return render_template("withdraw.html", currency_all = currency_all, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
+            return render_template("withdraw.html", 
+                                 currency_all=currency_all, 
+                                 user_photo_path=user_photo_path, 
+                                 total_favorite_currency=total_favorite_currency, 
+                                 favorite_currency=favorite_currency, 
+                                 form=CSRFForm(),
+                                 user_categories=user_categories)
 
         else:
             date = request.form.get("date")
             amount = float(request.form.get("amount"))
             currency = request.form.get("currency")
-            user_id = session.get("user_id")
             trans_details = request.form.get("trans_details")
             trans_details_link = request.form.get("trans_details_link")
+            category = request.form.get("category")
 
             if currency == None or date == None or amount == None :
                 error = "You have to choose the currency!"
                 currency_all = select_currencies(user_id)
-                return render_template("withdraw.html", currency_all = currency_all, error = error, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
-
+                return render_template("withdraw.html", 
+                                     currency_all=currency_all, 
+                                     error=error, 
+                                     user_photo_path=user_photo_path, 
+                                     total_favorite_currency=total_favorite_currency, 
+                                     favorite_currency=favorite_currency, 
+                                     form=CSRFForm(),
+                                     user_categories=user_categories)
+            
             amount_of_currency = db.session.execute(
                 text("SELECT total FROM networth WHERE user_id = :user_id AND currency = :currency"),
                 {"user_id": user_id, "currency":currency}
@@ -136,8 +159,15 @@ def withdraw():
             if amount > amount_of_currency:
                 error = "This user doesn't have this amount of this currency"
                 currency_all = select_currencies(user_id)
-                return render_template("withdraw.html", currency_all = currency_all, error=error, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, form=CSRFForm())
-
+                return render_template("withdraw.html", 
+                                     currency_all=currency_all, 
+                                     error=error, 
+                                     user_photo_path=user_photo_path, 
+                                     total_favorite_currency=total_favorite_currency, 
+                                     favorite_currency=favorite_currency, 
+                                     form=CSRFForm(),
+                                     user_categories=user_categories)
+            
             try:
                 last_trans_id = db.session.execute(
                         text("SELECT MAX(trans_id) FROM trans WHERE user_id = :user_id"),
@@ -156,8 +186,8 @@ def withdraw():
                 trans_key = 1
 
             db.session.execute(
-                text("INSERT INTO trans (date, trans_key, amount, currency, user_id, trans_id, trans_status, trans_details, trans_details_link) VALUES (:date, :trans_key, :amount, :currency, :user_id, :trans_id, :trans_status, :trans_details, :trans_details_link)"),
-                  {"date": date,"trans_key":trans_key, "amount": amount, "currency": currency, "user_id": user_id, "trans_id": trans_id, "trans_status": "withdraw", "trans_details": trans_details, "trans_details_link": trans_details_link}
+                text("INSERT INTO trans (date, trans_key, amount, currency, user_id, trans_id, trans_status, trans_details, trans_details_link, category) VALUES (:date, :trans_key, :amount, :currency, :user_id, :trans_id, :trans_status, :trans_details, :trans_details_link, :category)"),
+                  {"date": date,"trans_key":trans_key, "amount": amount, "currency": currency, "user_id": user_id, "trans_id": trans_id, "trans_status": "withdraw", "trans_details": trans_details, "trans_details_link": trans_details_link, "category":category}
             )
             db.session.commit()
 
@@ -235,6 +265,7 @@ def edit_trans():
             amount = request.form.get("amount")
             trans_details = request.form.get("trans_details")
             trans_details_link = request.form.get("trans_details_link")
+            category = request.form.get("category")
 
             amount_currency_db = db.session.execute(
                 text("SELECT amount, currency, trans_status FROM trans WHERE trans_key = :trans_key"),
@@ -280,8 +311,8 @@ def edit_trans():
                                      available_currencies = get_app_currencies())
 
             db.session.execute(
-                text("UPDATE trans SET  date = :date, trans_details = :trans_details, trans_details_link = :trans_details_link, amount = :amount WHERE trans_key = :trans_key"),
-                {"date" :date, "trans_details" :trans_details, "trans_details_link" :trans_details_link, "amount" :amount, "trans_key" :trans_key}
+                text("UPDATE trans SET  date = :date, trans_details = :trans_details, trans_details_link = :trans_details_link, amount = :amount, category = :category WHERE trans_key = :trans_key"),
+                {"date" :date, "trans_details" :trans_details, "trans_details_link" :trans_details_link, "amount" :amount, "trans_key" :trans_key, "category":category}
             )
             db.session.commit()
 
@@ -343,7 +374,7 @@ def delete_trans():
             total = total_db + float(amount_db)
 
         trans_data_db = db.session.execute(
-                text("SELECT currency, date, amount, trans_status, trans_details, trans_details_link FROM trans WHERE user_id = :user_id AND trans_key = :trans_key"),
+                text("SELECT currency, date, amount, trans_status, trans_details, trans_details_link, category FROM trans WHERE user_id = :user_id AND trans_key = :trans_key"),
                 {"user_id": user_id, "trans_key" :trans_key}
             ).fetchone()
 
@@ -353,6 +384,7 @@ def delete_trans():
         trans_status = trans_data_db[3]
         trans_details = trans_data_db[4]
         trans_details_link = trans_data_db[5]
+        category = category[6]
 
         try:
             last_trans_trash_id = db.session.execute(
@@ -372,8 +404,8 @@ def delete_trans():
             trans_trash_key = 1
 
         db.session.execute(
-            text("INSERT INTO trans_trash (trans_trash_key, trans_trash_id, user_id, currency, date, amount, trans_status, trans_details, trans_details_link) VALUES(:trans_trash_key, :trans_trash_id, :user_id, :currency, :date, :amount, :trans_status, :trans_details, :trans_details_link)"),
-            {"trans_trash_key" :trans_trash_key, "trans_trash_id": trans_trash_id, "user_id": user_id, "currency": currency, "date": date, "amount": amount, "trans_status": trans_status, "trans_details": trans_details, "trans_details_link": trans_details_link}
+            text("INSERT INTO trans_trash (trans_trash_key, trans_trash_id, user_id, currency, date, amount, trans_status, trans_details, trans_details_link, category) VALUES(:trans_trash_key, :trans_trash_id, :user_id, :currency, :date, :amount, :trans_status, :trans_details, :trans_details_link, :category)"),
+            {"trans_trash_key" :trans_trash_key, "trans_trash_id": trans_trash_id, "user_id": user_id, "currency": currency, "date": date, "amount": amount, "trans_status": trans_status, "trans_details": trans_details, "trans_details_link": trans_details_link, "category":category}
         )
         db.session.commit()
 
@@ -427,7 +459,7 @@ def trash_trans():
 
             trans_trash_key = request.form.get("trans_trash_key")
             trash_trans_data = db.session.execute(
-                text("SELECT currency, date, amount, trans_status, trans_details, trans_details_link FROM trans_trash WHERE user_id = :user_id AND trans_trash_key = :trans_trash_key"),
+                text("SELECT currency, date, amount, trans_status, trans_details, trans_details_link, category FROM trans_trash WHERE user_id = :user_id AND trans_trash_key = :trans_trash_key"),
                 {"user_id" :user_id, "trans_trash_key" :trans_trash_key}
             ).fetchone()
 
@@ -454,10 +486,11 @@ def trash_trans():
             trans_status = trash_trans_data[3]
             trans_details = trash_trans_data[4]
             trans_details_link = trash_trans_data[5]
+            category = category[6]
 
             db.session.execute(
-                text("INSERT INTO trans (trans_key, trans_id, user_id, currency, date, amount, trans_status, trans_details, trans_details_link) VALUES (:trans_key, :trans_id, :user_id, :currency, :date, :amount, :trans_status, :trans_details, :trans_details_link)"),
-                {"trans_key": trans_key, "trans_id": trans_id, "user_id" :user_id, "currency" :currency, "date" :date, "amount" :amount, "trans_status" :trans_status, "trans_details" :trans_details, "trans_details_link" :trans_details_link}
+                text("INSERT INTO trans (trans_key, trans_id, user_id, currency, date, amount, trans_status, trans_details, trans_details_link, category) VALUES (:trans_key, :trans_id, :user_id, :currency, :date, :amount, :trans_status, :trans_details, :trans_details_link, :category)"),
+                {"trans_key": trans_key, "trans_id": trans_id, "user_id" :user_id, "currency" :currency, "date" :date, "amount" :amount, "trans_status" :trans_status, "trans_details" :trans_details, "trans_details_link" :trans_details_link, "category":category}
             )
             db.session.commit()
 

@@ -171,6 +171,18 @@
                         </select>
                     </div>
                     
+                    <!-- Category Input -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">
+                            <i class="fas fa-sticky-note mr-1 text-gray-400"></i>
+                            Category <span class="text-gray-400 text-xs">(Optional)</span>
+                        </label>
+                        <textarea name="category" 
+                                  rows="3" 
+                                  class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-imhotep-600 focus:ring-4 focus:ring-imhotep-600/20 transition-all duration-200 text-gray-900 hover:border-gray-300 focus:outline-none resize-none"
+                                  placeholder="Add The category about this income"></textarea>
+                    </div>
+
                     <!-- Description Input -->
                     <div class="space-y-2">
                         <label class="block text-sm font-medium text-gray-700">
@@ -271,8 +283,15 @@
 {% endblock %}
 
 {% block extra_scripts %}
+<!-- Hidden data for JavaScript -->
+<script type="application/json" id="user-categories-data">{{ user_categories | tojson | safe }}</script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Prevent multiple initialization
+    if (window.withdrawPageInitialized) return;
+    window.withdrawPageInitialized = true;
+    
     // Set today's date as default
     const dateInput = document.getElementById('dateInput');
     if (dateInput) {
@@ -292,6 +311,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    // Initialize withdraw page features (category suggestions only, NO amount buttons)
+    if (typeof initializeWithdrawPage === 'function') {
+        initializeWithdrawPage();
+    }
+    
     // Animate cards on load
     const cards = document.querySelectorAll('.metric-card, .bg-white');
     cards.forEach((card, index) => {
@@ -306,15 +330,15 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Form submission
-    form.addEventListener('submit', function(e) {
-
-        // Show loading state
-        const submitBtn = form.querySelector('button[type="submit"]');
-        submitBtn.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i>Adding Expense...';
-        submitBtn.disabled = true;
-    });
-    
+    const form = document.getElementById('expenseForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            // Show loading state
+            const submitBtn = form.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i>Adding Expense...';
+            submitBtn.disabled = true;
+        });
+    }
 });
-
 </script>
 {% endblock %}
