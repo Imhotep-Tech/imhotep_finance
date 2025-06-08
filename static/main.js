@@ -691,86 +691,127 @@ function addMobileTouchInteractions() {
 }
 
 // ============================================================================
-// MOBILE MENU STATE CLEANUP
+// DEPOSIT PAGE FUNCTIONALITY
 // ============================================================================
 
-function cleanupMobileMenuState() {
-    const body = document.body;
-    body.classList.remove('mobile-menu-open');
-    body.style.overflow = '';
-    body.style.position = '';
-    body.style.top = '';
+function initializeDepositPage() {
+    // Add form animations
+    animateFormElements();
     
-    const mainContent = document.querySelector('main');
-    if (mainContent) {
-        mainContent.style.display = 'block';
-        mainContent.style.visibility = 'visible';
-    }
+    // Add amount input formatting
+    setupAmountInput();
+    
+    // Add income category suggestions
+    addIncomeCategorySuggestions();
 }
 
-// ============================================================================
-// LEGACY SUPPORT AND UTILITY FUNCTIONS
-// ============================================================================
-
-// Auto-hide messages after 5 seconds
-setTimeout(function() {
-    document.querySelectorAll('.done-message, .error-message').forEach(message => {
-        if (message) message.style.display = 'none';
+function animateFormElements() {
+    const formElements = document.querySelectorAll('.space-y-2, .bg-white');
+    formElements.forEach((element, index) => {
+        element.style.opacity = '0';
+        element.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            element.style.transition = 'all 0.6s ease';
+            element.style.opacity = '1';
+            element.style.transform = 'translateY(0)';
+        }, index * 100);
     });
-}, 5000);
-
-// Online/Offline status handling
-window.addEventListener('online', updateOnlineStatus);
-window.addEventListener('offline', updateOnlineStatus);
-
-function updateOnlineStatus() {
-    if (!navigator.onLine) {
-        document.body.innerHTML = '<h1>You are offline</h1><p>Database connection is unavailable. Please check your internet connection.</p>';
-    } else {
-        location.reload();
-    }
 }
 
-// Page navigation cleanup
-window.addEventListener('beforeunload', cleanupMobileMenuState);
-window.addEventListener('pageshow', cleanupMobileMenuState);
-window.addEventListener('popstate', cleanupMobileMenuState);
-
-// Touch events for better mobile interaction
-const touchElementsList = document.querySelectorAll('button, a, .cursor-pointer');
-touchElementsList.forEach(element => {
-    element.addEventListener('touchstart', function() {
-        this.style.transform = 'scale(0.95)';
+function setupAmountInput() {
+    const amountInput = document.querySelector('input[name="amount"]');
+    if (!amountInput) return;
+    
+    amountInput.addEventListener('input', function() {
+        // Format number with commas
+        let value = this.value.replace(/,/g, '');
+        if (!isNaN(value) && value !== '') {
+            this.value = parseFloat(value).toLocaleString();
+        }
     });
     
-    element.addEventListener('touchend', function() {
-        this.style.transform = '';
+    amountInput.addEventListener('blur', function() {
+        // Ensure proper decimal formatting
+        let value = this.value.replace(/,/g, '');
+        if (!isNaN(value) && value !== '') {
+            this.value = parseFloat(value).toFixed(2);
+        }
+    });
+}
+
+function addIncomeCategorySuggestions() {
+    const descriptionInput = document.querySelector('textarea[name="category"]');
+    if (!descriptionInput) return;
+    
+    // Check if suggestions already exist to prevent duplicates
+    if (descriptionInput.closest('.space-y-2').querySelector('.category-suggestions')) {
+        return;
+    }
+    
+    // Get user categories from template data
+    const userCategoriesElement = document.getElementById('user-categories-data');
+    let userCategories = [];
+    
+    if (userCategoriesElement && userCategoriesElement.textContent.trim()) {
+        try {
+            userCategories = JSON.parse(userCategoriesElement.textContent);
+        } catch (e) {
+            userCategories = [];
+        }
+    }
+    
+    // Default income categories as fallback
+    const defaultCategories = [
+        'Salary', 'Freelance', 'Business Income', 'Investment Returns', 'Rental Income',
+        'Side Hustle', 'Bonus', 'Commission', 'Dividend', 'Interest',
+        'Gift/Donation', 'Tax Refund', 'Insurance Claim', 'Other Income'
+    ];
+    
+    // Use user categories first, then fill with defaults if needed
+    const categories = [...userCategories];
+    defaultCategories.forEach(cat => {
+        if (!categories.includes(cat) && categories.length < 15) {
+            categories.push(cat);
+        }
     });
     
-    element.addEventListener('touchcancel', function() {
-        this.style.transform = '';
-    });
-});
+    addCategorySuggestions(descriptionInput, categories, 'income');
+}
 
-// Focus handling for accessibility
-document.addEventListener('focusin', function(e) {
-    if (e.target.matches('input, textarea, select')) {
-        e.target.style.outline = '2px solid #51adac';
+function addCategorySuggestions(descriptionInput, categories, type) {
+    const colorClasses = type === 'income' 
+        ? { bg: 'bg-green-100', hover: 'hover:bg-green-200', text: 'text-green-700', selected: 'bg-green-500', selectedText: 'text-white' }
+        : { bg: 'bg-blue-100', hover: 'hover:bg-blue-200', text: 'text-blue-700', selected: 'bg-blue-500', selectedText: 'text-white' };
+    
+    // Create suggestions container with unique class to prevent duplicates
+    const suggestionsContainer = document.createElement('div');
+    suggestionsContainer.className = 'category-suggestions flex flex-wrap gap-2 mt-2';
+    suggestionsContainer.innerHTML = categories.map(category => 
+        `<button type="button" class="category-btn px-3 py-1 ${colorClasses.bg} ${colorClasses.hover} ${colorClasses.text} text-sm rounded-lg transition-colors" data-category="${category}">${category}</button>`
+    ).join('');
+    
+    // Insert after description input
+    const descriptionContainer = descriptionInput.closest('.space-y-2');
+    if (descriptionContainer) {
+        descriptionContainer.appendChild(suggestionsContainer);
+        
+        // Add click handlers
+        suggestionsContainer.querySelectorAll('.category-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                descriptionInput.value = this.dataset.category;
+                descriptionInput.focus();
+                
+                // Highlight selected category
+                suggestionsContainer.querySelectorAll('.category-btn').forEach(b => {
+                    b.classList.remove(colorClasses.selected, colorClasses.selectedText);
+                    b.classList.add(colorClasses.bg, colorClasses.text);
+                });
+                this.classList.remove(colorClasses.bg, colorClasses.text);
+                this.classList.add(colorClasses.selected, colorClasses.selectedText);
+            });
+        });
     }
-});
-
-document.addEventListener('focusout', function(e) {
-    if (e.target.matches('input, textarea, select')) {
-        e.target.style.outline = '';
-    }
-});
-
-// Ensure viewport meta tag exists for mobile
-if (!document.querySelector('meta[name="viewport"]')) {
-    const metaViewport = document.createElement('meta');
-    metaViewport.name = 'viewport';
-    metaViewport.content = 'width=device-width, initial-scale=1.0, user-scalable=no';
-    document.head.appendChild(metaViewport);
 }
 
 // ============================================================================
@@ -781,11 +822,8 @@ function initializeWithdrawPage() {
     // Add form animations
     animateFormElements();
     
-    // Add amount input formatting
+    // Add amount input formatting (but NO quick expense buttons)
     setupAmountInput();
-    
-    // Add quick expense buttons
-    addQuickExpenseButtons();
     
     // Add expense category suggestions
     addExpenseCategorySuggestions();
@@ -829,77 +867,43 @@ function setupAmountInput() {
     });
 }
 
-function addQuickExpenseButtons() {
-    const amountInput = document.querySelector('input[name="amount"]');
-    if (!amountInput) return;
-    
-    // Create quick amount buttons container for common expenses
-    const quickAmountContainer = document.createElement('div');
-    quickAmountContainer.className = 'flex flex-wrap gap-2 mt-2';
-    quickAmountContainer.innerHTML = `
-        <button type="button" class="quick-amount-btn px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-lg transition-colors" data-amount="5">+5</button>
-        <button type="button" class="quick-amount-btn px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-lg transition-colors" data-amount="10">+10</button>
-        <button type="button" class="quick-amount-btn px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-lg transition-colors" data-amount="25">+25</button>
-        <button type="button" class="quick-amount-btn px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-lg transition-colors" data-amount="50">+50</button>
-        <button type="button" class="quick-amount-btn px-3 py-1 bg-red-100 hover:bg-red-200 text-red-700 text-sm rounded-lg transition-colors" onclick="document.querySelector('input[name=\\'amount\\']').value = ''">Clear</button>
-    `;
-    
-    // Insert after amount input
-    const amountContainer = amountInput.closest('.space-y-2');
-    if (amountContainer) {
-        amountContainer.appendChild(quickAmountContainer);
-        
-        // Add click handlers
-        quickAmountContainer.querySelectorAll('.quick-amount-btn[data-amount]').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const amount = parseFloat(this.dataset.amount);
-                const currentAmount = parseFloat(amountInput.value) || 0;
-                amountInput.value = (currentAmount + amount).toFixed(2);
-                amountInput.dispatchEvent(new Event('input'));
-                amountInput.dispatchEvent(new Event('blur'));
-            });
-        });
-    }
-}
-
 function addExpenseCategorySuggestions() {
-    const descriptionInput = document.querySelector('textarea[name="trans_details"]');
+    const descriptionInput = document.querySelector('textarea[name="category"]');
     if (!descriptionInput) return;
     
-    const categories = [
+    // Check if suggestions already exist to prevent duplicates
+    if (descriptionInput.closest('.space-y-2').querySelector('.category-suggestions')) {
+        return;
+    }
+    
+    // Get user categories from template data
+    const userCategoriesElement = document.getElementById('user-categories-data');
+    let userCategories = [];
+    
+    if (userCategoriesElement && userCategoriesElement.textContent.trim()) {
+        try {
+            userCategories = JSON.parse(userCategoriesElement.textContent);
+        } catch (e) {
+            userCategories = [];
+        }
+    }
+    
+    // Default expense categories as fallback
+    const defaultCategories = [
         'Groceries', 'Transportation', 'Entertainment', 'Dining Out', 'Utilities',
         'Rent/Mortgage', 'Insurance', 'Healthcare', 'Shopping', 'Gas/Fuel',
         'Internet/Phone', 'Gym/Fitness', 'Subscriptions', 'Education', 'Travel'
     ];
     
-    // Create suggestions container
-    const suggestionsContainer = document.createElement('div');
-    suggestionsContainer.className = 'flex flex-wrap gap-2 mt-2';
-    suggestionsContainer.innerHTML = categories.map(category => 
-        `<button type="button" class="category-btn px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 text-sm rounded-lg transition-colors" data-category="${category}">${category}</button>`
-    ).join('');
+    // Use user categories first, then fill with defaults if needed
+    const categories = [...userCategories];
+    defaultCategories.forEach(cat => {
+        if (!categories.includes(cat) && categories.length < 15) {
+            categories.push(cat);
+        }
+    });
     
-    // Insert after description input
-    const descriptionContainer = descriptionInput.closest('.space-y-2');
-    if (descriptionContainer) {
-        descriptionContainer.appendChild(suggestionsContainer);
-        
-        // Add click handlers
-        suggestionsContainer.querySelectorAll('.category-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                descriptionInput.value = this.dataset.category;
-                descriptionInput.focus();
-                
-                // Highlight selected category
-                suggestionsContainer.querySelectorAll('.category-btn').forEach(b => {
-                    b.classList.remove('bg-blue-500', 'text-white');
-                    b.classList.add('bg-blue-100', 'text-blue-700');
-                });
-                this.classList.remove('bg-blue-100', 'text-blue-700');
-                this.classList.add('bg-blue-500', 'text-white');
-            });
-        });
-    }
+    addCategorySuggestions(descriptionInput, categories, 'expense');
 }
 
 function setupBalanceValidation() {
@@ -908,51 +912,20 @@ function setupBalanceValidation() {
     
     if (!amountInput || !currencySelect) return;
     
-    function validateBalance() {
-        const amount = parseFloat(amountInput.value);
-        const selectedCurrency = currencySelect.value;
+    // Add real-time balance checking
+    function checkBalance() {
+        const amount = parseFloat(amountInput.value) || 0;
+        const currency = currencySelect.value;
         
-        if (amount && selectedCurrency) {
-            const selectedOption = currencySelect.options[currencySelect.selectedIndex];
-            if (selectedOption.text.includes(' - ')) {
-                const balanceText = selectedOption.text.split(' - ')[1].replace(' Available', '');
-                const availableBalance = parseFloat(balanceText);
-                
-                if (amount > availableBalance) {
-                    amountInput.classList.add('border-red-400');
-                    amountInput.classList.remove('border-green-400');
-                    
-                    // Show warning message
-                    showBalanceWarning('Amount exceeds available balance');
-                } else {
-                    amountInput.classList.remove('border-red-400');
-                    amountInput.classList.add('border-green-400');
-                    hideBalanceWarning();
-                }
-            }
+        if (amount > 0 && currency) {
+            // You could add AJAX call here to check actual balance
+            // For now, just visual feedback
+            amountInput.style.borderColor = amount > 0 ? '#10b981' : '#ef4444';
         }
     }
     
-    function showBalanceWarning(message) {
-        let warningDiv = document.getElementById('balance-warning');
-        if (!warningDiv) {
-            warningDiv = document.createElement('div');
-            warningDiv.id = 'balance-warning';
-            warningDiv.className = 'mt-2 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm flex items-center space-x-2';
-            warningDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i><span>${message}</span>`;
-            amountInput.parentNode.appendChild(warningDiv);
-        }
-    }
-    
-    function hideBalanceWarning() {
-        const warningDiv = document.getElementById('balance-warning');
-        if (warningDiv) {
-            warningDiv.remove();
-        }
-    }
-    
-    amountInput.addEventListener('input', validateBalance);
-    currencySelect.addEventListener('change', validateBalance);
+    amountInput.addEventListener('input', checkBalance);
+    currencySelect.addEventListener('change', checkBalance);
 }
 
 // ============================================================================

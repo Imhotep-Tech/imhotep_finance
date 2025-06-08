@@ -37,6 +37,81 @@
         border-left: 4px solid #ef4444;
     }
     
+    /* Category tag styling */
+    .category-tag {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.5rem;
+        background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+        color: #374151;
+        border-radius: 0.5rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        border: 1px solid #d1d5db;
+    }
+    
+    .category-tag.income {
+        background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+        color: #166534;
+        border-color: #86efac;
+    }
+    
+    .category-tag.expense {
+        background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%);
+        color: #991b1b;
+        border-color: #fca5a5;
+    }
+    
+    /* Dark mode improvements */
+    .dark-mode .transaction-row,
+    .dark-mode .transaction-card {
+        color: #ffffff !important;
+    }
+    
+    .dark-mode .transaction-row td,
+    .dark-mode .transaction-card .text-gray-500,
+    .dark-mode .transaction-card .text-gray-700,
+    .dark-mode .text-gray-500,
+    .dark-mode .text-gray-700,
+    .dark-mode .text-gray-900 {
+        color: #ccfffe !important;
+    }
+    
+    /* Fix mobile card dark mode text visibility */
+    .dark-mode .mobile-card .text-sm.text-gray-500,
+    .dark-mode .mobile-card .text-xs.text-gray-500 {
+        color: #99fffc !important;
+    }
+    
+    .dark-mode .category-tag {
+        background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+        color: #f9fafb;
+        border-color: #6b7280;
+    }
+    
+    .dark-mode .category-tag.income {
+        background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+        color: #a7f3d0;
+        border-color: #34d399;
+    }
+    
+    .dark-mode .category-tag.expense {
+        background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
+        color: #fca5a5;
+        border-color: #f87171;
+    }
+    
+    /* Dark mode for mobile deposit/withdraw backgrounds */
+    .dark-mode .deposit-bg {
+        background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+        border-left: 4px solid #10b981;
+    }
+    
+    .dark-mode .withdraw-bg {
+        background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
+        border-left: 4px solid #f87171;
+    }
+    
     /* Mobile responsive styles */
     @media (max-width: 768px) {
         .desktop-table {
@@ -211,6 +286,7 @@
                                 <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
                                 <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
                                 <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Currency</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
                                 <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
                                 <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
@@ -249,6 +325,18 @@
                                 <!-- Currency -->
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-medium">
                                     {{ transaction[3] }}
+                                </td>
+                                
+                                <!-- Category -->
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    {% if transaction[9] %}
+                                        <span class="category-tag {% if transaction[6] == 'deposit' %}income{% else %}expense{% endif %}">
+                                            <i class="fas fa-tag mr-1 text-xs"></i>
+                                            {{ transaction[9] }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-gray-400 italic text-xs">No category</span>
+                                    {% endif %}
                                 </td>
                                 
                                 <!-- Description -->
@@ -323,6 +411,16 @@
                                 <div class="text-sm text-gray-500">{{ transaction[4].strftime('%b %d, %Y') }}</div>
                             </div>
                         </div>
+                        
+                        <!-- Category Section -->
+                        {% if transaction[9] %}
+                        <div class="mb-3">
+                            <span class="category-tag {% if transaction[6] == 'deposit' %}income{% else %}expense{% endif %}">
+                                <i class="fas fa-tag mr-1 text-xs"></i>
+                                {{ transaction[9] }}
+                            </span>
+                        </div>
+                        {% endif %}
                         
                         {% if transaction[7] %}
                         <div class="mb-3">
