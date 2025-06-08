@@ -366,7 +366,7 @@ function showOperationFeedback(message, type = 'success') {
     notification.innerHTML = `
         <div class="flex items-center space-x-2">
             <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
-            <span>${message}</span>
+            <span>${escapeHtml(message)}</span>
         </div>
     `;
     
@@ -389,6 +389,13 @@ function showOperationFeedback(message, type = 'success') {
             }
         }, 300);
     }, 4000);
+}
+
+// Utility function to escape HTML special characters
+function escapeHtml(unsafe) {
+    const div = document.createElement('div');
+    div.appendChild(document.createTextNode(unsafe));
+    return div.innerHTML;
 }
 
 // Handle form submission feedback
