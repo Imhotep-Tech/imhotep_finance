@@ -1315,73 +1315,99 @@ if (!document.querySelector('meta[name="viewport"]')) {
 // Monthly Reports Pie Chart
 function initExpenseChart() {
     const canvas = document.getElementById('expenseChart');
-    if (!canvas || !window.chartData.expenses.labels.length) return;
+    if (!canvas || !window.chartData || !window.chartData.expenses || !window.chartData.expenses.labels.length) {
+        console.log('Expense chart: canvas or data not available');
+        return;
+    }
     
     drawPieChart(canvas, window.chartData.expenses, 'expense');
 }
 
 function initIncomeChart() {
     const canvas = document.getElementById('incomeChart');
-    if (!canvas || !window.chartData.income.labels.length) return;
+    if (!canvas || !window.chartData || !window.chartData.income || !window.chartData.income.labels.length) {
+        console.log('Income chart: canvas or data not available');
+        return;
+    }
     
     drawPieChart(canvas, window.chartData.income, 'income');
 }
 
 function initBothExpenseChart() {
     const canvas = document.getElementById('bothExpenseChart');
-    if (!canvas || !window.chartData.expenses.labels.length) return;
+    if (!canvas || !window.chartData || !window.chartData.expenses || !window.chartData.expenses.labels.length) {
+        console.log('Both expense chart: canvas or data not available');
+        return;
+    }
     
     drawPieChart(canvas, window.chartData.expenses, 'expense');
 }
 
 function initBothIncomeChart() {
     const canvas = document.getElementById('bothIncomeChart');
-    if (!canvas || !window.chartData.income.labels.length) return;
+    if (!canvas || !window.chartData || !window.chartData.income || !window.chartData.income.labels.length) {
+        console.log('Both income chart: canvas or data not available');
+        return;
+    }
     
     drawPieChart(canvas, window.chartData.income, 'income');
 }
 
 function updateSummaryStats() {
-    const totalExpensesEl = document.getElementById('total-expenses');
-    const totalIncomeEl = document.getElementById('total-income');
-    
-    if (totalExpensesEl && window.chartData.expenses.data.length) {
-        const totalExpenses = window.chartData.expenses.data.reduce((sum, value) => sum + parseFloat(value), 0);
-        totalExpensesEl.textContent = `${totalExpenses.toFixed(0)} ${window.chartData.currency}`;
-    }
-    
-    if (totalIncomeEl && window.chartData.income.data.length) {
-        const totalIncome = window.chartData.income.data.reduce((sum, value) => sum + parseFloat(value), 0);
-        totalIncomeEl.textContent = `${totalIncome.toFixed(0)} ${window.chartData.currency}`;
+    try {
+        const totalExpensesEl = document.getElementById('total-expenses');
+        const totalIncomeEl = document.getElementById('total-income');
+        
+        if (totalExpensesEl && window.chartData && window.chartData.expenses && window.chartData.expenses.data.length) {
+            const totalExpenses = window.chartData.expenses.data.reduce((sum, value) => sum + parseFloat(value || 0), 0);
+            totalExpensesEl.textContent = totalExpenses.toFixed(0) + ' ' + (window.chartData.currency || '');
+        }
+        
+        if (totalIncomeEl && window.chartData && window.chartData.income && window.chartData.income.data.length) {
+            const totalIncome = window.chartData.income.data.reduce((sum, value) => sum + parseFloat(value || 0), 0);
+            totalIncomeEl.textContent = totalIncome.toFixed(0) + ' ' + (window.chartData.currency || '');
+        }
+    } catch (error) {
+        console.error('Error updating summary stats:', error);
     }
 }
 
-// Monthly Reports Chart Functions
+// Monthly Reports Chart Functions - Updated for PythonAnywhere compatibility
 function initMonthlyReportsCharts() {
-    if (!window.chartData) return;
-    
-    // Initialize tab switching
-    initTabSwitching();
-    
-    // Initialize charts
-    if (document.getElementById('expenseChart')) {
-        initExpenseChart();
-    }
-    
-    if (document.getElementById('incomeChart')) {
-        initIncomeChart();
-    }
-    
-    if (document.getElementById('bothExpenseChart')) {
-        initBothExpenseChart();
-    }
-    
-    if (document.getElementById('bothIncomeChart')) {
-        initBothIncomeChart();
-    }
-    
-    // Update summary stats
-    updateSummaryStats();
+    // Add delay to ensure DOM is fully loaded
+    setTimeout(function() {
+        if (!window.chartData) {
+            console.log('Chart data not available');
+            return;
+        }
+        
+        // Initialize tab switching
+        initTabSwitching();
+        
+        // Initialize charts with error handling
+        try {
+            if (document.getElementById('expenseChart')) {
+                initExpenseChart();
+            }
+            
+            if (document.getElementById('incomeChart')) {
+                initIncomeChart();
+            }
+            
+            if (document.getElementById('bothExpenseChart')) {
+                initBothExpenseChart();
+            }
+            
+            if (document.getElementById('bothIncomeChart')) {
+                initBothIncomeChart();
+            }
+            
+            // Update summary stats
+            updateSummaryStats();
+        } catch (error) {
+            console.error('Error initializing charts:', error);
+        }
+    }, 100);
 }
 
 function initTabSwitching() {
@@ -1393,114 +1419,163 @@ function initTabSwitching() {
     const incomeSection = document.getElementById('incomeSection');
     const bothSection = document.getElementById('bothSection');
     
-    if (!expenseTab || !incomeTab || !bothTab) return;
-    
-    function switchTab(activeTab, activeSection) {
-        // Reset all tabs
-        [expenseTab, incomeTab, bothTab].forEach(tab => {
-            tab.classList.remove('active');
-            tab.classList.add('text-gray-700');
-        });
-        
-        // Reset all sections
-        [expenseSection, incomeSection, bothSection].forEach(section => {
-            if (section) section.classList.add('hidden');
-        });
-        
-        // Activate selected tab and section
-        activeTab.classList.add('active');
-        activeTab.classList.remove('text-gray-700');
-        if (activeSection) activeSection.classList.remove('hidden');
-        
-        // Redraw charts with delay to ensure visibility
-        setTimeout(() => {
-            handleChartResize();
-        }, 100);
+    if (!expenseTab || !incomeTab || !bothTab) {
+        console.log('Tab elements not found');
+        return;
     }
     
-    expenseTab.addEventListener('click', () => switchTab(expenseTab, expenseSection));
-    incomeTab.addEventListener('click', () => switchTab(incomeTab, incomeSection));
-    bothTab.addEventListener('click', () => switchTab(bothTab, bothSection));
+    function switchTab(activeTab, activeSection) {
+        try {
+            // Reset all tabs
+            [expenseTab, incomeTab, bothTab].forEach(tab => {
+                if (tab) {
+                    tab.classList.remove('active');
+                    tab.classList.add('text-gray-700');
+                    tab.style.backgroundColor = '';
+                    tab.style.color = '';
+                }
+            });
+            
+            // Reset all sections
+            [expenseSection, incomeSection, bothSection].forEach(section => {
+                if (section) section.classList.add('hidden');
+            });
+            
+            // Activate selected tab and section
+            if (activeTab) {
+                activeTab.classList.add('active');
+                activeTab.classList.remove('text-gray-700');
+                
+                // Set active styles based on tab type
+                if (activeTab.id === 'expenseTab') {
+                    activeTab.style.backgroundColor = '#ef4444';
+                    activeTab.style.color = 'white';
+                } else if (activeTab.id === 'incomeTab') {
+                    activeTab.style.backgroundColor = '#10b981';
+                    activeTab.style.color = 'white';
+                } else if (activeTab.id === 'bothTab') {
+                    activeTab.style.backgroundColor = '#51adac';
+                    activeTab.style.color = 'white';
+                }
+            }
+            
+            if (activeSection) activeSection.classList.remove('hidden');
+            
+            // Redraw charts with delay to ensure visibility
+            setTimeout(() => {
+                handleChartResize();
+            }, 200);
+        } catch (error) {
+            console.error('Error switching tabs:', error);
+        }
+    }
+    
+    // Add event listeners with error handling
+    if (expenseTab) {
+        expenseTab.addEventListener('click', () => switchTab(expenseTab, expenseSection));
+    }
+    if (incomeTab) {
+        incomeTab.addEventListener('click', () => switchTab(incomeTab, incomeSection));
+    }
+    if (bothTab) {
+        bothTab.addEventListener('click', () => switchTab(bothTab, bothSection));
+    }
 }
 
 function drawPieChart(canvas, data, colorPrefix) {
-    const ctx = canvas.getContext('2d');
-    const { labels, data: values } = data;
-    
-    if (!labels.length || !values.length) return;
-    
-    // Make canvas responsive
-    const container = canvas.parentElement;
-    const containerWidth = container.clientWidth;
-    const isMobile = window.innerWidth < 768;
-    
-    // Set responsive canvas size
-    const canvasSize = isMobile ? Math.min(containerWidth - 40, 280) : Math.min(containerWidth - 40, 300);
-    canvas.width = canvasSize;
-    canvas.height = canvasSize;
-    
-    // Set CSS size to match canvas size for crisp rendering
-    canvas.style.width = canvasSize + 'px';
-    canvas.style.height = canvasSize + 'px';
-    
-    // Calculate total and percentages
-    const total = values.reduce((sum, value) => sum + parseFloat(value), 0);
-    
-    // Generate colors based on prefix
-    const colors = labels.map((_, index) => {
-        if (colorPrefix === 'expense') {
-            return `hsl(${0 + (index * 15)}, 70%, ${50 + (index * 2)}%)`;
-        } else {
-            return `hsl(${120 + (index * 15)}, 70%, ${50 + (index * 2)}%)`;
-        }
-    });
-    
-    // Update percentage displays
-    labels.forEach((_, index) => {
-        const percentage = ((values[index] / total) * 100).toFixed(1);
-        const percentageElement = document.getElementById(`${colorPrefix}-percentage-${index}`);
-        if (percentageElement) {
-            percentageElement.textContent = `${percentage}%`;
-        }
-    });
-    
-    // Draw pie chart with responsive sizing
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-    const radius = Math.min(centerX, centerY) - (isMobile ? 15 : 20);
-    
-    let currentAngle = -Math.PI / 2; // Start from top
-    
-    values.forEach((value, index) => {
-        const sliceAngle = (value / total) * 2 * Math.PI;
+    try {
+        const ctx = canvas.getContext('2d');
+        const labels = data.labels || [];
+        const values = data.data || [];
         
-        // Draw slice
-        ctx.beginPath();
-        ctx.moveTo(centerX, centerY);
-        ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
-        ctx.closePath();
-        ctx.fillStyle = colors[index];
-        ctx.fill();
-        ctx.strokeStyle = '#fff';
-        ctx.lineWidth = isMobile ? 1 : 2;
-        ctx.stroke();
+        if (!labels.length || !values.length) {
+            console.log('No data available for chart');
+            return;
+        }
         
-        // Add labels for larger slices (only on desktop or larger slices)
-        if (!isMobile && (value / total) > 0.08) {
-            const labelAngle = currentAngle + sliceAngle / 2;
-            const labelRadius = radius * 0.7;
-            const labelX = centerX + Math.cos(labelAngle) * labelRadius;
-            const labelY = centerY + Math.sin(labelAngle) * labelRadius;
+        // Clear any existing content
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Make canvas responsive
+        const container = canvas.parentElement;
+        const containerWidth = container ? container.clientWidth : 300;
+        const isMobile = window.innerWidth < 768;
+        
+        // Set responsive canvas size
+        const canvasSize = isMobile ? Math.min(containerWidth - 40, 280) : Math.min(containerWidth - 40, 300);
+        canvas.width = canvasSize;
+        canvas.height = canvasSize;
+        
+        // Set CSS size to match canvas size for crisp rendering
+        canvas.style.width = canvasSize + 'px';
+        canvas.style.height = canvasSize + 'px';
+        
+        // Calculate total and percentages
+        const total = values.reduce((sum, value) => sum + parseFloat(value || 0), 0);
+        
+        if (total === 0) {
+            console.log('Total is zero, no chart to draw');
+            return;
+        }
+        
+        // Generate colors based on prefix
+        const colors = labels.map((_, index) => {
+            if (colorPrefix === 'expense') {
+                return 'hsl(' + (0 + (index * 15)) + ', 70%, ' + (50 + (index * 2)) + '%)';
+            } else {
+                return 'hsl(' + (120 + (index * 15)) + ', 70%, ' + (50 + (index * 2)) + '%)';
+            }
+        });
+        
+        // Update percentage displays
+        labels.forEach((_, index) => {
+            const percentage = ((values[index] / total) * 100).toFixed(1);
+            const percentageElement = document.getElementById(colorPrefix + '-percentage-' + index);
+            if (percentageElement) {
+                percentageElement.textContent = percentage + '%';
+            }
+        });
+        
+        // Draw pie chart with responsive sizing
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const radius = Math.min(centerX, centerY) - (isMobile ? 15 : 20);
+        
+        let currentAngle = -Math.PI / 2; // Start from top
+        
+        values.forEach((value, index) => {
+            const sliceAngle = (value / total) * 2 * Math.PI;
             
-            ctx.fillStyle = '#fff';
-            ctx.font = '10px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(`${((value / total) * 100).toFixed(0)}%`, labelX, labelY);
-        }
-        
-        currentAngle += sliceAngle;
-    });
+            // Draw slice
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
+            ctx.closePath();
+            ctx.fillStyle = colors[index];
+            ctx.fill();
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = isMobile ? 1 : 2;
+            ctx.stroke();
+            
+            // Add labels for larger slices (only on desktop or larger slices)
+            if (!isMobile && (value / total) > 0.08) {
+                const labelAngle = currentAngle + sliceAngle / 2;
+                const labelRadius = radius * 0.7;
+                const labelX = centerX + Math.cos(labelAngle) * labelRadius;
+                const labelY = centerY + Math.sin(labelAngle) * labelRadius;
+                
+                ctx.fillStyle = '#fff';
+                ctx.font = '10px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(((value / total) * 100).toFixed(0) + '%', labelX, labelY);
+            }
+            
+            currentAngle += sliceAngle;
+        });
+    } catch (error) {
+        console.error('Error drawing pie chart:', error);
+    }
 }
 
 // Enhanced resize handler for multiple charts
@@ -1510,15 +1585,19 @@ function handleChartResize() {
     charts.forEach(chartId => {
         const canvas = document.getElementById(chartId);
         if (canvas && window.chartData) {
-            // Clear the canvas
-            const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Redraw based on chart type
-            if (chartId.includes('expense')) {
-                drawPieChart(canvas, window.chartData.expenses, 'expense');
-            } else if (chartId.includes('income')) {
-                drawPieChart(canvas, window.chartData.income, 'income');
+            try {
+                // Clear the canvas
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Redraw based on chart type
+                if (chartId.includes('expense')) {
+                    drawPieChart(canvas, window.chartData.expenses, 'expense');
+                } else if (chartId.includes('income')) {
+                    drawPieChart(canvas, window.chartData.income, 'income');
+                }
+            } catch (error) {
+                console.error('Error resizing chart ' + chartId + ':', error);
             }
         }
     });
@@ -1528,6 +1607,7 @@ function handleChartResize() {
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize monthly reports charts if on monthly reports page
     if (document.getElementById('expenseChart') || document.getElementById('incomeChart')) {
+        console.log('Initializing monthly reports charts');
         initMonthlyReportsCharts();
         
         // Add resize event listener for responsiveness
@@ -1541,5 +1621,18 @@ document.addEventListener('DOMContentLoaded', function() {
         window.addEventListener('orientationchange', function() {
             setTimeout(handleChartResize, 300);
         });
+    }
+});
+
+// Fallback initialization for slow loading
+window.addEventListener('load', function() {
+    if (document.getElementById('expenseChart') || document.getElementById('incomeChart')) {
+        setTimeout(function() {
+            if (!window.chartsInitialized) {
+                console.log('Fallback chart initialization');
+                initMonthlyReportsCharts();
+                window.chartsInitialized = true;
+            }
+        }, 500);
     }
 });

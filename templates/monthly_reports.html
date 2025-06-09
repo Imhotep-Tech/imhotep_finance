@@ -32,13 +32,13 @@
         <div class="mb-6">
             <div class="flex justify-center">
                 <div class="bg-white rounded-lg p-1 shadow-md">
-                    <button id="expenseTab" class="px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 bg-red-500 text-white">
+                    <button id="expenseTab" class="px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 bg-red-500 text-white" onclick="showSection('expense')">
                         <i class="fas fa-minus mr-2"></i>Expenses
                     </button>
-                    <button id="incomeTab" class="px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 text-gray-700 hover:text-green-600">
+                    <button id="incomeTab" class="px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 text-gray-700 hover:text-green-600" onclick="showSection('income')">
                         <i class="fas fa-plus mr-2"></i>Income
                     </button>
-                    <button id="bothTab" class="px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 text-gray-700 hover:text-imhotep-600">
+                    <button id="bothTab" class="px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 text-gray-700 hover:text-imhotep-600" onclick="showSection('both')">
                         <i class="fas fa-chart-line mr-2"></i>Both
                     </button>
                 </div>
@@ -57,7 +57,7 @@
                     <div class="bg-white rounded-lg shadow-lg p-4 sm:p-6 border-l-4 border-red-500">
                         <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Expense Categories</h3>
                         <div class="relative flex justify-center">
-                            <canvas id="expenseChart" class="max-w-full h-auto"></canvas>
+                            <canvas id="expenseChart" width="300" height="300" class="max-w-full h-auto"></canvas>
                         </div>
                         <!-- Mobile Legend for Expenses -->
                         <div class="mt-4 sm:hidden">
@@ -88,7 +88,7 @@
                                 </div>
                                 <div class="text-right flex-shrink-0 ml-2">
                                     <p class="font-semibold text-red-600 text-sm sm:text-base">{{ "%.2f"|format(report[1]) }} {{ favorite_currency }}</p>
-                                    <p class="text-xs sm:text-sm text-gray-500" id="expense-percentage-{{ loop.index0 }}">0%</p>
+                                    <p class="text-xs sm:text-sm text-gray-500 expense-percentage" data-index="{{ loop.index0 }}">0%</p>
                                 </div>
                             </div>
                             {% endfor %}
@@ -122,7 +122,7 @@
                     <div class="bg-white rounded-lg shadow-lg p-4 sm:p-6 border-l-4 border-green-500">
                         <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Income Categories</h3>
                         <div class="relative flex justify-center">
-                            <canvas id="incomeChart" class="max-w-full h-auto"></canvas>
+                            <canvas id="incomeChart" width="300" height="300" class="max-w-full h-auto"></canvas>
                         </div>
                         <!-- Mobile Legend for Income -->
                         <div class="mt-4 sm:hidden">
@@ -153,7 +153,7 @@
                                 </div>
                                 <div class="text-right flex-shrink-0 ml-2">
                                     <p class="font-semibold text-green-600 text-sm sm:text-base">{{ "%.2f"|format(report[1]) }} {{ favorite_currency }}</p>
-                                    <p class="text-xs sm:text-sm text-gray-500" id="income-percentage-{{ loop.index0 }}">0%</p>
+                                    <p class="text-xs sm:text-sm text-gray-500 income-percentage" data-index="{{ loop.index0 }}">0%</p>
                                 </div>
                             </div>
                             {% endfor %}
@@ -186,7 +186,7 @@
                         <i class="fas fa-minus mr-2"></i>Expenses
                     </h3>
                     <div class="relative flex justify-center mb-4">
-                        <canvas id="bothExpenseChart" class="max-w-full h-auto" style="max-width: 250px; max-height: 250px;"></canvas>
+                        <canvas id="bothExpenseChart" width="250" height="250" class="max-w-full h-auto"></canvas>
                     </div>
                     <div class="space-y-2 max-h-60 overflow-y-auto">
                         {% for report in user_withdraw_on_range[:5] %}
@@ -209,7 +209,7 @@
                         <i class="fas fa-plus mr-2"></i>Income
                     </h3>
                     <div class="relative flex justify-center mb-4">
-                        <canvas id="bothIncomeChart" class="max-w-full h-auto" style="max-width: 250px; max-height: 250px;"></canvas>
+                        <canvas id="bothIncomeChart" width="250" height="250" class="max-w-full h-auto"></canvas>
                     </div>
                     <div class="space-y-2 max-h-60 overflow-y-auto">
                         {% for report in user_deposit_on_range[:5] %}
@@ -239,32 +239,235 @@
                 <div class="text-xs sm:text-sm text-gray-600">Income Categories</div>
             </div>
             <div class="bg-white rounded-lg shadow-lg p-4 sm:p-6 text-center border-l-4 border-red-500">
-                <div class="text-xl sm:text-2xl font-bold text-red-600" id="total-expenses">0</div>
+                <div class="text-xl sm:text-2xl font-bold text-red-600" id="total-expenses">
+                    {% if user_withdraw_on_range %}
+                        {% set total_expenses = user_withdraw_on_range | sum(attribute=1) %}
+                        {{ "%.0f"|format(total_expenses) }} {{ favorite_currency }}
+                    {% else %}
+                        0
+                    {% endif %}
+                </div>
                 <div class="text-xs sm:text-sm text-gray-600">Total Expenses</div>
             </div>
             <div class="bg-white rounded-lg shadow-lg p-4 sm:p-6 text-center border-l-4 border-green-500">
-                <div class="text-xl sm:text-2xl font-bold text-green-600" id="total-income">0</div>
+                <div class="text-xl sm:text-2xl font-bold text-green-600" id="total-income">
+                    {% if user_deposit_on_range %}
+                        {% set total_income = user_deposit_on_range | sum(attribute=1) %}
+                        {{ "%.0f"|format(total_income) }} {{ favorite_currency }}
+                    {% else %}
+                        0
+                    {% endif %}
+                </div>
                 <div class="text-xs sm:text-sm text-gray-600">Total Income</div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Chart Data -->
-<script>
+<!-- Inline JavaScript for PythonAnywhere compatibility -->
+<script type="text/javascript">
+// Global variables - ensure they exist
 window.chartData = {
     expenses: {
-        labels: [{% for report in user_withdraw_on_range %}"{{ report[0] }}"{% if not loop.last %},{% endif %}{% endfor %}],
-        data: [{% for report in user_withdraw_on_range %}{{ report[1] }}{% if not loop.last %},{% endif %}{% endfor %}],
-        transactions: [{% for report in user_withdraw_on_range %}{{ report[2] }}{% if not loop.last %},{% endif %}{% endfor %}]
+        labels: [{% for report in user_withdraw_on_range %}"{{ report[0]|replace('"', '\\"')|replace('\n', ' ')|replace('\r', '') }}"{% if not loop.last %},{% endif %}{% endfor %}],
+        data: [{% for report in user_withdraw_on_range %}{{ report[1]|float|round(2) }}{% if not loop.last %},{% endif %}{% endfor %}],
+        transactions: [{% for report in user_withdraw_on_range %}{{ report[2]|int }}{% if not loop.last %},{% endif %}{% endfor %}]
     },
     income: {
-        labels: [{% for report in user_deposit_on_range %}"{{ report[0] }}"{% if not loop.last %},{% endif %}{% endfor %}],
-        data: [{% for report in user_deposit_on_range %}{{ report[1] }}{% if not loop.last %},{% endif %}{% endfor %}],
-        transactions: [{% for report in user_deposit_on_range %}{{ report[2] }}{% if not loop.last %},{% endif %}{% endfor %}]
+        labels: [{% for report in user_deposit_on_range %}"{{ report[0]|replace('"', '\\"')|replace('\n', ' ')|replace('\r', '') }}"{% if not loop.last %},{% endif %}{% endfor %}],
+        data: [{% for report in user_deposit_on_range %}{{ report[1]|float|round(2) }}{% if not loop.last %},{% endif %}{% endfor %}],
+        transactions: [{% for report in user_deposit_on_range %}{{ report[2]|int }}{% if not loop.last %},{% endif %}{% endfor %}]
     },
     currency: "{{ favorite_currency }}"
 };
+
+console.log('Chart data loaded:', window.chartData);
+
+// Simple tab switching function
+function showSection(sectionName) {
+    console.log('Switching to section:', sectionName);
+    
+    // Hide all sections
+    var sections = ['expenseSection', 'incomeSection', 'bothSection'];
+    sections.forEach(function(id) {
+        var element = document.getElementById(id);
+        if (element) {
+            element.classList.add('hidden');
+        }
+    });
+    
+    // Reset all tabs
+    var tabs = ['expenseTab', 'incomeTab', 'bothTab'];
+    tabs.forEach(function(id) {
+        var tab = document.getElementById(id);
+        if (tab) {
+            tab.classList.remove('bg-red-500', 'bg-green-500', 'bg-imhotep-600', 'text-white');
+            tab.classList.add('text-gray-700');
+        }
+    });
+    
+    // Show selected section and activate tab
+    var sectionId = sectionName + 'Section';
+    var tabId = sectionName + 'Tab';
+    
+    var section = document.getElementById(sectionId);
+    var tab = document.getElementById(tabId);
+    
+    if (section) {
+        section.classList.remove('hidden');
+    }
+    
+    if (tab) {
+        tab.classList.remove('text-gray-700');
+        tab.classList.add('text-white');
+        
+        if (sectionName === 'expense') {
+            tab.classList.add('bg-red-500');
+        } else if (sectionName === 'income') {
+            tab.classList.add('bg-green-500');
+        } else if (sectionName === 'both') {
+            tab.classList.add('bg-imhotep-600');
+        }
+    }
+    
+    // Redraw charts after section switch
+    setTimeout(function() {
+        if (sectionName === 'expense' || sectionName === 'both') {
+            drawExpenseChart();
+        }
+        if (sectionName === 'income' || sectionName === 'both') {
+            drawIncomeChart();
+        }
+        if (sectionName === 'both') {
+            drawBothCharts();
+        }
+    }, 100);
+}
+
+// Simple chart drawing function
+function drawExpenseChart() {
+    var canvas = document.getElementById('expenseChart');
+    if (!canvas || !window.chartData.expenses.labels.length) {
+        console.log('No expense chart canvas or data');
+        return;
+    }
+    
+    drawPieChart(canvas, window.chartData.expenses, 'expense');
+}
+
+function drawIncomeChart() {
+    var canvas = document.getElementById('incomeChart');
+    if (!canvas || !window.chartData.income.labels.length) {
+        console.log('No income chart canvas or data');
+        return;
+    }
+    
+    drawPieChart(canvas, window.chartData.income, 'income');
+}
+
+function drawBothCharts() {
+    var expenseCanvas = document.getElementById('bothExpenseChart');
+    var incomeCanvas = document.getElementById('bothIncomeChart');
+    
+    if (expenseCanvas && window.chartData.expenses.labels.length) {
+        drawPieChart(expenseCanvas, window.chartData.expenses, 'expense');
+    }
+    
+    if (incomeCanvas && window.chartData.income.labels.length) {
+        drawPieChart(incomeCanvas, window.chartData.income, 'income');
+    }
+}
+
+function drawPieChart(canvas, data, type) {
+    try {
+        var ctx = canvas.getContext('2d');
+        var labels = data.labels || [];
+        var values = data.data || [];
+        
+        if (!labels.length || !values.length) {
+            console.log('No data to draw chart for type:', type);
+            return;
+        }
+        
+        // Clear canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Calculate total
+        var total = 0;
+        for (var i = 0; i < values.length; i++) {
+            total += parseFloat(values[i]) || 0;
+        }
+        
+        if (total === 0) {
+            console.log('Total is zero, no chart to draw');
+            return;
+        }
+        
+        // Generate colors
+        var colors = [];
+        for (var i = 0; i < labels.length; i++) {
+            if (type === 'expense') {
+                colors.push('hsl(' + (0 + (i * 15)) + ', 70%, ' + (50 + (i * 2)) + '%)');
+            } else {
+                colors.push('hsl(' + (120 + (i * 15)) + ', 70%, ' + (50 + (i * 2)) + '%)');
+            }
+        }
+        
+        // Update percentages
+        for (var i = 0; i < labels.length; i++) {
+            var percentage = ((values[i] / total) * 100).toFixed(1);
+            var elements = document.querySelectorAll('.' + type + '-percentage[data-index="' + i + '"]');
+            for (var j = 0; j < elements.length; j++) {
+                elements[j].textContent = percentage + '%';
+            }
+        }
+        
+        // Draw pie chart
+        var centerX = canvas.width / 2;
+        var centerY = canvas.height / 2;
+        var radius = Math.min(centerX, centerY) - 20;
+        var currentAngle = -Math.PI / 2;
+        
+        for (var i = 0; i < values.length; i++) {
+            var sliceAngle = (values[i] / total) * 2 * Math.PI;
+            
+            // Draw slice
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
+            ctx.closePath();
+            ctx.fillStyle = colors[i];
+            ctx.fill();
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            currentAngle += sliceAngle;
+        }
+        
+        console.log('Chart drawn successfully for type:', type);
+    } catch (error) {
+        console.error('Error drawing chart:', error);
+    }
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing charts');
+    
+    // Draw initial expense chart
+    setTimeout(function() {
+        drawExpenseChart();
+    }, 500);
+});
+
+// Fallback initialization
+window.addEventListener('load', function() {
+    console.log('Window loaded, ensuring charts are drawn');
+    setTimeout(function() {
+        drawExpenseChart();
+    }, 1000);
+});
 </script>
 {% endblock %}
 
@@ -329,10 +532,28 @@ button[id="incomeTab"].active {
     color: white;
 }
 
-/* Ensure canvas is centered and responsive */
+/* PythonAnywhere specific fixes */
 canvas {
     display: block;
     margin: 0 auto;
+    max-width: 100%;
+    height: auto;
+}
+
+/* Ensure sections are properly hidden/shown */
+.section-content.hidden {
+    display: none !important;
+}
+
+.section-content:not(.hidden) {
+    display: block !important;
+}
+
+/* Fix for PythonAnywhere font loading */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 </style>
 {% endblock %}

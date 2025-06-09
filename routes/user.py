@@ -350,19 +350,51 @@ def monthly_reports():
 
     user_id = session.get("user_id")
     
-    #get current date
+    # Get current date
     now = datetime.datetime.now()
     
-    #start date: first day of current month
+    # Start date: first day of current month
     start_date = now.replace(day=1).date()
     
-    #end date: first day of next month
+    # End date: first day of next month
     if now.month == 12:
         end_date = now.replace(year=now.year + 1, month=1, day=1).date()
     else:
         end_date = now.replace(month=now.month + 1, day=1).date()
 
+    # Debug: Check if there are any transactions in the date range
+    total_transactions = db.session.execute(
+        text("SELECT COUNT(*) FROM trans WHERE user_id = :user_id AND date >= :start_date AND date < :end_date"),
+        {"user_id": user_id, "start_date": start_date, "end_date": end_date}
+    ).scalar()
+    
+    transactions_with_category = db.session.execute(
+        text("SELECT COUNT(*) FROM trans WHERE user_id = :user_id AND date >= :start_date AND date < :end_date AND category IS NOT NULL AND category != ''"),
+        {"user_id": user_id, "start_date": start_date, "end_date": end_date}
+    ).scalar()
+    
+    print(f"Debug - User ID: {user_id}")
+    print(f"Debug - Date range: {start_date} to {end_date}")
+    print(f"Debug - Total transactions in range: {total_transactions}")
+    print(f"Debug - Transactions with categories: {transactions_with_category}")
+    
+    # Sample some transactions to check data
+    sample_transactions = db.session.execute(
+        text("SELECT trans_status, category, amount, currency, date FROM trans WHERE user_id = :user_id AND date >= :start_date AND date < :end_date LIMIT 5"),
+        {"user_id": user_id, "start_date": start_date, "end_date": end_date}
+    ).fetchall()
+    
+    print(f"Debug - Sample transactions: {sample_transactions}")
+    
     user_withdraw_on_range, user_deposit_on_range = calculate_user_report(start_date, end_date, user_id)
+    
+    print(f"Debug - Final withdrawals count: {len(user_withdraw_on_range) if user_withdraw_on_range else 0}")
+    print(f"Debug - Final deposits count: {len(user_deposit_on_range) if user_deposit_on_range else 0}")
+    
+    if user_withdraw_on_range:
+        print(f"Debug - First withdrawal: {user_withdraw_on_range[0]}")
+    if user_deposit_on_range:
+        print(f"Debug - First deposit: {user_deposit_on_range[0]}")
 
     return render_template("monthly_reports.html",
                             user_photo_path=user_photo_path,

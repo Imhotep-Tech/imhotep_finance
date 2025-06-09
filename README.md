@@ -3,16 +3,38 @@
 [![Project Status: Active](https://img.shields.io/badge/Project%20Status-Active-green.svg)](https://github.com/yourusername/imhotep_finance)
 [![License](https://img.shields.io/badge/License-Dual-blue.svg)](LICENSE)
 
-A comprehensive financial management web application that helps you track transactions, manage deposits and withdrawals, create wishlists, and set financial goals.
+A comprehensive financial management web application that helps you track transactions, manage deposits and withdrawals, create wishlists, and set financial goals with intelligent automation and advanced analytics.
 
 ## 💰 Features
 
+### Core Financial Management
 - **Financial Tracking**: Easily deposit and withdraw funds with detailed transaction history
-- **Transaction Analysis**: View and analyze your spending patterns over time
-- **Wishlist Management**: Create and prioritize items you want to purchase
+- **Smart Categories**: Enhanced transaction categorization with intelligent suggestions based on your most frequent categories
+- **Transaction Analysis**: View and analyze your spending patterns with detailed pie charts for expenses and income categories
+- **Data Export**: Export your transaction data to CSV format for external analysis and record-keeping
+
+### Automation & Intelligence
+- **Scheduled Transactions**: Set up automated monthly recurring transactions for bills, income, and regular expenses
+- **Smart Suggestions**: AI-powered category recommendations based on your transaction history and patterns
+- **Error Handling**: Comprehensive error management system with user-friendly custom error pages
+
+### Goal Setting & Planning
+- **Wishlist Management**: Create and prioritize items you want to purchase with detailed tracking
 - **Goal Setting**: Set monthly savings targets to help achieve your financial objectives
-- **Currency Options**: Support for multiple currencies to match your location preferences
-- **Responsive Design**: Works seamlessly across desktop and mobile devices
+- **Financial Analytics**: Advanced charts and visualizations to understand your spending habits
+
+### User Experience
+- **Multi-Currency Support**: Support for multiple currencies with real-time exchange rates
+- **Responsive Design**: Optimized experience across desktop, tablet, and mobile devices
+- **Dark Mode**: Toggle between light and dark themes for comfortable viewing
+- **Enhanced Navigation**: Improved mobile navigation with better responsiveness
+- **Modern UI/UX**: Clean, intuitive interface with modern design patterns
+
+### Security & Performance
+- **Advanced Security**: CSRF protection and enhanced security measures
+- **Performance Optimized**: Fast loading times and optimized user experience
+- **Google OAuth**: Secure login with Google account integration
+- **Data Backup**: Automated database backup system for data protection
 
 ## 🖼️ Screenshots
 
