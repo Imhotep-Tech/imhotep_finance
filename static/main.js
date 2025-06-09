@@ -1238,3 +1238,235 @@ if (!document.querySelector('meta[name="viewport"]')) {
     metaViewport.content = 'width=device-width, initial-scale=1.0, user-scalable=no';
     document.head.appendChild(metaViewport);
 }
+
+// Monthly Reports Pie Chart
+function initExpenseChart() {
+    const canvas = document.getElementById('expenseChart');
+    if (!canvas || !window.chartData.expenses.labels.length) return;
+    
+    drawPieChart(canvas, window.chartData.expenses, 'expense');
+}
+
+function initIncomeChart() {
+    const canvas = document.getElementById('incomeChart');
+    if (!canvas || !window.chartData.income.labels.length) return;
+    
+    drawPieChart(canvas, window.chartData.income, 'income');
+}
+
+function initBothExpenseChart() {
+    const canvas = document.getElementById('bothExpenseChart');
+    if (!canvas || !window.chartData.expenses.labels.length) return;
+    
+    drawPieChart(canvas, window.chartData.expenses, 'expense');
+}
+
+function initBothIncomeChart() {
+    const canvas = document.getElementById('bothIncomeChart');
+    if (!canvas || !window.chartData.income.labels.length) return;
+    
+    drawPieChart(canvas, window.chartData.income, 'income');
+}
+
+function updateSummaryStats() {
+    const totalExpensesEl = document.getElementById('total-expenses');
+    const totalIncomeEl = document.getElementById('total-income');
+    
+    if (totalExpensesEl && window.chartData.expenses.data.length) {
+        const totalExpenses = window.chartData.expenses.data.reduce((sum, value) => sum + parseFloat(value), 0);
+        totalExpensesEl.textContent = `${totalExpenses.toFixed(0)} ${window.chartData.currency}`;
+    }
+    
+    if (totalIncomeEl && window.chartData.income.data.length) {
+        const totalIncome = window.chartData.income.data.reduce((sum, value) => sum + parseFloat(value), 0);
+        totalIncomeEl.textContent = `${totalIncome.toFixed(0)} ${window.chartData.currency}`;
+    }
+}
+
+// Monthly Reports Chart Functions
+function initMonthlyReportsCharts() {
+    if (!window.chartData) return;
+    
+    // Initialize tab switching
+    initTabSwitching();
+    
+    // Initialize charts
+    if (document.getElementById('expenseChart')) {
+        initExpenseChart();
+    }
+    
+    if (document.getElementById('incomeChart')) {
+        initIncomeChart();
+    }
+    
+    if (document.getElementById('bothExpenseChart')) {
+        initBothExpenseChart();
+    }
+    
+    if (document.getElementById('bothIncomeChart')) {
+        initBothIncomeChart();
+    }
+    
+    // Update summary stats
+    updateSummaryStats();
+}
+
+function initTabSwitching() {
+    const expenseTab = document.getElementById('expenseTab');
+    const incomeTab = document.getElementById('incomeTab');
+    const bothTab = document.getElementById('bothTab');
+    
+    const expenseSection = document.getElementById('expenseSection');
+    const incomeSection = document.getElementById('incomeSection');
+    const bothSection = document.getElementById('bothSection');
+    
+    if (!expenseTab || !incomeTab || !bothTab) return;
+    
+    function switchTab(activeTab, activeSection) {
+        // Reset all tabs
+        [expenseTab, incomeTab, bothTab].forEach(tab => {
+            tab.classList.remove('active');
+            tab.classList.add('text-gray-700');
+        });
+        
+        // Reset all sections
+        [expenseSection, incomeSection, bothSection].forEach(section => {
+            if (section) section.classList.add('hidden');
+        });
+        
+        // Activate selected tab and section
+        activeTab.classList.add('active');
+        activeTab.classList.remove('text-gray-700');
+        if (activeSection) activeSection.classList.remove('hidden');
+        
+        // Redraw charts with delay to ensure visibility
+        setTimeout(() => {
+            handleChartResize();
+        }, 100);
+    }
+    
+    expenseTab.addEventListener('click', () => switchTab(expenseTab, expenseSection));
+    incomeTab.addEventListener('click', () => switchTab(incomeTab, incomeSection));
+    bothTab.addEventListener('click', () => switchTab(bothTab, bothSection));
+}
+
+function drawPieChart(canvas, data, colorPrefix) {
+    const ctx = canvas.getContext('2d');
+    const { labels, data: values } = data;
+    
+    if (!labels.length || !values.length) return;
+    
+    // Make canvas responsive
+    const container = canvas.parentElement;
+    const containerWidth = container.clientWidth;
+    const isMobile = window.innerWidth < 768;
+    
+    // Set responsive canvas size
+    const canvasSize = isMobile ? Math.min(containerWidth - 40, 280) : Math.min(containerWidth - 40, 300);
+    canvas.width = canvasSize;
+    canvas.height = canvasSize;
+    
+    // Set CSS size to match canvas size for crisp rendering
+    canvas.style.width = canvasSize + 'px';
+    canvas.style.height = canvasSize + 'px';
+    
+    // Calculate total and percentages
+    const total = values.reduce((sum, value) => sum + parseFloat(value), 0);
+    
+    // Generate colors based on prefix
+    const colors = labels.map((_, index) => {
+        if (colorPrefix === 'expense') {
+            return `hsl(${0 + (index * 15)}, 70%, ${50 + (index * 2)}%)`;
+        } else {
+            return `hsl(${120 + (index * 15)}, 70%, ${50 + (index * 2)}%)`;
+        }
+    });
+    
+    // Update percentage displays
+    labels.forEach((_, index) => {
+        const percentage = ((values[index] / total) * 100).toFixed(1);
+        const percentageElement = document.getElementById(`${colorPrefix}-percentage-${index}`);
+        if (percentageElement) {
+            percentageElement.textContent = `${percentage}%`;
+        }
+    });
+    
+    // Draw pie chart with responsive sizing
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = Math.min(centerX, centerY) - (isMobile ? 15 : 20);
+    
+    let currentAngle = -Math.PI / 2; // Start from top
+    
+    values.forEach((value, index) => {
+        const sliceAngle = (value / total) * 2 * Math.PI;
+        
+        // Draw slice
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
+        ctx.closePath();
+        ctx.fillStyle = colors[index];
+        ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = isMobile ? 1 : 2;
+        ctx.stroke();
+        
+        // Add labels for larger slices (only on desktop or larger slices)
+        if (!isMobile && (value / total) > 0.08) {
+            const labelAngle = currentAngle + sliceAngle / 2;
+            const labelRadius = radius * 0.7;
+            const labelX = centerX + Math.cos(labelAngle) * labelRadius;
+            const labelY = centerY + Math.sin(labelAngle) * labelRadius;
+            
+            ctx.fillStyle = '#fff';
+            ctx.font = '10px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(`${((value / total) * 100).toFixed(0)}%`, labelX, labelY);
+        }
+        
+        currentAngle += sliceAngle;
+    });
+}
+
+// Enhanced resize handler for multiple charts
+function handleChartResize() {
+    const charts = ['expenseChart', 'incomeChart', 'bothExpenseChart', 'bothIncomeChart'];
+    
+    charts.forEach(chartId => {
+        const canvas = document.getElementById(chartId);
+        if (canvas && window.chartData) {
+            // Clear the canvas
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Redraw based on chart type
+            if (chartId.includes('expense')) {
+                drawPieChart(canvas, window.chartData.expenses, 'expense');
+            } else if (chartId.includes('income')) {
+                drawPieChart(canvas, window.chartData.income, 'income');
+            }
+        }
+    });
+}
+
+// Initialize chart when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize monthly reports charts if on monthly reports page
+    if (document.getElementById('expenseChart') || document.getElementById('incomeChart')) {
+        initMonthlyReportsCharts();
+        
+        // Add resize event listener for responsiveness
+        let resizeTimeout;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(handleChartResize, 250);
+        });
+        
+        // Handle orientation change on mobile
+        window.addEventListener('orientationchange', function() {
+            setTimeout(handleChartResize, 300);
+        });
+    }
+});
