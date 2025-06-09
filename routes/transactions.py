@@ -379,14 +379,14 @@ def delete_trans():
                 text("SELECT currency, date, amount, trans_status, trans_details, trans_details_link, category FROM trans WHERE user_id = :user_id AND trans_key = :trans_key"),
                 {"user_id": user_id, "trans_key" :trans_key}
             ).fetchone()
-
+        
         currency = trans_data_db[0]
         date = trans_data_db[1]
         amount = trans_data_db[2]
         trans_status = trans_data_db[3]
         trans_details = trans_data_db[4]
         trans_details_link = trans_data_db[5]
-        category = category[6]
+        category = trans_data_db[6]
 
         try:
             last_trans_trash_id = db.session.execute(

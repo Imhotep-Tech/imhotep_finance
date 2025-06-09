@@ -358,14 +358,14 @@
                                 <!-- Actions -->
                                 <td class="px-6 py-4 whitespace-nowrap text-sm">
                                     <div class="flex items-center space-x-2">
-                                        <a href="/edit_trans?trans_key={{ transaction[1] }}" 
+                                        <a href="/edit_trans?trans_key={{ transaction[0] }}" 
                                            class="text-indigo-600 hover:text-indigo-800 transition-colors">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         <form method="POST" action="/delete_trans" class="inline" 
                                               onsubmit="return confirm('Are you sure you want to delete this transaction?')">
                                             {{ form.hidden_tag() }}
-                                            <input type="hidden" name="trans_key" value="{{ transaction[1] }}">
+                                            <input type="hidden" name="trans_key" value="{{ transaction[0] }}">
                                             <button type="submit" 
                                                     class="text-red-600 hover:text-red-800 transition-colors">
                                                 <i class="fas fa-trash"></i>
@@ -441,14 +441,14 @@
                                 Transaction ID: {{ transaction[1] }}
                             </div>
                             <div class="flex items-center space-x-3">
-                                <a href="/edit_trans?trans_key={{ transaction[1] }}" 
+                                <a href="/edit_trans?trans_key={{ transaction[0] }}" 
                                    class="text-indigo-600 hover:text-indigo-800 text-sm flex items-center">
                                     <i class="fas fa-edit mr-1"></i>Edit
                                 </a>
                                 <form method="POST" action="/delete_trans" class="inline" 
                                       onsubmit="return confirm('Are you sure you want to delete this transaction?')">
                                     {{ form.hidden_tag() }}
-                                    <input type="hidden" name="trans_key" value="{{ transaction[1] }}">
+                                    <input type="hidden" name="trans_key" value="{{ transaction[0] }}">
                                     <button type="submit" 
                                             class="text-red-600 hover:text-red-800 text-sm flex items-center">
                                         <i class="fas fa-trash mr-1"></i>Delete
