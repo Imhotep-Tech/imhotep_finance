@@ -18,24 +18,28 @@
                         </a>
                         
                         <!-- Transactions Dropdown -->
-                        <div class="relative group">
-                            <button class="nav-item px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-imhotep-600 hover:bg-imhotep-50 transition-all duration-200 flex items-center">
+                        <div class="group relative">
+                            <button class="text-gray-700 hover:text-imhotep-600 px-3 py-2 rounded-md text-sm font-medium flex items-center">
                                 <i class="fas fa-exchange-alt mr-1"></i>Transactions
-                                <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                                <i class="fas fa-chevron-down ml-1"></i>
                             </button>
-                            <div class="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 border border-gray-200">
+                            <div class="absolute left-0 mt-2 w-56 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                                 <div class="py-1">
-                                    <a href="/deposit" class="block px-4 py-2 text-sm text-gray-700 hover:bg-imhotep-50 hover:text-imhotep-600">
-                                        <i class="fas fa-plus text-green-500 mr-2"></i>Add Income
+                                    <a href="/deposit" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        <i class="fas fa-plus mr-2"></i>Add Income
                                     </a>
-                                    <a href="/withdraw" class="block px-4 py-2 text-sm text-gray-700 hover:bg-imhotep-50 hover:text-imhotep-600">
-                                        <i class="fas fa-minus text-red-500 mr-2"></i>Add Expense
+                                    <a href="/withdraw" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        <i class="fas fa-minus mr-2"></i>Add Expense
                                     </a>
-                                    <a href="/show_trans" class="block px-4 py-2 text-sm text-gray-700 hover:bg-imhotep-50 hover:text-imhotep-600">
-                                        <i class="fas fa-history mr-2"></i>Transaction History
+                                    <a href="/show_trans" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        <i class="fas fa-history mr-2"></i>View History
                                     </a>
-                                    <a href="/trash_trans" class="block px-4 py-2 text-sm text-gray-700 hover:bg-imhotep-50 hover:text-imhotep-600">
-                                        <i class="fas fa-trash text-gray-500 mr-2"></i>Trash
+                                    <div class="border-t border-gray-100 my-1"></div>
+                                    <a href="/add_scheduled_transaction" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        <i class="fas fa-calendar-plus mr-2"></i>Schedule Transaction
+                                    </a>
+                                    <a href="/show_scheduled_trans" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        <i class="fas fa-calendar-alt mr-2"></i>Scheduled Transactions
                                     </a>
                                 </div>
                             </div>

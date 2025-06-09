@@ -11,6 +11,7 @@ from routes.transactions import transactions_bp
 from routes.user import user_bp
 from routes.wishlist import wishlist_bp
 from routes.before_sign import before_sign_bp
+from routes.scheduled_transaction import scheduled_transactions_bp
 
 #define the app
 def create_app():
@@ -28,6 +29,7 @@ def create_app():
     app.register_blueprint(user_bp)
     app.register_blueprint(wishlist_bp)
     app.register_blueprint(before_sign_bp)
+    app.register_blueprint(scheduled_transactions_bp)
 
     return app
 
