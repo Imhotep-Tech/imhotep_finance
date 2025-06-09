@@ -46,11 +46,19 @@ function initializeLoadingHandlers() {
         form.addEventListener('submit', showLoadingScreen);
     });
     
+    // Handle export links separately
+    initializeExportHandlers();
+    
     // Hide loading on page load
     window.addEventListener('load', hideLoadingScreen);
     
-    // Show loading when navigating away
-    window.addEventListener('beforeunload', showLoadingScreen);
+    // Show loading when navigating away (but not for downloads)
+    window.addEventListener('beforeunload', function(event) {
+        // Don't show loading if it's a download request
+        if (!event.target.activeElement || !event.target.activeElement.href || !event.target.activeElement.href.includes('export_trans')) {
+            showLoadingScreen();
+        }
+    });
     
     // Handle page show (back/forward navigation)
     window.addEventListener('pageshow', function(event) {
@@ -59,6 +67,71 @@ function initializeLoadingHandlers() {
             setTimeout(hideLoadingScreen, 100);
         }
     });
+}
+
+function initializeExportHandlers() {
+    // Handle export links with special download detection
+    const exportLinks = document.querySelectorAll('a[href*="export_trans"]');
+    
+    exportLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            showLoadingScreen();
+            
+            // Create a hidden iframe to handle the download
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = this.href;
+            document.body.appendChild(iframe);
+            
+            // Prevent default navigation
+            e.preventDefault();
+            
+            // Hide loading after a short delay (download should start immediately)
+            setTimeout(() => {
+                hideLoadingScreen();
+                // Remove the iframe after download
+                document.body.removeChild(iframe);
+            }, 2000); // 2 seconds should be enough for the download to start
+            
+            // Alternative method: Use fetch to detect when response is received
+            fetch(this.href)
+                .then(response => {
+                    if (response.ok) {
+                        return response.blob();
+                    }
+                    throw new Error('Download failed');
+                })
+                .then(blob => {
+                    // Create download link
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = getFilenameFromUrl(this.href);
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    
+                    // Hide loading screen
+                    hideLoadingScreen();
+                })
+                .catch(error => {
+                    console.error('Export failed:', error);
+                    hideLoadingScreen();
+                    // You could show an error message here
+                    alert('Export failed. Please try again.');
+                });
+        });
+    });
+}
+
+function getFilenameFromUrl(url) {
+    // Extract filename from URL parameters or create a default one
+    const urlParams = new URLSearchParams(url.split('?')[1]);
+    const fromDate = urlParams.get('from_date') || 'all';
+    const toDate = urlParams.get('to_date') || 'all';
+    return `transactions_${fromDate}_to_${toDate}.csv`;
 }
 
 // ============================================================================

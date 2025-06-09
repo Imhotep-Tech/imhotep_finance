@@ -252,11 +252,10 @@
                            class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors duration-200 text-sm">
                             <i class="fas fa-trash mr-2"></i>Trash
                         </a>
-                        <button type="button" 
-                                id="exportBtn"
-                                class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 text-sm">
-                            <i class="fas fa-download mr-2"></i>Export
-                        </button>
+                        <a href="/export_trans?from_date={{ from_date }}&to_date={{ to_date }}" 
+                           class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 text-sm">
+                            <i class="fas fa-download mr-2"></i>Export CSV
+                        </a>
                     </div>
                 </form>
             </div>
@@ -535,9 +534,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize sorting
     initializeSorting();
-    
-    // Initialize export functionality
-    initializeExport();
     
     // Animate elements on load
     animateElements();
