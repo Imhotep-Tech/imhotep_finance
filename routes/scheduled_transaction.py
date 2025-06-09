@@ -189,9 +189,8 @@ def change_status_of_scheduled_trans():
         db.session.execute(
             text('''
                 UPDATE scheduled_trans SET status = NOT(status) WHERE scheduled_trans_key = :scheduled_trans_key
-            '''
-            )
-            ,{"scheduled_trans_key": scheduled_trans_key}
+            '''),
+            {"scheduled_trans_key": scheduled_trans_key}
         )
         db.session.commit()
 
