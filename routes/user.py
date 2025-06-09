@@ -3,7 +3,7 @@ import secrets
 from sqlalchemy import text
 import datetime
 from sqlalchemy.exc import OperationalError
-from utils.user_info import select_user_photo
+from utils.user_info import select_user_photo, calculate_user_report
 from utils.currencies import show_networth, convert_to_fav_currency
 from utils.security import security_check, logout
 from config import CSRFForm
@@ -333,3 +333,42 @@ def show_scores_history():
         total_pages = (total_count + per_page - 1) // per_page  # Calculate total number of pages
 
         return render_template("show_scores_history.html", target_history=target_history, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, total_pages=total_pages,page=page, form=CSRFForm())
+
+@user_bp.route("/monthly_reports", methods=["GET"])
+def monthly_reports():
+    if not session.get("logged_in"):
+        return redirect("/login_page")
+    
+    try:
+        user_photo_path = select_user_photo()
+    except OperationalError:
+        error = "Welcome Back"
+        return render_template('error.html', error=error, form=CSRFForm())
+    
+    total_favorite_currency, favorite_currency = show_networth()
+    total_favorite_currency = f"{total_favorite_currency:,.2f}"
+
+    user_id = session.get("user_id")
+    
+    #get current date
+    now = datetime.datetime.now()
+    
+    #start date: first day of current month
+    start_date = now.replace(day=1).date()
+    
+    #end date: first day of next month
+    if now.month == 12:
+        end_date = now.replace(year=now.year + 1, month=1, day=1).date()
+    else:
+        end_date = now.replace(month=now.month + 1, day=1).date()
+
+    user_withdraw_on_range, user_deposit_on_range = calculate_user_report(start_date, end_date, user_id)
+
+    return render_template("monthly_reports.html",
+                            user_photo_path=user_photo_path,
+                            total_favorite_currency=total_favorite_currency,
+                            favorite_currency=favorite_currency,
+                            user_withdraw_on_range=user_withdraw_on_range,
+                            user_deposit_on_range=user_deposit_on_range,
+                            current_month=now.strftime("%B %Y"),
+                            form=CSRFForm())
