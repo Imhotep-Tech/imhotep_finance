@@ -173,6 +173,7 @@
                 <!-- Trial Login -->
                 <div class="mt-4">
                     <form method="POST" action="/trial_login">
+                        {{ form.hidden_tag() }}
                         <button type="submit" 
                                 class="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-medium py-2.5 px-6 rounded-lg transition-all duration-200 transform hover:scale-[1.02] hover:shadow-md focus:outline-none focus:ring-4 focus:ring-yellow-400/30 flex items-center justify-center space-x-2 text-sm">
                             <i class="fas fa-rocket"></i>

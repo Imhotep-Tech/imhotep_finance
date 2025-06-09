@@ -43,10 +43,13 @@
                    class="bg-white text-indigo-600 hover:bg-gray-100 font-semibold py-4 px-8 rounded-full text-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
                     <i class="fas fa-rocket mr-2"></i>Get Started Free
                 </a>
-                <a href="/trial_login" 
-                   class="glass-effect text-white border-2 border-white hover:bg-white hover:text-indigo-600 font-semibold py-4 px-8 rounded-full text-lg transition-all duration-300 transform hover:scale-105">
-                    <i class="fas fa-play mr-2"></i>Try Demo
-                </a>
+                <form action="/trial_login" method="POST" class="inline">
+                    {{ form.hidden_tag() }}
+                    <button type="submit" 
+                            class="glass-effect text-white border-2 border-white hover:bg-white hover:text-indigo-600 font-semibold py-4 px-8 rounded-full text-lg transition-all duration-300 transform hover:scale-105">
+                        <i class="fas fa-play mr-2"></i>Try Demo
+                    </button>
+                </form>
             </div>
             
             <!-- Stats -->
