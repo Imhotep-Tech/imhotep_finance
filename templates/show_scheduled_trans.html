@@ -1,0 +1,210 @@
+{% extends "layout.html" %}
+
+{% block title %}Scheduled Transactions - Imhotep Financial Manager{% endblock %}
+{% block description %}View and manage your scheduled recurring transactions{% endblock %}
+
+{% block extra_head %}
+<style>
+    .pattern-bg {
+        background-image: radial-gradient(circle at 1px 1px, rgba(81, 173, 172, 0.1) 1px, transparent 0);
+        background-size: 20px 20px;
+    }
+    
+    .transaction-card {
+        transition: all 0.3s ease;
+    }
+    
+    .transaction-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .status-active {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+    
+    .status-inactive {
+        background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+    }
+    
+    .type-deposit {
+        border-left: 4px solid #10b981;
+    }
+    
+    .type-withdraw {
+        border-left: 4px solid #ef4444;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 pattern-bg">
+    <!-- Header Section -->
+    <div class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Scheduled Transactions</h1>
+                    <p class="text-gray-600 mt-1">Manage your recurring financial transactions</p>
+                </div>
+                <div class="hidden sm:flex items-center space-x-4">
+                    {% if user_photo_path %}
+                        <img src="{{ url_for('static', filename='user_photo/' + user_photo_path) }}" alt="Profile" class="w-10 h-10 rounded-full border-2 border-imhotep-200">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='avatar-anonymous-300x300.png') }}" alt="Profile" class="w-10 h-10 rounded-full border-2 border-imhotep-200">
+                    {% endif %}
+                    <div class="text-right">
+                        <div class="text-sm text-gray-500">Net Worth</div>
+                        <div class="font-bold text-imhotep-600">{{ total_favorite_currency }} {{ favorite_currency }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Action Bar -->
+        <div class="mb-6 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+            <nav class="flex" aria-label="Breadcrumb">
+                <ol class="flex items-center space-x-4">
+                    <li>
+                        <div>
+                            <a href="/home" class="text-gray-400 hover:text-gray-500">
+                                <i class="fas fa-home"></i>
+                            </a>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="flex items-center">
+                            <i class="fas fa-chevron-right text-gray-300 h-4 w-4"></i>
+                            <span class="ml-4 text-sm font-medium text-gray-500">Scheduled Transactions</span>
+                        </div>
+                    </li>
+                </ol>
+            </nav>
+            
+            <a href="/add_scheduled_transaction" 
+               class="bg-gradient-to-r from-imhotep-500 to-imhotep-600 hover:from-imhotep-600 hover:to-imhotep-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200 flex items-center">
+                <i class="fas fa-plus mr-2"></i>
+                Add Scheduled Transaction
+            </a>
+        </div>
+        
+        <!-- Scheduled Transactions List -->
+        {% if scheduled_trans %}
+        <div class="space-y-4">
+            {% for trans in scheduled_trans %}
+            <div class="transaction-card bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden 
+                        {% if trans[6] == 'deposit' %}type-deposit{% else %}type-withdraw{% endif %}">
+                <div class="p-6">
+                    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+                        
+                        <!-- Transaction Info -->
+                        <div class="flex-1 lg:mr-6">
+                            <div class="flex items-start space-x-4">
+                                <div class="w-12 h-12 rounded-full flex items-center justify-center
+                                           {% if trans[6] == 'deposit' %}bg-green-100{% else %}bg-red-100{% endif %}">
+                                    <i class="fas {% if trans[6] == 'deposit' %}fa-arrow-down text-green-600{% else %}fa-arrow-up text-red-600{% endif %} text-xl"></i>
+                                </div>
+                                
+                                <div class="flex-1">
+                                    <div class="flex items-center space-x-3 mb-2">
+                                        <h3 class="text-lg font-semibold text-gray-900">{{ trans[9] }}</h3>
+                                        <span class="px-2 py-1 text-xs font-medium rounded-full 
+                                                   {% if trans[6] == 'deposit' %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                            {{ trans[6].title() }}
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm text-gray-600">
+                                        <div>
+                                            <i class="fas fa-calendar-day mr-1 text-imhotep-500"></i>
+                                            Day {{ trans[4] }} of month
+                                        </div>
+                                        <div>
+                                            <i class="fas fa-coins mr-1 text-imhotep-500"></i>
+                                            {{ trans[5] }} {{ trans[3] }}
+                                        </div>
+                                        <div>
+                                            <i class="fas fa-{% if trans[6] == 1 %}check-circle text-green-500{% else %}pause-circle text-gray-500{% endif %} mr-1"></i>
+                                            {% if trans[10] == 1 %}Active{% else %}Inactive{% endif %}
+                                        </div>
+                                    </div>
+                                    
+                                    {% if trans[7] %}
+                                    <p class="mt-2 text-sm text-gray-600">{{ trans[7] }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="mt-4 lg:mt-0 flex flex-row lg:flex-col gap-2">
+                            <a href="/edit_scheduled_trans?scheduled_trans_key={{ trans[1] }}"
+                               class="flex-1 lg:flex-none bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors text-center">
+                                <i class="fas fa-edit mr-1"></i>
+                                <span class="hidden sm:inline">Edit</span>
+                            </a>
+                            
+                            <a href="/change_status_of_scheduled_trans?scheduled_trans_key={{ trans[0] }}"
+                               class="flex-1 lg:flex-none {% if trans[10] == 1 %}bg-yellow-500 hover:bg-yellow-600{% else %}bg-green-500 hover:bg-green-600{% endif %} text-white font-medium py-2 px-4 rounded-lg transition-colors text-center">
+                                <i class="fas fa-{% if trans[10] == 1 %}pause{% else %}play{% endif %} mr-1"></i>
+                                <span class="hidden sm:inline">{% if trans[10] == 1 %}Pause{% else %}Activate{% endif %}</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if total_pages > 1 %}
+        <div class="mt-8 flex items-center justify-center">
+            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                {% if page > 1 %}
+                <a href="?page={{ page - 1 }}" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                {% endif %}
+                
+                {% for p in range(1, total_pages + 1) %}
+                    {% if p == page %}
+                    <span class="relative inline-flex items-center px-4 py-2 border border-imhotep-300 bg-imhotep-50 text-sm font-medium text-imhotep-600">
+                        {{ p }}
+                    </span>
+                    {% else %}
+                    <a href="?page={{ p }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        {{ p }}
+                    </a>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page < total_pages %}
+                <a href="?page={{ page + 1 }}" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+        {% endif %}
+        
+        {% else %}
+        <!-- Empty State -->
+        <div class="text-center py-12">
+            <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-calendar-plus text-gray-400 text-3xl"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">No Scheduled Transactions</h3>
+            <p class="text-gray-600 mb-6">You haven't set up any recurring transactions yet.</p>
+            <a href="/add_scheduled_transaction" 
+               class="bg-gradient-to-r from-imhotep-500 to-imhotep-600 hover:from-imhotep-600 hover:to-imhotep-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 inline-flex items-center">
+                <i class="fas fa-plus mr-2"></i>
+                Add Your First Scheduled Transaction
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -113,20 +113,37 @@ def get_user_categories(trans_status, user_id):
     if not user_id or not trans_status:
         return []
 
-    user_categories = db.session.execute(
-        text("""
-            SELECT category, COUNT(*) as frequency_of_category
-            FROM trans 
-            WHERE user_id = :user_id 
-            AND trans_status = :trans_status 
-            AND category IS NOT NULL 
-            AND category != ''
-            GROUP BY category 
-            ORDER BY frequency_of_category DESC 
-            LIMIT 15
-        """),
-        {"user_id": user_id, "trans_status": trans_status}
-    ).fetchall()
+    if trans_status == "ANY":
+         
+         user_categories = db.session.execute(
+            text("""
+                SELECT category, COUNT(*) as frequency_of_category
+                FROM trans 
+                WHERE user_id = :user_id 
+                AND category IS NOT NULL 
+                AND category != ''
+                GROUP BY category 
+                ORDER BY frequency_of_category DESC 
+                LIMIT 15
+            """),
+            {"user_id": user_id}
+        ).fetchall()
+         
+    else:
+        user_categories = db.session.execute(
+            text("""
+                SELECT category, COUNT(*) as frequency_of_category
+                FROM trans 
+                WHERE user_id = :user_id 
+                AND trans_status = :trans_status 
+                AND category IS NOT NULL 
+                AND category != ''
+                GROUP BY category 
+                ORDER BY frequency_of_category DESC 
+                LIMIT 15
+            """),
+            {"user_id": user_id, "trans_status": trans_status}
+        ).fetchall()
 
     # Extract just the category names from the result
     categories = [row[0] for row in user_categories] if user_categories else []
@@ -169,3 +186,26 @@ def calculate_user_report(start_date, end_date, user_id):
     ).fetchall()
 
     return user_withdraw_on_range, user_deposit_on_range
+
+def select_scheduled_trans(user_id, page):
+    per_page = 20
+
+    offset = (page - 1) * per_page
+
+    trans_db = db.session.execute(
+        text("SELECT * FROM scheduled_trans WHERE user_id = :user_id ORDER BY date DESC LIMIT :limit OFFSET :offset"),
+        {"user_id": user_id, "limit": per_page, "offset": offset}
+    ).fetchall()
+
+    # Get total count for pagination
+    total_count = db.session.execute(
+        text('''
+            SELECT COUNT(*) FROM scheduled_trans
+            WHERE user_id = :user_id
+        '''),
+        {"user_id": user_id}
+    ).scalar()
+
+    total_pages = (total_count + per_page - 1) // per_page  # Calculate total number of pages
+
+    return trans_db, total_pages, page

@@ -1,0 +1,177 @@
+{% extends "layout.html" %}
+
+{% block title %}Edit Scheduled Transaction - Imhotep Financial Manager{% endblock %}
+{% block description %}Edit your scheduled recurring transaction{% endblock %}
+
+{% block extra_head %}
+<style>
+    .pattern-bg {
+        background-image: radial-gradient(circle at 1px 1px, rgba(81, 173, 172, 0.1) 1px, transparent 0);
+        background-size: 20px 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 pattern-bg">
+    <!-- Header Section -->
+    <div class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Edit Scheduled Transaction</h1>
+                    <p class="text-gray-600 mt-1">Modify your recurring transaction settings</p>
+                </div>
+                <div class="hidden sm:flex items-center space-x-4">
+                    {% if user_photo_path %}
+                        <img src="{{ url_for('static', filename='user_photo/' + user_photo_path) }}" alt="Profile" class="w-10 h-10 rounded-full border-2 border-imhotep-200">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='avatar-anonymous-300x300.png') }}" alt="Profile" class="w-10 h-10 rounded-full border-2 border-imhotep-200">
+                    {% endif %}
+                    <div class="text-right">
+                        <div class="text-sm text-gray-500">Net Worth</div>
+                        <div class="font-bold text-imhotep-600">{{ total_favorite_currency }} {{ favorite_currency }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Quick Navigation -->
+        <div class="mb-6">
+            <nav class="flex" aria-label="Breadcrumb">
+                <ol class="flex items-center space-x-4">
+                    <li>
+                        <div>
+                            <a href="/home" class="text-gray-400 hover:text-gray-500">
+                                <i class="fas fa-home"></i>
+                            </a>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="flex items-center">
+                            <i class="fas fa-chevron-right text-gray-300 h-4 w-4"></i>
+                            <a href="/show_scheduled_trans" class="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700">Scheduled Transactions</a>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="flex items-center">
+                            <i class="fas fa-chevron-right text-gray-300 h-4 w-4"></i>
+                            <span class="ml-4 text-sm font-medium text-gray-500">Edit</span>
+                        </div>
+                    </li>
+                </ol>
+            </nav>
+        </div>
+        
+        <!-- Main Form -->
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+            <div class="px-6 py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+                <h2 class="text-xl font-bold flex items-center">
+                    <i class="fas fa-edit mr-3"></i>
+                    Edit Scheduled Transaction
+                </h2>
+            </div>
+            
+            <form method="POST" class="p-6 space-y-6">
+                {{ form.hidden_tag() }}
+                <input type="hidden" name="scheduled_trans_key" value="{{ scheduled_trans_db[1] }}">
+                
+                <!-- Day of Month -->
+                <div class="space-y-2">
+                    <label for="date" class="block text-sm font-medium text-gray-700">
+                        <i class="fas fa-calendar-day mr-2 text-imhotep-500"></i>
+                        Day of Month
+                    </label>
+                    <select name="date" id="date" required
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-imhotep-500 focus:border-imhotep-500 transition-colors">
+                        {% for day in range(1, 32) %}
+                            <option value="{{ day }}" {% if day == scheduled_trans_db[4]|int %}selected{% endif %}>{{ day }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- Amount -->
+                <div class="space-y-2">
+                    <label for="amount" class="block text-sm font-medium text-gray-700">
+                        <i class="fas fa-dollar-sign mr-2 text-imhotep-500"></i>
+                        Amount
+                    </label>
+                    <input type="number" name="amount" id="amount" step="0.01" min="0" required
+                           value="{{ scheduled_trans_db[5] }}"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-imhotep-500 focus:border-imhotep-500 transition-colors">
+                </div>
+                
+                <!-- Currency -->
+                <div class="space-y-2">
+                    <label for="currency" class="block text-sm font-medium text-gray-700">
+                        <i class="fas fa-coins mr-2 text-imhotep-500"></i>
+                        Currency
+                    </label>
+                    <div class="relative">
+                        <input type="text" id="searchInput1" placeholder="Search currencies..."
+                               class="w-full px-4 py-2 mb-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-imhotep-500 focus:border-imhotep-500 transition-colors">
+                        <select name="currency" id="CurrencySelect1" required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-imhotep-500 focus:border-imhotep-500 transition-colors">
+                            <option value="" disabled>Select currency</option>
+                            {% for currency_option in available_currencies %}
+                                <option value="{{ currency_option }}" {% if currency_option == scheduled_trans_db[3] %}selected{% endif %}>{{ currency_option }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Category -->
+                <div class="space-y-2">
+                    <label for="category" class="block text-sm font-medium text-gray-700">
+                        <i class="fas fa-tag mr-2 text-imhotep-500"></i>
+                        Category
+                    </label>
+                    <textarea name="category" id="category" rows="2" required
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-imhotep-500 focus:border-imhotep-500 transition-colors resize-none">{{ scheduled_trans_db[9] if scheduled_trans_db[9] else '' }}</textarea>
+                </div>
+                
+                <!-- Description -->
+                <div class="space-y-2">
+                    <label for="scheduled_trans_details" class="block text-sm font-medium text-gray-700">
+                        <i class="fas fa-sticky-note mr-2 text-imhotep-500"></i>
+                        Description <span class="text-gray-400">(optional)</span>
+                    </label>
+                    <textarea name="scheduled_trans_details" id="scheduled_trans_details" rows="3"
+                              placeholder="Additional details about this scheduled transaction..."
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-imhotep-500 focus:border-imhotep-500 transition-colors resize-none">{{ scheduled_trans_db[7] if scheduled_trans_db[7] else '' }}</textarea>
+                </div>
+                
+                <!-- Link (if applicable) -->
+                <div class="space-y-2">
+                    <label for="scheduled_trans_link" class="block text-sm font-medium text-gray-700">
+                        <i class="fas fa-link mr-2 text-imhotep-500"></i>
+                        Reference Link <span class="text-gray-400">(optional)</span>
+                    </label>
+                    <input type="url" name="scheduled_trans_link" id="scheduled_trans_link"
+                           placeholder="https://..."
+                           value="{{ scheduled_trans_db[8] if scheduled_trans_db[8] else '' }}"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-imhotep-500 focus:border-imhotep-500 transition-colors">
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
+                    <button type="submit" 
+                            class="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 flex items-center justify-center">
+                        <i class="fas fa-save mr-2"></i>
+                        Update Transaction
+                    </button>
+                    
+                    <a href="/show_scheduled_trans" 
+                       class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 flex items-center justify-center text-center">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to Scheduled
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
