@@ -1,4 +1,4 @@
-from flask import render_template, redirect, session, request, Blueprint, flash, flash, url_for
+from flask import render_template, redirect, session, request, Blueprint, flash, flash, url_for, Response
 from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
 from extensions import db
@@ -6,7 +6,9 @@ from config import CSRFForm, Config
 from utils.user_info import select_user_photo, trans, get_app_currencies, get_user_categories
 from utils.currencies import show_networth, select_currencies
 from datetime import datetime
-import logging
+from openpyxl import Workbook
+import io
+import csv
 
 transactions_bp = Blueprint('transactions', __name__)
 
@@ -552,3 +554,54 @@ def delete_trash_trans():
         ).fetchall()
 
         return render_template("trash_trans.html",user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, trash_trans_data=trash_trans_data, form=CSRFForm())
+
+@transactions_bp.route("/export_trans", methods=["GET"])
+def export():
+    if not session.get("logged_in"):
+        return redirect("/login_page")
+    else:
+        user_id = session.get("user_id")
+        try:
+            user_photo_path = select_user_photo()
+        except OperationalError:
+            error = "Welcome Back"
+            return render_template('error.html', error=error, form=CSRFForm())
+
+        #get the same filtered transactions as show_trans
+        trans_db, to_date, from_date, total_pages, page = trans(user_id)    
+
+        #create CSV data
+        output = io.StringIO()
+        writer = csv.writer(output)
+        
+        # CSV Headers
+        headers = ['Date', 'Type', 'Amount', 'Currency', 'Category', 'Description', 'Receipt Link', 'Transaction ID']
+        writer.writerow(headers)
+
+        # Write transaction data
+        for transaction in trans_db:
+            writer.writerow([
+                transaction[4].strftime('%Y-%m-%d') if transaction[4] else '',  #date
+                transaction[6] if transaction[6] else '',  # Type (deposit/withdraw)
+                float(transaction[5]) if transaction[5] else 0,  # Amount
+                transaction[3] if transaction[3] else '',  # Currency
+                transaction[9] if transaction[9] else 'No Category',  # Category
+                transaction[7] if transaction[7] else 'No Description',  # Description
+                transaction[8] if transaction[8] else '',  # Receipt Link
+                transaction[1] if transaction[1] else ''  # Transaction Key
+            ])
+
+        # Prepare response
+        output.seek(0)
+        csv_data = output.getvalue()
+        output.close()
+
+        response = Response(
+            csv_data,
+            mimetype='text/csv',
+            headers={
+                'Content-Disposition': f'attachment; filename=transactions_{from_date}_to_{to_date}.csv'
+            }
+        )
+
+        return response
