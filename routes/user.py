@@ -19,7 +19,6 @@ def home():
     if not session.get("logged_in"):
         return redirect("/login_page")
     else:
-
         #gets the user photo
         try:
             user_photo_path = select_user_photo()
@@ -49,7 +48,7 @@ def home():
             year = now.year
 
             #if this is a new mounth with the year then add the new mounthly data to the database 
-            if mounth_db != mounth and year_db != year:
+            if mounth_db != mounth or year_db != year:
                 try:
                     last_target_id = db.session.execute(
                             text("SELECT MAX(target_id) FROM target")
@@ -123,7 +122,11 @@ def home():
                 )
                 db.session.commit()
                 return render_template("home.html", total_favorite_currency = total_favorite_currency, favorite_currency=favorite_currency , user_photo_path=user_photo_path, score_txt=score_txt, score=score, target = target, form=CSRFForm())
+            else:
+                # If no target found for current month/year, redirect to set target
+                return render_template("home.html", total_favorite_currency = total_favorite_currency, favorite_currency=favorite_currency , user_photo_path=user_photo_path, form=CSRFForm())
         else:
+            # If no target exists at all, show home without target info
             return render_template("home.html", total_favorite_currency = total_favorite_currency, favorite_currency=favorite_currency , user_photo_path=user_photo_path, form=CSRFForm())
 
 @user_bp.route("/show_networth_details", methods=["GET"])

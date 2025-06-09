@@ -151,41 +151,52 @@ def get_user_categories(trans_status, user_id):
 
 def calculate_user_report(start_date, end_date, user_id):
     if not user_id:
-        return None
+        return [], []
     
-    user_withdraw_on_range = db.session.execute(
-        text("""
-            SELECT category, SUM(CAST(amount AS DECIMAL)) as total_amount, COUNT(*) as frequency_of_category
-            FROM trans 
-            WHERE user_id = :user_id 
-            AND trans_status = :trans_status 
-            AND category IS NOT NULL 
-            AND category != ''
-            AND date BETWEEN :start_date AND :end_date
-            GROUP BY category 
-            ORDER BY total_amount DESC 
-            LIMIT 15
-        """),
-        {"user_id": user_id, "trans_status": "withdraw", "start_date":start_date, "end_date":end_date}
-    ).fetchall()
+    try:
+        user_withdraw_on_range = db.session.execute(
+            text("""
+                SELECT category, SUM(CAST(amount AS DECIMAL)) as total_amount, COUNT(*) as frequency_of_category
+                FROM trans 
+                WHERE user_id = :user_id 
+                AND trans_status = :trans_status 
+                AND category IS NOT NULL 
+                AND category != ''
+                AND date BETWEEN :start_date AND :end_date
+                GROUP BY category 
+                ORDER BY total_amount DESC 
+                LIMIT 15
+            """),
+            {"user_id": user_id, "trans_status": "withdraw", "start_date":start_date, "end_date":end_date}
+        ).fetchall()
 
-    user_deposit_on_range = db.session.execute(
-        text("""
-            SELECT category, SUM(CAST(amount AS DECIMAL)) as total_amount, COUNT(*) as frequency_of_category
-            FROM trans 
-            WHERE user_id = :user_id 
-            AND trans_status = :trans_status 
-            AND category IS NOT NULL 
-            AND category != ''
-            AND date BETWEEN :start_date AND :end_date
-            GROUP BY category 
-            ORDER BY total_amount DESC 
-            LIMIT 15
-        """),
-        {"user_id": user_id, "trans_status": "deposit", "start_date":start_date, "end_date":end_date}
-    ).fetchall()
+        user_deposit_on_range = db.session.execute(
+            text("""
+                SELECT category, SUM(CAST(amount AS DECIMAL)) as total_amount, COUNT(*) as frequency_of_category
+                FROM trans 
+                WHERE user_id = :user_id 
+                AND trans_status = :trans_status 
+                AND category IS NOT NULL 
+                AND category != ''
+                AND date BETWEEN :start_date AND :end_date
+                GROUP BY category 
+                ORDER BY total_amount DESC 
+                LIMIT 15
+            """),
+            {"user_id": user_id, "trans_status": "deposit", "start_date":start_date, "end_date":end_date}
+        ).fetchall()
 
-    return user_withdraw_on_range, user_deposit_on_range
+        # Ensure we return empty lists if no data
+        if user_withdraw_on_range is None:
+            user_withdraw_on_range = []
+        if user_deposit_on_range is None:
+            user_deposit_on_range = []
+
+        return user_withdraw_on_range, user_deposit_on_range
+    
+    except Exception as e:
+        print(f"Error in calculate_user_report: {e}")
+        return [], []
 
 def select_scheduled_trans(user_id, page):
     per_page = 20
