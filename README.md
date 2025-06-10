@@ -39,14 +39,26 @@ A comprehensive financial management web application that helps you track transa
 ## 🖼️ Screenshots
 
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/ecba65cd-f60a-4dfe-8c6d-e325fde38c4b" alt="Dashboard View" width="700"/>
+  <!--Main Page-->
+  <img src="https://github.com/user-attachments/assets/34e1e1c5-b6c3-4765-bfd7-8a0ac9af862f" alt="Goals Setting" width="700"/>
+  <p><em>Landing Page</em></p>
+
+  <!--Login-->
+  <img src="https://github.com/user-attachments/assets/b095332b-e3a9-45ba-886e-2a197dda2ba8" alt="Goals Setting" width="700"/>
+  <p><em>Login Page</em></p>
+
+  <!--Dashboard-->
+  <img src="https://github.com/user-attachments/assets/7fc74e14-1468-4d69-9aef-d3fd882f724f" alt="Goals Setting" width="700"/>
   <p><em>Dashboard with transaction overview</em></p>
-  
-  <img src="https://github.com/user-attachments/assets/21535dc7-42ec-41fe-9b53-6c35bbd358cf" alt="Transaction History" width="700"/>
+
+  <!--Transactions -->
+  <img src="https://github.com/user-attachments/assets/1aa2f117-83af-4d31-ad22-b050cea258dd" alt="Transaction History" width="700"/>
   <p><em>Transaction history and analytics</em></p>
   
-  <img src="https://github.com/user-attachments/assets/33bf89b6-9429-4e6d-b526-e0f74f8192f7" alt="Goals Setting" width="700"/>
-  <p><em>Financial goals and wishlist management</em></p>
+  <!--Monthly Reports -->
+  <img src="https://github.com/user-attachments/assets/02a243a5-423b-42b7-85df-678a6b6720ee" alt="Dashboard View" width="700"/>
+  <p><em>Monthly Reports</em></p>
+  
 </div>
 
 ## 🔧 Technology Stack
