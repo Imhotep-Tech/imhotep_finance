@@ -1,5 +1,5 @@
 # Core Flask application
-Flask==3.1.0
+Flask==3.1.1
 Flask-SQLAlchemy==3.1.1
 Flask-WTF==1.2.2
 Flask-Mail==0.10.0
@@ -21,7 +21,7 @@ WTForms==3.2.1
 
 # Utilities
 python-dotenv==1.0.1
-requests==2.32.3
+requests==2.32.4
 
 # Your custom packages
 imhotep_files_flask==0.1
