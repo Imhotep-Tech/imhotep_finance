@@ -135,16 +135,3 @@ This project uses a dual-licensing approach:
 - Commercial License for commercial use, redistribution, or use in commercial products/services
 
 For commercial licensing inquiries, please contact imhoteptech@outlook.com.
-
-## ☕ Support Development
-
-If you've found Imhotep Financial Manager helpful for managing your finances, please consider supporting its continued development:
-
-<div align="center">
-  <a href="https://ko-fi.com/kbassem10" target="_blank">
- <img src="https://storage.ko-fi.com/cdn/kofi3.png?v=3" alt="Buy Me a Coffee at ko-fi.com" height="50" style="margin-right: 20px;">
-  </a>
-<!--   <a href="https://www.buymeacoffee.com/kbassem10" target="_blank">
- <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="50">
-  </a> -->
-</div>
