@@ -146,7 +146,6 @@
                             </label>
                             <input type="number" 
                                    name="amount" 
-                                   step="0.01" 
                                    min="0.01" 
                                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-imhotep-600 focus:ring-4 focus:ring-imhotep-600/20 transition-all duration-200 text-gray-900 hover:border-gray-300 focus:outline-none"
                                    placeholder="0.00"
@@ -322,59 +321,6 @@ document.addEventListener('DOMContentLoaded', function() {
             card.style.opacity = '1';
             card.style.transform = 'translateY(0)';
         }, index * 100);
-    });
-    
-    // Form validation
-    const form = document.getElementById('incomeForm');
-    const amountInput = form.querySelector('input[name="amount"]');
-    const currencyInput = form.querySelector('select[name="currency"]');
-    
-    // Amount validation
-    amountInput.addEventListener('input', function() {
-        const value = parseFloat(this.value);
-        if (value <= 0 || isNaN(value)) {
-            this.classList.add('border-red-400');
-            this.classList.remove('border-green-400');
-        } else {
-            this.classList.add('border-green-400');
-            this.classList.remove('border-red-400');
-        }
-    });
-    
-    // Currency validation
-    currencyInput.addEventListener('change', function() {
-        if (this.value) {
-            this.classList.add('border-green-400');
-            this.classList.remove('border-red-400');
-        } else {
-            this.classList.add('border-red-400');
-            this.classList.remove('border-green-400');
-        }
-    });
-    
-    // Form submission
-    form.addEventListener('submit', function(e) {
-        const amount = parseFloat(amountInput.value);
-        const currency = currencyInput.value;
-        
-        if (!amount || amount <= 0) {
-            e.preventDefault();
-            amountInput.focus();
-            amountInput.classList.add('border-red-400');
-            return;
-        }
-        
-        if (!currency) {
-            e.preventDefault();
-            currencyInput.focus();
-            currencyInput.classList.add('border-red-400');
-            return;
-        }
-        
-        // Show loading state
-        const submitBtn = form.querySelector('button[type="submit"]');
-        submitBtn.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i>Adding Income...';
-        submitBtn.disabled = true;
     });
 });
 </script>

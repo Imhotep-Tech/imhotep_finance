@@ -771,9 +771,6 @@ function initializeDepositPage() {
     // Add form animations
     animateFormElements();
     
-    // Add amount input formatting
-    setupAmountInput();
-    
     // Add income category suggestions
     addIncomeCategorySuggestions();
 }
@@ -789,27 +786,6 @@ function animateFormElements() {
             element.style.opacity = '1';
             element.style.transform = 'translateY(0)';
         }, index * 100);
-    });
-}
-
-function setupAmountInput() {
-    const amountInput = document.querySelector('input[name="amount"]');
-    if (!amountInput) return;
-    
-    amountInput.addEventListener('input', function() {
-        // Format number with commas
-        let value = this.value.replace(/,/g, '');
-        if (!isNaN(value) && value !== '') {
-            this.value = parseFloat(value).toLocaleString();
-        }
-    });
-    
-    amountInput.addEventListener('blur', function() {
-        // Ensure proper decimal formatting
-        let value = this.value.replace(/,/g, '');
-        if (!isNaN(value) && value !== '') {
-            this.value = parseFloat(value).toFixed(2);
-        }
     });
 }
 
@@ -895,9 +871,6 @@ function initializeWithdrawPage() {
     // Add form animations
     animateFormElements();
     
-    // Add amount input formatting (but NO quick expense buttons)
-    setupAmountInput();
-    
     // Add expense category suggestions
     addExpenseCategorySuggestions();
     
@@ -916,27 +889,6 @@ function animateFormElements() {
             element.style.opacity = '1';
             element.style.transform = 'translateY(0)';
         }, index * 100);
-    });
-}
-
-function setupAmountInput() {
-    const amountInput = document.querySelector('input[name="amount"]');
-    if (!amountInput) return;
-    
-    amountInput.addEventListener('input', function() {
-        // Format number with commas
-        let value = this.value.replace(/,/g, '');
-        if (!isNaN(value) && value !== '') {
-            this.value = parseFloat(value).toLocaleString();
-        }
-    });
-    
-    amountInput.addEventListener('blur', function() {
-        // Ensure proper decimal formatting
-        let value = this.value.replace(/,/g, '');
-        if (!isNaN(value) && value !== '') {
-            this.value = parseFloat(value).toFixed(2);
-        }
     });
 }
 
@@ -985,19 +937,17 @@ function setupBalanceValidation() {
     
     if (!amountInput || !currencySelect) return;
     
-    // Add real-time balance checking
+    // Add real-time balance checking (but NO formatting that breaks input)
     function checkBalance() {
         const amount = parseFloat(amountInput.value) || 0;
         const currency = currencySelect.value;
         
         if (amount > 0 && currency) {
-            // You could add AJAX call here to check actual balance
-            // For now, just visual feedback
+            // Just visual feedback, no input manipulation
             amountInput.style.borderColor = amount > 0 ? '#10b981' : '#ef4444';
         }
     }
     
-    amountInput.addEventListener('input', checkBalance);
     currencySelect.addEventListener('change', checkBalance);
 }
 

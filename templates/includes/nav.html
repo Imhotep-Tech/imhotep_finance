@@ -172,10 +172,14 @@
                         <i class="fas fa-minus text-red-500 mr-2"></i>Add Expense
                     </a>
                     <a href="/show_trans" class="text-gray-700 hover:text-imhotep-600 hover:bg-gray-50 block px-6 py-2 rounded-md text-base font-medium">
-                        <i class="fas fa-history mr-2"></i>History
+                        <i class="fas fa-history mr-2"></i>View History
                     </a>
-                    <a href="/trash_trans" class="text-gray-700 hover:text-imhotep-600 hover:bg-gray-50 block px-6 py-2 rounded-md text-base font-medium">
-                        <i class="fas fa-trash text-gray-500 mr-2"></i>Trash
+                    <div class="border-t border-gray-100 my-1 mx-6"></div>
+                    <a href="/add_scheduled_transaction" class="text-gray-700 hover:text-imhotep-600 hover:bg-gray-50 block px-6 py-2 rounded-md text-base font-medium">
+                        <i class="fas fa-calendar-plus mr-2"></i>Schedule Transaction
+                    </a>
+                    <a href="/show_scheduled_trans" class="text-gray-700 hover:text-imhotep-600 hover:bg-gray-50 block px-6 py-2 rounded-md text-base font-medium">
+                        <i class="fas fa-calendar-alt mr-2"></i>Scheduled Transactions
                     </a>
                 </div>
                 
@@ -183,10 +187,7 @@
                 <div class="space-y-1">
                     <div class="px-3 py-2 text-sm font-medium text-gray-500 uppercase tracking-wider">Analytics</div>
                     <a href="/show_networth_details" class="text-gray-700 hover:text-imhotep-600 hover:bg-gray-50 block px-6 py-2 rounded-md text-base font-medium">
-                        <i class="fas fa-wallet mr-2"></i>Net Worth
-                    </a>
-                    <a href="/show_chart" class="text-gray-700 hover:text-imhotep-600 hover:bg-gray-50 block px-6 py-2 rounded-md text-base font-medium">
-                        <i class="fas fa-chart-pie mr-2"></i>Charts
+                        <i class="fas fa-wallet mr-2"></i>Net Worth Details
                     </a>
                     <a href="/monthly_reports" class="text-gray-700 hover:text-imhotep-600 hover:bg-gray-50 block px-6 py-2 rounded-md text-base font-medium">
                         <i class="fas fa-chart-pie mr-2"></i>Monthly Reports
@@ -216,15 +217,16 @@
                 <!-- Settings Section -->
                 <div class="space-y-1 border-t border-gray-200 pt-3">
                     <div class="px-3 py-2 text-sm font-medium text-gray-500 uppercase tracking-wider">Settings</div>
-                    <a href="/settings/favorite_currency" class="text-gray-700 hover:text-imhotep-600 hover:bg-gray-50 block px-6 py-2 rounded-md text-base font-medium">
-                        <i class="fas fa-dollar-sign mr-2"></i>Currency
-                    </a>
                     <a href="/settings/personal_info" class="text-gray-700 hover:text-imhotep-600 hover:bg-gray-50 block px-6 py-2 rounded-md text-base font-medium">
                         <i class="fas fa-user mr-2"></i>Profile
                     </a>
-                    <a href="/settings/security_check" class="text-gray-700 hover:text-imhotep-600 hover:bg-gray-50 block px-6 py-2 rounded-md text-base font-medium">
-                        <i class="fas fa-key mr-2"></i>Password
+                    <a href="/settings/favorite_currency" class="text-gray-700 hover:text-imhotep-600 hover:bg-gray-50 block px-6 py-2 rounded-md text-base font-medium">
+                        <i class="fas fa-dollar-sign mr-2"></i>Change Currency
                     </a>
+                    <a href="/settings/security_check" class="text-gray-700 hover:text-imhotep-600 hover:bg-gray-50 block px-6 py-2 rounded-md text-base font-medium">
+                        <i class="fas fa-key mr-2"></i>Change Password
+                    </a>
+                    <div class="border-t border-gray-100 mx-6 my-1"></div>
                     <a href="/delete_user" class="text-red-600 hover:text-red-700 hover:bg-red-50 block px-6 py-2 rounded-md text-base font-medium">
                         <i class="fas fa-trash mr-2"></i>Delete Account
                     </a>
@@ -234,9 +236,15 @@
                 <div class="border-t border-gray-200 pt-4 pb-3">
                     <div class="flex items-center px-4">
                         <div class="flex-shrink-0">
-                            <img class="h-10 w-10 rounded-full" 
-                                 src="{{ user_photo_path if user_photo_path else url_for('static', filename='default-avatar.png') }}" 
-                                 alt="Profile">
+                            {% if not user_photo_path %}
+                                <img src="{{url_for('static', filename='avatar-anonymous-300x300.png') }}" 
+                                    alt="Profile" 
+                                    class="h-8 w-8 rounded-full border-2 border-imhotep-200 hover:border-imhotep-400 transition-colors cursor-pointer">
+                            {% else %}
+                                <img src="{{ url_for('static', filename='user_photo/' + user_photo_path) }}" 
+                                    alt="Profile" 
+                                    class="h-8 w-8 rounded-full border-2 border-imhotep-200 hover:border-imhotep-400 transition-colors cursor-pointer">
+                            {% endif %}
                         </div>
                         <div class="ml-3">
                             <div class="text-base font-medium leading-none text-gray-800">Welcome back!</div>
