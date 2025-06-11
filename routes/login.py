@@ -180,7 +180,7 @@ def forget_password():
                         </div>
                         
                         <div style="text-align: center; margin: 30px 0;">
-                            <a href="https://yourapp.com/login_page" style="background: linear-gradient(135deg, #51adac 0%, #428a89 100%); color: #ffffff; padding: 15px 30px; text-decoration: none; border-radius: 25px; font-weight: bold; display: inline-block;">
+                            <a href="https://imhotepf.pythonanywhere.com/login_page" style="background: linear-gradient(135deg, #51adac 0%, #428a89 100%); color: #ffffff; padding: 15px 30px; text-decoration: none; border-radius: 25px; font-weight: bold; display: inline-block;">
                                 🔑 Login to Your Account
                             </a>
                         </div>

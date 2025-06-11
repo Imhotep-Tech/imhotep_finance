@@ -154,14 +154,180 @@ def mail_verification_change_mail():
             db.session.commit()
 
             is_html = True
-            body = f"Your E-mail has been changed now to {user_mail}"
-            success, error = send_mail(smtp_server , smtp_port , email_send , email_send_password , user_mail_db, "Email Verification" ,body, is_html)
+            body = f"""
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Email Changed - Imhotep Financial Manager</title>
+            </head>
+            <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background-color: #f8f9fa; margin: 0; padding: 0;">
+                <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                    <!-- Header -->
+                    <div style="background: linear-gradient(135deg, #51adac 0%, #428a89 100%); padding: 30px 20px; text-align: center;">
+                        <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold;">
+                            📧 Email Address Changed
+                        </h1>
+                        <p style="color: rgba(255, 255, 255, 0.9); margin: 10px 0 0 0; font-size: 16px;">
+                            Imhotep Financial Manager Security
+                        </p>
+                    </div>
+                    
+                    <!-- Content -->
+                    <div style="padding: 40px 30px;">
+                        <div style="background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 8px; padding: 20px; margin-bottom: 25px;">
+                            <h3 style="color: #155724; margin-top: 0; font-size: 18px;">✅ Account Update Successful</h3>
+                            <p style="margin-bottom: 0; color: #155724;">
+                                Your email address has been successfully changed for security and communication purposes.
+                            </p>
+                        </div>
+                        
+                        <h2 style="color: #51adac; margin-bottom: 20px; font-size: 24px;">
+                            Email Address Updated
+                        </h2>
+                        
+                        <p style="font-size: 16px; margin-bottom: 25px; color: #555;">
+                            Dear User,
+                        </p>
+                        
+                        <p style="font-size: 16px; margin-bottom: 25px; color: #555;">
+                            This email is to inform you that your email address has been successfully changed from your previous email to:
+                        </p>
+                        
+                        <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border: 2px solid #51adac; border-radius: 12px; padding: 25px; text-align: center; margin: 30px 0;">
+                            <p style="margin: 0 0 10px 0; color: #555; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">New Email Address</p>
+                            <h3 style="color: #51adac; font-size: 20px; margin: 0; font-weight: bold;">
+                                {user_mail}
+                            </h3>
+                        </div>
+                        
+                        <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 20px; margin: 25px 0;">
+                            <h4 style="color: #856404; margin-top: 0;">🔐 Security Notice:</h4>
+                            <ul style="color: #856404; padding-left: 20px; margin-bottom: 0;">
+                                <li style="margin-bottom: 8px;">All future communications will be sent to your new email address</li>
+                                <li style="margin-bottom: 8px;">If you didn't make this change, contact support immediately</li>
+                                <li style="margin-bottom: 8px;">Your account security remains protected</li>
+                                <li style="margin-bottom: 8px;">Use your new email for all future logins</li>
+                            </ul>
+                        </div>
+                        
+                        <p style="font-size: 14px; color: #6c757d; margin-top: 30px;">
+                            This notification was sent to your previous email address for security purposes. If you have any questions or concerns, please contact our support team at 
+                            <a href="mailto:imhoteptech@outlook.com" style="color: #51adac;">imhoteptech@outlook.com</a>
+                        </p>
+                    </div>
+                    
+                    <!-- Footer -->
+                    <div style="background-color: #2f5a5a; color: #ffffff; padding: 25px 30px; text-align: center;">
+                        <p style="margin: 0 0 15px 0; font-size: 16px; font-weight: bold;">
+                            Imhotep Financial Manager Security Team
+                        </p>
+                        <p style="margin: 0 0 15px 0; font-size: 14px; opacity: 0.9;">
+                            Protecting your financial data is our top priority.
+                        </p>
+                        <p style="margin: 0; font-size: 12px; opacity: 0.7;">
+                            © 2025 Imhotep Financial Manager. All rights reserved.<br>
+                            This is an automated security email. Please do not reply.
+                        </p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """
+            success, error = send_mail(smtp_server , smtp_port , email_send , email_send_password , user_mail_db, "📧 Email Changed - Imhotep Financial Manager" ,body, is_html)
             if error:
                 print(error)
 
             is_html = True
-            body = f"Welcome {user_username} To Imhotep Finacial Manager"
-            success, error = send_mail(smtp_server , smtp_port , email_send , email_send_password , user_mail, "Email Verification" ,body, is_html)
+            body = f"""
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Welcome - Imhotep Financial Manager</title>
+            </head>
+            <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background-color: #f8f9fa; margin: 0; padding: 0;">
+                <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                    <!-- Header -->
+                    <div style="background: linear-gradient(135deg, #51adac 0%, #428a89 100%); padding: 30px 20px; text-align: center;">
+                        <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold;">
+                            🎉 Welcome to Your Updated Account
+                        </h1>
+                        <p style="color: rgba(255, 255, 255, 0.9); margin: 10px 0 0 0; font-size: 16px;">
+                            Imhotep Financial Manager
+                        </p>
+                    </div>
+                    
+                    <!-- Content -->
+                    <div style="padding: 40px 30px;">
+                        <div style="background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 8px; padding: 20px; margin-bottom: 25px;">
+                            <h3 style="color: #155724; margin-top: 0; font-size: 18px;">✅ Account Successfully Updated</h3>
+                            <p style="margin-bottom: 0; color: #155724;">
+                                Your account information has been successfully updated and verified.
+                            </p>
+                        </div>
+                        
+                        <h2 style="color: #51adac; margin-bottom: 20px; font-size: 24px;">
+                            Welcome Back, {user_username}!
+                        </h2>
+                        
+                        <p style="font-size: 16px; margin-bottom: 25px; color: #555;">
+                            Dear {user_username},
+                        </p>
+                        
+                        <p style="font-size: 16px; margin-bottom: 25px; color: #555;">
+                            Welcome to Imhotep Financial Manager! Your account has been successfully updated with your new email address. You can now enjoy all the features of our financial management platform.
+                        </p>
+                        
+                        <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border: 2px solid #51adac; border-radius: 12px; padding: 25px; text-align: center; margin: 30px 0;">
+                            <p style="margin: 0 0 10px 0; color: #555; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Your New Email</p>
+                            <h3 style="color: #51adac; font-size: 20px; margin: 0; font-weight: bold;">
+                                {user_mail}
+                            </h3>
+                        </div>
+                        
+                        <div style="text-align: center; margin: 30px 0;">
+                            <a href="https://imhotepf.pythonanywhere.com/login_page" style="background: linear-gradient(135deg, #51adac 0%, #428a89 100%); color: #ffffff; padding: 15px 30px; text-decoration: none; border-radius: 25px; font-weight: bold; display: inline-block;">
+                                🚀 Access Your Dashboard
+                            </a>
+                        </div>
+                        
+                        <div style="background-color: #d1ecf1; border: 1px solid #bee5eb; border-radius: 8px; padding: 20px; margin: 25px 0;">
+                            <h4 style="color: #0c5460; margin-top: 0;">💡 Getting Started:</h4>
+                            <ul style="color: #0c5460; padding-left: 20px; margin-bottom: 0;">
+                                <li style="margin-bottom: 8px;">Track your income and expenses</li>
+                                <li style="margin-bottom: 8px;">Set financial goals and budgets</li>
+                                <li style="margin-bottom: 8px;">Monitor your net worth across multiple currencies</li>
+                                <li style="margin-bottom: 8px;">Generate detailed financial reports</li>
+                            </ul>
+                        </div>
+                        
+                        <p style="font-size: 14px; color: #6c757d; margin-top: 30px;">
+                            This welcome email was sent to {user_mail}. If you have any questions or need assistance, please contact our support team at 
+                            <a href="mailto:imhoteptech@outlook.com" style="color: #51adac;">imhoteptech@outlook.com</a>
+                        </p>
+                    </div>
+                    
+                    <!-- Footer -->
+                    <div style="background-color: #2f5a5a; color: #ffffff; padding: 25px 30px; text-align: center;">
+                        <p style="margin: 0 0 15px 0; font-size: 16px; font-weight: bold;">
+                            Imhotep Financial Manager Team
+                        </p>
+                        <p style="margin: 0 0 15px 0; font-size: 14px; opacity: 0.9;">
+                            Your financial success is our mission.
+                        </p>
+                        <p style="margin: 0; font-size: 12px; opacity: 0.7;">
+                            © 2025 Imhotep Financial Manager. All rights reserved.<br>
+                            This is an automated welcome email. Please do not reply.
+                        </p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """
+            success, error = send_mail(smtp_server , smtp_port , email_send , email_send_password , user_mail, "🎉 Welcome - Imhotep Financial Manager" ,body, is_html)
             if error:
                 print(error)
 
@@ -348,15 +514,104 @@ def security():
 
         is_html = True
         body = f"""
-        <h3>Password Changed Successfully</h3>
-        <p>Dear User,</p>
-        <p>Your password has been successfully changed. If you did not request this change, please contact our support team immediately.</p>
-        <p>For your security, please do not share your password with anyone.</p>
-        <p>If you have any questions or need further assistance, feel free to reach out to our support team.</p>
-        <p>Best regards,</p>
-        <p>The Imhotep Financial Manager Team</p>
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Password Changed - Imhotep Financial Manager</title>
+        </head>
+        <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background-color: #f8f9fa; margin: 0; padding: 0;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                <!-- Header -->
+                <div style="background: linear-gradient(135deg, #51adac 0%, #428a89 100%); padding: 30px 20px; text-align: center;">
+                    <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold;">
+                        🔐 Password Successfully Changed
+                    </h1>
+                    <p style="color: rgba(255, 255, 255, 0.9); margin: 10px 0 0 0; font-size: 16px;">
+                        Imhotep Financial Manager Security
+                    </p>
+                </div>
+                
+                <!-- Content -->
+                <div style="padding: 40px 30px;">
+                    <div style="background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 8px; padding: 20px; margin-bottom: 25px;">
+                        <h3 style="color: #155724; margin-top: 0; font-size: 18px;">✅ Password Update Successful</h3>
+                        <p style="margin-bottom: 0; color: #155724;">
+                            Your password has been successfully changed and your account is now more secure.
+                        </p>
+                    </div>
+                    
+                    <h2 style="color: #51adac; margin-bottom: 20px; font-size: 24px;">
+                        Password Changed Successfully
+                    </h2>
+                    
+                    <p style="font-size: 16px; margin-bottom: 25px; color: #555;">
+                        Dear User,
+                    </p>
+                    
+                    <p style="font-size: 16px; margin-bottom: 25px; color: #555;">
+                        This email confirms that your password has been successfully changed for your Imhotep Financial Manager account. Your account security has been updated and you can continue using our platform with confidence.
+                    </p>
+                    
+                    <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border: 2px solid #51adac; border-radius: 12px; padding: 25px; text-align: center; margin: 30px 0;">
+                        <h3 style="color: #51adac; font-size: 20px; margin: 0; font-weight: bold;">
+                            🛡️ Your Account is Now More Secure
+                        </h3>
+                        <p style="margin: 10px 0 0 0; color: #555; font-size: 14px;">
+                            Password updated successfully at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} UTC
+                        </p>
+                    </div>
+                    
+                    <div style="text-align: center; margin: 30px 0;">
+                        <a href="https://imhotepf.pythonanywhere.com/login_page" style="background: linear-gradient(135deg, #51adac 0%, #428a89 100%); color: #ffffff; padding: 15px 30px; text-decoration: none; border-radius: 25px; font-weight: bold; display: inline-block;">
+                            🚀 Access Your Dashboard
+                        </a>
+                    </div>
+                    
+                    <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 20px; margin: 25px 0;">
+                        <h4 style="color: #856404; margin-top: 0;">🔐 Security Reminders:</h4>
+                        <ul style="color: #856404; padding-left: 20px; margin-bottom: 0;">
+                            <li style="margin-bottom: 8px;">Keep your new password secure and never share it with anyone</li>
+                            <li style="margin-bottom: 8px;">Use your new password for all future logins</li>
+                            <li style="margin-bottom: 8px;">Consider enabling two-factor authentication for added security</li>
+                            <li style="margin-bottom: 8px;">If you didn't make this change, contact support immediately</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 8px; padding: 20px; margin: 25px 0;">
+                        <h4 style="color: #721c24; margin-top: 0;">⚠️ Didn't Change Your Password?</h4>
+                        <p style="color: #721c24; margin-bottom: 10px;">
+                            If you did not request this password change, your account may be compromised. Please contact our support team immediately.
+                        </p>
+                        <p style="color: #721c24; margin-bottom: 0;">
+                            <strong>Support Email:</strong> <a href="mailto:imhoteptech@outlook.com" style="color: #721c24;">imhoteptech@outlook.com</a>
+                        </p>
+                    </div>
+                    
+                    <p style="font-size: 14px; color: #6c757d; margin-top: 30px;">
+                        This security notification was sent to {user_mail}. For your protection, we automatically log you out of all devices when your password is changed. If you have any questions or concerns, please contact our support team.
+                    </p>
+                </div>
+                
+                <!-- Footer -->
+                <div style="background-color: #2f5a5a; color: #ffffff; padding: 25px 30px; text-align: center;">
+                    <p style="margin: 0 0 15px 0; font-size: 16px; font-weight: bold;">
+                        Imhotep Financial Manager Security Team
+                    </p>
+                    <p style="margin: 0 0 15px 0; font-size: 14px; opacity: 0.9;">
+                        Protecting your financial data is our top priority.
+                    </p>
+                    <p style="margin: 0; font-size: 12px; opacity: 0.7;">
+                        © 2025 Imhotep Financial Manager. All rights reserved.<br>
+                        This is an automated security email. Please do not reply.
+                    </p>
+                </div>
+            </div>
+        </body>
+        </html>
         """
-        success, error = send_mail(smtp_server, smtp_port, email_send, email_send_password, user_mail, "Password Changed", body, is_html)
+        success, error = send_mail(smtp_server, smtp_port, email_send, email_send_password, user_mail, "🔐 Password Changed - Imhotep Financial Manager", body, is_html)
         if error:
             print(error)
 
@@ -458,4 +713,4 @@ def update_target():
 
         done = "Your Target have been updated"
         return render_template("update_target.html", total_favorite_currency=total_favorite_currency,favorite_currency=favorite_currency, done=done,user_photo_path=user_photo_path, target_db=target_db, form=CSRFForm())
-    
+

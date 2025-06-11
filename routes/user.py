@@ -207,16 +207,109 @@ def check_pass_delete_user():
 
             is_html = True
             body = f"""
-            <h3>Account Deletion Verification</h3>
-            <p>Dear User,</p>
-            <p>We have received a request to delete your account. To proceed with the deletion, please use the following verification code:</p>
-            <h1>{verification_code}</h1>
-            <p>Please enter this code on the verification page to confirm the deletion of your account.</p>
-            <p>If you did not request this action, please ignore this email and contact our support team immediately.</p>
-            <p>Best regards,</p>
-            <p>The Imhotep Financial Manager Team</p>
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Account Deletion Verification - Imhotep Financial Manager</title>
+            </head>
+            <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background-color: #f8f9fa; margin: 0; padding: 0;">
+                <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                    <!-- Header -->
+                    <div style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); padding: 30px 20px; text-align: center;">
+                        <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold;">
+                            ⚠️ Account Deletion Request
+                        </h1>
+                        <p style="color: rgba(255, 255, 255, 0.9); margin: 10px 0 0 0; font-size: 16px;">
+                            Imhotep Financial Manager Security
+                        </p>
+                    </div>
+                    
+                    <!-- Content -->
+                    <div style="padding: 40px 30px;">
+                        <div style="background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 8px; padding: 20px; margin-bottom: 25px;">
+                            <h3 style="color: #721c24; margin-top: 0; font-size: 18px;">🚨 Critical Security Alert</h3>
+                            <p style="margin-bottom: 0; color: #721c24;">
+                                We have received a request to permanently delete your account. This action cannot be undone.
+                            </p>
+                        </div>
+                        
+                        <h2 style="color: #dc3545; margin-bottom: 20px; font-size: 24px;">
+                            Account Deletion Verification Required
+                        </h2>
+                        
+                        <p style="font-size: 16px; margin-bottom: 25px; color: #555;">
+                            Dear User,
+                        </p>
+                        
+                        <p style="font-size: 16px; margin-bottom: 25px; color: #555;">
+                            We have received a request to delete your Imhotep Financial Manager account. To proceed with this permanent action, please use the verification code below:
+                        </p>
+                        
+                        <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border: 2px dashed #dc3545; border-radius: 12px; padding: 25px; text-align: center; margin: 30px 0;">
+                            <p style="margin: 0 0 10px 0; color: #555; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Verification Code</p>
+                            <h1 style="color: #dc3545; font-family: 'Courier New', monospace; font-size: 32px; margin: 0; letter-spacing: 3px; font-weight: bold;">
+                                {verification_code}
+                            </h1>
+                        </div>
+                        
+                        <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 20px; margin: 25px 0;">
+                            <h4 style="color: #856404; margin-top: 0;">⚠️ Before You Proceed:</h4>
+                            <ul style="color: #856404; padding-left: 20px; margin-bottom: 0;">
+                                <li style="margin-bottom: 8px;">Account deletion is permanent and cannot be undone</li>
+                                <li style="margin-bottom: 8px;">All your financial data, transactions, and reports will be lost</li>
+                                <li style="margin-bottom: 8px;">Your targets and wishlist items will be permanently removed</li>
+                                <li style="margin-bottom: 8px;">You will need to create a new account to use our services again</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="background-color: #d1ecf1; border: 1px solid #bee5eb; border-radius: 8px; padding: 20px; margin: 25px 0;">
+                            <h4 style="color: #0c5460; margin-top: 0;">🤔 Consider These Alternatives:</h4>
+                            <ul style="color: #0c5460; padding-left: 20px; margin-bottom: 0;">
+                                <li style="margin-bottom: 8px;">Temporarily disable your account instead</li>
+                                <li style="margin-bottom: 8px;">Export your financial data before deletion</li>
+                                <li style="margin-bottom: 8px;">Contact support if you're experiencing issues</li>
+                                <li style="margin-bottom: 8px;">Take a break and come back when you're ready</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 8px; padding: 20px; margin: 25px 0;">
+                            <h4 style="color: #721c24; margin-top: 0;">🔒 Didn't Request This?</h4>
+                            <p style="color: #721c24; margin-bottom: 10px;">
+                                If you did not request account deletion, your account may be compromised. Please:
+                            </p>
+                            <ul style="color: #721c24; padding-left: 20px; margin-bottom: 0;">
+                                <li style="margin-bottom: 8px;">Do not enter the verification code</li>
+                                <li style="margin-bottom: 8px;">Change your password immediately</li>
+                                <li style="margin-bottom: 8px;">Contact our support team</li>
+                            </ul>
+                        </div>
+                        
+                        <p style="font-size: 14px; color: #6c757d; margin-top: 30px;">
+                            This verification email was sent to {user_mail}. The verification code will expire in 30 minutes. If you have any questions or concerns, please contact our support team at 
+                            <a href="mailto:imhoteptech@outlook.com" style="color: #dc3545;">imhoteptech@outlook.com</a>
+                        </p>
+                    </div>
+                    
+                    <!-- Footer -->
+                    <div style="background-color: #2f5a5a; color: #ffffff; padding: 25px 30px; text-align: center;">
+                        <p style="margin: 0 0 15px 0; font-size: 16px; font-weight: bold;">
+                            Imhotep Financial Manager Security Team
+                        </p>
+                        <p style="margin: 0 0 15px 0; font-size: 14px; opacity: 0.9;">
+                            We're here to help protect your account and data.
+                        </p>
+                        <p style="margin: 0; font-size: 12px; opacity: 0.7;">
+                            © 2025 Imhotep Financial Manager. All rights reserved.<br>
+                            This is an automated security email. Please do not reply.
+                        </p>
+                    </div>
+                </div>
+            </body>
+            </html>
             """
-            success, error = send_mail(smtp_server, smtp_port, email_send, email_send_password, user_mail, "Delete Verification", body, is_html)
+            success, error = send_mail(smtp_server, smtp_port, email_send, email_send_password, user_mail, "⚠️ Account Deletion Verification - Imhotep Financial Manager", body, is_html)
             if error:
                 print(error)
 
@@ -268,17 +361,119 @@ def verify_delete_user():
 
             is_html = True
             body = f"""
-            <h3>Account Deleted</h3>
-            <p>Dear User,</p>
-            <p>We are sorry to see you go. Your account has been successfully deleted.</p>
-            <p>We would appreciate it if you could take a moment to let us know why you decided to delete your account. Your feedback is valuable to us and will help us improve our services.</p>
-            <p>Please click the link below to fill out a short feedback form:</p>
-            <p><a href="https://forms.gle/FZVhQXnticjx16228">Feedback Form</a></p>
-            <p>If you have any questions or need further assistance, feel free to reach out to our support team.</p>
-            <p>Best regards,</p>
-            <p>The Imhotep Financial Manager Team</p>
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Account Deleted - Imhotep Financial Manager</title>
+            </head>
+            <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background-color: #f8f9fa; margin: 0; padding: 0;">
+                <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                    <!-- Header -->
+                    <div style="background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%); padding: 30px 20px; text-align: center;">
+                        <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold;">
+                            👋 Account Successfully Deleted
+                        </h1>
+                        <p style="color: rgba(255, 255, 255, 0.9); margin: 10px 0 0 0; font-size: 16px;">
+                            Imhotep Financial Manager
+                        </p>
+                    </div>
+                    
+                    <!-- Content -->
+                    <div style="padding: 40px 30px;">
+                        <div style="background-color: #d1ecf1; border: 1px solid #bee5eb; border-radius: 8px; padding: 20px; margin-bottom: 25px;">
+                            <h3 style="color: #0c5460; margin-top: 0; font-size: 18px;">✅ Deletion Complete</h3>
+                            <p style="margin-bottom: 0; color: #0c5460;">
+                                Your account and all associated data have been permanently removed from our systems.
+                            </p>
+                        </div>
+                        
+                        <h2 style="color: #6c757d; margin-bottom: 20px; font-size: 24px;">
+                            We're Sorry to See You Go
+                        </h2>
+                        
+                        <p style="font-size: 16px; margin-bottom: 25px; color: #555;">
+                            Dear Former User,
+                        </p>
+                        
+                        <p style="font-size: 16px; margin-bottom: 25px; color: #555;">
+                            Your Imhotep Financial Manager account has been successfully deleted as requested. We understand that everyone's financial management needs are different, and we respect your decision to move on.
+                        </p>
+                        
+                        <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border: 2px solid #6c757d; border-radius: 12px; padding: 25px; text-align: center; margin: 30px 0;">
+                            <h3 style="color: #6c757d; font-size: 20px; margin: 0; font-weight: bold;">
+                                🗑️ Account Deletion Confirmed
+                            </h3>
+                            <p style="margin: 10px 0 0 0; color: #555; font-size: 14px;">
+                                All your data has been permanently removed from our servers
+                            </p>
+                        </div>
+                        
+                        <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 20px; margin: 25px 0;">
+                            <h4 style="color: #856404; margin-top: 0;">📋 What Was Deleted:</h4>
+                            <ul style="color: #856404; padding-left: 20px; margin-bottom: 0;">
+                                <li style="margin-bottom: 8px;">All financial transactions and records</li>
+                                <li style="margin-bottom: 8px;">Personal information and account settings</li>
+                                <li style="margin-bottom: 8px;">Financial targets and goals</li>
+                                <li style="margin-bottom: 8px;">Wishlist items and preferences</li>
+                                <li style="margin-bottom: 8px;">Reports and analytics data</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 8px; padding: 20px, margin: 25px 0;">
+                            <h4 style="color: #155724; margin-top: 0;">💝 Help Us Improve</h4>
+                            <p style="color: #155724; margin-bottom: 15px;">
+                                We would greatly appreciate your feedback to help us improve our services for future users. Your insights are valuable to us and will help us build a better financial management platform.
+                            </p>
+                            <div style="text-align: center;">
+                                <a href="https://forms.gle/FZVhQXnticjx16228" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: #ffffff; padding: 12px 25px; text-decoration: none; border-radius: 20px; font-weight: bold; display: inline-block;">
+                                    📝 Share Your Feedback
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div style="background-color: #d1ecf1; border: 1px solid #bee5eb; border-radius: 8px; padding: 20px; margin: 25px 0;">
+                            <h4 style="color: #0c5460; margin-top: 0;">🔄 Want to Return?</h4>
+                            <p style="color: #0c5460; margin-bottom: 10px;">
+                                You're always welcome back! If you decide to return to Imhotep Financial Manager in the future:
+                            </p>
+                            <ul style="color: #0c5460; padding-left: 20px; margin-bottom: 15px;">
+                                <li style="margin-bottom: 8px;">Create a new account with the same or different email</li>
+                                <li style="margin-bottom: 8px;">Start fresh with new financial goals</li>
+                                <li style="margin-bottom: 8px;">Enjoy any new features we've added</li>
+                            </ul>
+                            <div style="text-align: center;">
+                                <a href="https://imhotepf.pythonanywhere.com/register_page" style="background: linear-gradient(135deg, #51adac 0%, #428a89 100%); color: #ffffff; padding: 12px 25px; text-decoration: none; border-radius: 20px; font-weight: bold; display: inline-block;">
+                                    🚀 Create New Account
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <p style="font-size: 14px; color: #6c757d; margin-top: 30px;">
+                            This final confirmation was sent to {user_mail}. If you have any questions or need assistance with financial management in the future, please don't hesitate to contact our support team at 
+                            <a href="mailto:imhoteptech@outlook.com" style="color: #6c757d;">imhoteptech@outlook.com</a>
+                        </p>
+                    </div>
+                    
+                    <!-- Footer -->
+                    <div style="background-color: #2f5a5a; color: #ffffff; padding: 25px 30px; text-align: center;">
+                        <p style="margin: 0 0 15px 0; font-size: 16px; font-weight: bold;">
+                            Imhotep Financial Manager Team
+                        </p>
+                        <p style="margin: 0 0 15px 0; font-size: 14px; opacity: 0.9;">
+                            Thank you for being part of our community.
+                        </p>
+                        <p style="margin: 0; font-size: 12px; opacity: 0.7;">
+                            © 2025 Imhotep Financial Manager. All rights reserved.<br>
+                            This is an automated confirmation email. Please do not reply.
+                        </p>
+                    </div>
+                </div>
+            </body>
+            </html>
             """
-            success, error = send_mail(smtp_server, smtp_port, email_send, email_send_password, user_mail, "Account Deleted", body, is_html)
+            success, error = send_mail(smtp_server, smtp_port, email_send, email_send_password, user_mail, "👋 Account Deleted - Imhotep Financial Manager", body, is_html)
             if error:
                 print(error)
 

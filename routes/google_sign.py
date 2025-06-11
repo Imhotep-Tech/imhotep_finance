@@ -145,7 +145,7 @@ def add_password_google_login():
                 </div>
                 
                 <div style="text-align: center; margin: 30px 0;">
-                    <a href="https://yourapp.com/login" style="background: linear-gradient(135deg, #51adac 0%, #428a89 100%); color: #ffffff; padding: 15px 30px; text-decoration: none; border-radius: 25px; font-weight: bold; display: inline-block; transition: transform 0.3s ease;">
+                    <a href="https://https://imhotepf.pythonanywhere.com/" style="background: linear-gradient(135deg, #51adac 0%, #428a89 100%); color: #ffffff; padding: 15px 30px; text-decoration: none; border-radius: 25px; font-weight: bold; display: inline-block; transition: transform 0.3s ease;">
                         🎯 Start Managing Your Finances
                     </a>
                 </div>
