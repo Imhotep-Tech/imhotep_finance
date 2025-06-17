@@ -5,10 +5,12 @@ from flask_limiter.util import get_remote_address
 from flask_sqlalchemy import SQLAlchemy
 from authlib.integrations.flask_client import OAuth
 import os
+from flask_caching import Cache
 
 # Initialize extensions
 sess = Session()
 csrf = CSRFProtect()
+cache = Cache()
 
 limiter = Limiter(
     get_remote_address,  # This will limit based on the IP address of the requester
@@ -41,3 +43,4 @@ def init_extensions(app):
     limiter.init_app(app)
     db.init_app(app)
     oauth.init_app(app)
+    cache.init_app(app)

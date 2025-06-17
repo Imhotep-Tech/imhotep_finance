@@ -314,7 +314,7 @@ function removeDarkModeFromNavigation() {
     });
     
     // Reset cards and forms
-    document.querySelectorAll('.metric-card, .gradient-card, .score-card, .currency-card, .bg-white, input, select, textarea').forEach(element => {
+    document.querySelectorAll('.metric-card, .gradient-card, .score-card, .currency-card, .bg-white').forEach(element => {
         if (!element.classList.contains('fixed')) {
             element.style.background = '';
             element.style.backgroundColor = '';
@@ -998,43 +998,39 @@ function initializeAdvancedFiltering() {
     // Show loading on form submission
     filterForm.addEventListener('submit', showLoadingScreen);
     
-    // Year filter functionality
+    // Basic year filter functionality - validation handled in templates
     const yearSelect = document.getElementById('YearSelect');
-    if (yearSelect) {
+    const searchInput = document.getElementById('searchInput1');
+    if (yearSelect && searchInput) {
         const originalOptions = [...yearSelect.options];
         
-        // Filter years based on search input
-        const searchInput = document.getElementById('searchInput1');
-        if (searchInput) {
-            searchInput.addEventListener('input', function() {
-                const searchText = this.value.toLowerCase();
-                yearSelect.innerHTML = '';
-                
-                // Add the default option
-                const defaultOption = document.createElement('option');
-                defaultOption.disabled = true;
-                defaultOption.selected = true;
-                defaultOption.textContent = 'Years';
-                yearSelect.appendChild(defaultOption);
-                
-                const filteredOptions = originalOptions.filter(option => {
-                    // Skip the default "Years" option
-                    return !option.disabled && option.textContent.toLowerCase().includes(searchText);
-                });
-                
-                if (filteredOptions.length === 0) {
-                    const noMatchOption = document.createElement('option');
-                    noMatchOption.disabled = true;
-                    noMatchOption.textContent = 'No Match';
-                    yearSelect.appendChild(noMatchOption);
-                } else {
-                    filteredOptions.forEach(option => {
-                        const newOption = option.cloneNode(true);
-                        yearSelect.appendChild(newOption);
-                    });
-                }
+        searchInput.addEventListener('input', function() {
+            const searchText = this.value.toLowerCase();
+            yearSelect.innerHTML = '';
+            
+            // Add the default option
+            const defaultOption = document.createElement('option');
+            defaultOption.disabled = true;
+            defaultOption.selected = true;
+            defaultOption.textContent = 'Years';
+            yearSelect.appendChild(defaultOption);
+            
+            const filteredOptions = originalOptions.filter(option => {
+                return !option.disabled && option.textContent.toLowerCase().includes(searchText);
             });
-        }
+            
+            if (filteredOptions.length === 0) {
+                const noMatchOption = document.createElement('option');
+                noMatchOption.disabled = true;
+                noMatchOption.textContent = 'No Match';
+                yearSelect.appendChild(noMatchOption);
+            } else {
+                filteredOptions.forEach(option => {
+                    const newOption = option.cloneNode(true);
+                    yearSelect.appendChild(newOption);
+                });
+            }
+        });
     }
 }
 
@@ -1054,9 +1050,6 @@ function initializeWishlistPage() {
     
     // Initialize responsive behavior
     handleWishlistResponsiveness();
-    
-    // Remove the status filter initialization as it's not needed for wishlist
-    // initializeStatusFilter();
 }
 
 function animateWishlistCards() {
@@ -1239,19 +1232,6 @@ touchElements.forEach(element => {
     element.addEventListener('touchcancel', function() {
         this.style.transform = '';
     });
-});
-
-// Focus handling for accessibility
-document.addEventListener('focusin', function(e) {
-    if (e.target.matches('input, textarea, select')) {
-        e.target.style.outline = '2px solid #51adac';
-    }
-});
-
-document.addEventListener('focusout', function(e) {
-    if (e.target.matches('input, textarea, select')) {
-        e.target.style.outline = '';
-    }
 });
 
 // Ensure viewport meta tag exists for mobile

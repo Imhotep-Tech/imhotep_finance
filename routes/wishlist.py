@@ -6,6 +6,7 @@ from utils.currencies import show_networth, select_currencies
 from datetime import date
 from extensions import db
 from config import CSRFForm
+from utils.recalculate_networth import recalculate_networth
 
 wishlist_bp = Blueprint('wishlist', __name__)
 
@@ -174,6 +175,9 @@ def check_wish():
                     )
                     db.session.commit()
 
+                    #to make sure that the networth is calculated correctly and there is no unexpected error happened
+                    new_total = recalculate_networth(user_id, new_total, currency)
+
                     db.session.execute(
                         text("UPDATE networth SET total = :total WHERE currency = :currency AND user_id = :user_id"),
                         {"total" :new_total,"currency" :currency, "user_id" :user_id}
@@ -210,6 +214,9 @@ def check_wish():
                         {"trans_key" :trans_key}
                     )
                     db.session.commit()
+
+                    #to make sure that the networth is calculated correctly and there is no unexpected error happened
+                    new_total = recalculate_networth(user_id, new_total, currency)
 
                     db.session.execute(
                         text("UPDATE networth SET total = :total WHERE currency = :currency AND user_id = :user_id"),

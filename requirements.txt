@@ -6,6 +6,7 @@ Flask-Mail==0.10.0
 Flask-Session==0.8.0
 Flask-Limiter==3.10.1
 flask-talisman==1.1.0
+flask-caching==2.3.1
 
 # Database
 SQLAlchemy==2.0.36
