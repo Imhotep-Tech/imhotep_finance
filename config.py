@@ -37,6 +37,10 @@ class Config:
     #the password mail
     MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
 
+    CACHE_TYPE = 'SimpleCache'
+    CACHE_DEFAULT_TIMEOUT = 300
+    CACHE_THRESHOLD = 500  # Maximum number of items the cache stores
+    
 #the csrf class for the protection
 class CSRFForm(FlaskForm):
     pass

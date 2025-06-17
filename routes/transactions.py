@@ -9,6 +9,7 @@ from datetime import datetime
 from openpyxl import Workbook
 import io
 import csv
+from utils.recalculate_networth import recalculate_networth
 
 transactions_bp = Blueprint('transactions', __name__)
 
@@ -68,14 +69,6 @@ def deposit():
             except:
                 trans_key = 1
 
-            last_networth_id = db.session.execute(
-                    text("SELECT MAX(networth_id) FROM networth")
-                ).fetchone()[0]
-            if last_networth_id:
-                networth_id = last_networth_id + 1
-            else:
-                networth_id = 1
-
             db.session.execute(
                 text("INSERT INTO trans (date, trans_key, amount, currency, user_id, trans_id, trans_status, trans_details, category) VALUES (:date, :trans_key, :amount, :currency, :user_id, :trans_id, :trans_status, :trans_details, :category)"),
                   {"date": date,"trans_key":trans_key, "amount": amount, "currency": currency, "user_id": user_id, "trans_id": trans_id, "trans_status": "deposit", "trans_details": trans_details, "category":category}
@@ -91,7 +84,11 @@ def deposit():
                 networth_id = networth_db[0]
                 total = float(networth_db[1])
 
-                new_total = total + amount
+                new_total_calc = total + amount
+
+                #to make sure that the networth is calculated correctly and there is no unexpected error happened
+                new_total = recalculate_networth(user_id, new_total_calc, currency)
+
                 db.session.execute(
                     text("UPDATE networth SET total = :total WHERE networth_id = :networth_id"),
                     {"total" :new_total, "networth_id": networth_id}
@@ -99,6 +96,10 @@ def deposit():
                 db.session.commit()
 
             else:
+                networth_id = db.session.execute(
+                    text("SELECT COALESCE(MAX(networth_id), 0) + 1 FROM networth")
+                ).fetchone()[0]
+                
                 db.session.execute(
                     text("INSERT INTO networth (networth_id,  user_id , currency, total) VALUES (:networth_id,  :user_id , :currency, :total)"),
                     {"networth_id": networth_id, "user_id": user_id, "currency": currency, "total": amount}
@@ -201,7 +202,11 @@ def withdraw():
                 networth_id = networth_db[0]
                 total = float(networth_db[1])
 
-                new_total = total - amount
+                new_total_calc = total - amount
+                
+                #to make sure that the networth is calculated correctly and there is no unexpected error happened
+                new_total = recalculate_networth(user_id, new_total_calc, currency)
+
                 db.session.execute(
                     text("UPDATE networth SET total = :total WHERE networth_id = :networth_id"),
                     {"total" :new_total, "networth_id": networth_id}
@@ -294,7 +299,7 @@ def edit_trans():
             elif status_db == "deposit":
                 total_db -= amount_db
                 total = total_db + float(amount)
-
+            
             if total < 0:
                 error = "you don't have enough money from this currency!"
                 trans_db = db.session.execute(
@@ -318,9 +323,12 @@ def edit_trans():
             )
             db.session.commit()
 
+            #to make sure that the networth is calculated correctly and there is no unexpected error happened
+            new_total = recalculate_networth(user_id, total, currency)
+
             db.session.execute(
                 text("UPDATE networth SET total = :total WHERE user_id = :user_id and currency = :currency"),
-                {"total" :total, "user_id" :user_id, "currency" :currency}
+                {"total" :new_total, "user_id" :user_id, "currency" :currency}
             )
             db.session.commit()
 
@@ -417,6 +425,9 @@ def delete_trans():
         )
         db.session.commit()
 
+        #to make sure that the networth is calculated correctly and there is no unexpected error happened
+        total = recalculate_networth(user_id, total, currency)
+
         db.session.execute(
             text("UPDATE networth SET total = :total WHERE user_id = :user_id AND currency = :currency"),
             {"total" :total, "user_id" :user_id, "currency" :currency_db}
@@ -488,7 +499,7 @@ def trash_trans():
             trans_status = trash_trans_data[3]
             trans_details = trash_trans_data[4]
             trans_details_link = trash_trans_data[5]
-            category = category[6]
+            category = trash_trans_data[6]
 
             db.session.execute(
                 text("INSERT INTO trans (trans_key, trans_id, user_id, currency, date, amount, trans_status, trans_details, trans_details_link, category) VALUES (:trans_key, :trans_id, :user_id, :currency, :date, :amount, :trans_status, :trans_details, :trans_details_link, :category)"),
@@ -505,6 +516,9 @@ def trash_trans():
                 total = total_db + float(amount)
             elif trans_status == "withdraw":
                 total = total_db - float(amount)
+
+            #to make sure that the networth is calculated correctly and there is no unexpected error happened
+            total = recalculate_networth(user_id, total, currency)
 
             db.session.execute(
                 text("UPDATE networth SET total = :total WHERE user_id = :user_id AND currency = :currency"),

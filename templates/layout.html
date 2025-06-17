@@ -220,22 +220,40 @@
             background-color: rgba(26, 53, 53, 0.9) !important;
         }
         
+        /* Optimized animations - reduced complexity */
         .animate-float {
             animation: float 6s ease-in-out infinite;
+            will-change: transform;
+            transform: translateZ(0); /* Hardware acceleration */
         }
+        
         @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
+            0%, 100% { transform: translateY(0px) translateZ(0); }
+            50% { transform: translateY(-20px) translateZ(0); }
         }
+        
+        /* Pause animations when user prefers reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            .animate-float,
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+        
         .hero-pattern {
             background-image: radial-gradient(circle at 1px 1px, rgba(81, 173, 172, 0.1) 1px, transparent 0);
             background-size: 20px 20px;
         }
+        
         .logo-img {
             transition: transform 0.3s ease;
+            will-change: transform;
         }
+        
         .logo-img:hover {
-            transform: scale(1.05);
+            transform: scale(1.05) translateZ(0);
         }
         /* Custom scrollbar */
         ::-webkit-scrollbar {
@@ -283,7 +301,6 @@
     {% include 'includes/footer.html' %}
     {% endblock %}
 
-    <!-- Scripts -->
     <script src="{{ url_for('static', filename='main.js') }}"></script>
     {% block extra_scripts %}{% endblock %}
     
