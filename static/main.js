@@ -937,7 +937,7 @@ function setupBalanceValidation() {
     
     if (!amountInput || !currencySelect) return;
     
-    // Add real-time balance checking (but NO formatting that breaks input)
+    // Add real-time balance checking (NO formatting to preserve natural input)
     function checkBalance() {
         const amount = parseFloat(amountInput.value) || 0;
         const currency = currencySelect.value;
