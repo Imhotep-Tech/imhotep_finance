@@ -273,7 +273,8 @@ def edit_trans():
             trans_details = request.form.get("trans_details")
             trans_details_link = request.form.get("trans_details_link")
             category = request.form.get("category")
-
+            
+            print(trans_key)
             amount_currency_db = db.session.execute(
                 text("SELECT amount, currency, trans_status FROM trans WHERE trans_key = :trans_key"),
                 {"trans_key" :trans_key}

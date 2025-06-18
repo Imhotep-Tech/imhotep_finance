@@ -14,7 +14,7 @@ def select_user_data(user_id):
         user_photo_path = user_info[2]
         return user_username, user_mail, user_photo_path
 
-@cache.cached(timeout=300) #cache the photo for 300 seconds (5 mins)
+@cache.cached(timeout=300, key_prefix="user_photo") #cache the photo for 300 seconds (5 mins)
 def select_user_photo():
     user_id = session.get("user_id")
     user_photo_path = db.session.execute(
@@ -88,7 +88,7 @@ def select_years_wishlist(user_id):
 
         return all_years
 
-@cache.cached(timeout=900)
+@cache.cached(timeout=900, key_prefix="app_currencies")
 def get_app_currencies():
     currencies = [
         "USD", "EGP", "AED", "AFN", "ALL", "AMD", "ANG", "AOA", "ARS", "AUD", 
@@ -151,7 +151,7 @@ def get_user_categories(trans_status, user_id):
     categories = [row[0] for row in user_categories] if user_categories else []
     return categories
 
-@cache.cached(timeout=150)
+@cache.cached(timeout=150, key_prefix="user_report")
 def calculate_user_report(start_date, end_date, user_id):
     if not user_id:
         return [], []

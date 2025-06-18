@@ -431,6 +431,7 @@ def favorite_currency():
             favorite_currency = select_favorite_currency(user_id)
             total_favorite_currency, favorite_currency = show_networth()
             total_favorite_currency = f"{total_favorite_currency:,.2f}"
+            print(get_app_currencies())
             return render_template("favorite_currency.html",
                                     favorite_currency=favorite_currency,
                                       user_photo_path=user_photo_path,
@@ -451,6 +452,7 @@ def favorite_currency():
             db.session.commit()
 
             done = f"Your favorite currency is {favorite_currency} now"
+            
             return render_template("favorite_currency.html",
                                     done=done,
                                     favorite_currency=favorite_currency,
