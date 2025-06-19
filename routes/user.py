@@ -10,6 +10,7 @@ from config import CSRFForm
 from extensions import db
 from utils.send_mail import smtp_server, smtp_port, email_send, email_send_password
 from imhotep_mail import send_mail
+from utils.scheduled_trans import add_scheduled_trans
 
 user_bp = Blueprint('user', __name__)
 
@@ -30,6 +31,11 @@ def home():
         user_id = session.get("user_id")
         total_favorite_currency, favorite_currency = show_networth()
         total_favorite_currency = f"{total_favorite_currency:,.2f}"
+        
+        now = datetime.datetime.now()
+
+        #check and add the scheduled trans for the user
+        add_scheduled_trans(user_id, now)
 
         # gets the user target points
         target_db = db.session.execute(
@@ -43,7 +49,6 @@ def home():
             target = target_db[0][2]
             mounth_db = int(target_db[0][3])
             year_db = int(target_db[0][4])
-            now = datetime.datetime.now()
             mounth = now.month
             year = now.year
 
