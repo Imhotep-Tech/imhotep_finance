@@ -68,8 +68,8 @@ def add_scheduled_transaction():
             db.session.execute(
                 text('''
                     INSERT INTO scheduled_trans
-                    (date, scheduled_trans_key, amount, currency, user_id, scheduled_trans_id, scheduled_trans_status, scheduled_trans_details, category)
-                    VALUES (:date, :scheduled_trans_key, :amount, :currency, :user_id, :scheduled_trans_id, :scheduled_trans_status, :scheduled_trans_details, :category)
+                    (date, scheduled_trans_key, amount, currency, user_id, scheduled_trans_id, scheduled_trans_status, scheduled_trans_details, category, last_time_added, status)
+                    VALUES (:date, :scheduled_trans_key, :amount, :currency, :user_id, :scheduled_trans_id, :scheduled_trans_status, :scheduled_trans_details, :category, :last_time_added, :status)
                     '''),
                     {"date": day_of_month,
                     "scheduled_trans_key":scheduled_trans_key,
@@ -79,7 +79,9 @@ def add_scheduled_transaction():
                     "scheduled_trans_id": scheduled_trans_id,
                     "scheduled_trans_status": scheduled_trans_status,
                     "scheduled_trans_details": scheduled_trans_details,
-                    "category":category}
+                    "category":category,
+                    "last_time_added": None,
+                    "status": True}
             )
             db.session.commit()
 
