@@ -107,6 +107,7 @@ def edit_scheduled_trans():
             ).fetchall()[0]
             total_favorite_currency, favorite_currency = show_networth()
             total_favorite_currency = f"{total_favorite_currency:,.2f}"
+
             return render_template("edit_scheduled_trans.html",
                                     scheduled_trans_db = scheduled_trans_db,
                                     user_photo_path=user_photo_path,
@@ -120,6 +121,7 @@ def edit_scheduled_trans():
 
             scheduled_trans_key = request.form.get("scheduled_trans_key")
             currency = request.form.get("currency")
+            print(currency)
             date = request.form.get("date")
             amount = request.form.get("amount")
             scheduled_trans_details = request.form.get("scheduled_trans_details")
