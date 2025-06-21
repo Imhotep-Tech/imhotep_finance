@@ -1,7 +1,8 @@
 {% extends "layout.html" %}
 
 {% block title %}Download - Imhotep Financial Manager{% endblock %}
-{% block description %}Download Imhotep Financial Manager for Windows, macOS, Android, and iOS. Get started with our comprehensive financial management solution today.{% endblock %}
+{% block description %}Download Imhotep Financial Manager for Windows, macOS, Android, and iOS. Get started with our
+comprehensive financial management solution today.{% endblock %}
 
 {% block extra_head %}
 <style>
@@ -9,20 +10,20 @@
         background-image: radial-gradient(circle at 1px 1px, rgba(81, 173, 172, 0.1) 1px, transparent 0);
         background-size: 20px 20px;
     }
-    
+
     .download-card {
         background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
         border: 1px solid #e2e8f0;
         border-left: 4px solid #51adac;
         transition: all 0.3s ease;
     }
-    
+
     .download-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         border-left-color: #428a89;
     }
-    
+
     /* Dark mode styles for download cards */
     body.dark-mode .download-card {
         background: linear-gradient(135deg, #2f5a5a 0%, #376e6d 100%);
@@ -30,13 +31,13 @@
         border-left: 4px solid #51adac;
         color: #ffffff;
     }
-    
+
     body.dark-mode .download-card:hover {
         background: linear-gradient(135deg, #376e6d 0%, #428a89 100%);
         border-color: #51adac;
         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
     }
-    
+
     .platform-icon {
         width: 64px;
         height: 64px;
@@ -49,7 +50,7 @@
         font-size: 2rem;
         margin-bottom: 1rem;
     }
-    
+
     .download-btn {
         background: linear-gradient(135deg, #51adac 0%, #428a89 100%);
         border: none;
@@ -62,7 +63,7 @@
         align-items: center;
         font-weight: 600;
     }
-    
+
     .download-btn:hover {
         background: linear-gradient(135deg, #428a89 0%, #2f5a5a 100%);
         transform: translateY(-2px);
@@ -70,29 +71,29 @@
         color: white;
         text-decoration: none;
     }
-    
+
     .secondary-btn {
         background: transparent;
         border: 2px solid #51adac;
         color: #51adac;
     }
-    
+
     .secondary-btn:hover {
         background: #51adac;
         color: white;
         transform: translateY(-2px);
     }
-    
+
     body.dark-mode .secondary-btn {
         border-color: #51adac;
         color: #51adac;
     }
-    
+
     body.dark-mode .secondary-btn:hover {
         background: #51adac;
         color: white;
     }
-    
+
     .stats-card {
         background: linear-gradient(135deg, #51adac 0%, #428a89 100%);
         color: white;
@@ -103,21 +104,21 @@
         overflow: hidden;
         transition: all 0.3s ease;
     }
-    
+
     .stats-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 20px 25px -5px rgba(81, 173, 172, 0.3), 0 10px 10px -5px rgba(81, 173, 172, 0.2);
     }
-    
+
     body.dark-mode .stats-card {
         background: linear-gradient(135deg, #2f5a5a 0%, #376e6d 100%);
     }
-    
+
     body.dark-mode .stats-card:hover {
         background: linear-gradient(135deg, #376e6d 0%, #428a89 100%);
         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5p rgba(0, 0, 0, 0.3);
     }
-    
+
     .feature-badge {
         background: linear-gradient(135deg, #10b981 0%, #059669 100%);
         color: white;
@@ -128,7 +129,7 @@
         display: inline-block;
         margin-bottom: 0.5rem;
     }
-    
+
     .ios-instructions {
         background: rgba(81, 173, 172, 0.1);
         border-radius: 12px;
@@ -136,25 +137,25 @@
         margin-top: 1rem;
         border-left: 4px solid #51adac;
     }
-    
+
     body.dark-mode .ios-instructions {
         background: rgba(255, 255, 255, 0.1);
         color: #ffffff;
     }
-    
+
     /* Dark mode text colors */
     body.dark-mode .text-gray-900 {
         color: #ffffff !important;
     }
-    
+
     body.dark-mode .text-gray-600 {
         color: #d1d5db !important;
     }
-    
+
     body.dark-mode .text-gray-500 {
         color: #9ca3af !important;
     }
-    
+
     body.dark-mode .bg-gray-100 {
         background-color: rgba(255, 255, 255, 0.1) !important;
         color: #ffffff !important;
@@ -169,7 +170,8 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div class="text-center">
                 <div class="flex items-center justify-center mb-6">
-                    <div class="w-20 h-20 bg-gradient-to-r from-imhotep-500 to-imhotep-600 rounded-full flex items-center justify-center">
+                    <div
+                        class="w-20 h-20 bg-gradient-to-r from-imhotep-500 to-imhotep-600 rounded-full flex items-center justify-center">
                         <i class="fas fa-download text-white text-3xl"></i>
                     </div>
                 </div>
@@ -213,9 +215,8 @@
                     </div>
                 </div>
                 <div class="flex flex-col sm:flex-row gap-3">
-                    <a href="https://github.com/Imhotep-Tech/imhotep_finance/releases/download/v3.0.0/Imhotep-Financial-Manager-Setup-3.0.0.exe" 
-                       class="download-btn" download>
-                        <i class="fas fa-download mr-2"></i>Download .exe
+                    <a href="/" class="download-btn">
+                        <i class="fas fa-home mr-2"></i>Go to Web App
                     </a>
                     <span class="text-sm text-gray-500 self-center">Version 3.0.0</span>
                 </div>
@@ -234,8 +235,8 @@
                     </div>
                 </div>
                 <div class="flex flex-col sm:flex-row gap-3">
-                    <a href="https://github.com/Kbassem10/imhotep_finance/releases/download/Imhotep_Financial_Manager/Imhotep-Financial-Manager-MacOS.dmg" 
-                       class="download-btn" download>
+                    <a href="https://github.com/Kbassem10/imhotep_finance/releases/download/Imhotep_Financial_Manager/Imhotep-Financial-Manager-MacOS.dmg"
+                        class="download-btn" download>
                         <i class="fas fa-download mr-2"></i>Download .dmg
                     </a>
                     <span class="text-sm text-gray-500 self-center">Latest version</span>
@@ -255,8 +256,8 @@
                     </div>
                 </div>
                 <div class="flex flex-col sm:flex-row gap-3">
-                    <a href="https://www.amazon.com/dp/B0D9TVMV3D/ref=sr_1_2?dib=eyJ2IjoiMSJ9.qzFudk5ElS-BgrqDZfGpZ41oDM22hTBqu51QpR0uz2U.gaEl94dYgf1OQ7HDnnCjwOm9-K70Vj7R-gUBLnW6eGQ&dib_tag=se&qid=1721656003&refinements=p_4%3AImhotep+Tech&s=mobile-apps&search-type=ss&sr=1-2" 
-                       class="download-btn" target="_blank">
+                    <a href="https://www.amazon.com/dp/B0D9TVMV3D/ref=sr_1_2?dib=eyJ2IjoiMSJ9.qzFudk5ElS-BgrqDZfGpZ41oDM22hTBqu51QpR0uz2U.gaEl94dYgf1OQ7HDnnCjwOm9-K70Vj7R-gUBLnW6eGQ&dib_tag=se&qid=1721656003&refinements=p_4%3AImhotep+Tech&s=mobile-apps&search-type=ss&sr=1-2"
+                        class="download-btn" target="_blank">
                         <i class="fab fa-amazon mr-2"></i>Amazon App Store
                     </a>
                     <a href="#" class="secondary-btn" onclick="showAPKDownload()">
@@ -264,7 +265,8 @@
                     </a>
                 </div>
                 <div id="apkDownload" class="hidden mt-4 p-4 bg-blue-50 rounded-lg">
-                    <p class="text-sm text-gray-600 mb-2">APK download will be available soon. For now, please use the Amazon App Store.</p>
+                    <p class="text-sm text-gray-600 mb-2">APK download will be available soon. For now, please use the
+                        Amazon App Store.</p>
                 </div>
             </div>
 
@@ -282,13 +284,15 @@
                 </div>
                 <div class="flex flex-col gap-3">
                     <a href="#" id="iosInstall" class="download-btn">
-                        <img src="{{ url_for('static', filename='ios.png') }}" class="w-6 h-6 mr-2" alt="Add to Home Screen">
+                        <img src="{{ url_for('static', filename='ios.png') }}" class="w-6 h-6 mr-2"
+                            alt="Add to Home Screen">
                         Add to Home Screen
                     </a>
                     <div class="ios-instructions" id="iosInstructions">
                         <p class="font-semibold mb-2">To add this app to your home screen on iOS:</p>
                         <ol class="list-decimal list-inside text-sm space-y-1">
-                            <li>Tap the Share button <i class="fas fa-share text-blue-500"></i> at the bottom of Safari</li>
+                            <li>Tap the Share button <i class="fas fa-share text-blue-500"></i> at the bottom of Safari
+                            </li>
                             <li>Select "Add to Home Screen" from the options</li>
                             <li>Tap "Add" to confirm</li>
                         </ol>
@@ -376,7 +380,8 @@
                     </div>
                 </div>
                 <div class="mt-8">
-                    <a href="/register" class="bg-white text-imhotep-600 px-8 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-colors">
+                    <a href="/register"
+                        class="bg-white text-imhotep-600 px-8 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-colors">
                         Get Started Free
                     </a>
                 </div>
@@ -388,85 +393,85 @@
 
 {% block extra_scripts %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Apply dark mode styles to cards if dark mode is enabled
-    function applyDarkModeStyles() {
-        const downloadCards = document.querySelectorAll('.download-card');
-        const statsCards = document.querySelectorAll('.stats-card');
-        
-        if (document.body.classList.contains('dark-mode')) {
-            downloadCards.forEach(card => {
-                card.style.background = 'linear-gradient(135deg, #2f5a5a 0%, #376e6d 100%)';
-                card.style.borderColor = '#428a89';
-                card.style.color = '#ffffff';
-            });
-            
-            statsCards.forEach(card => {
-                card.style.background = 'linear-gradient(135deg, #2f5a5a 0%, #376e6d 100%)';
-            });
-        } else {
-            downloadCards.forEach(card => {
-                card.style.background = 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)';
-                card.style.borderColor = '#e2e8f0';
-                card.style.color = '';
-            });
-            
-            statsCards.forEach(card => {
-                card.style.background = 'linear-gradient(135deg, #51adac 0%, #428a89 100%)';
-            });
-        }
-    }
-    
-    // Apply dark mode styles on load
-    applyDarkModeStyles();
-    
-    // Listen for dark mode toggle
-    const darkModeObserver = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                applyDarkModeStyles();
-            }
-        });
-    });
-    
-    darkModeObserver.observe(document.body, {
-        attributes: true,
-        attributeFilter: ['class']
-    });
-    
-    // Animate cards on load
-    const cards = document.querySelectorAll('.download-card, .stats-card');
-    cards.forEach((card, index) => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(20px)';
-        
-        setTimeout(() => {
-            card.style.transition = 'all 0.6s ease';
-            card.style.opacity = '1';
-            card.style.transform = 'translateY(0)';
-        }, index * 100);
-    });
-    
-    // Enhanced hover effects for download cards
-    const downloadCards = document.querySelectorAll('.download-card');
-    downloadCards.forEach(card => {
-        card.addEventListener('mouseenter', function() {
-            if (document.body.classList.contains('dark-mode')) {
-                this.style.background = 'linear-gradient(135deg, #376e6d 0%, #428a89 100%)';
-            }
-        });
-        
-        card.addEventListener('mouseleave', function() {
-            if (document.body.classList.contains('dark-mode')) {
-                this.style.background = 'linear-gradient(135deg, #2f5a5a 0%, #376e6d 100%)';
-            }
-        });
-    });
-});
+    document.addEventListener('DOMContentLoaded', function () {
+        // Apply dark mode styles to cards if dark mode is enabled
+        function applyDarkModeStyles() {
+            const downloadCards = document.querySelectorAll('.download-card');
+            const statsCards = document.querySelectorAll('.stats-card');
 
-function showAPKDownload() {
-    const apkDiv = document.getElementById('apkDownload');
-    apkDiv.classList.toggle('hidden');
-}
+            if (document.body.classList.contains('dark-mode')) {
+                downloadCards.forEach(card => {
+                    card.style.background = 'linear-gradient(135deg, #2f5a5a 0%, #376e6d 100%)';
+                    card.style.borderColor = '#428a89';
+                    card.style.color = '#ffffff';
+                });
+
+                statsCards.forEach(card => {
+                    card.style.background = 'linear-gradient(135deg, #2f5a5a 0%, #376e6d 100%)';
+                });
+            } else {
+                downloadCards.forEach(card => {
+                    card.style.background = 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)';
+                    card.style.borderColor = '#e2e8f0';
+                    card.style.color = '';
+                });
+
+                statsCards.forEach(card => {
+                    card.style.background = 'linear-gradient(135deg, #51adac 0%, #428a89 100%)';
+                });
+            }
+        }
+
+        // Apply dark mode styles on load
+        applyDarkModeStyles();
+
+        // Listen for dark mode toggle
+        const darkModeObserver = new MutationObserver(function (mutations) {
+            mutations.forEach(function (mutation) {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                    applyDarkModeStyles();
+                }
+            });
+        });
+
+        darkModeObserver.observe(document.body, {
+            attributes: true,
+            attributeFilter: ['class']
+        });
+
+        // Animate cards on load
+        const cards = document.querySelectorAll('.download-card, .stats-card');
+        cards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+
+            setTimeout(() => {
+                card.style.transition = 'all 0.6s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+
+        // Enhanced hover effects for download cards
+        const downloadCards = document.querySelectorAll('.download-card');
+        downloadCards.forEach(card => {
+            card.addEventListener('mouseenter', function () {
+                if (document.body.classList.contains('dark-mode')) {
+                    this.style.background = 'linear-gradient(135deg, #376e6d 0%, #428a89 100%)';
+                }
+            });
+
+            card.addEventListener('mouseleave', function () {
+                if (document.body.classList.contains('dark-mode')) {
+                    this.style.background = 'linear-gradient(135deg, #2f5a5a 0%, #376e6d 100%)';
+                }
+            });
+        });
+    });
+
+    function showAPKDownload() {
+        const apkDiv = document.getElementById('apkDownload');
+        apkDiv.classList.toggle('hidden');
+    }
 </script>
 {% endblock %}
