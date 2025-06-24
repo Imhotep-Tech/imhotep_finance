@@ -183,19 +183,27 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('currencyForm');
+    const currencySelect = document.getElementById('favorite_currency');
+    
+    // Ensure current favorite currency is selected
+    const currentFavorite = '{{ favorite_currency }}';
+    if (currencySelect && currentFavorite) {
+        currencySelect.value = currentFavorite;
+    }
     
     // Form submission with loading state
     form.addEventListener('submit', function(e) {
         const submitBtn = form.querySelector('button[type="submit"]');
-        const selectedCurrency = document.getElementById('favorite_currency').value;
+        const selectedCurrency = currencySelect.value;
         
         if (!selectedCurrency) {
             e.preventDefault();
+            alert('Please select a currency');
             return;
         }
         
         // Show loading state
-        submitBtn.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i>Updating...';
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Updating...';
         submitBtn.disabled = true;
     });
 });
