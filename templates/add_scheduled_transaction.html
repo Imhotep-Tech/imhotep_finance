@@ -205,52 +205,27 @@
 {% block extra_scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('searchInput1');
+    // Set favorite currency as default selection
     const currencySelect = document.getElementById('CurrencySelect1');
-    const allOptions = Array.from(currencySelect.options);
+    const favoriteCurrency = '{{ favorite_currency }}';
     
-    // Store the initially selected value from the database
-    const initialValue = '{{ favorite_currency }}';
+    if (currencySelect && favoriteCurrency) {
+        setTimeout(function() {
+            currencySelect.value = favoriteCurrency;
+        }, 50);
+    }
     
-    // Set the correct selected option on page load with a slight delay
-    setTimeout(function() {
-        if (initialValue) {
-            currencySelect.value = initialValue;
-        }
-    }, 50);
-    
-    // Search functionality
-    searchInput.addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
-        
-        // Clear all options except the first one (disabled placeholder)
-        currencySelect.innerHTML = '<option value="" disabled>Select currency</option>';
-        
-        // Filter and add matching options
-        allOptions.slice(1).forEach(option => {
-            if (option.value.toLowerCase().includes(searchTerm)) {
-                const newOption = option.cloneNode(true);
-                // Preserve selection for the current value
-                if (option.value === initialValue) {
-                    newOption.selected = true;
-                }
-                currencySelect.appendChild(newOption);
+    // Add form loading state
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function() {
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Scheduling...';
             }
         });
-        
-        // If no search term, restore all options
-        if (searchTerm === '') {
-            currencySelect.innerHTML = '';
-            allOptions.forEach(option => {
-                const newOption = option.cloneNode(true);
-                // Preserve selection for the current value
-                if (option.value === initialValue) {
-                    newOption.selected = true;
-                }
-                currencySelect.appendChild(newOption);
-            });
-        }
-    });
+    }
 });
 </script>
 {% endblock %}

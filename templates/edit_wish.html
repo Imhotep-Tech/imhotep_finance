@@ -91,7 +91,7 @@
                            name="price" 
                            min="0.01" 
                            step="0.01"
-                           value="{{ "%.2f"|format(wish_db[3]|float) if wish_db[3] else '' }}"
+                           value="{{ "%.2f"|format(wish_db[1]|float) if wish_db[1] else '' }}"
                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-imhotep-600 focus:ring-4 focus:ring-imhotep-600/20 transition-all duration-200 text-gray-900 hover:border-gray-300 focus:outline-none input-field"
                            placeholder="0.00"
                            required>
@@ -168,35 +168,6 @@
 {% block extra_scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Simple currency search functionality
-    const searchInput = document.getElementById('searchInput1');
-    const currencySelect = document.getElementById('CurrencySelect1');
-    
-    if (searchInput && currencySelect) {
-        const originalOptions = [...currencySelect.options];
-        
-        searchInput.addEventListener('input', function() {
-            const searchText = this.value.toLowerCase();
-            currencySelect.innerHTML = '';
-            
-            const filteredOptions = originalOptions.filter(option => 
-                option.textContent.toLowerCase().includes(searchText) || option.value.toLowerCase().includes(searchText)
-            );
-            
-            if (filteredOptions.length === 0) {
-                const noMatchOption = document.createElement('option');
-                noMatchOption.disabled = true;
-                noMatchOption.textContent = 'No matches found';
-                currencySelect.appendChild(noMatchOption);
-            } else {
-                filteredOptions.forEach(option => {
-                    const newOption = option.cloneNode(true);
-                    currencySelect.appendChild(newOption);
-                });
-            }
-        });
-    }
-    
     // Add loading state to form submission
     const form = document.querySelector('form');
     if (form) {
