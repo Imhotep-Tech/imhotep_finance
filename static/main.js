@@ -410,50 +410,68 @@ function initializeFormValidation() {
 // ============================================================================
 
 function initializeCurrencyFilters() {
-    const searchInput = document.getElementById('searchInput1');
-    const currencySelect = document.getElementById('CurrencySelect1');
+    // Handle all currency search inputs and selects
+    const currencyPairs = [
+        { searchId: 'searchInput1', selectId: 'CurrencySelect1' }
+    ];
     
-    if (searchInput && currencySelect) {
-        const originalOptions = [...currencySelect.options];
+    currencyPairs.forEach(pair => {
+        const searchInput = document.getElementById(pair.searchId);
+        const currencySelect = document.getElementById(pair.selectId);
         
-        searchInput.addEventListener('input', function() {
-            filterOptions(searchInput, currencySelect, originalOptions);
-        });
-        
-        // Set favorite currency if available
-        const favoriteCurrency = window.favoriteCurrency || "USD";
-        preselectCurrency('CurrencySelect1', favoriteCurrency);
-    }
+        if (searchInput && currencySelect) {
+            const originalOptions = [...currencySelect.options];
+            
+            searchInput.addEventListener('input', function() {
+                filterCurrencyOptions(searchInput, currencySelect, originalOptions);
+            });
+            
+            // Set favorite currency if available
+            const favoriteCurrency = window.favoriteCurrency || "USD";
+            preselectCurrency(pair.selectId, favoriteCurrency);
+        }
+    });
 }
 
-function filterOptions(searchInput, currencySelect, originalOptions) {
+function filterCurrencyOptions(searchInput, currencySelect, originalOptions) {
     const searchText = searchInput.value.toLowerCase();
+    const currentValue = currencySelect.value; // Preserve current selection
+    
+    // Clear current options
     currencySelect.innerHTML = '';
     
+    // Add default option
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.disabled = true;
+    defaultOption.textContent = 'Select Currency';
+    currencySelect.appendChild(defaultOption);
+    
+    // Filter and add matching options
     const filteredOptions = originalOptions.filter(option => 
-        option.textContent.toLowerCase().includes(searchText)
+        !option.disabled && (
+            option.textContent.toLowerCase().includes(searchText) || 
+            option.value.toLowerCase().includes(searchText)
+        )
     );
     
-    if (filteredOptions.length === 0) {
+    if (filteredOptions.length === 0 && searchText !== '') {
         const noMatchOption = document.createElement('option');
         noMatchOption.disabled = true;
-        noMatchOption.selected = true;
-        noMatchOption.textContent = 'No Match';
+        noMatchOption.textContent = 'No matches found';
         currencySelect.appendChild(noMatchOption);
     } else {
-        filteredOptions.forEach(option => currencySelect.appendChild(option));
+        filteredOptions.forEach(option => {
+            const newOption = option.cloneNode(true);
+            currencySelect.appendChild(newOption);
+        });
     }
-}
-
-function preselectCurrency(selectElementId, favoriteCurrency) {
-    const selectElement = document.getElementById(selectElementId);
-    if (!selectElement) return;
     
-    const options = selectElement.options;
-    for (let i = 0; i < options.length; i++) {
-        if (options[i].value === favoriteCurrency) {
-            options[i].selected = true;
-            break;
+    // Restore previous selection if it still exists
+    if (currentValue) {
+        const matchingOption = [...currencySelect.options].find(opt => opt.value === currentValue);
+        if (matchingOption) {
+            currencySelect.value = currentValue;
         }
     }
 }
