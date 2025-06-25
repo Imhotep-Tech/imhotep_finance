@@ -154,7 +154,7 @@ def get_user_categories(trans_status, user_id):
 @cache.cached(timeout=150, key_prefix="user_report")
 def calculate_user_report(start_date, end_date, user_id):
     if not user_id:
-        return [], []
+        return [], [], [], []
     
     try:
         user_withdraw_on_range = db.session.execute(
@@ -195,11 +195,36 @@ def calculate_user_report(start_date, end_date, user_id):
         if user_deposit_on_range is None:
             user_deposit_on_range = []
 
-        return user_withdraw_on_range, user_deposit_on_range
+        # Calculate percentages for withdrawals
+        withdraw_percentages = []
+        if user_withdraw_on_range:
+            total_withdraw = 0
+            for row in user_withdraw_on_range:
+                total_withdraw+=float(row[1])
+
+            if total_withdraw > 0:
+                withdraw_percentages = [round((float(row[1]) / total_withdraw) * 100, 1) for row in user_withdraw_on_range]
+            else:
+                withdraw_percentages = [0] * len(user_withdraw_on_range)
+
+        # Calculate percentages for deposits
+        deposit_percentages = []
+        if user_deposit_on_range:
+            
+            total_deposit = 0
+            for row in user_deposit_on_range:
+                total_deposit+=float(row[1])
+
+            if total_deposit > 0:
+                deposit_percentages = [round((float(row[1]) / total_deposit) * 100, 1) for row in user_deposit_on_range]
+            else:
+                deposit_percentages = [0] * len(user_deposit_on_range)
+
+        return user_withdraw_on_range, user_deposit_on_range, withdraw_percentages, deposit_percentages
     
     except Exception as e:
         print(f"Error in calculate_user_report: {e}")
-        return [], []
+        return [], [], [], []
 
 def select_scheduled_trans(user_id, page):
     per_page = 20

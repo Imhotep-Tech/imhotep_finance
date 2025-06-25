@@ -269,7 +269,7 @@ def check_pass_delete_user():
                             </ul>
                         </div>
                         
-                        <div style="background-color: #d1ecf1; border: 1px solid #bee5eb; border-radius: 8px; padding: 20px; margin: 25px 0;">
+                        <div style="background-color: #d1ecf1; border: 1px solid #bee5eb; border-radius: 8px; padding: 20px, margin: 25px 0;">
                             <h4 style="color: #0c5460; margin-top: 0;">🤔 Consider These Alternatives:</h4>
                             <ul style="color: #0c5460; padding-left: 20px; margin-bottom: 0;">
                                 <li style="margin-bottom: 8px;">Temporarily disable your account instead</li>
@@ -565,39 +565,7 @@ def monthly_reports():
     else:
         end_date = now.replace(month=now.month + 1, day=1).date()
 
-    # Debug: Check if there are any transactions in the date range
-    total_transactions = db.session.execute(
-        text("SELECT COUNT(*) FROM trans WHERE user_id = :user_id AND date >= :start_date AND date < :end_date"),
-        {"user_id": user_id, "start_date": start_date, "end_date": end_date}
-    ).scalar()
-    
-    transactions_with_category = db.session.execute(
-        text("SELECT COUNT(*) FROM trans WHERE user_id = :user_id AND date >= :start_date AND date < :end_date AND category IS NOT NULL AND category != ''"),
-        {"user_id": user_id, "start_date": start_date, "end_date": end_date}
-    ).scalar()
-    
-    print(f"Debug - User ID: {user_id}")
-    print(f"Debug - Date range: {start_date} to {end_date}")
-    print(f"Debug - Total transactions in range: {total_transactions}")
-    print(f"Debug - Transactions with categories: {transactions_with_category}")
-    
-    # Sample some transactions to check data
-    sample_transactions = db.session.execute(
-        text("SELECT trans_status, category, amount, currency, date FROM trans WHERE user_id = :user_id AND date >= :start_date AND date < :end_date LIMIT 5"),
-        {"user_id": user_id, "start_date": start_date, "end_date": end_date}
-    ).fetchall()
-    
-    print(f"Debug - Sample transactions: {sample_transactions}")
-    
-    user_withdraw_on_range, user_deposit_on_range = calculate_user_report(start_date, end_date, user_id)
-    
-    print(f"Debug - Final withdrawals count: {len(user_withdraw_on_range) if user_withdraw_on_range else 0}")
-    print(f"Debug - Final deposits count: {len(user_deposit_on_range) if user_deposit_on_range else 0}")
-    
-    if user_withdraw_on_range:
-        print(f"Debug - First withdrawal: {user_withdraw_on_range[0]}")
-    if user_deposit_on_range:
-        print(f"Debug - First deposit: {user_deposit_on_range[0]}")
+    user_withdraw_on_range, user_deposit_on_range, withdraw_percentages, deposit_percentages = calculate_user_report(start_date, end_date, user_id)
 
     return render_template("monthly_reports.html",
                             user_photo_path=user_photo_path,
@@ -605,5 +573,7 @@ def monthly_reports():
                             favorite_currency=favorite_currency,
                             user_withdraw_on_range=user_withdraw_on_range,
                             user_deposit_on_range=user_deposit_on_range,
+                            withdraw_percentages=withdraw_percentages,
+                            deposit_percentages=deposit_percentages,
                             current_month=now.strftime("%B %Y"),
                             form=CSRFForm())
