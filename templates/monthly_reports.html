@@ -330,18 +330,27 @@ function showSection(sectionName) {
         }
     }
     
-    // Redraw charts after section switch
+    // Apply dark mode if active
+    if (document.body.classList.contains('dark-mode')) {
+        applyDarkModeToDetailCards();
+    }
+    
+    // Redraw charts after section switch with proper delay
     setTimeout(function() {
-        if (sectionName === 'expense' || sectionName === 'both') {
+        if (sectionName === 'expense') {
             drawExpenseChart();
-        }
-        if (sectionName === 'income' || sectionName === 'both') {
+        } else if (sectionName === 'income') {
             drawIncomeChart();
+        } else if (sectionName === 'both') {
+            // For both section, draw charts with staggered timing to prevent conflicts
+            setTimeout(function() {
+                drawBothExpenseChart();
+            }, 50);
+            setTimeout(function() {
+                drawBothIncomeChart();
+            }, 100);
         }
-        if (sectionName === 'both') {
-            drawBothCharts();
-        }
-    }, 100);
+    }, 200);
 }
 
 // Simple chart drawing function
@@ -366,94 +375,89 @@ function drawIncomeChart() {
 }
 
 function drawBothCharts() {
-    var expenseCanvas = document.getElementById('bothExpenseChart');
-    var incomeCanvas = document.getElementById('bothIncomeChart');
+    // Use separate timing for both charts to prevent conflicts
+    setTimeout(function() {
+        var expenseCanvas = document.getElementById('bothExpenseChart');
+        if (expenseCanvas && window.chartData.expenses.labels.length) {
+            drawPieChart(expenseCanvas, window.chartData.expenses, 'expense');
+        }
+    }, 50);
     
-    if (expenseCanvas && window.chartData.expenses.labels.length) {
-        drawPieChart(expenseCanvas, window.chartData.expenses, 'expense');
-    }
-    
-    if (incomeCanvas && window.chartData.income.labels.length) {
-        drawPieChart(incomeCanvas, window.chartData.income, 'income');
-    }
+    setTimeout(function() {
+        var incomeCanvas = document.getElementById('bothIncomeChart');
+        if (incomeCanvas && window.chartData.income.labels.length) {
+            drawPieChart(incomeCanvas, window.chartData.income, 'income');
+        }
+    }, 100);
 }
 
-function drawPieChart(canvas, data, type) {
-    try {
-        var ctx = canvas.getContext('2d');
-        var labels = data.labels || [];
-        var values = data.data || [];
-        
-        if (!labels.length || !values.length) {
-            console.log('No data to draw chart for type:', type);
-            return;
-        }
-        
-        // Clear canvas
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // Calculate total
-        var total = 0;
-        for (var i = 0; i < values.length; i++) {
-            total += parseFloat(values[i]) || 0;
-        }
-        
-        if (total === 0) {
-            console.log('Total is zero, no chart to draw');
-            return;
-        }
-        
-        // Generate colors
-        var colors = [];
-        for (var i = 0; i < labels.length; i++) {
-            if (type === 'expense') {
-                colors.push('hsl(' + (0 + (i * 15)) + ', 70%, ' + (50 + (i * 2)) + '%)');
-            } else {
-                colors.push('hsl(' + (120 + (i * 15)) + ', 70%, ' + (50 + (i * 2)) + '%)');
-            }
-        }
-        
-        // Update percentages
-        for (var i = 0; i < labels.length; i++) {
-            var percentage = ((values[i] / total) * 100).toFixed(1);
-            var elements = document.querySelectorAll('.' + type + '-percentage[data-index="' + i + '"]');
-            for (var j = 0; j < elements.length; j++) {
-                elements[j].textContent = percentage + '%';
-            }
-        }
-        
-        // Draw pie chart
-        var centerX = canvas.width / 2;
-        var centerY = canvas.height / 2;
-        var radius = Math.min(centerX, centerY) - 20;
-        var currentAngle = -Math.PI / 2;
-        
-        for (var i = 0; i < values.length; i++) {
-            var sliceAngle = (values[i] / total) * 2 * Math.PI;
-            
-            // Draw slice
-            ctx.beginPath();
-            ctx.moveTo(centerX, centerY);
-            ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
-            ctx.closePath();
-            ctx.fillStyle = colors[i];
-            ctx.fill();
-            ctx.strokeStyle = '#fff';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-            
-            currentAngle += sliceAngle;
-        }
-        
-        console.log('Chart drawn successfully for type:', type);
-    } catch (error) {
-        console.error('Error drawing chart:', error);
+function drawBothExpenseChart() {
+    var canvas = document.getElementById('bothExpenseChart');
+    if (!canvas || !window.chartData.expenses.labels.length) {
+        console.log('No both expense chart canvas or data');
+        return;
     }
+    
+    drawPieChart(canvas, window.chartData.expenses, 'expense');
+}
+
+function drawBothIncomeChart() {
+    var canvas = document.getElementById('bothIncomeChart');
+    if (!canvas || !window.chartData.income.labels.length) {
+        console.log('No both income chart canvas or data');
+        return;
+    }
+    
+    drawPieChart(canvas, window.chartData.income, 'income');
+}
+
+// Function to apply dark mode to detail cards
+function applyDarkModeToDetailCards() {
+    // Apply to expense detail cards
+    var expenseCards = document.querySelectorAll('.bg-red-50, .hover\\:bg-red-100');
+    expenseCards.forEach(function(card) {
+        if (document.body.classList.contains('dark-mode')) {
+            card.style.backgroundColor = '#7f1d1d';
+            card.style.color = '#fecaca';
+        } else {
+            card.style.backgroundColor = '';
+            card.style.color = '';
+        }
+    });
+    
+    // Apply to income detail cards
+    var incomeCards = document.querySelectorAll('.bg-green-50, .hover\\:bg-green-100');
+    incomeCards.forEach(function(card) {
+        if (document.body.classList.contains('dark-mode')) {
+            card.style.backgroundColor = '#14532d';
+            card.style.color = '#bbf7d0';
+        } else {
+            card.style.backgroundColor = '';
+            card.style.color = '';
+        }
+    });
+    
+    // Apply to main container cards
+    var mainCards = document.querySelectorAll('.bg-white');
+    mainCards.forEach(function(card) {
+        if (document.body.classList.contains('dark-mode')) {
+            card.style.background = 'linear-gradient(135deg, #2f5a5a 0%, #376e6d 100%)';
+            card.style.color = '#ffffff';
+        } else {
+            card.style.background = '';
+            card.style.color = '';
+        }
+    });
 }
 
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded, initializing charts');
+    
+    // Apply dark mode to detail cards if dark mode is active
+    if (document.body.classList.contains('dark-mode')) {
+        applyDarkModeToDetailCards();
+    }
     
     // Draw initial expense chart
     setTimeout(function() {
@@ -464,6 +468,14 @@ document.addEventListener('DOMContentLoaded', function() {
 // Fallback initialization
 window.addEventListener('load', function() {
     console.log('Window loaded, ensuring charts are drawn');
+    
+    // Apply dark mode to detail cards if dark mode is active
+    if (document.body.classList.contains('dark-mode')) {
+        setTimeout(function() {
+            applyDarkModeToDetailCards();
+        }, 100);
+    }
+    
     setTimeout(function() {
         drawExpenseChart();
     }, 1000);
@@ -530,6 +542,50 @@ button[id="expenseTab"].active {
 button[id="incomeTab"].active {
     background-color: #10b981;
     color: white;
+}
+
+/* Dark mode styles for detail cards */
+body.dark-mode .bg-red-50 {
+    background-color: #7f1d1d !important;
+    color: #fecaca !important;
+}
+
+body.dark-mode .hover\:bg-red-100:hover {
+    background-color: #991b1b !important;
+}
+
+body.dark-mode .bg-green-50 {
+    background-color: #14532d !important;
+    color: #bbf7d0 !important;
+}
+
+body.dark-mode .hover\:bg-green-100:hover {
+    background-color: #166534 !important;
+}
+
+body.dark-mode .bg-white {
+    background: linear-gradient(135deg, #2f5a5a 0%, #376e6d 100%) !important;
+    color: #ffffff !important;
+    border-color: #428a89 !important;
+}
+
+body.dark-mode .text-gray-900 {
+    color: #f3f4f6 !important;
+}
+
+body.dark-mode .text-gray-500 {
+    color: #9ca3af !important;
+}
+
+body.dark-mode .text-gray-600 {
+    color: #d1d5db !important;
+}
+
+/* Ensure charts remain visible in both section */
+#bothSection canvas {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
 /* PythonAnywhere specific fixes */

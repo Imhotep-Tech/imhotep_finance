@@ -264,6 +264,9 @@ function applyDarkModeToComponents() {
         }
     });
     
+    // Apply to detail cards in monthly reports
+    applyDarkModeToMonthlyReportCards();
+    
     // Apply to form elements
     const formElements = document.querySelectorAll('input, select, textarea');
     formElements.forEach(element => {
@@ -280,6 +283,35 @@ function applyDarkModeToComponents() {
             this.style.borderColor = '#428a89';
             this.style.boxShadow = '';
         });
+    });
+}
+
+// New function to handle monthly report dark mode
+function applyDarkModeToMonthlyReportCards() {
+    // Apply to expense detail cards
+    const expenseCards = document.querySelectorAll('.bg-red-50');
+    expenseCards.forEach(card => {
+        card.style.backgroundColor = '#7f1d1d';
+        card.style.color = '#fecaca';
+    });
+    
+    // Apply to income detail cards
+    const incomeCards = document.querySelectorAll('.bg-green-50');
+    incomeCards.forEach(card => {
+        card.style.backgroundColor = '#14532d';
+        card.style.color = '#bbf7d0';
+    });
+    
+    // Apply to text elements
+    const textElements = document.querySelectorAll('.text-gray-900, .text-gray-500, .text-gray-600');
+    textElements.forEach(element => {
+        if (element.classList.contains('text-gray-900')) {
+            element.style.color = '#f3f4f6';
+        } else if (element.classList.contains('text-gray-500')) {
+            element.style.color = '#9ca3af';
+        } else if (element.classList.contains('text-gray-600')) {
+            element.style.color = '#d1d5db';
+        }
     });
 }
 
@@ -322,6 +354,16 @@ function removeDarkModeFromNavigation() {
             element.style.color = '';
             element.style.boxShadow = '';
         }
+    });
+    
+    // Reset monthly report cards
+    document.querySelectorAll('.bg-red-50, .bg-green-50').forEach(card => {
+        card.style.backgroundColor = '';
+        card.style.color = '';
+    });
+    
+    document.querySelectorAll('.text-gray-900, .text-gray-500, .text-gray-600').forEach(element => {
+        element.style.color = '';
     });
 }
 
@@ -1409,10 +1451,30 @@ function initTabSwitching() {
             
             if (activeSection) activeSection.classList.remove('hidden');
             
-            // Redraw charts with delay to ensure visibility
+            // Apply dark mode if active
+            if (document.body.classList.contains('dark-mode')) {
+                setTimeout(() => {
+                    applyDarkModeToMonthlyReportCards();
+                }, 50);
+            }
+            
+            // Redraw charts with proper timing for both section
             setTimeout(() => {
+                if (activeTab && activeTab.id === 'expenseTab') {
+                    initExpenseChart();
+                } else if (activeTab && activeTab.id === 'incomeTab') {
+                    initIncomeChart();
+                } else if (activeTab && activeTab.id === 'bothTab') {
+                    // Stagger the both chart initialization to prevent conflicts
+                    setTimeout(() => {
+                        initBothExpenseChart();
+                    }, 100);
+                    setTimeout(() => {
+                        initBothIncomeChart();
+                    }, 200);
+                }
                 handleChartResize();
-            }, 200);
+            }, 250);
         } catch (error) {
             console.error('Error switching tabs:', error);
         }
@@ -1533,6 +1595,10 @@ function handleChartResize() {
     charts.forEach(chartId => {
         const canvas = document.getElementById(chartId);
         if (canvas && window.chartData) {
+            // Check if the canvas is visible before redrawing
+            const isVisible = canvas.offsetParent !== null;
+            if (!isVisible) return;
+            
             try {
                 // Clear the canvas
                 const ctx = canvas.getContext('2d');
@@ -1557,6 +1623,13 @@ document.addEventListener('DOMContentLoaded', function() {
     if (document.getElementById('expenseChart') || document.getElementById('incomeChart')) {
         console.log('Initializing monthly reports charts');
         initMonthlyReportsCharts();
+        
+        // Apply dark mode to monthly report cards if dark mode is active
+        if (document.body.classList.contains('dark-mode')) {
+            setTimeout(() => {
+                applyDarkModeToMonthlyReportCards();
+            }, 100);
+        }
         
         // Add resize event listener for responsiveness
         let resizeTimeout;
