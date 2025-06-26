@@ -10,78 +10,86 @@ register_bp = Blueprint('register', __name__)
 
 @register_bp.route("/register_page", methods=["GET"])
 def register_page():
+    """Render the registration page."""
     return render_template("register.html", form=CSRFForm())
 
 @register_bp.route("/register", methods=["POST", "GET"])
 def register():
-    if request.method == "GET":
-        return redirect("register_page")
-    user_username = (request.form.get("user_username").strip()).lower()
-    user_password = request.form.get("user_password")
-    user_mail = request.form.get("user_mail").lower()
+    """Handle user registration and store user data in the database."""
+    if request.method == "GET": #handle get request
+        return redirect("register_page") #redirect to registration page
+    user_username = (request.form.get("user_username").strip()).lower() #get username from form
+    user_password = request.form.get("user_password") #get password from form
+    user_mail = request.form.get("user_mail").lower() #get email from form
 
-    if "@" in user_username:
-        error = "username should not have @"
+    if "@" in user_username: #validate username format
+        error = "username should not have @" #username validation error
         return render_template("register.html", error=error, form=CSRFForm())
 
-    if "@" not in user_mail:
-        error = "mail should have @"
+    if "@" not in user_mail: #validate email format
+        error = "mail should have @" #email validation error
         return render_template("register.html", error=error, form=CSRFForm())
 
+    #check if username already exists in database
     existing_username = db.session.execute(
         text("SELECT user_username FROM users WHERE LOWER(user_username) = :user_username"),
         {"user_username": user_username}
     ).fetchall()
     if existing_username:
-        error_existing = "Username is already in use. Please choose another one. or "
+        error_existing = "Username is already in use. Please choose another one. or " #username already taken error
         return render_template("register.html", error=error_existing, form=CSRFForm())
 
+    #check if email already exists in database
     existing_mail = db.session.execute(
         text("SELECT user_mail FROM users WHERE LOWER(user_mail) = :user_mail"),
         {"user_mail": user_mail}
     ).fetchall()
     if existing_mail:
-        error_existing = "Mail is already in use. Please choose another one. or "
+        error_existing = "Mail is already in use. Please choose another one. or " #email already taken error
         return render_template("register.html", error=error_existing, form=CSRFForm())
 
+    #get the last user_id in the database
     try:
         last_user_id = db.session.execute(
             text("SELECT MAX(user_id) FROM users")
         ).fetchone()[0]
-        user_id = last_user_id + 1
+        user_id = last_user_id + 1 #increment for new user
     except:
-        user_id = 1
+        user_id = 1 #first user in database
 
-    session["user_id"] = user_id
-    hashed_password = generate_password_hash(user_password)
+    session["user_id"] = user_id #store user id in session
+    hashed_password = generate_password_hash(user_password) #hash the password
 
-    send_verification_mail_code(user_mail)
+    send_verification_mail_code(user_mail) #send verification email
 
+    #insert new user into database
     db.session.execute(
         text("INSERT INTO users (user_id, user_username, user_password, user_mail, user_mail_verify, favorite_currency) VALUES (:user_id, :user_username, :user_password, :user_mail, :user_mail_verify, :favorite_currency)"),
         {"user_id": user_id ,"user_username": user_username, "user_password": hashed_password, "user_mail": user_mail, "user_mail_verify": "not_verified", "favorite_currency": "USD"}
     )
-    db.session.commit()
+    db.session.commit() #commit changes to database
 
-    return render_template("mail_verify.html", user_mail=user_mail, user_username=user_username, form=CSRFForm())
+    return render_template("mail_verify.html", user_mail=user_mail, user_username=user_username, form=CSRFForm()) #render email verification page
 
 @register_bp.route("/mail_verification", methods=["POST", "GET"])
 def mail_verification():
-    if request.method == "GET":
-        return render_template("mail_verify.html", form=CSRFForm())
-    else:
+    """Verify the user's email address and activate their account."""
+    if request.method == "GET": #handle get request
+        return render_template("mail_verify.html", form=CSRFForm()) #render verification page
+    else: #handle post request
 
-        verification_code = request.form.get("verification_code").strip().lower()
-        user_id = session.get("user_id")
-        user_mail = request.form.get("user_mail")
-        user_username = request.form.get("user_username")
+        verification_code = request.form.get("verification_code").strip().lower() #get verification code from form
+        user_id = session.get("user_id") #get user id from session
+        user_mail = request.form.get("user_mail") #get email from form
+        user_username = request.form.get("user_username") #get username from form
 
-        if verification_code == session.get("verification_code"):
+        if verification_code == session.get("verification_code"): #verify the code
+            #update user verification status in database
             db.session.execute(
                 text("UPDATE users SET user_mail_verify = :user_mail_verify WHERE user_id = :user_id"), {"user_mail_verify" :"verified", "user_id": user_id}
                 )
-            db.session.commit()
-            is_html = True
+            db.session.commit() #commit changes to database
+            is_html = True #set email format to html
             body = f"""
             <!DOCTYPE html>
             <html lang="en">
@@ -154,14 +162,14 @@ def mail_verification():
                 </div>
             </body>
             </html>
-            """
-            success, error = send_mail(smtp_server, smtp_port, email_send, email_send_password, user_mail, "✅ Email Verified - Welcome to Imhotep Financial Manager!", body, is_html)
+            """ #email verification success html template
+            success, error = send_mail(smtp_server, smtp_port, email_send, email_send_password, user_mail, "✅ Email Verified - Welcome to Imhotep Financial Manager!", body, is_html) #send verification success email
             if error:
-                print(error)
+                print(error) #print error if email sending fails
                 
-            success = "Email verified successfully. You can now log in."
+            success = "Email verified successfully. You can now log in." #success message
             return render_template("login.html", success=success, form=CSRFForm())
 
         else:
-            error="Invalid verification code."
+            error="Invalid verification code." #invalid code error
             return render_template("mail_verify.html", error=error, form=CSRFForm())

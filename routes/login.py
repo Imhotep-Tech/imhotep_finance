@@ -13,124 +13,137 @@ login_bp = Blueprint('login', __name__)
 
 @login_bp.route("/login_page", methods=["GET"])
 def login_page():
-    if session.get("logged_in"):
-        return redirect("/home")
+    """Render the login page or redirect to home if already logged in."""
+    if session.get("logged_in"): #check if user is already logged in
+        return redirect("/home") #redirect to home if already logged in
     else:
-        return render_template("login.html", form=CSRFForm())
+        return render_template("login.html", form=CSRFForm()) #render login page
 
 @login_bp.route("/trial_login", methods=["POST"])
 def trial_login():
+    """Log in a test user and redirect to home."""
     # Assuming the test user has user_id = 1
-    test_user_id = 1
-    session["logged_in"] = True
-    session["user_id"] = test_user_id
-    session.permanent = True
-    return redirect("/home")
+    test_user_id = 1 #set test user id
+    session["logged_in"] = True #set logged in status
+    session["user_id"] = test_user_id #set user id in session
+    session.permanent = True #make session permanent
+    return redirect("/home") #redirect to home page
 
 @login_bp.route("/login", methods=["POST"])
 #@limiter.limit("3 per minute")
 def login():
-    user_username_mail = (request.form.get("user_username_mail").strip()).lower()
-    user_password = request.form.get("user_password")
+    """Log in a user with given username/email and password."""
+    user_username_mail = (request.form.get("user_username_mail").strip()).lower() #get username or email from form
+    user_password = request.form.get("user_password") #get password from form
 
-    if "@" in user_username_mail:
+    if "@" in user_username_mail: #check if input is email
         try:
+            #get password and verification status from database using email
             login_db = db.session.execute(
             text("SELECT user_password, user_mail_verify FROM users WHERE LOWER(user_mail) = :user_mail"),
             {"user_mail": user_username_mail}
             ).fetchall()[0]
 
-            password_db = login_db[0]
-            user_mail_verify = login_db[1]
+            password_db = login_db[0] #get hashed password from database
+            user_mail_verify = login_db[1] #get email verification status
 
-            if check_password_hash(password_db, user_password):
-                if user_mail_verify == "verified":
+            if check_password_hash(password_db, user_password): #verify password
+                if user_mail_verify == "verified": #check if email is verified
+                    #get user id for verified user
                     user = db.session.execute(
                         text("SELECT user_id FROM users WHERE LOWER(user_mail) = :user_mail AND user_password = :user_password"),
                         {"user_mail": user_username_mail, "user_password": password_db}
                     ).fetchone()[0]
 
+                    #log in the user
                     session["logged_in"] = True
                     session["user_id"] = user
                     session.permanent = True
                     return redirect("/home")
                 else:
-                    error_verify = "Your mail isn't verified"
+                    error_verify = "Your mail isn't verified" #email not verified error
                     return render_template("login.html", error_verify=error_verify, form=CSRFForm())
             else:
-                error = "Your username or password are incorrect!"
+                error = "Your username or password are incorrect!" #incorrect password error
                 return render_template("login.html", error=error, form=CSRFForm())
         except:
-            error = "Your E-mail or password are incorrect!"
+            error = "Your E-mail or password are incorrect!" #email not found error
             return render_template("login.html", error=error, form=CSRFForm())
-    else:
+    else: #input is username
         try:
+            #get password and verification status from database using username
             login_db = db.session.execute(
                     text("SELECT user_password, user_mail_verify FROM users WHERE LOWER(user_username) = :user_username"),
                     {"user_username": user_username_mail}
                 ).fetchall()[0]
-            password_db = login_db[0]
-            user_mail_verify = login_db[1]
+            password_db = login_db[0] #get hashed password from database
+            user_mail_verify = login_db[1] #get email verification status
 
-            if check_password_hash(password_db, user_password):
-                if user_mail_verify == "verified":
+            if check_password_hash(password_db, user_password): #verify password
+                if user_mail_verify == "verified": #check if email is verified
+                    #get user id for verified user
                     user = db.session.execute(
                         text("SELECT user_id FROM users WHERE LOWER(user_username) = :user_username AND user_password = :user_password"),
                         {"user_username": user_username_mail, "user_password": password_db}
                     ).fetchone()[0]
 
+                    #log in the user
                     session["logged_in"] = True
                     session["user_id"] = user
                     session.permanent = True
                     return redirect("/home")
                 else:
-                    error_verify = "Your mail isn't verified"
+                    error_verify = "Your mail isn't verified" #email not verified error
                     return render_template("login.html", error_verify=error_verify, form=CSRFForm())
             else:
-                error = "Your username or password are incorrect!"
+                error = "Your username or password are incorrect!" #incorrect password error
                 return render_template("login.html", error=error, form=CSRFForm())
         except:
-            error = "Your username or password are incorrect!"
+            error = "Your username or password are incorrect!" #username not found error
             return render_template("login.html", error=error, form=CSRFForm())
 
 @login_bp.route("/manual_mail_verification", methods=["POST", "GET"])
 def manual_mail_verification():
-    if request.method == "GET":
-        return render_template("manual_mail_verification.html", form=CSRFForm())
-    else:
-        user_mail = (request.form.get("user_mail").strip()).lower()
+    """Render the manual mail verification page or send a verification email."""
+    if request.method == "GET": #handle get request
+        return render_template("manual_mail_verification.html", form=CSRFForm()) #render verification page
+    else: #handle post request
+        user_mail = (request.form.get("user_mail").strip()).lower() #get email from form
         try:
+            #get user id and verification status from database
             mail_verify_db = db.session.execute(
                 text("SELECT user_id, user_mail_verify FROM users WHERE user_mail = :user_mail"), {"user_mail" : user_mail}
                 ).fetchall()[0]
-            user_id = mail_verify_db[0]
-            mail_verify = mail_verify_db[1]
+            user_id = mail_verify_db[0] #get user id
+            mail_verify = mail_verify_db[1] #get verification status
         except:
-            error_not = "This mail isn't used on the webapp!"
+            error_not = "This mail isn't used on the webapp!" #email not found error
             return render_template("manual_mail_verification.html", error_not = error_not, form=CSRFForm())
 
-        if mail_verify == "verified":
-            error = "This Mail is already used and verified"
+        if mail_verify == "verified": #check if already verified
+            error = "This Mail is already used and verified" #already verified error
             return render_template("login.html", error=error, form=CSRFForm())
         else:
-            session["user_id"] = user_id
-            send_verification_mail_code(user_mail)
-            return render_template("mail_verify.html", form=CSRFForm())
+            session["user_id"] = user_id #store user id in session
+            send_verification_mail_code(user_mail) #send verification email
+            return render_template("mail_verify.html", form=CSRFForm()) #render verification page
 
 @login_bp.route("/forget_password",methods=["POST", "GET"])
 def forget_password():
-    if request.method == "GET":
-        return render_template("forget_password.html", form=CSRFForm())
-    else:
+    """Render the forget password page or send a password reset email."""
+    if request.method == "GET": #handle get request
+        return render_template("forget_password.html", form=CSRFForm()) #render forget password page
+    else: #handle post request
 
-        user_mail = request.form.get("user_mail")
+        user_mail = request.form.get("user_mail") #get email from form
         try:
+            #check if email exists in database
             db.session.execute(
                 text("SELECT user_mail FROM users WHERE user_mail = :user_mail"), {"user_mail" : user_mail}
             ).fetchall()[0]
 
-            temp_password = secrets.token_hex(4)
-            is_html = True
+            temp_password = secrets.token_hex(4) #generate temporary password
+            is_html = True #set email format to html
             body = f"""
             <!DOCTYPE html>
             <html lang="en">
@@ -217,24 +230,26 @@ def forget_password():
                 </div>
             </body>
             </html>
-            """
-            success, error = send_mail(smtp_server, smtp_port, email_send, email_send_password, user_mail, "🔐 Password Reset - Imhotep Financial Manager", body, is_html)
+            """ #password reset email html template
+            success, error = send_mail(smtp_server, smtp_port, email_send, email_send_password, user_mail, "🔐 Password Reset - Imhotep Financial Manager", body, is_html) #send password reset email
             if error:
-                print(error)
+                print(error) #print error if email sending fails
 
-            hashed_password = generate_password_hash(temp_password)
+            hashed_password = generate_password_hash(temp_password) #hash temporary password
+            #update user password in database
             db.session.execute(
                 text("UPDATE users SET user_password = :user_password WHERE user_mail = :user_mail"), {"user_password" :hashed_password, "user_mail": user_mail}
                 )
-            db.session.commit()
+            db.session.commit() #commit changes to database
 
-            success="The Mail is sent check Your mail for your new password"
+            success="The Mail is sent check Your mail for your new password" #success message
             return render_template("login.html", success=success, form=CSRFForm())
         except:
-            error = "This Email isn't saved"
+            error = "This Email isn't saved" #email not found error
             return render_template("forget_password.html", error = error, form=CSRFForm())
 
 @login_bp.route("/logout", methods=["GET", "POST"])
 def logout_route():
-        logout()
-        return redirect("/login_page")
+        """Log out the user and redirect to the login page."""
+        logout() #clear session data
+        return redirect("/login_page") #redirect to login page
