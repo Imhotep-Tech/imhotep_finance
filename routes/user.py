@@ -17,200 +17,212 @@ user_bp = Blueprint('user', __name__)
 # the home screen that shows a lot of info
 @user_bp.route("/home", methods=["GET"])
 def home():
-    if not session.get("logged_in"):
-        return redirect("/login_page")
+    """Display the main dashboard with user information, targets, and financial data."""
+    if not session.get("logged_in"): #check if user is logged in
+        return redirect("/login_page") #redirect to login if not logged in
     else:
         #gets the user photo
         try:
-            user_photo_path = select_user_photo()
+            user_photo_path = select_user_photo() #get user profile picture path
         except OperationalError:
-            error = "Welcome Back"
+            error = "Welcome Back" #database error message
             return render_template('error.html', error=error, form=CSRFForm())
 
         #gets the user id and the total networth of the user
-        user_id = session.get("user_id")
-        total_favorite_currency, favorite_currency = show_networth()
-        total_favorite_currency = f"{total_favorite_currency:,.2f}"
+        user_id = session.get("user_id") #get user id from session
+        total_favorite_currency, favorite_currency = show_networth() #get user networth and favorite currency
+        total_favorite_currency = f"{total_favorite_currency:,.2f}" #format networth with commas
         
-        now = datetime.datetime.now()
+        now = datetime.datetime.now() #get current datetime
 
         #check and add the scheduled trans for the user
-        add_scheduled_trans(user_id, now)
+        add_scheduled_trans(user_id, now) #process scheduled transactions
 
         # gets the user target points
         target_db = db.session.execute(
             text("SELECT * FROM target WHERE user_id = :user_id"),
             {"user_id": user_id}
-        ).fetchall()
+        ).fetchall() #get all user targets from database
 
         #if the user has a target from the db
-        if target_db:
-            target_db = sorted(target_db, key=lambda x: (x[4], x[3]), reverse=True)
-            target = target_db[0][2]
-            mounth_db = int(target_db[0][3])
-            year_db = int(target_db[0][4])
-            mounth = now.month
-            year = now.year
+        if target_db: #check if user has targets
+            target_db = sorted(target_db, key=lambda x: (x[4], x[3]), reverse=True) #sort targets by year and month
+            target = target_db[0][2] #get latest target amount
+            mounth_db = int(target_db[0][3]) #get target month from database
+            year_db = int(target_db[0][4]) #get target year from database
+            mounth = now.month #get current month
+            year = now.year #get current year
 
             #if this is a new mounth with the year then add the new mounthly data to the database 
-            if mounth_db != mounth or year_db != year:
+            if mounth_db != mounth or year_db != year: #check if new month or year
+                #get the last target id in the database
                 try:
                     last_target_id = db.session.execute(
                             text("SELECT MAX(target_id) FROM target")
                         ).fetchone()[0]
-                    target_id = last_target_id + 1
+                    target_id = last_target_id + 1 #increment for new target
                 except:
-                    target_id = 1
+                    target_id = 1 #first target in database
 
+                #insert new monthly target
                 db.session.execute(
                     text("INSERT INTO target (target_id, user_id, target, mounth, year) VALUES (:target_id, :user_id, :target, :mounth, :year)"),
                     {"target_id":target_id, "user_id" :user_id, "target": target, "mounth" :mounth, "year" :year}
                 )
-                db.session.commit()
+                db.session.commit() #commit changes to database
 
-            first_day_current_month = now.replace(day=1)
+            first_day_current_month = now.replace(day=1) #get first day of current month
 
-            if now.month == 12:
-                first_day_next_month = now.replace(year=now.year + 1, month=1, day=1)
+            if now.month == 12: #check if december
+                first_day_next_month = now.replace(year=now.year + 1, month=1, day=1) #set to january next year
             else:
-                first_day_next_month = now.replace(month=now.month + 1, day=1)
+                first_day_next_month = now.replace(month=now.month + 1, day=1) #set to first day next month
 
-            from_date = first_day_current_month.date()
-            to_date = first_day_next_month.date()
+            from_date = first_day_current_month.date() #set start date for current month
+            to_date = first_day_next_month.date() #set end date for current month
 
+            #get current month target
             taregt_db_1 = db.session.execute(
                 text("SELECT target FROM target WHERE user_id = :user_id AND mounth = :mounth AND year = :year"),
                 {"user_id": user_id, "mounth": mounth, "year": year}
             ).fetchone()
 
-            if taregt_db_1:
-                target = taregt_db_1[0]
+            if taregt_db_1: #check if target exists for current month
+                target = taregt_db_1[0] #get target amount
+                #get deposit transactions for current month
                 score_deposite = db.session.execute(
                     text("SELECT amount, currency FROM trans WHERE user_id = :user_id AND date BETWEEN :from_date AND :to_date AND trans_status = :trans_status"),
                     {"user_id": user_id, "from_date": from_date, "to_date": to_date, "trans_status": "deposit"}
                 ).fetchall()
 
+                #get withdrawal transactions for current month
                 score_withdraw = db.session.execute(
                     text("SELECT amount, currency FROM trans WHERE user_id = :user_id AND date BETWEEN :from_date AND :to_date AND trans_status = :trans_status"),
                     {"user_id": user_id, "from_date": from_date, "to_date": to_date, "trans_status": "withdraw"}
                 ).fetchall()
 
-                currency_totals_deposite = {}
-                for amount, currency in score_deposite:
-                    amount = float(amount)
-                    if currency in currency_totals_deposite:
-                        currency_totals_deposite[currency] += amount
+                currency_totals_deposite = {} #initialize deposit totals by currency
+                for amount, currency in score_deposite: #iterate through deposits
+                    amount = float(amount) #convert amount to float
+                    if currency in currency_totals_deposite: #check if currency already exists
+                        currency_totals_deposite[currency] += amount #add to existing total
                     else:
-                        currency_totals_deposite[currency] = amount
-                total_favorite_currency_deposite, favorite_currency_deposite = convert_to_fav_currency(currency_totals_deposite, user_id)
+                        currency_totals_deposite[currency] = amount #create new currency entry
+                total_favorite_currency_deposite, favorite_currency_deposite = convert_to_fav_currency(currency_totals_deposite, user_id) #convert deposits to favorite currency
 
-                currency_totals_withdraw= {}
-                for amount, currency in score_withdraw:
-                    amount = float(amount)
-                    if currency in currency_totals_withdraw:
-                        currency_totals_withdraw[currency] += amount
+                currency_totals_withdraw= {} #initialize withdrawal totals by currency
+                for amount, currency in score_withdraw: #iterate through withdrawals
+                    amount = float(amount) #convert amount to float
+                    if currency in currency_totals_withdraw: #check if currency already exists
+                        currency_totals_withdraw[currency] += amount #add to existing total
                     else:
-                        currency_totals_withdraw[currency] = amount
-                total_favorite_currency_withdraw, favorite_currency_withdraw = convert_to_fav_currency(currency_totals_withdraw, user_id)
+                        currency_totals_withdraw[currency] = amount #create new currency entry
+                total_favorite_currency_withdraw, favorite_currency_withdraw = convert_to_fav_currency(currency_totals_withdraw, user_id) #convert withdrawals to favorite currency
 
-                score = (total_favorite_currency_deposite - target) - total_favorite_currency_withdraw
-                if score > 0:
-                    score_txt = "Above Target"
-                elif score < 0:
-                    score_txt = "Below Target"
+                score = (total_favorite_currency_deposite - target) - total_favorite_currency_withdraw #calculate target score
+                if score > 0: #check if above target
+                    score_txt = "Above Target" #above target message
+                elif score < 0: #check if below target
+                    score_txt = "Below Target" #below target message
                 else:
-                    score_txt = "On Target"
+                    score_txt = "On Target" #on target message
 
+                #update target score in database
                 db.session.execute(
                     text("UPDATE target SET score = :score WHERE user_id = :user_id AND mounth = :mounth AND year = :year"),
                     {"user_id" :user_id, "score":score,  "mounth" :mounth, "year" :year}
                 )
-                db.session.commit()
-                return render_template("home.html", total_favorite_currency = total_favorite_currency, favorite_currency=favorite_currency , user_photo_path=user_photo_path, score_txt=score_txt, score=score, target = target, form=CSRFForm())
+                db.session.commit() #commit score update
+                return render_template("home.html", total_favorite_currency = total_favorite_currency, favorite_currency=favorite_currency , user_photo_path=user_photo_path, score_txt=score_txt, score=score, target = target, form=CSRFForm()) #render home page with target info
             else:
                 # If no target found for current month/year, redirect to set target
-                return render_template("home.html", total_favorite_currency = total_favorite_currency, favorite_currency=favorite_currency , user_photo_path=user_photo_path, form=CSRFForm())
+                return render_template("home.html", total_favorite_currency = total_favorite_currency, favorite_currency=favorite_currency , user_photo_path=user_photo_path, form=CSRFForm()) #render home page without target
         else:
             # If no target exists at all, show home without target info
-            return render_template("home.html", total_favorite_currency = total_favorite_currency, favorite_currency=favorite_currency , user_photo_path=user_photo_path, form=CSRFForm())
+            return render_template("home.html", total_favorite_currency = total_favorite_currency, favorite_currency=favorite_currency , user_photo_path=user_photo_path, form=CSRFForm()) #render home page without target
 
 @user_bp.route("/show_networth_details", methods=["GET"])
 def show_networth_details():
-    if not session.get("logged_in"):
-        return redirect("/login_page")
+    """Display detailed breakdown of user's networth by currency."""
+    if not session.get("logged_in"): #check if user is logged in
+        return redirect("/login_page") #redirect to login if not logged in
     else:
         try:
-            user_photo_path = select_user_photo()
+            user_photo_path = select_user_photo() #get user profile picture path
         except OperationalError:
-            error = "Database connection error. Please try again."
+            error = "Database connection error. Please try again." #database error message
             return render_template('error.html', error=error, form=CSRFForm())
         
-        total_favorite_currency, favorite_currency = show_networth()
-        total_favorite_currency = f"{total_favorite_currency:,.2f}"
-        user_id = session.get("user_id")
+        total_favorite_currency, favorite_currency = show_networth() #get user networth and favorite currency
+        total_favorite_currency = f"{total_favorite_currency:,.2f}" #format networth with commas
+        user_id = session.get("user_id") #get user id from session
         
+        #get networth details by currency
         networth_details_db = db.session.execute(
             text("SELECT currency, total FROM networth WHERE user_id = :user_id ORDER BY total DESC"),
             {"user_id": user_id}
         ).fetchall()
 
-        networth_details = dict(networth_details_db)
+        networth_details = dict(networth_details_db) #convert to dictionary
         
         return render_template("networth_details.html", 
                              networth_details=networth_details, 
                              user_photo_path=user_photo_path, 
                              total_favorite_currency=total_favorite_currency, 
                              favorite_currency=favorite_currency, 
-                             form=CSRFForm())
+                             form=CSRFForm()) #render networth details page
 
 @user_bp.route("/delete_user", methods=["POST", "GET"])
 def delete_user():
-    if not session.get("logged_in"):
-        return redirect("/login_page")
-    elif session.get("user_id") == 1:
-        error = "this is a trial you can't delete that account!"
+    """Display the user account deletion page."""
+    if not session.get("logged_in"): #check if user is logged in
+        return redirect("/login_page") #redirect to login if not logged in
+    elif session.get("user_id") == 1: #check if trial user
+        error = "this is a trial you can't delete that account!" #trial user error
         return render_template("check_pass_delete_user.html", error=error, form=CSRFForm())
     else:
         try:
-            user_photo_path = select_user_photo()
+            user_photo_path = select_user_photo() #get user profile picture path
         except OperationalError:
-            error = "Welcome Back"
+            error = "Welcome Back" #database error message
             return render_template('error.html', error=error, form=CSRFForm())
 
-        total_favorite_currency, favorite_currency = show_networth()
-        total_favorite_currency = f"{total_favorite_currency:,.2f}"
-        return render_template("check_pass_delete_user.html", total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path, form=CSRFForm())
+        total_favorite_currency, favorite_currency = show_networth() #get user networth and favorite currency
+        total_favorite_currency = f"{total_favorite_currency:,.2f}" #format networth with commas
+        return render_template("check_pass_delete_user.html", total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path, form=CSRFForm()) #render password check page for deletion
 
 @user_bp.route("/delete_user/check_pass", methods=["POST"])
 def check_pass_delete_user():
-    if not session.get("logged_in"):
-        return redirect("/login_page")
-    elif session.get("user_id") == 1:
-        error = "this is a trial you can't delete that account!"
+    """Verify user password and send account deletion verification email."""
+    if not session.get("logged_in"): #check if user is logged in
+        return redirect("/login_page") #redirect to login if not logged in
+    elif session.get("user_id") == 1: #check if trial user
+        error = "this is a trial you can't delete that account!" #trial user error
         return render_template("check_pass_delete_user.html", error=error, form=CSRFForm())
     else:
 
         try:
-            user_photo_path = select_user_photo()
+            user_photo_path = select_user_photo() #get user profile picture path
         except OperationalError:
-            error = "Welcome Back"
+            error = "Welcome Back" #database error message
             return render_template('error.html', error=error, form=CSRFForm())
 
-        total_favorite_currency, favorite_currency = show_networth()
-        total_favorite_currency = f"{total_favorite_currency:,.2f}"
-        user_id = session.get("user_id")
-        check_pass = request.form.get("check_pass")
-        security = security_check(user_id, check_pass)
+        total_favorite_currency, favorite_currency = show_networth() #get user networth and favorite currency
+        total_favorite_currency = f"{total_favorite_currency:,.2f}" #format networth with commas
+        user_id = session.get("user_id") #get user id from session
+        check_pass = request.form.get("check_pass") #get password from form
+        security = security_check(user_id, check_pass) #verify password
 
-        if security:
+        if security: #password is correct
+            #get user email for verification
             user_mail = db.session.execute(
                 text("SELECT user_mail FROM users WHERE user_id = :user_id"),
                 {"user_id": user_id}
             ).fetchone()[0]
 
-            verification_code = secrets.token_hex(4)
+            verification_code = secrets.token_hex(4) #generate verification code
 
-            is_html = True
+            is_html = True #set email format to html
             body = f"""
             <!DOCTYPE html>
             <html lang="en">
@@ -313,58 +325,63 @@ def check_pass_delete_user():
                 </div>
             </body>
             </html>
-            """
-            success, error = send_mail(smtp_server, smtp_port, email_send, email_send_password, user_mail, "⚠️ Account Deletion Verification - Imhotep Financial Manager", body, is_html)
+            """ #account deletion verification html template
+            success, error = send_mail(smtp_server, smtp_port, email_send, email_send_password, user_mail, "⚠️ Account Deletion Verification - Imhotep Financial Manager", body, is_html) #send deletion verification email
             if error:
-                print(error)
+                print(error) #print error if email sending fails
 
-            session["verification_code"] = verification_code
+            session["verification_code"] = verification_code #store verification code in session
 
-            return render_template("mail_verify_delete_user.html", user_id = user_id, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path, user_mail=user_mail, form=CSRFForm())
+            return render_template("mail_verify_delete_user.html", user_id = user_id, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path, user_mail=user_mail, form=CSRFForm()) #render deletion verification page
         else:
-            error = "This password is incorrect!"
+            error = "This password is incorrect!" #incorrect password error
             return render_template("check_pass_delete_user.html", error = error, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, user_photo_path=user_photo_path, form=CSRFForm())
 
 @user_bp.route("/delete_user/verify_delete_user", methods=["POST"])
 def verify_delete_user():
-    if not session.get("logged_in"):
-        return redirect("/login_page")
-    elif session.get("user_id") == 1:
-        error = "this is a trial you can't delete that account!"
+    """Verify deletion code and permanently delete user account."""
+    if not session.get("logged_in"): #check if user is logged in
+        return redirect("/login_page") #redirect to login if not logged in
+    elif session.get("user_id") == 1: #check if trial user
+        error = "this is a trial you can't delete that account!" #trial user error
         return render_template("check_pass_delete_user.html", error=error, form=CSRFForm())
     else:
 
-        verification_code = request.form.get("verification_code").strip().lower()
-        user_id = session.get("user_id")
-        if verification_code == session.get("verification_code"):
+        verification_code = request.form.get("verification_code").strip().lower() #get verification code from form
+        user_id = session.get("user_id") #get user id from session
+        if verification_code == session.get("verification_code"): #verify the code
 
+            #delete user networth data
             db.session.execute(
                 text("DELETE FROM networth WHERE user_id = :user_id"),
                 {"user_id": user_id}
                 )
-            db.session.commit()
+            db.session.commit() #commit networth deletion
 
+            #delete user transactions
             db.session.execute(
                 text("DELETE FROM trans WHERE user_id = :user_id"),
                 {"user_id": user_id}
                 )
-            db.session.commit()
+            db.session.commit() #commit transactions deletion
 
+            #delete user targets
             db.session.execute(
                 text("DELETE FROM target WHERE user_id = :user_id"),
                 {"user_id": user_id}
                 )
-            db.session.commit()
+            db.session.commit() #commit targets deletion
 
+            #delete user wishlist
             db.session.execute(
                 text("DELETE FROM wishlist WHERE user_id = :user_id"),
                 {"user_id": user_id}
                 )
-            db.session.commit()
+            db.session.commit() #commit wishlist deletion
 
-            user_mail = request.form.get("user_mail")
+            user_mail = request.form.get("user_mail") #get user email from form
 
-            is_html = True
+            is_html = True #set email format to html
             body = f"""
             <!DOCTYPE html>
             <html lang="en">
@@ -477,52 +494,55 @@ def verify_delete_user():
                 </div>
             </body>
             </html>
-            """
-            success, error = send_mail(smtp_server, smtp_port, email_send, email_send_password, user_mail, "👋 Account Deleted - Imhotep Financial Manager", body, is_html)
+            """ #account deleted confirmation html template
+            success, error = send_mail(smtp_server, smtp_port, email_send, email_send_password, user_mail, "👋 Account Deleted - Imhotep Financial Manager", body, is_html) #send deletion confirmation email
             if error:
-                print(error)
+                print(error) #print error if email sending fails
 
+            #delete user account
             db.session.execute(
                 text("DELETE FROM users WHERE user_id = :user_id"),
                 {"user_id": user_id}
                 )
-            db.session.commit()
-            logout()
+            db.session.commit() #commit user deletion
+            logout() #log out user
 
-            success="Account Deleted"
-            return render_template("login.html", success=success, form=CSRFForm())
+            success="Account Deleted" #success message
+            return render_template("login.html", success=success, form=CSRFForm()) #render login page with success message
 
         else:
-            error="Invalid verification code."
+            error="Invalid verification code." #invalid code error
             return render_template("mail_verify_delete_user.html", error=error, form=CSRFForm())
 
 @user_bp.route("/show_scores_history", methods=["GET"])
 def show_scores_history():
-    if not session.get("logged_in"):
-        return redirect("/login_page")
+    """Display paginated history of user's target scores."""
+    if not session.get("logged_in"): #check if user is logged in
+        return redirect("/login_page") #redirect to login if not logged in
     else:
         try:
-            user_photo_path = select_user_photo()
+            user_photo_path = select_user_photo() #get user profile picture path
         except OperationalError:
-            error = "Welcome Back"
+            error = "Welcome Back" #database error message
             return render_template('error.html', error=error, form=CSRFForm())
         
-        total_favorite_currency, favorite_currency = show_networth()
-        total_favorite_currency = f"{total_favorite_currency:,.2f}"
-        user_id = session.get("user_id")
+        total_favorite_currency, favorite_currency = show_networth() #get user networth and favorite currency
+        total_favorite_currency = f"{total_favorite_currency:,.2f}" #format networth with commas
+        user_id = session.get("user_id") #get user id from session
 
-        page = int(request.args.get("page", 1))  # Default to page 1
-        per_page = 20  # Number of records per page
+        page = int(request.args.get("page", 1))  # Default to page 1 #get page number with default
+        per_page = 20  # Number of records per page #set records per page
 
-        offset = (page - 1) * per_page
+        offset = (page - 1) * per_page #calculate offset for pagination
 
+        #get target history with pagination
         target_history = db.session.execute(
             text("SELECT target, mounth, year, score FROM target WHERE user_id = :user_id ORDER BY target_id DESC LIMIT :limit OFFSET :offset"),
             {"user_id":user_id, "limit":per_page, "offset":offset}
         ).fetchall()
         
-        if not target_history:
-            target_history = []
+        if not target_history: #check if no history exists
+            target_history = [] #set to empty list
 
         # Get total count for pagination
         total_count = db.session.execute(
@@ -531,41 +551,42 @@ def show_scores_history():
                 WHERE user_id = :user_id
             '''),
             {"user_id": user_id}
-        ).scalar()
+        ).scalar() #get total count of targets
 
-        total_pages = (total_count + per_page - 1) // per_page  # Calculate total number of pages
+        total_pages = (total_count + per_page - 1) // per_page  # Calculate total number of pages #calculate total pages
 
-        return render_template("show_scores_history.html", target_history=target_history, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, total_pages=total_pages,page=page, form=CSRFForm())
+        return render_template("show_scores_history.html", target_history=target_history, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, total_pages=total_pages,page=page, form=CSRFForm()) #render scores history page
 
 @user_bp.route("/monthly_reports", methods=["GET"])
 def monthly_reports():
-    if not session.get("logged_in"):
-        return redirect("/login_page")
+    """Display monthly financial reports with category breakdowns."""
+    if not session.get("logged_in"): #check if user is logged in
+        return redirect("/login_page") #redirect to login if not logged in
     
     try:
-        user_photo_path = select_user_photo()
+        user_photo_path = select_user_photo() #get user profile picture path
     except OperationalError:
-        error = "Welcome Back"
+        error = "Welcome Back" #database error message
         return render_template('error.html', error=error, form=CSRFForm())
     
-    total_favorite_currency, favorite_currency = show_networth()
-    total_favorite_currency = f"{total_favorite_currency:,.2f}"
+    total_favorite_currency, favorite_currency = show_networth() #get user networth and favorite currency
+    total_favorite_currency = f"{total_favorite_currency:,.2f}" #format networth with commas
 
-    user_id = session.get("user_id")
+    user_id = session.get("user_id") #get user id from session
     
     # Get current date
-    now = datetime.datetime.now()
+    now = datetime.datetime.now() #get current datetime
     
     # Start date: first day of current month
-    start_date = now.replace(day=1).date()
+    start_date = now.replace(day=1).date() #set start date to first day of month
     
     # End date: first day of next month
-    if now.month == 12:
-        end_date = now.replace(year=now.year + 1, month=1, day=1).date()
+    if now.month == 12: #check if december
+        end_date = now.replace(year=now.year + 1, month=1, day=1).date() #set to january next year
     else:
-        end_date = now.replace(month=now.month + 1, day=1).date()
+        end_date = now.replace(month=now.month + 1, day=1).date() #set to first day next month
 
-    user_withdraw_on_range, user_deposit_on_range, withdraw_percentages, deposit_percentages = calculate_user_report(start_date, end_date, user_id)
+    user_withdraw_on_range, user_deposit_on_range, withdraw_percentages, deposit_percentages = calculate_user_report(start_date, end_date, user_id) #calculate monthly report data
 
     return render_template("monthly_reports.html",
                             user_photo_path=user_photo_path,
@@ -576,4 +597,4 @@ def monthly_reports():
                             withdraw_percentages=withdraw_percentages,
                             deposit_percentages=deposit_percentages,
                             current_month=now.strftime("%B %Y"),
-                            form=CSRFForm())
+                            form=CSRFForm()) #render monthly reports page
