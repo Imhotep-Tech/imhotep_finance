@@ -13,14 +13,15 @@ from flask import session
 # app.config['MAIL_USE_SSL'] = True
 # mail = Mail(app)
 
-smtp_server = 'smtp.gmail.com'
-smtp_port = 465
-email_send = 'imhotepfinance@gmail.com'
-email_send_password = os.getenv('MAIL_PASSWORD')
+smtp_server = 'smtp.gmail.com' #gmail smtp server
+smtp_port = 465 #gmail smtp port for ssl
+email_send = 'imhotepfinance@gmail.com' #sender email address
+email_send_password = os.getenv('MAIL_PASSWORD') #sender email password from environment variable
 
 def send_verification_mail_code(user_mail):
-    verification_code = secrets.token_hex(4)
-    is_html = True
+    """Send verification email with code to user for email verification."""
+    verification_code = secrets.token_hex(4) #generate random verification code
+    is_html = True #set email format to html
     body = f"""
     <!DOCTYPE html>
     <html lang="en">
@@ -117,9 +118,9 @@ def send_verification_mail_code(user_mail):
         </div>
     </body>
     </html>
-    """
-    success, error = send_mail(smtp_server, smtp_port, email_send, email_send_password, user_mail, "📧 Email Verification - Imhotep Financial Manager", body, is_html)
+    """ #email verification html template
+    success, error = send_mail(smtp_server, smtp_port, email_send, email_send_password, user_mail, "📧 Email Verification - Imhotep Financial Manager", body, is_html) #send verification email
     if error:
-        print(error)
+        print(error) #print error if email sending fails
 
-    session["verification_code"] = verification_code
+    session["verification_code"] = verification_code #store verification code in session
