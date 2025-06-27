@@ -27,12 +27,17 @@
     
     <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div class="max-w-4xl mx-auto">
-            <h1 class="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
+            <h1 class="text-5xl md:text-7xl font-bold text-black dark:text-white mb-6 leading-tight">
                 Take Control of Your
                 <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500">
                     Financial Future
                 </span>
             </h1>
+            <p class="text-xl md:text-2xl text-gray-800 dark:text-gray-200 mb-8 leading-relaxed">
+                Simplify your financial management with powerful tools for tracking expenses,
+                managing investments, and achieving your dreams.
+            </p>
+
             <p class="text-xl md:text-2xl text-gray-200 mb-8 leading-relaxed">
                 Simplify your financial management with powerful tools for tracking expenses, 
                 managing investments, and achieving your dreams.
@@ -45,8 +50,8 @@
                 </a>
                 <form action="/trial_login" method="POST" class="inline">
                     {{ form.hidden_tag() }}
-                    <button type="submit" 
-                            class="glass-effect text-white border-2 border-white hover:bg-white hover:text-indigo-600 font-semibold py-4 px-8 rounded-full text-lg transition-all duration-300 transform hover:scale-105">
+                    <button type="submit"
+                        class="glass-effect text-black dark:text-white border-2 border-black dark:border-white hover:bg-white hover:text-indigo-600 font-semibold py-4 px-8 rounded-full text-lg transition-all duration-300 transform hover:scale-105">
                         <i class="fas fa-play mr-2"></i>Try Demo
                     </button>
                 </form>
@@ -55,17 +60,20 @@
             <!-- Stats -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
                 <div class="glass-effect rounded-lg p-6 text-center transform hover:scale-105 transition-all duration-300">
-                    <div class="text-3xl font-bold text-white mb-2">{{users_count}}+</div>
-                    <div class="text-gray-200">Happy Users</div>
+                    <div class="text-3xl font-bold text-black dark:text-white mb-2">{{users_count}}+</div>
+
+                <div class="text-gray-700 dark:text-gray-200">Happy Users</div>
+
                 </div>
-                <div class="glass-effect rounded-lg p-6 text-center transform hover:scale-105 transition-all duration-300">
-                    <div class="text-3xl font-bold text-white mb-2">170+</div>
-                    <div class="text-gray-200">Currencies Supported</div>
-                </div>
-                <div class="glass-effect rounded-lg p-6 text-center transform hover:scale-105 transition-all duration-300">
-                    <div class="text-3xl font-bold text-white mb-2">99.9%</div>
-                    <div class="text-gray-200">Uptime</div>
-                </div>
+            <div class="glass-effect rounded-lg p-6 text-center transform hover:scale-105 transition-all duration-300">
+                <div class="text-3xl font-bold text-black dark:text-white mb-2">170+</div>
+                <div class="text-gray-700 dark:text-gray-200">Currencies Supported</div>
+            </div>
+            <div class="glass-effect rounded-lg p-6 text-center transform hover:scale-105 transition-all duration-300">
+                <div class="text-3xl font-bold text-black dark:text-white mb-2">99.9%</div>
+                <div class="text-gray-700 dark:text-gray-200">Uptime</div>
+            </div>
+
             </div>
         </div>
     </div>
