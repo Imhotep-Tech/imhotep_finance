@@ -14,12 +14,12 @@ google_sign_bp = Blueprint('google_sign', __name__)
 @google_sign_bp.route("/register_google")
 def login_google():
     google = oauth.create_client('google')  # create the google oauth client
-    redirect_uri = url_for('google_sign.authorize', _external=True)
-    return google.authorize_redirect(redirect_uri)
+    redirect_uri = url_for('google_sign.authorize', _external=True) #create the redirect uri for authorization
+    return google.authorize_redirect(redirect_uri) #redirect to google authorization
 
 @google_sign_bp.route('/authorize')
 def authorize():
-    google = oauth.create_client('google')
+    google = oauth.create_client('google') #create the google oauth client
     try:
         # create the google oauth client
         token = google.authorize_access_token()
@@ -29,80 +29,89 @@ def authorize():
         user_info = resp.json()
         user = oauth.google.userinfo()# uses openid endpoint to fetch user info
 
-        user_mail = user_info["email"]
-        user_username = user_mail.split('@')[0]
-        user_mail_verify = user_info["verified_email"]
-        user_photo_url = user_info["picture"]
+        user_mail = user_info["email"] #get user email from google
+        user_username = user_mail.split('@')[0] #extract username from email
+        user_mail_verify = user_info["verified_email"] #get email verification status
+        user_photo_url = user_info["picture"] #get user profile picture url
 
+        #check if email already exists in database
         existing_mail = db.session.execute(
             text("SELECT user_mail FROM users WHERE LOWER(user_mail) = :user_mail"),
             {"user_mail": user_mail}
         ).fetchall()
         if existing_mail:
+            #get user id for existing user
             user = db.session.execute(
                 text("SELECT user_id FROM users WHERE LOWER(user_mail) = :user_mail"),
                 {"user_mail": user_mail}
             ).fetchone()[0]
 
+            #log in the existing user
             session["logged_in"] = True
             session["user_id"] = user
             session.permanent = True
             return redirect("/home")
 
+        #store user data in session for new user
         session["user_mail"] = user_mail
         session["user_mail_verify"] = user_mail_verify
         session["user_photo_url"] = user_photo_url
 
+        #check if username already exists in database
         existing_username = db.session.execute(
             text("SELECT user_username FROM users WHERE LOWER(user_username) = :user_username"),
             {"user_username": user_username}
         ).fetchall()
         if existing_username:
             #error_existing = "Username is already in use. Please choose another one."
-            return render_template("add_username_google_login.html", form=CSRFForm())
+            return render_template("add_username_google_login.html", form=CSRFForm()) #render username selection page
 
-        session["user_username"] = user_username
-        return render_template('add_password_google_login.html', form=CSRFForm())
+        session["user_username"] = user_username #store username in session
+        return render_template('add_password_google_login.html', form=CSRFForm()) #render password creation page
 
     except OAuthError as error:
-        # Catch the OAuthError and handle it
+        #catch the OAuthError and handle it
         if error.error == 'access_denied':
-            error_message = "Google login was canceled. Please try again."
+            error_message = "Google login was canceled. Please try again." #user canceled login
             return render_template("login.html", error=error_message, form=CSRFForm())
         else:
-            error_message = "An error occurred. Please try again."
+            error_message = "An error occurred. Please try again." #general oauth error
             return render_template("login.html", error=error_message, form=CSRFForm())
 
 @google_sign_bp.route("/add_password_google_login", methods=["POST"])
 def add_password_google_login():
 
-    user_password = request.form.get("user_password")
+    user_password = request.form.get("user_password") #get the user password
 
-    hashed_password = generate_password_hash(user_password)
+    hashed_password = generate_password_hash(user_password) #hash the password
 
+    #get the user data form the session
     user_username = session.get("user_username")
-    user_mail = session.get("user_mail")
+    user_mail = session.get("user_mail") 
     user_mail_verify = session.get("user_mail_verify")
-    user_photo_url = session.get("user_photo_url")
+    user_photo_url = session.get("user_photo_url") 
 
+    #get the last user_id in the database
     try:
         last_user_id = db.session.execute(
             text("SELECT MAX(user_id) FROM users")
         ).fetchone()[0]
-        user_id = last_user_id + 1
+        user_id = last_user_id + 1 #increment for new user
     except:
-        user_id = 1
+        user_id = 1 #first user in database
 
+    #if there is a current user_photo then save it
     if user_photo_url:
-        user_photo_path = save_profile_picture(user_photo_url, user_id)
+        user_photo_path = save_profile_picture(user_photo_url, user_id) #save google profile picture
 
+    #insert new user into database
     db.session.execute(
         text("INSERT INTO users (user_id, user_username, user_password, user_mail, user_mail_verify, favorite_currency, user_photo_path) VALUES (:user_id, :user_username, :user_password, :user_mail, :user_mail_verify, :favorite_currency, :user_photo_path)"),
         {"user_id": user_id ,"user_username": user_username, "user_password": hashed_password, "user_mail": user_mail, "user_mail_verify": "verified", "favorite_currency": "USD", "user_photo_path":user_photo_path}
     )
-    db.session.commit()
+    db.session.commit() #commit changes to database
 
-    is_html = True
+    is_html = True #set email format to html
     body = f"""
     <!DOCTYPE html>
     <html lang="en">
@@ -187,11 +196,12 @@ def add_password_google_login():
         </div>
     </body>
     </html>
-    """
-    success, error = send_mail(smtp_server, smtp_port, email_send, email_send_password, user_mail, "🎉 Welcome to Imhotep Financial Manager - Your Journey Begins!", body, is_html)
+    """ #welcome email html template
+    success, error = send_mail(smtp_server, smtp_port, email_send, email_send_password, user_mail, "🎉 Welcome to Imhotep Financial Manager - Your Journey Begins!", body, is_html) #send welcome email
     if error:
-        print(error)
+        print(error) #print error if email sending fails
 
+    #log in the new user
     session["logged_in"] = True
     session["user_id"] = user_id
     session.permanent = True
@@ -200,15 +210,16 @@ def add_password_google_login():
 @google_sign_bp.route("/add_username_google_login", methods=["POST"])
 def add_username_google_login():
 
-    user_username = request.form.get("user_username")
+    user_username = request.form.get("user_username") #get username from form
 
+    #check if username already exists in database
     existing_username = db.session.execute(
         text("SELECT user_username FROM users WHERE LOWER(user_username) = :user_username"),
         {"user_username": user_username}
     ).fetchall()
     if existing_username:
-        error_existing = "Username is already in use. Please choose another one."
+        error_existing = "Username is already in use. Please choose another one." #username already taken error
         return render_template("add_username_google_login.html", form=CSRFForm(), error=error_existing)
 
-    session["user_username"] = user_username
-    return render_template('add_password_google_login.html', form=CSRFForm())
+    session["user_username"] = user_username #store username in session
+    return render_template('add_password_google_login.html', form=CSRFForm()) #render password creation page
