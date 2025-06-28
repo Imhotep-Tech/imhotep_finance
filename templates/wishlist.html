@@ -5,6 +5,11 @@
 
 {% block extra_head %}
 <style>
+    .pattern-bg {
+        background-image: radial-gradient(circle at 1px 1px, rgba(81, 173, 172, 0.1) 1px, transparent 0);
+        background-size: 20px 20px;
+    }
+
     .wishlist-card {
         background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
         transition: all 0.3s ease;
@@ -37,6 +42,154 @@
         to {
             opacity: 1;
             transform: translateY(0);
+        }
+    }
+
+    /* Dark mode styles */
+    body.dark-mode .pattern-bg {
+        background-image: radial-gradient(circle at 1px 1px, rgba(81, 173, 172, 0.2) 1px, transparent 0) !important;
+    }
+
+    body.dark-mode .wishlist-card {
+        background: linear-gradient(135deg, #2f5a5a 0%, #376e6d 100%) !important;
+        border-color: #428a89 !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .wishlist-card:hover {
+        background: linear-gradient(135deg, #376e6d 0%, #428a89 100%) !important;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2) !important;
+    }
+
+    /* Dark mode text colors */
+    body.dark-mode .text-gray-900 {
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .text-gray-700 {
+        color: #e5e7eb !important;
+    }
+
+    body.dark-mode .text-gray-600 {
+        color: #d1d5db !important;
+    }
+
+    body.dark-mode .text-gray-500 {
+        color: #9ca3af !important;
+    }
+
+    body.dark-mode .text-gray-800 {
+        color: #f0fffe !important;
+    }
+
+    /* Dark mode backgrounds */
+    body.dark-mode .bg-white {
+        background-color: #2f5a5a !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .bg-gray-50 {
+        background-color: #1a3535 !important;
+    }
+
+    body.dark-mode .bg-gray-100 {
+        background-color: #376e6d !important;
+    }
+
+    body.dark-mode .border-gray-200 {
+        border-color: #428a89 !important;
+    }
+
+    body.dark-mode .border-gray-100 {
+        border-color: #376e6d !important;
+    }
+
+    /* Dark mode status badges */
+    body.dark-mode .status-pending {
+        background-color: rgba(251, 191, 36, 0.2) !important;
+        color: #fbbf24 !important;
+        border: 1px solid rgba(251, 191, 36, 0.3) !important;
+    }
+
+    body.dark-mode .status-done {
+        background-color: rgba(16, 185, 129, 0.2) !important;
+        color: #10b981 !important;
+        border: 1px solid rgba(16, 185, 129, 0.3) !important;
+    }
+
+    /* Dark mode form elements */
+    body.dark-mode input,
+    body.dark-mode select,
+    body.dark-mode textarea {
+        background-color: #376e6d !important;
+        border-color: #428a89 !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode input::placeholder,
+    body.dark-mode select::placeholder,
+    body.dark-mode textarea::placeholder {
+        color: #99fffc !important;
+    }
+
+    body.dark-mode input:focus,
+    body.dark-mode select:focus,
+    body.dark-mode textarea:focus {
+        border-color: #51adac !important;
+        box-shadow: 0 0 0 3px rgba(81, 173, 172, 0.3) !important;
+    }
+
+    /* Dark mode buttons */
+    body.dark-mode .bg-blue-100 {
+        background-color: rgba(59, 130, 246, 0.2) !important;
+        color: #60a5fa !important;
+    }
+
+    body.dark-mode .bg-blue-100:hover {
+        background-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .bg-red-100 {
+        background-color: rgba(239, 68, 68, 0.2) !important;
+        color: #f87171 !important;
+    }
+
+    body.dark-mode .bg-red-100:hover {
+        background-color: rgba(239, 68, 68, 0.3) !important;
+    }
+
+    body.dark-mode .bg-green-50 {
+        background-color: rgba(16, 185, 129, 0.1) !important;
+        border-color: rgba(16, 185, 129, 0.3) !important;
+    }
+
+    body.dark-mode .bg-red-50 {
+        background-color: rgba(239, 68, 68, 0.1) !important;
+        border-color: rgba(239, 68, 68, 0.3) !important;
+    }
+
+    /* Dark mode shadows */
+    body.dark-mode .shadow-sm {
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3) !important;
+    }
+
+    body.dark-mode .shadow-lg {
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2) !important;
+    }
+
+    body.dark-mode .shadow-xl {
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2) !important;
+    }
+
+    /* Dark mode empty state */
+    body.dark-mode .bg-imhotep-100 {
+        background-color: rgba(81, 173, 172, 0.2) !important;
+    }
+
+    /* Prevent iOS zoom on input focus */
+    @media screen and (max-width: 767px) {
+        input, select, textarea {
+            font-size: 16px !important;
         }
     }
 </style>

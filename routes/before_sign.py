@@ -5,9 +5,10 @@ from config import CSRFForm
 
 before_sign_bp = Blueprint('before_sign', __name__)
 
+#a landing page route
 @before_sign_bp.route('/before_sign')
 def before_sign():
-    # Landing page data
+    #the landing page data
     features = [
         {
             'icon': 'fas fa-chart-line',
@@ -31,10 +32,12 @@ def before_sign():
         }
     ]
     
+    #select the number of users
     users_count_db = db.session.execute(
             text("SELECT COUNT(*) FROM users")
             ).fetchone()
 
+    #if there is users set there number else put it as 0
     try:
         users_count = users_count_db[0]
     except:
