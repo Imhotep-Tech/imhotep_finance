@@ -16,14 +16,14 @@ function hideLoadingScreen() {
 // INITIALIZATION AND EVENT LISTENERS
 // ============================================================================
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Initialize all components
     initializeLoadingHandlers();
     initializeDarkMode();
     initializeFormValidation();
     initializeCurrencyFilters();
     initializePageSpecificFeatures();
-    
+
     // Clean up any mobile menu artifacts on page load
     cleanupMobileMenuState();
 });
@@ -37,31 +37,31 @@ function initializeLoadingHandlers() {
     const forms = document.querySelectorAll('form');
     forms.forEach(form => {
         // Skip year filter forms to avoid conflicts
-        if (form.action.includes('filter_year_wishlist') || 
+        if (form.action.includes('filter_year_wishlist') ||
             form.action.includes('filter_year') ||
             form.querySelector('select[name="year"]')) {
             return; // Skip this form
         }
-        
+
         form.addEventListener('submit', showLoadingScreen);
     });
-    
+
     // Handle export links separately
     initializeExportHandlers();
-    
+
     // Hide loading on page load
     window.addEventListener('load', hideLoadingScreen);
-    
+
     // Show loading when navigating away (but not for downloads)
-    window.addEventListener('beforeunload', function(event) {
+    window.addEventListener('beforeunload', function (event) {
         // Don't show loading if it's a download request
         if (!event.target.activeElement || !event.target.activeElement.href || !event.target.activeElement.href.includes('export_trans')) {
             showLoadingScreen();
         }
     });
-    
+
     // Handle page show (back/forward navigation)
-    window.addEventListener('pageshow', function(event) {
+    window.addEventListener('pageshow', function (event) {
         if (event.persisted) {
             showLoadingScreen();
             setTimeout(hideLoadingScreen, 100);
@@ -72,27 +72,27 @@ function initializeLoadingHandlers() {
 function initializeExportHandlers() {
     // Handle export links with special download detection
     const exportLinks = document.querySelectorAll('a[href*="export_trans"]');
-    
+
     exportLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
+        link.addEventListener('click', function (e) {
             showLoadingScreen();
-            
+
             // Create a hidden iframe to handle the download
             const iframe = document.createElement('iframe');
             iframe.style.display = 'none';
             iframe.src = this.href;
             document.body.appendChild(iframe);
-            
+
             // Prevent default navigation
             e.preventDefault();
-            
+
             // Hide loading after a short delay (download should start immediately)
             setTimeout(() => {
                 hideLoadingScreen();
                 // Remove the iframe after download
                 document.body.removeChild(iframe);
             }, 2000); // 2 seconds should be enough for the download to start
-            
+
             // Alternative method: Use fetch to detect when response is received
             fetch(this.href)
                 .then(response => {
@@ -112,7 +112,7 @@ function initializeExportHandlers() {
                     a.click();
                     window.URL.revokeObjectURL(url);
                     document.body.removeChild(a);
-                    
+
                     // Hide loading screen
                     hideLoadingScreen();
                 })
@@ -141,27 +141,27 @@ function getFilenameFromUrl(url) {
 function initializeDarkMode() {
     const toggleButton = document.getElementById('toggleDarkMode');
     if (!toggleButton) return;
-    
+
     // Load saved preference
     if (localStorage.getItem('dark-mode') === 'enabled') {
         document.body.classList.add('dark-mode');
         updateDarkModeIcon(toggleButton, true);
         applyDarkModeToNavigation();
     }
-    
+
     // Toggle functionality
     toggleButton.addEventListener('click', () => {
         const isDarkMode = document.body.classList.toggle('dark-mode');
         localStorage.setItem('dark-mode', isDarkMode ? 'enabled' : 'disabled');
         updateDarkModeIcon(toggleButton, isDarkMode);
-        
+
         if (isDarkMode) {
             applyDarkModeToNavigation();
         } else {
             removeDarkModeFromNavigation();
         }
     });
-    
+
     // Observe navigation changes for dynamic dark mode application
     observeNavigationChanges();
 }
@@ -169,7 +169,7 @@ function initializeDarkMode() {
 function updateDarkModeIcon(button, isDarkMode) {
     const icon = button.querySelector('i');
     if (!icon) return;
-    
+
     icon.classList.remove('fa-moon', 'fa-sun');
     icon.classList.add(isDarkMode ? 'fa-sun' : 'fa-moon');
 }
@@ -178,13 +178,13 @@ function applyDarkModeToNavigation() {
     // Apply to navigation bar
     const nav = document.querySelector('nav');
     if (nav) nav.style.backgroundColor = '#2f5a5a';
-    
+
     // Apply to dropdowns
     applyDarkModeToDropdowns();
-    
+
     // Apply to mobile menu
     applyDarkModeToMobileMenu();
-    
+
     // Apply to cards and forms
     applyDarkModeToComponents();
 }
@@ -195,16 +195,16 @@ function applyDarkModeToDropdowns() {
         dropdown.style.backgroundColor = '#2f5a5a';
         dropdown.style.borderColor = '#428a89';
         dropdown.style.boxShadow = '0 10px 25px -5px rgba(0, 0, 0, 0.3)';
-        
+
         dropdown.querySelectorAll('a').forEach(link => {
             link.style.color = '#ccfffe';
-            
-            link.addEventListener('mouseenter', function() {
+
+            link.addEventListener('mouseenter', function () {
                 this.style.backgroundColor = '#376e6d';
                 this.style.color = '#51adac';
             });
-            
-            link.addEventListener('mouseleave', function() {
+
+            link.addEventListener('mouseleave', function () {
                 this.style.backgroundColor = '';
                 this.style.color = '#ccfffe';
             });
@@ -215,27 +215,27 @@ function applyDarkModeToDropdowns() {
 function applyDarkModeToMobileMenu() {
     const mobileMenu = document.getElementById('mobile-menu');
     if (!mobileMenu) return;
-    
+
     mobileMenu.style.backgroundColor = '#2f5a5a';
     mobileMenu.style.borderColor = '#428a89';
-    
+
     const container = mobileMenu.querySelector('.px-2');
     if (container) container.style.backgroundColor = '#2f5a5a';
-    
+
     mobileMenu.querySelectorAll('a').forEach(link => {
         link.style.color = '#ccfffe';
-        
-        link.addEventListener('mouseenter', function() {
+
+        link.addEventListener('mouseenter', function () {
             this.style.backgroundColor = '#376e6d';
             this.style.color = '#51adac';
         });
-        
-        link.addEventListener('mouseleave', function() {
+
+        link.addEventListener('mouseleave', function () {
             this.style.backgroundColor = '';
             this.style.color = '#ccfffe';
         });
     });
-    
+
     // Apply to text elements
     mobileMenu.querySelectorAll('.text-gray-500, .text-gray-700, .text-gray-800').forEach(element => {
         if (element.classList.contains('text-gray-500')) {
@@ -246,7 +246,7 @@ function applyDarkModeToMobileMenu() {
             element.style.color = '#f0fffe';
         }
     });
-    
+
     // Apply to borders
     mobileMenu.querySelectorAll('.border-gray-200').forEach(border => {
         border.style.borderColor = '#428a89';
@@ -263,23 +263,23 @@ function applyDarkModeToComponents() {
             card.style.color = '#ffffff';
         }
     });
-    
+
     // Apply to detail cards in monthly reports
     applyDarkModeToMonthlyReportCards();
-    
+
     // Apply to form elements
     const formElements = document.querySelectorAll('input, select, textarea');
     formElements.forEach(element => {
         element.style.backgroundColor = '#376e6d';
         element.style.borderColor = '#428a89';
         element.style.color = '#ffffff';
-        
-        element.addEventListener('focus', function() {
+
+        element.addEventListener('focus', function () {
             this.style.borderColor = '#51adac';
             this.style.boxShadow = '0 0 0 3px rgba(81, 173, 172, 0.3)';
         });
-        
-        element.addEventListener('blur', function() {
+
+        element.addEventListener('blur', function () {
             this.style.borderColor = '#428a89';
             this.style.boxShadow = '';
         });
@@ -294,14 +294,14 @@ function applyDarkModeToMonthlyReportCards() {
         card.style.backgroundColor = '#7f1d1d';
         card.style.color = '#fecaca';
     });
-    
+
     // Apply to income detail cards
     const incomeCards = document.querySelectorAll('.bg-green-50');
     incomeCards.forEach(card => {
         card.style.backgroundColor = '#14532d';
         card.style.color = '#bbf7d0';
     });
-    
+
     // Apply to text elements
     const textElements = document.querySelectorAll('.text-gray-900, .text-gray-500, .text-gray-600');
     textElements.forEach(element => {
@@ -319,81 +319,81 @@ function removeDarkModeFromNavigation() {
     // Reset navigation
     const nav = document.querySelector('nav');
     if (nav) nav.style.backgroundColor = '';
-    
+
     // Reset dropdowns and mobile menu
     const elementsToReset = [
         ...document.querySelectorAll('.group div[class*="absolute"]'),
         document.getElementById('mobile-menu')
     ].filter(Boolean);
-    
+
     elementsToReset.forEach(element => {
         element.style.backgroundColor = '';
         element.style.borderColor = '';
         element.style.boxShadow = '';
-        
+
         element.querySelectorAll('a').forEach(link => {
-            link.style.color = '';
+            link.style.color = '#333';
             link.style.backgroundColor = '';
         });
-        
+
         element.querySelectorAll('.text-gray-500, .text-gray-700, .text-gray-800').forEach(textEl => {
-            textEl.style.color = '';
+            textEl.style.color = '#333';
         });
-        
+
         element.querySelectorAll('.border-gray-200').forEach(border => {
-            border.style.borderColor = '';
+            border.style.borderColor = '#ccc';
         });
     });
-    
+
     // Reset cards and forms
     document.querySelectorAll('.metric-card, .gradient-card, .score-card, .currency-card, .bg-white').forEach(element => {
         if (!element.classList.contains('fixed')) {
             element.style.background = '';
             element.style.backgroundColor = '';
             element.style.borderColor = '';
-            element.style.color = '';
+            element.style.color = '#333';
             element.style.boxShadow = '';
         }
     });
-    
+
     // Reset monthly report cards
     document.querySelectorAll('.bg-red-50, .bg-green-50').forEach(card => {
         card.style.backgroundColor = '';
-        card.style.color = '';
+        card.style.color = '#333';
     });
-    
+
     document.querySelectorAll('.text-gray-900, .text-gray-500, .text-gray-600').forEach(element => {
-        element.style.color = '';
+        element.style.color = '#333';
     });
 }
 
 function observeNavigationChanges() {
     const nav = document.querySelector('nav');
     if (!nav) return;
-    
-    const observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
+
+    const observer = new MutationObserver(function (mutations) {
+        mutations.forEach(function (mutation) {
             if (mutation.type === 'childList' && document.body.classList.contains('dark-mode')) {
                 setTimeout(applyDarkModeToNavigation, 10);
             }
         });
     });
-    
+
     observer.observe(nav, { childList: true, subtree: true });
-    
+
     // Re-apply on dropdown hover
     document.querySelectorAll('.group > button').forEach(button => {
-        button.addEventListener('mouseenter', function() {
+        button.addEventListener('mouseenter', function () {
             if (document.body.classList.contains('dark-mode')) {
                 setTimeout(applyDarkModeToNavigation, 10);
             }
         });
     });
-    
+
     // Re-apply on mobile menu toggle
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
     if (mobileMenuBtn) {
-        mobileMenuBtn.addEventListener('click', function() {
+        mobileMenuBtn.addEventListener('click', function () {
             if (document.body.classList.contains('dark-mode')) {
                 setTimeout(applyDarkModeToNavigation, 100);
             }
@@ -407,10 +407,10 @@ function observeNavigationChanges() {
 
 function initializeFormValidation() {
     // Password visibility toggle
-    window.togglePasswordVisibility = function() {
+    window.togglePasswordVisibility = function () {
         const passwordInput = document.getElementById("password");
         const toggleIcon = document.getElementById("password-toggle-icon");
-        
+
         if (passwordInput && toggleIcon) {
             if (passwordInput.type === "password") {
                 passwordInput.type = "text";
@@ -421,26 +421,26 @@ function initializeFormValidation() {
             }
         }
     };
-    
+
     // Password confirmation validation
-    window.validatePassword = function() {
+    window.validatePassword = function () {
         const password = document.getElementById("password")?.value;
         const confirmPassword = document.getElementById("confirm_password")?.value;
-        
+
         if (password !== confirmPassword) {
             alert("Passwords do not match!");
             return false;
         }
         return true;
     };
-    
+
     // Toggle all password visibility
-    window.togglePasswordVisibility_all = function() {
+    window.togglePasswordVisibility_all = function () {
         const passwordInputs = [
             document.getElementById("password"),
             document.getElementById("confirm_password")
         ].filter(Boolean);
-        
+
         passwordInputs.forEach(input => {
             input.type = input.type === "password" ? "text" : "password";
         });
@@ -456,18 +456,18 @@ function initializeCurrencyFilters() {
     const currencyPairs = [
         { searchId: 'searchInput1', selectId: 'CurrencySelect1' }
     ];
-    
+
     currencyPairs.forEach(pair => {
         const searchInput = document.getElementById(pair.searchId);
         const currencySelect = document.getElementById(pair.selectId);
-        
+
         if (searchInput && currencySelect) {
             const originalOptions = [...currencySelect.options];
-            
-            searchInput.addEventListener('input', function() {
+
+            searchInput.addEventListener('input', function () {
                 filterCurrencyOptions(searchInput, currencySelect, originalOptions);
             });
-            
+
             // Set favorite currency if available
             const favoriteCurrency = window.favoriteCurrency || "USD";
             preselectCurrency(pair.selectId, favoriteCurrency);
@@ -478,25 +478,25 @@ function initializeCurrencyFilters() {
 function filterCurrencyOptions(searchInput, currencySelect, originalOptions) {
     const searchText = searchInput.value.toLowerCase();
     const currentValue = currencySelect.value; // Preserve current selection
-    
+
     // Clear current options
     currencySelect.innerHTML = '';
-    
+
     // Add default option
     const defaultOption = document.createElement('option');
     defaultOption.value = '';
     defaultOption.disabled = true;
     defaultOption.textContent = 'Select Currency';
     currencySelect.appendChild(defaultOption);
-    
+
     // Filter and add matching options
-    const filteredOptions = originalOptions.filter(option => 
+    const filteredOptions = originalOptions.filter(option =>
         !option.disabled && (
-            option.textContent.toLowerCase().includes(searchText) || 
+            option.textContent.toLowerCase().includes(searchText) ||
             option.value.toLowerCase().includes(searchText)
         )
     );
-    
+
     if (filteredOptions.length === 0 && searchText !== '') {
         const noMatchOption = document.createElement('option');
         noMatchOption.disabled = true;
@@ -508,7 +508,7 @@ function filterCurrencyOptions(searchInput, currencySelect, originalOptions) {
             currencySelect.appendChild(newOption);
         });
     }
-    
+
     // Restore previous selection if it still exists
     if (currentValue) {
         const matchingOption = [...currencySelect.options].find(opt => opt.value === currentValue);
@@ -524,42 +524,42 @@ function filterCurrencyOptions(searchInput, currencySelect, originalOptions) {
 
 function initializePageSpecificFeatures() {
     const currentPath = window.location.pathname;
-    
+
     // Landing page features
     if (currentPath === '/' || currentPath === '/before_sign') {
         initializeLandingPageFeatures();
     }
-    
+
     // Scores history page
     if (currentPath === '/show_scores_history') {
         initializeScoresHistory();
     }
-    
+
     // Deposit/Income page
     if (currentPath === '/deposit') {
         initializeDepositPage();
     }
-    
+
     // Withdraw/Expense page
     if (currentPath === '/withdraw') {
         initializeWithdrawPage();
     }
-    
+
     // Transaction History page
     if (currentPath === '/show_trans') {
         initializeTransactionHistoryPage();
     }
-    
+
     // Trash page
     if (currentPath === '/trash_trans') {
         initializeTrashPage();
     }
-    
+
     // Wishlist page
     if (currentPath.includes('wishlist') || currentPath.includes('filter_year_wishlist')) {
         initializeWishlistPage();
     }
-    
+
     // Set today's date for date inputs
     const dateInput = document.getElementById('dateInput');
     if (dateInput) {
@@ -570,7 +570,7 @@ function initializePageSpecificFeatures() {
 function initializeLandingPageFeatures() {
     // Smooth scrolling for anchor links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function(e) {
+        anchor.addEventListener('click', function (e) {
             e.preventDefault();
             const target = document.querySelector(this.getAttribute('href'));
             if (target) {
@@ -578,7 +578,7 @@ function initializeLandingPageFeatures() {
             }
         });
     });
-    
+
     // Intersection Observer for animations
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
@@ -587,7 +587,7 @@ function initializeLandingPageFeatures() {
             }
         });
     }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
-    
+
     document.querySelectorAll('.animate-on-scroll, .bg-white.rounded-xl').forEach(el => {
         observer.observe(el);
     });
@@ -611,7 +611,7 @@ function animateScoreCards() {
     cards.forEach((card, index) => {
         card.style.opacity = '0';
         card.style.transform = 'translateY(20px)';
-        
+
         setTimeout(() => {
             card.style.transition = 'all 0.6s ease';
             card.style.opacity = '1';
@@ -624,10 +624,10 @@ function addScoreCardInteractions() {
     const scoreCards = document.querySelectorAll('.score-card');
     scoreCards.forEach(card => {
         const score = parseFloat(card.getAttribute('data-score')) || 0;
-        
-        card.addEventListener('mouseenter', function() {
+
+        card.addEventListener('mouseenter', function () {
             this.style.transform = 'translateY(-8px) scale(1.02)';
-            
+
             if (score > 0) {
                 this.style.boxShadow = '0 25px 50px -12px rgba(34, 197, 94, 0.3)';
             } else if (score < 0) {
@@ -636,13 +636,13 @@ function addScoreCardInteractions() {
                 this.style.boxShadow = '0 25px 50px -12px rgba(234, 179, 8, 0.3)';
             }
         });
-        
-        card.addEventListener('mouseleave', function() {
+
+        card.addEventListener('mouseleave', function () {
             this.style.transform = 'translateY(0) scale(1)';
             this.style.boxShadow = '0 15px 25px -5px rgba(0, 0, 0, 0.1)';
         });
     });
-    
+
     // Add loading to pagination links
     document.querySelectorAll('a[href*="page="]').forEach(link => {
         link.addEventListener('click', showLoadingScreen);
@@ -652,10 +652,10 @@ function addScoreCardInteractions() {
 function addScoresSortingFeature() {
     const scoreCards = document.querySelectorAll('.score-card[data-score]');
     if (scoreCards.length <= 1) return;
-    
+
     const sortContainer = document.querySelector('.flex.items-center.justify-between.mb-6');
     if (!sortContainer) return;
-    
+
     const sortControls = document.createElement('div');
     sortControls.className = 'flex items-center space-x-2 text-sm';
     sortControls.innerHTML = `
@@ -668,12 +668,12 @@ function addScoresSortingFeature() {
             <option value="target-low">Target (Low to High)</option>
         </select>
     `;
-    
+
     sortContainer.appendChild(sortControls);
-    
+
     const sortSelect = document.getElementById('scoresSort');
     if (sortSelect) {
-        sortSelect.addEventListener('change', function() {
+        sortSelect.addEventListener('change', function () {
             sortScoreCards(this.value);
         });
     }
@@ -682,13 +682,13 @@ function addScoresSortingFeature() {
 function sortScoreCards(sortBy) {
     const container = document.querySelector('.grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-3');
     if (!container) return;
-    
+
     const cards = Array.from(container.querySelectorAll('.score-card[data-score]'));
-    
+
     cards.sort((a, b) => {
         const scoreA = parseFloat(a.getAttribute('data-score')) || 0;
         const scoreB = parseFloat(b.getAttribute('data-score')) || 0;
-        
+
         switch (sortBy) {
             case 'score-high': return scoreB - scoreA;
             case 'score-low': return scoreA - scoreB;
@@ -700,12 +700,12 @@ function sortScoreCards(sortBy) {
             default: return 0;
         }
     });
-    
+
     // Animate reordering
     cards.forEach((card, index) => {
         card.style.opacity = '0';
         card.style.transform = 'translateY(20px)';
-        
+
         setTimeout(() => {
             container.appendChild(card);
             card.style.transition = 'all 0.6s ease';
@@ -727,14 +727,14 @@ function extractTargetFromCard(card) {
 function calculatePerformanceMetrics() {
     const scoreCards = document.querySelectorAll('.score-card[data-score]');
     if (scoreCards.length === 0) return;
-    
-    const scores = Array.from(scoreCards).map(card => 
+
+    const scores = Array.from(scoreCards).map(card =>
         parseFloat(card.getAttribute('data-score')) || 0
     );
-    
+
     const positiveScores = scores.filter(score => score > 0);
     const averageScore = scores.reduce((sum, score) => sum + score, 0) / scores.length;
-    
+
     const headerSection = document.querySelector('.max-w-7xl.mx-auto.px-4.sm\\:px-6.lg\\:px-8.py-8 > .mb-8');
     if (headerSection && scores.length > 3) {
         const performanceSummary = document.createElement('div');
@@ -759,7 +759,7 @@ function calculatePerformanceMetrics() {
                 <div class="text-lg font-bold text-gray-900">${scores.length}</div>
             </div>
         `;
-        
+
         headerSection.appendChild(performanceSummary);
     }
 }
@@ -768,55 +768,55 @@ function handleMobileResponsiveness() {
     function adjustForMobile() {
         const isMobile = window.innerWidth < 768;
         const scoreCards = document.querySelectorAll('.score-card');
-        
+
         scoreCards.forEach(card => {
             if (isMobile) {
                 card.classList.add('mobile-responsive-card');
-                card.querySelectorAll('.text-lg, .text-xl').forEach(el => 
+                card.querySelectorAll('.text-lg, .text-xl').forEach(el =>
                     el.classList.add('mobile-responsive-text')
                 );
             } else {
                 card.classList.remove('mobile-responsive-card');
-                card.querySelectorAll('.text-lg, .text-xl').forEach(el => 
+                card.querySelectorAll('.text-lg, .text-xl').forEach(el =>
                     el.classList.remove('mobile-responsive-text')
                 );
             }
         });
-        
+
         const gridContainer = document.querySelector('.grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-3');
         if (gridContainer) {
             gridContainer.classList.toggle('mobile-responsive-grid', isMobile);
         }
     }
-    
+
     adjustForMobile();
-    
+
     let resizeTimeout;
-    window.addEventListener('resize', function() {
+    window.addEventListener('resize', function () {
         clearTimeout(resizeTimeout);
         resizeTimeout = setTimeout(adjustForMobile, 250);
     });
-    
-    window.addEventListener('orientationchange', function() {
+
+    window.addEventListener('orientationchange', function () {
         setTimeout(adjustForMobile, 300);
     });
 }
 
 function addMobileTouchInteractions() {
     const scoreCards = document.querySelectorAll('.score-card');
-    
+
     scoreCards.forEach(card => {
-        card.addEventListener('touchstart', function() {
+        card.addEventListener('touchstart', function () {
             this.style.transform = 'translateY(-2px) scale(0.98)';
             this.style.transition = 'all 0.1s ease';
         });
-        
-        card.addEventListener('touchend', function() {
+
+        card.addEventListener('touchend', function () {
             this.style.transform = 'translateY(0) scale(1)';
             this.style.transition = 'all 0.3s ease';
         });
-        
-        card.addEventListener('touchcancel', function() {
+
+        card.addEventListener('touchcancel', function () {
             this.style.transform = 'translateY(0) scale(1)';
             this.style.transition = 'all 0.3s ease';
         });
@@ -830,7 +830,7 @@ function addMobileTouchInteractions() {
 function initializeDepositPage() {
     // Add form animations
     animateFormElements();
-    
+
     // Add income category suggestions
     addIncomeCategorySuggestions();
 }
@@ -840,7 +840,7 @@ function animateFormElements() {
     formElements.forEach((element, index) => {
         element.style.opacity = '0';
         element.style.transform = 'translateY(20px)';
-        
+
         setTimeout(() => {
             element.style.transition = 'all 0.6s ease';
             element.style.opacity = '1';
@@ -852,16 +852,16 @@ function animateFormElements() {
 function addIncomeCategorySuggestions() {
     const descriptionInput = document.querySelector('textarea[name="category"]');
     if (!descriptionInput) return;
-    
+
     // Check if suggestions already exist to prevent duplicates
     if (descriptionInput.closest('.space-y-2').querySelector('.category-suggestions')) {
         return;
     }
-    
+
     // Get user categories from template data
     const userCategoriesElement = document.getElementById('user-categories-data');
     let userCategories = [];
-    
+
     if (userCategoriesElement && userCategoriesElement.textContent.trim()) {
         try {
             userCategories = JSON.parse(userCategoriesElement.textContent);
@@ -869,14 +869,14 @@ function addIncomeCategorySuggestions() {
             userCategories = [];
         }
     }
-    
+
     // Default income categories as fallback
     const defaultCategories = [
         'Salary', 'Freelance', 'Business Income', 'Investment Returns', 'Rental Income',
         'Side Hustle', 'Bonus', 'Commission', 'Dividend', 'Interest',
         'Gift/Donation', 'Tax Refund', 'Insurance Claim', 'Other Income'
     ];
-    
+
     // Use user categories first, then fill with defaults if needed
     const categories = [...userCategories];
     defaultCategories.forEach(cat => {
@@ -884,33 +884,33 @@ function addIncomeCategorySuggestions() {
             categories.push(cat);
         }
     });
-    
+
     addCategorySuggestions(descriptionInput, categories, 'income');
 }
 
 function addCategorySuggestions(descriptionInput, categories, type) {
-    const colorClasses = type === 'income' 
+    const colorClasses = type === 'income'
         ? { bg: 'bg-green-100', hover: 'hover:bg-green-200', text: 'text-green-700', selected: 'bg-green-500', selectedText: 'text-white' }
         : { bg: 'bg-blue-100', hover: 'hover:bg-blue-200', text: 'text-blue-700', selected: 'bg-blue-500', selectedText: 'text-white' };
-    
+
     // Create suggestions container with unique class to prevent duplicates
     const suggestionsContainer = document.createElement('div');
     suggestionsContainer.className = 'category-suggestions flex flex-wrap gap-2 mt-2';
-    suggestionsContainer.innerHTML = categories.map(category => 
+    suggestionsContainer.innerHTML = categories.map(category =>
         `<button type="button" class="category-btn px-3 py-1 ${colorClasses.bg} ${colorClasses.hover} ${colorClasses.text} text-sm rounded-lg transition-colors" data-category="${category}">${category}</button>`
     ).join('');
-    
+
     // Insert after description input
     const descriptionContainer = descriptionInput.closest('.space-y-2');
     if (descriptionContainer) {
         descriptionContainer.appendChild(suggestionsContainer);
-        
+
         // Add click handlers
         suggestionsContainer.querySelectorAll('.category-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
+            btn.addEventListener('click', function () {
                 descriptionInput.value = this.dataset.category;
                 descriptionInput.focus();
-                
+
                 // Highlight selected category
                 suggestionsContainer.querySelectorAll('.category-btn').forEach(b => {
                     b.classList.remove(colorClasses.selected, colorClasses.selectedText);
@@ -930,10 +930,10 @@ function addCategorySuggestions(descriptionInput, categories, type) {
 function initializeWithdrawPage() {
     // Add form animations
     animateFormElements();
-    
+
     // Add expense category suggestions
     addExpenseCategorySuggestions();
-    
+
     // Add balance validation
     setupBalanceValidation();
 }
@@ -943,7 +943,7 @@ function animateFormElements() {
     formElements.forEach((element, index) => {
         element.style.opacity = '0';
         element.style.transform = 'translateY(20px)';
-        
+
         setTimeout(() => {
             element.style.transition = 'all 0.6s ease';
             element.style.opacity = '1';
@@ -955,16 +955,16 @@ function animateFormElements() {
 function addExpenseCategorySuggestions() {
     const descriptionInput = document.querySelector('textarea[name="category"]');
     if (!descriptionInput) return;
-    
+
     // Check if suggestions already exist to prevent duplicates
     if (descriptionInput.closest('.space-y-2').querySelector('.category-suggestions')) {
         return;
     }
-    
+
     // Get user categories from template data
     const userCategoriesElement = document.getElementById('user-categories-data');
     let userCategories = [];
-    
+
     if (userCategoriesElement && userCategoriesElement.textContent.trim()) {
         try {
             userCategories = JSON.parse(userCategoriesElement.textContent);
@@ -972,14 +972,14 @@ function addExpenseCategorySuggestions() {
             userCategories = [];
         }
     }
-    
+
     // Default expense categories as fallback
     const defaultCategories = [
         'Groceries', 'Transportation', 'Entertainment', 'Dining Out', 'Utilities',
         'Rent/Mortgage', 'Insurance', 'Healthcare', 'Shopping', 'Gas/Fuel',
         'Internet/Phone', 'Gym/Fitness', 'Subscriptions', 'Education', 'Travel'
     ];
-    
+
     // Use user categories first, then fill with defaults if needed
     const categories = [...userCategories];
     defaultCategories.forEach(cat => {
@@ -987,27 +987,27 @@ function addExpenseCategorySuggestions() {
             categories.push(cat);
         }
     });
-    
+
     addCategorySuggestions(descriptionInput, categories, 'expense');
 }
 
 function setupBalanceValidation() {
     const amountInput = document.querySelector('input[name="amount"]');
     const currencySelect = document.querySelector('select[name="currency"]');
-    
+
     if (!amountInput || !currencySelect) return;
-    
+
     // Add real-time balance checking (NO formatting to preserve natural input)
     function checkBalance() {
         const amount = parseFloat(amountInput.value) || 0;
         const currency = currencySelect.value;
-        
+
         if (amount > 0 && currency) {
             // Just visual feedback, no input manipulation
             amountInput.style.borderColor = amount > 0 ? '#10b981' : '#ef4444';
         }
     }
-    
+
     currencySelect.addEventListener('change', checkBalance);
 }
 
@@ -1018,10 +1018,10 @@ function setupBalanceValidation() {
 function initializeTransactionHistoryPage() {
     // Animate elements on load
     animateTransactionElements();
-    
+
     // Initialize responsive table handling
     handleResponsiveTable();
-    
+
     // Initialize advanced filtering
     initializeAdvancedFiltering();
 }
@@ -1031,7 +1031,7 @@ function animateTransactionElements() {
     rows.forEach((row, index) => {
         row.style.opacity = '0';
         row.style.transform = 'translateY(10px)';
-        
+
         setTimeout(() => {
             row.style.transition = 'all 0.6s ease';
             row.style.opacity = '1';
@@ -1054,31 +1054,31 @@ function initializeAdvancedFiltering() {
     // Only initialize if the filter form exists
     const filterForm = document.getElementById('filterForm');
     if (!filterForm) return;
-    
+
     // Show loading on form submission
     filterForm.addEventListener('submit', showLoadingScreen);
-    
+
     // Basic year filter functionality - validation handled in templates
     const yearSelect = document.getElementById('YearSelect');
     const searchInput = document.getElementById('searchInput1');
     if (yearSelect && searchInput) {
         const originalOptions = [...yearSelect.options];
-        
-        searchInput.addEventListener('input', function() {
+
+        searchInput.addEventListener('input', function () {
             const searchText = this.value.toLowerCase();
             yearSelect.innerHTML = '';
-            
+
             // Add the default option
             const defaultOption = document.createElement('option');
             defaultOption.disabled = true;
             defaultOption.selected = true;
             defaultOption.textContent = 'Years';
             yearSelect.appendChild(defaultOption);
-            
+
             const filteredOptions = originalOptions.filter(option => {
                 return !option.disabled && option.textContent.toLowerCase().includes(searchText);
             });
-            
+
             if (filteredOptions.length === 0) {
                 const noMatchOption = document.createElement('option');
                 noMatchOption.disabled = true;
@@ -1101,13 +1101,13 @@ function initializeAdvancedFiltering() {
 function initializeWishlistPage() {
     // Animate wishlist cards on load
     animateWishlistCards();
-    
+
     // Initialize mobile interactions
     addMobileWishlistInteractions();
-    
+
     // Initialize form submissions with loading
     setupWishlistFormHandlers();
-    
+
     // Initialize responsive behavior
     handleWishlistResponsiveness();
 }
@@ -1117,7 +1117,7 @@ function animateWishlistCards() {
     cards.forEach((card, index) => {
         card.style.opacity = '0';
         card.style.transform = 'translateY(10px)';
-        
+
         setTimeout(() => {
             card.style.transition = 'all 0.6s ease';
             card.style.opacity = '1';
@@ -1128,31 +1128,31 @@ function animateWishlistCards() {
 
 function addMobileWishlistInteractions() {
     const wishlistCards = document.querySelectorAll('.wishlist-card');
-    
+
     wishlistCards.forEach(card => {
         // Touch interactions for mobile
-        card.addEventListener('touchstart', function() {
+        card.addEventListener('touchstart', function () {
             this.style.transform = 'translateY(-2px) scale(0.98)';
             this.style.transition = 'all 0.1s ease';
         });
-        
-        card.addEventListener('touchend', function() {
+
+        card.addEventListener('touchend', function () {
             this.style.transform = 'translateY(0) scale(1)';
             this.style.transition = 'all 0.3s ease';
         });
-        
-        card.addEventListener('touchcancel', function() {
+
+        card.addEventListener('touchcancel', function () {
             this.style.transform = 'translateY(0) scale(1)';
             this.style.transition = 'all 0.3s ease';
         });
-        
+
         // Enhanced hover effects for desktop
-        card.addEventListener('mouseenter', function() {
+        card.addEventListener('mouseenter', function () {
             this.style.transform = 'translateY(-8px)';
             this.style.boxShadow = '0 25px 50px -12px rgba(0, 0, 0, 0.15)';
         });
-        
-        card.addEventListener('mouseleave', function() {
+
+        card.addEventListener('mouseleave', function () {
             this.style.transform = 'translateY(0)';
             this.style.boxShadow = '';
         });
@@ -1163,24 +1163,24 @@ function setupWishlistFormHandlers() {
     // Only handle wishlist action forms (mark as purchased/pending, delete) 
     // DO NOT handle year filter forms - let them work with pure HTML
     const wishlistActionForms = document.querySelectorAll('form[action*="check_wish"], form[action*="delete_wish"]');
-    
+
     wishlistActionForms.forEach(form => {
-        form.addEventListener('submit', function(e) {
+        form.addEventListener('submit', function (e) {
             const button = form.querySelector('button[type="submit"]');
             if (!button) return;
-            
+
             const originalText = button.innerHTML;
-            
+
             // Show loading state
             button.disabled = true;
             button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
-            
+
             // Show loading overlay
             showLoadingScreen();
-            
+
         });
     });
-    
+
     // Set up year filter functionality
     setupYearFilterForWishlist();
 }
@@ -1188,27 +1188,27 @@ function setupWishlistFormHandlers() {
 function setupYearFilterForWishlist() {
     const searchInput = document.getElementById('searchInput1');
     const yearSelect = document.getElementById('YearSelect');
-    
+
     if (searchInput && yearSelect) {
         const originalOptions = [...yearSelect.options];
-        
+
         // Filter years based on search input
-        searchInput.addEventListener('input', function() {
+        searchInput.addEventListener('input', function () {
             const searchText = this.value.toLowerCase();
             yearSelect.innerHTML = '';
-            
+
             // Add the default option
             const defaultOption = document.createElement('option');
             defaultOption.disabled = true;
             defaultOption.selected = true;
             defaultOption.textContent = 'Years';
             yearSelect.appendChild(defaultOption);
-            
+
             const filteredOptions = originalOptions.filter(option => {
                 // Skip the default "Years" option
                 return !option.disabled && option.textContent.toLowerCase().includes(searchText);
             });
-            
+
             if (filteredOptions.length === 0) {
                 const noMatchOption = document.createElement('option');
                 noMatchOption.disabled = true;
@@ -1221,11 +1221,11 @@ function setupYearFilterForWishlist() {
                 });
             }
         });
-        
+
         // Handle form submission with loading
         const filterForm = document.getElementById('filterForm');
         if (filterForm) {
-            filterForm.addEventListener('submit', function(e) {
+            filterForm.addEventListener('submit', function (e) {
                 showLoadingScreen();
             });
         }
@@ -1242,7 +1242,7 @@ function cleanupMobileMenuState() {
     body.style.overflow = '';
     body.style.position = '';
     body.style.top = '';
-    
+
     const mainContent = document.querySelector('main');
     if (mainContent) {
         mainContent.style.display = 'block';
@@ -1255,7 +1255,7 @@ function cleanupMobileMenuState() {
 // ============================================================================
 
 // Auto-hide messages after 5 seconds
-setTimeout(function() {
+setTimeout(function () {
     document.querySelectorAll('.done-message, .error-message').forEach(message => {
         if (message) message.style.display = 'none';
     });
@@ -1281,15 +1281,15 @@ window.addEventListener('popstate', cleanupMobileMenuState);
 // Touch events for better mobile interaction
 const touchElements = document.querySelectorAll('button, a, .cursor-pointer');
 touchElements.forEach(element => {
-    element.addEventListener('touchstart', function() {
+    element.addEventListener('touchstart', function () {
         this.style.transform = 'scale(0.95)';
     });
-    
-    element.addEventListener('touchend', function() {
+
+    element.addEventListener('touchend', function () {
         this.style.transform = '';
     });
-    
-    element.addEventListener('touchcancel', function() {
+
+    element.addEventListener('touchcancel', function () {
         this.style.transform = '';
     });
 });
@@ -1309,7 +1309,7 @@ function initExpenseChart() {
         console.log('Expense chart: canvas or data not available');
         return;
     }
-    
+
     drawPieChart(canvas, window.chartData.expenses, 'expense');
 }
 
@@ -1319,7 +1319,7 @@ function initIncomeChart() {
         console.log('Income chart: canvas or data not available');
         return;
     }
-    
+
     drawPieChart(canvas, window.chartData.income, 'income');
 }
 
@@ -1329,7 +1329,7 @@ function initBothExpenseChart() {
         console.log('Both expense chart: canvas or data not available');
         return;
     }
-    
+
     drawPieChart(canvas, window.chartData.expenses, 'expense');
 }
 
@@ -1339,7 +1339,7 @@ function initBothIncomeChart() {
         console.log('Both income chart: canvas or data not available');
         return;
     }
-    
+
     drawPieChart(canvas, window.chartData.income, 'income');
 }
 
@@ -1347,12 +1347,12 @@ function updateSummaryStats() {
     try {
         const totalExpensesEl = document.getElementById('total-expenses');
         const totalIncomeEl = document.getElementById('total-income');
-        
+
         if (totalExpensesEl && window.chartData && window.chartData.expenses && window.chartData.expenses.data.length) {
             const totalExpenses = window.chartData.expenses.data.reduce((sum, value) => sum + parseFloat(value || 0), 0);
             totalExpensesEl.textContent = totalExpenses.toFixed(0) + ' ' + (window.chartData.currency || '');
         }
-        
+
         if (totalIncomeEl && window.chartData && window.chartData.income && window.chartData.income.data.length) {
             const totalIncome = window.chartData.income.data.reduce((sum, value) => sum + parseFloat(value || 0), 0);
             totalIncomeEl.textContent = totalIncome.toFixed(0) + ' ' + (window.chartData.currency || '');
@@ -1365,33 +1365,33 @@ function updateSummaryStats() {
 // Monthly Reports Chart Functions - Updated for PythonAnywhere compatibility
 function initMonthlyReportsCharts() {
     // Add delay to ensure DOM is fully loaded
-    setTimeout(function() {
+    setTimeout(function () {
         if (!window.chartData) {
             console.log('Chart data not available');
             return;
         }
-        
+
         // Initialize tab switching
         initTabSwitching();
-        
+
         // Initialize charts with error handling
         try {
             if (document.getElementById('expenseChart')) {
                 initExpenseChart();
             }
-            
+
             if (document.getElementById('incomeChart')) {
                 initIncomeChart();
             }
-            
+
             if (document.getElementById('bothExpenseChart')) {
                 initBothExpenseChart();
             }
-            
+
             if (document.getElementById('bothIncomeChart')) {
                 initBothIncomeChart();
             }
-            
+
             // Update summary stats
             updateSummaryStats();
         } catch (error) {
@@ -1404,16 +1404,16 @@ function initTabSwitching() {
     const expenseTab = document.getElementById('expenseTab');
     const incomeTab = document.getElementById('incomeTab');
     const bothTab = document.getElementById('bothTab');
-    
+
     const expenseSection = document.getElementById('expenseSection');
     const incomeSection = document.getElementById('incomeSection');
     const bothSection = document.getElementById('bothSection');
-    
+
     if (!expenseTab || !incomeTab || !bothTab) {
         console.log('Tab elements not found');
         return;
     }
-    
+
     function switchTab(activeTab, activeSection) {
         try {
             // Reset all tabs
@@ -1425,17 +1425,17 @@ function initTabSwitching() {
                     tab.style.color = '';
                 }
             });
-            
+
             // Reset all sections
             [expenseSection, incomeSection, bothSection].forEach(section => {
                 if (section) section.classList.add('hidden');
             });
-            
+
             // Activate selected tab and section
             if (activeTab) {
                 activeTab.classList.add('active');
                 activeTab.classList.remove('text-gray-700');
-                
+
                 // Set active styles based on tab type
                 if (activeTab.id === 'expenseTab') {
                     activeTab.style.backgroundColor = '#ef4444';
@@ -1448,16 +1448,16 @@ function initTabSwitching() {
                     activeTab.style.color = 'white';
                 }
             }
-            
+
             if (activeSection) activeSection.classList.remove('hidden');
-            
+
             // Apply dark mode if active
             if (document.body.classList.contains('dark-mode')) {
                 setTimeout(() => {
                     applyDarkModeToMonthlyReportCards();
                 }, 50);
             }
-            
+
             // Redraw charts with proper timing for both section
             setTimeout(() => {
                 if (activeTab && activeTab.id === 'expenseTab') {
@@ -1479,7 +1479,7 @@ function initTabSwitching() {
             console.error('Error switching tabs:', error);
         }
     }
-    
+
     // Add event listeners with error handling
     if (expenseTab) {
         expenseTab.addEventListener('click', () => switchTab(expenseTab, expenseSection));
@@ -1497,37 +1497,37 @@ function drawPieChart(canvas, data, colorPrefix) {
         const ctx = canvas.getContext('2d');
         const labels = data.labels || [];
         const values = data.data || [];
-        
+
         if (!labels.length || !values.length) {
             console.log('No data available for chart');
             return;
         }
-        
+
         // Clear any existing content
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
+
         // Make canvas responsive
         const container = canvas.parentElement;
         const containerWidth = container ? container.clientWidth : 300;
         const isMobile = window.innerWidth < 768;
-        
+
         // Set responsive canvas size
         const canvasSize = isMobile ? Math.min(containerWidth - 40, 280) : Math.min(containerWidth - 40, 300);
         canvas.width = canvasSize;
         canvas.height = canvasSize;
-        
+
         // Set CSS size to match canvas size for crisp rendering
         canvas.style.width = canvasSize + 'px';
         canvas.style.height = canvasSize + 'px';
-        
+
         // Calculate total and percentages
         const total = values.reduce((sum, value) => sum + parseFloat(value || 0), 0);
-        
+
         if (total === 0) {
             console.log('Total is zero, no chart to draw');
             return;
         }
-        
+
         // Generate colors based on prefix
         const colors = labels.map((_, index) => {
             if (colorPrefix === 'expense') {
@@ -1536,7 +1536,7 @@ function drawPieChart(canvas, data, colorPrefix) {
                 return 'hsl(' + (120 + (index * 15)) + ', 70%, ' + (50 + (index * 2)) + '%)';
             }
         });
-        
+
         // Update percentage displays
         labels.forEach((_, index) => {
             const percentage = ((values[index] / total) * 100).toFixed(1);
@@ -1545,17 +1545,17 @@ function drawPieChart(canvas, data, colorPrefix) {
                 percentageElement.textContent = percentage + '%';
             }
         });
-        
+
         // Draw pie chart with responsive sizing
         const centerX = canvas.width / 2;
         const centerY = canvas.height / 2;
         const radius = Math.min(centerX, centerY) - (isMobile ? 15 : 20);
-        
+
         let currentAngle = -Math.PI / 2; // Start from top
-        
+
         values.forEach((value, index) => {
             const sliceAngle = (value / total) * 2 * Math.PI;
-            
+
             // Draw slice
             ctx.beginPath();
             ctx.moveTo(centerX, centerY);
@@ -1566,21 +1566,21 @@ function drawPieChart(canvas, data, colorPrefix) {
             ctx.strokeStyle = '#fff';
             ctx.lineWidth = isMobile ? 1 : 2;
             ctx.stroke();
-            
+
             // Add labels for larger slices (only on desktop or larger slices)
             if (!isMobile && (value / total) > 0.08) {
                 const labelAngle = currentAngle + sliceAngle / 2;
                 const labelRadius = radius * 0.7;
                 const labelX = centerX + Math.cos(labelAngle) * labelRadius;
                 const labelY = centerY + Math.sin(labelAngle) * labelRadius;
-                
+
                 ctx.fillStyle = '#fff';
                 ctx.font = '10px Arial';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(((value / total) * 100).toFixed(0) + '%', labelX, labelY);
             }
-            
+
             currentAngle += sliceAngle;
         });
     } catch (error) {
@@ -1591,19 +1591,19 @@ function drawPieChart(canvas, data, colorPrefix) {
 // Enhanced resize handler for multiple charts
 function handleChartResize() {
     const charts = ['expenseChart', 'incomeChart', 'bothExpenseChart', 'bothIncomeChart'];
-    
+
     charts.forEach(chartId => {
         const canvas = document.getElementById(chartId);
         if (canvas && window.chartData) {
             // Check if the canvas is visible before redrawing
             const isVisible = canvas.offsetParent !== null;
             if (!isVisible) return;
-            
+
             try {
                 // Clear the canvas
                 const ctx = canvas.getContext('2d');
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                
+
                 // Redraw based on chart type
                 if (chartId.includes('expense')) {
                     drawPieChart(canvas, window.chartData.expenses, 'expense');
@@ -1618,37 +1618,37 @@ function handleChartResize() {
 }
 
 // Initialize chart when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Initialize monthly reports charts if on monthly reports page
     if (document.getElementById('expenseChart') || document.getElementById('incomeChart')) {
         console.log('Initializing monthly reports charts');
         initMonthlyReportsCharts();
-        
+
         // Apply dark mode to monthly report cards if dark mode is active
         if (document.body.classList.contains('dark-mode')) {
             setTimeout(() => {
                 applyDarkModeToMonthlyReportCards();
             }, 100);
         }
-        
+
         // Add resize event listener for responsiveness
         let resizeTimeout;
-        window.addEventListener('resize', function() {
+        window.addEventListener('resize', function () {
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(handleChartResize, 250);
         });
-        
+
         // Handle orientation change on mobile
-        window.addEventListener('orientationchange', function() {
+        window.addEventListener('orientationchange', function () {
             setTimeout(handleChartResize, 300);
         });
     }
 });
 
 // Fallback initialization for slow loading
-window.addEventListener('load', function() {
+window.addEventListener('load', function () {
     if (document.getElementById('expenseChart') || document.getElementById('incomeChart')) {
-        setTimeout(function() {
+        setTimeout(function () {
             if (!window.chartsInitialized) {
                 console.log('Fallback chart initialization');
                 initMonthlyReportsCharts();
