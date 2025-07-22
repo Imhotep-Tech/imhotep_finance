@@ -38,17 +38,16 @@ def add_scheduled_trans(user_id, now):
     # This avoids database-specific CAST operations
     user_scheduled_trans = db.session.execute(
         text('''
-            SELECT currency, date, amount, scheduled_trans_status, scheduled_trans_details, scheduled_trans_link, category, scheduled_trans_key
+            SELECT currency, date, amount, scheduled_trans_status, scheduled_trans_details, scheduled_trans_link, category, scheduled_trans_key, status
             FROM scheduled_trans
             WHERE user_id = :user_id 
-            AND status = :status
+            AND status = :active_status
             AND (last_time_added IS NULL OR last_time_added < :prev_month_date)
              '''),
-
-        {"user_id": user_id, "status": True, "prev_month_date": prev_month_date}
+        {"user_id": user_id, "active_status": True, "prev_month_date": prev_month_date}
     ).fetchall() #get active scheduled transactions that haven't been processed this month
 
-    # Filter the results in Python to avoid database-specific SQL
+    # Filter the results to only include valid days for processing
     filtered_scheduled_trans = [] #initialize filtered transactions list
     valid_days = list(set(valid_days_current + valid_days_prev)) #combine and deduplicate valid days
     
@@ -71,6 +70,11 @@ def add_scheduled_trans(user_id, now):
                 scheduled_trans_link = scheduled_trans[5] #get transaction link
                 category = scheduled_trans[6] #get category
                 scheduled_trans_key = scheduled_trans[7] #get transaction key
+                status = scheduled_trans[8] #get status (should be True for active)
+
+                # Double-check that transaction is active before processing
+                if not status: #skip if inactive
+                    continue #skip inactive transactions
 
                 # Determine which month to use and handle edge cases
                 if day_in_date in valid_days_prev: #check if day belongs to previous month
@@ -110,7 +114,7 @@ def add_scheduled_trans(user_id, now):
                     date = now.replace(day=day_in_date if day_in_date <= calendar.monthrange(year, month)[1] else calendar.monthrange(year, month)[1]) #fallback date calculation
 
                 try:
-                    #     Get next transaction ID for this user
+                    # Get next transaction ID for this user
                     next_trans_id = db.session.execute(
                         text("SELECT COALESCE(MAX(trans_id), 0) + 1 FROM trans WHERE user_id = :user_id"),
                         {"user_id": user_id}

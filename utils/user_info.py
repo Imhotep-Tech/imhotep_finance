@@ -263,3 +263,27 @@ def select_scheduled_trans(user_id, page):
     total_pages = (total_count + per_page - 1) // per_page  # Calculate total number of pages #calculate total pages
 
     return trans_db, total_pages, page
+
+def delete_scheduled_trans(user_id, scheduled_trans_key):
+    """Delete a scheduled transaction for a user."""
+    try:
+        # Verify the transaction belongs to the user
+        trans_exists = db.session.execute(
+            text("SELECT COUNT(*) FROM scheduled_trans WHERE user_id = :user_id AND scheduled_trans_key = :scheduled_trans_key"),
+            {"user_id": user_id, "scheduled_trans_key": scheduled_trans_key}
+        ).scalar()
+        
+        if trans_exists > 0:
+            # Delete the scheduled transaction
+            db.session.execute(
+                text("DELETE FROM scheduled_trans WHERE user_id = :user_id AND scheduled_trans_key = :scheduled_trans_key"),
+                {"user_id": user_id, "scheduled_trans_key": scheduled_trans_key}
+            )
+            db.session.commit()
+            return True
+        else:
+            return False
+    except Exception as e:
+        print(f"Error deleting scheduled transaction: {str(e)}")
+        db.session.rollback()
+        return False

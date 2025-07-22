@@ -3,7 +3,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
 from extensions import db
 from config import CSRFForm, Config
-from utils.user_info import select_user_photo, trans, get_app_currencies, get_user_categories, select_scheduled_trans
+from utils.user_info import select_user_photo, trans, get_app_currencies, get_user_categories, select_scheduled_trans, delete_scheduled_trans
 from utils.currencies import show_networth
 from datetime import datetime
 
@@ -186,6 +186,30 @@ def show_scheduled_trans():
 
         return render_template("show_scheduled_trans.html", scheduled_trans=scheduled_trans, user_photo_path=user_photo_path, total_favorite_currency=total_favorite_currency, favorite_currency=favorite_currency, total_pages=total_pages,page=page, form=CSRFForm()) #render show scheduled transactions page
 
+@scheduled_transactions_bp.route("/delete_scheduled_trans", methods=["POST"])
+def delete_scheduled_trans_route():
+    """Delete a scheduled transaction."""
+    if not session.get("logged_in"): #check if user is logged in
+        return redirect("/login_page") #redirect to login if not logged in
+    
+    # Validate CSRF token
+    form = CSRFForm()
+    if not form.validate_on_submit():
+        return redirect("/show_scheduled_trans?error=invalid_request") #redirect with error message
+    
+    user_id = session.get("user_id") #get user id from session
+    scheduled_trans_key = request.form.get("scheduled_trans_key") #get transaction key from form
+    confirm_delete = request.form.get("confirm_delete") #get confirmation from form
+    
+    if confirm_delete == "yes" and scheduled_trans_key:
+        success = delete_scheduled_trans(user_id, scheduled_trans_key) #delete the transaction
+        if success:
+            return redirect("/show_scheduled_trans?deleted=true") #redirect with success message
+        else:
+            return redirect("/show_scheduled_trans?error=delete_failed") #redirect with error message
+    else:
+        return redirect("/show_scheduled_trans") #redirect if not confirmed
+
 @scheduled_transactions_bp.route("/change_status_of_scheduled_trans", methods=["GET"])
 def change_status_of_scheduled_trans():
     """Change the status of a scheduled transaction (active/inactive)."""
@@ -193,20 +217,22 @@ def change_status_of_scheduled_trans():
         return redirect("/login_page") #redirect to login if not logged in
     else:
         user_id = session.get("user_id") #get user id from session
-        try:
-            user_photo_path = select_user_photo() #get user profile picture path
-        except OperationalError:
-            error = "Welcome Back" #database error message
-            return render_template('error.html', error=error, form=CSRFForm())
-
         scheduled_trans_key = request.args.get("scheduled_trans_key") #get transaction key from url parameters
-        #toggle the status of the scheduled transaction
-        db.session.execute(
-            text('''
-                UPDATE scheduled_trans SET status = NOT(status) WHERE scheduled_trans_key = :scheduled_trans_key
-            '''),
-            {"scheduled_trans_key": scheduled_trans_key}
-        )
-        db.session.commit() #commit changes to database
+        
+        # Verify the transaction belongs to the user before updating
+        trans_exists = db.session.execute(
+            text("SELECT COUNT(*) FROM scheduled_trans WHERE user_id = :user_id AND scheduled_trans_key = :scheduled_trans_key"),
+            {"user_id": user_id, "scheduled_trans_key": scheduled_trans_key}
+        ).scalar()
+        
+        if trans_exists > 0:
+            #toggle the status of the scheduled transaction
+            db.session.execute(
+                text('''
+                    UPDATE scheduled_trans SET status = NOT(status) WHERE scheduled_trans_key = :scheduled_trans_key AND user_id = :user_id
+                '''),
+                {"scheduled_trans_key": scheduled_trans_key, "user_id": user_id}
+            )
+            db.session.commit() #commit changes to database
 
         return redirect("/show_scheduled_trans") #redirect to show scheduled transactions page

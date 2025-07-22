@@ -316,9 +316,43 @@
 
 {% block extra_scripts %}
 <script>
-// Use the scores history functionality from main.js
+// Minimal JavaScript - only basic animations and interactions
 document.addEventListener('DOMContentLoaded', function() {
-    initializeScoresHistory();
+    // Simple card animations
+    const cards = document.querySelectorAll('.score-card, .metric-card, .gradient-card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'all 0.6s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+
+    // Add loading to pagination links only
+    document.querySelectorAll('a[href*="page="]').forEach(link => {
+        link.addEventListener('click', function() {
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay) overlay.style.display = 'flex';
+        });
+    });
+
+    // Simple hover effects for score cards
+    document.querySelectorAll('.score-card').forEach(card => {
+        const score = parseFloat(card.getAttribute('data-score')) || 0;
+        
+        card.addEventListener('mouseenter', function () {
+            this.style.transform = 'translateY(-8px) scale(1.02)';
+            this.style.transition = 'all 0.3s ease';
+        });
+
+        card.addEventListener('mouseleave', function () {
+            this.style.transform = 'translateY(0) scale(1)';
+            this.style.transition = 'all 0.3s ease';
+        });
+    });
 });
 </script>
 {% endblock %}
