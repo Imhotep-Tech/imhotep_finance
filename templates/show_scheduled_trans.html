@@ -147,11 +147,22 @@
                                 <span class="hidden sm:inline">Edit</span>
                             </a>
                             
-                            <a href="/change_status_of_scheduled_trans?scheduled_trans_key={{ trans[0] }}"
+                            <a href="/change_status_of_scheduled_trans?scheduled_trans_key={{ trans[1] }}"
                                class="flex-1 lg:flex-none {% if trans[10] == 1 %}bg-yellow-500 hover:bg-yellow-600{% else %}bg-green-500 hover:bg-green-600{% endif %} text-white font-medium py-2 px-4 rounded-lg transition-colors text-center">
                                 <i class="fas fa-{% if trans[10] == 1 %}pause{% else %}play{% endif %} mr-1"></i>
                                 <span class="hidden sm:inline">{% if trans[10] == 1 %}Pause{% else %}Activate{% endif %}</span>
                             </a>
+                            <form action="/delete_scheduled_trans" method="post" style="display: inline;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                <input type="hidden" name="scheduled_trans_key" value="{{ trans[1] }}">
+                                <input type="hidden" name="confirm_delete" value="yes">
+                                <button type="submit" 
+                                        class="flex-1 lg:flex-none bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition-colors text-center"
+                                        onclick="return confirm('Are you sure you want to delete this scheduled transaction?')">
+                                    <i class="fas fa-trash mr-1"></i>
+                                    <span class="hidden sm:inline">Delete</span>
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
