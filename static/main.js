@@ -600,7 +600,6 @@ function initializeLandingPageFeatures() {
 function initializeScoresHistory() {
     animateScoreCards();
     addScoreCardInteractions();
-    addScoresSortingFeature();
     calculatePerformanceMetrics();
     handleMobileResponsiveness();
     addMobileTouchInteractions();
@@ -649,84 +648,15 @@ function addScoreCardInteractions() {
     });
 }
 
-function addScoresSortingFeature() {
-    const scoreCards = document.querySelectorAll('.score-card[data-score]');
-    if (scoreCards.length <= 1) return;
-
-    const sortContainer = document.querySelector('.flex.items-center.justify-between.mb-6');
-    if (!sortContainer) return;
-
-    const sortControls = document.createElement('div');
-    sortControls.className = 'flex items-center space-x-2 text-sm';
-    sortControls.innerHTML = `
-        <span class="text-gray-500">Sort by:</span>
-        <select id="scoresSort" class="bg-white border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-imhotep-500 focus:border-imhotep-500">
-            <option value="default">Default (Newest)</option>
-            <option value="score-high">Score (High to Low)</option>
-            <option value="score-low">Score (Low to High)</option>
-            <option value="target-high">Target (High to Low)</option>
-            <option value="target-low">Target (Low to High)</option>
-        </select>
-    `;
-
-    sortContainer.appendChild(sortControls);
-
-    const sortSelect = document.getElementById('scoresSort');
-    if (sortSelect) {
-        sortSelect.addEventListener('change', function () {
-            sortScoreCards(this.value);
-        });
-    }
-}
-
-function sortScoreCards(sortBy) {
-    const container = document.querySelector('.grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-3');
-    if (!container) return;
-
-    const cards = Array.from(container.querySelectorAll('.score-card[data-score]'));
-
-    cards.sort((a, b) => {
-        const scoreA = parseFloat(a.getAttribute('data-score')) || 0;
-        const scoreB = parseFloat(b.getAttribute('data-score')) || 0;
-
-        switch (sortBy) {
-            case 'score-high': return scoreB - scoreA;
-            case 'score-low': return scoreA - scoreB;
-            case 'target-high':
-            case 'target-low':
-                const targetA = extractTargetFromCard(a);
-                const targetB = extractTargetFromCard(b);
-                return sortBy === 'target-high' ? targetB - targetA : targetA - targetB;
-            default: return 0;
-        }
-    });
-
-    // Animate reordering
-    cards.forEach((card, index) => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(20px)';
-
-        setTimeout(() => {
-            container.appendChild(card);
-            card.style.transition = 'all 0.6s ease';
-            card.style.opacity = '1';
-            card.style.transform = 'translateY(0)';
-        }, index * 50);
-    });
-}
-
-function extractTargetFromCard(card) {
-    const targetElement = card.querySelector('[class*="Target:"]');
-    if (targetElement) {
-        const targetMatch = targetElement.textContent.match(/[\d,]+/);
-        return targetMatch ? parseFloat(targetMatch[0].replace(/,/g, '')) : 0;
-    }
-    return 0;
-}
-
 function calculatePerformanceMetrics() {
     const scoreCards = document.querySelectorAll('.score-card[data-score]');
     if (scoreCards.length === 0) return;
+
+    // Check if performance summary already exists to prevent duplicates
+    const existingSummary = document.querySelector('.performance-summary');
+    if (existingSummary) {
+        return; // Exit early if summary already exists
+    }
 
     const scores = Array.from(scoreCards).map(card =>
         parseFloat(card.getAttribute('data-score')) || 0
@@ -736,9 +666,10 @@ function calculatePerformanceMetrics() {
     const averageScore = scores.reduce((sum, score) => sum + score, 0) / scores.length;
 
     const headerSection = document.querySelector('.max-w-7xl.mx-auto.px-4.sm\\:px-6.lg\\:px-8.py-8 > .mb-8');
+    
     if (headerSection && scores.length > 3) {
         const performanceSummary = document.createElement('div');
-        performanceSummary.className = 'mt-4 grid grid-cols-2 md:grid-cols-4 gap-4';
+        performanceSummary.className = 'performance-summary mt-4 grid grid-cols-2 md:grid-cols-4 gap-4';
         performanceSummary.innerHTML = `
             <div class="bg-white rounded-lg p-3 border border-gray-200">
                 <div class="text-xs text-gray-500 uppercase tracking-wide">Success Rate</div>
