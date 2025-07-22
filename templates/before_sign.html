@@ -1,13 +1,14 @@
 {% extends "layout.html" %}
 
 {% block title %}Imhotep Financial Manager - Take Control of Your Finances{% endblock %}
-{% block description %}Transform your financial life with Imhotep Financial Manager. Track expenses, manage investments, and achieve your financial goals with our powerful yet simple tools.{% endblock %}
+{% block description %}Transform your financial life with Imhotep Financial Manager. Track expenses, manage investments,
+and achieve your financial goals with our powerful yet simple tools.{% endblock %}
 
 {% block content %}
 <!-- Hero Section -->
 <section class="gradient-bg hero-pattern min-h-screen flex items-center relative overflow-hidden">
     <div class="absolute inset-0 bg-black opacity-20"></div>
-    
+
     <!-- Floating Elements -->
     <div class="absolute top-20 left-10 animate-float">
         <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
@@ -24,7 +25,7 @@
             <i class="fas fa-coins text-white text-2xl"></i>
         </div>
     </div>
-    
+
     <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div class="max-w-4xl mx-auto">
             <h1 class="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
@@ -33,43 +34,45 @@
                     Financial Future
                 </span>
             </h1>
-            <p class="text-xl md:text-2xl text-gray-200 mb-8 leading-relaxed">
-                Simplify your financial management with powerful tools for tracking expenses, 
+            <p class="text-xl md:text-2xl text-white mb-8 leading-relaxed opacity-95">
+                Simplify your financial management with powerful tools for tracking expenses,
                 managing investments, and achieving your dreams.
             </p>
-            
             <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-                <a href="/register" 
-                   class="bg-white text-indigo-600 hover:bg-gray-100 font-semibold py-4 px-8 rounded-full text-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
+                <a href="/register"
+                    class="bg-white text-indigo-600 hover:bg-gray-100 font-semibold py-4 px-8 rounded-full text-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
                     <i class="fas fa-rocket mr-2"></i>Get Started Free
                 </a>
                 <form action="/trial_login" method="POST" class="inline">
                     {{ form.hidden_tag() }}
-                    <button type="submit" 
-                            class="glass-effect text-white border-2 border-white hover:bg-white hover:text-indigo-600 font-semibold py-4 px-8 rounded-full text-lg transition-all duration-300 transform hover:scale-105">
+                    <button type="submit"
+                        class="glass-effect text-white border-2 border-white hover:bg-white hover:text-indigo-600 font-semibold py-4 px-8 rounded-full text-lg transition-all duration-300 transform hover:scale-105">
                         <i class="fas fa-play mr-2"></i>Try Demo
                     </button>
                 </form>
             </div>
-            
+
             <!-- Stats -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
-                <div class="glass-effect rounded-lg p-6 text-center transform hover:scale-105 transition-all duration-300">
+                <div
+                    class="glass-effect rounded-lg p-6 text-center transform hover:scale-105 transition-all duration-300">
                     <div class="text-3xl font-bold text-white mb-2">{{users_count}}+</div>
-                    <div class="text-gray-200">Happy Users</div>
+                    <div class="text-white opacity-90">Happy Users</div>
                 </div>
-                <div class="glass-effect rounded-lg p-6 text-center transform hover:scale-105 transition-all duration-300">
+                <div
+                    class="glass-effect rounded-lg p-6 text-center transform hover:scale-105 transition-all duration-300">
                     <div class="text-3xl font-bold text-white mb-2">170+</div>
-                    <div class="text-gray-200">Currencies Supported</div>
+                    <div class="text-white opacity-90">Currencies Supported</div>
                 </div>
-                <div class="glass-effect rounded-lg p-6 text-center transform hover:scale-105 transition-all duration-300">
+                <div
+                    class="glass-effect rounded-lg p-6 text-center transform hover:scale-105 transition-all duration-300">
                     <div class="text-3xl font-bold text-white mb-2">99.9%</div>
-                    <div class="text-gray-200">Uptime</div>
+                    <div class="text-white opacity-90">Uptime</div>
                 </div>
             </div>
         </div>
     </div>
-    
+
     <!-- Scroll Indicator -->
     <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white animate-bounce">
         <i class="fas fa-chevron-down text-2xl"></i>
@@ -77,25 +80,27 @@
 </section>
 
 <!-- Features Section -->
-<section class="py-20 bg-gray-50">
+<section class="py-20 bg-gray-50 dark:bg-gray-900">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
-            <h2 class="text-4xl font-bold text-gray-900 mb-4">
+            <h2 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
                 Why Choose Imhotep?
             </h2>
-            <p class="text-xl text-gray-600">
+            <p class="text-xl text-gray-600 dark:text-gray-300">
                 Powerful features designed to make financial management effortless
             </p>
         </div>
-        
+
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {% for feature in features %}
-            <div class="bg-white rounded-xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 text-center">
-                <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <i class="{{ feature.icon }} text-2xl text-indigo-600"></i>
+            <div
+                class="bg-white dark:bg-gray-800 rounded-xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 text-center">
+                <div
+                    class="w-16 h-16 bg-indigo-100 dark:bg-indigo-900 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="{{ feature.icon }} text-2xl text-indigo-600 dark:text-indigo-400"></i>
                 </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-4">{{ feature.title }}</h3>
-                <p class="text-gray-600">{{ feature.description }}</p>
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">{{ feature.title }}</h3>
+                <p class="text-gray-600 dark:text-gray-300">{{ feature.description }}</p>
             </div>
             {% endfor %}
         </div>
@@ -103,65 +108,70 @@
 </section>
 
 <!-- How It Works Section -->
-<section class="py-20 bg-white">
+<section class="py-20 bg-white dark:bg-gray-800">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
-            <h2 class="text-4xl font-bold text-gray-900 mb-4">
+            <h2 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
                 Get Started in 3 Simple Steps
             </h2>
         </div>
-        
+
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div class="text-center">
-                <div class="w-24 h-24 bg-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                <div
+                    class="w-24 h-24 bg-indigo-600 dark:bg-indigo-500 rounded-full flex items-center justify-center mx-auto mb-6">
                     <span class="text-3xl font-bold text-white">1</span>
                 </div>
-                <h3 class="text-2xl font-semibold text-gray-900 mb-4">Sign Up</h3>
-                <p class="text-gray-600">Create your free account in less than 2 minutes</p>
+                <h3 class="text-2xl font-semibold text-gray-900 dark:text-white mb-4">Sign Up</h3>
+                <p class="text-gray-600 dark:text-gray-300">Create your free account in less than 2 minutes</p>
             </div>
             <div class="text-center">
-                <div class="w-24 h-24 bg-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                <div
+                    class="w-24 h-24 bg-indigo-600 dark:bg-indigo-500 rounded-full flex items-center justify-center mx-auto mb-6">
                     <span class="text-3xl font-bold text-white">2</span>
                 </div>
-                <h3 class="text-2xl font-semibold text-gray-900 mb-4">Connect</h3>
-                <p class="text-gray-600">Add your accounts and start tracking your finances</p>
+                <h3 class="text-2xl font-semibold text-gray-900 dark:text-white mb-4">Connect</h3>
+                <p class="text-gray-600 dark:text-gray-300">Add your accounts and start tracking your finances</p>
             </div>
             <div class="text-center">
-                <div class="w-24 h-24 bg-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                <div
+                    class="w-24 h-24 bg-indigo-600 dark:bg-indigo-500 rounded-full flex items-center justify-center mx-auto mb-6">
                     <span class="text-3xl font-bold text-white">3</span>
                 </div>
-                <h3 class="text-2xl font-semibold text-gray-900 mb-4">Achieve</h3>
-                <p class="text-gray-600">Reach your financial goals with our smart tools</p>
+                <h3 class="text-2xl font-semibold text-gray-900 dark:text-white mb-4">Achieve</h3>
+                <p class="text-gray-600 dark:text-gray-300">Reach your financial goals with our smart tools</p>
             </div>
         </div>
     </div>
 </section>
 
 <!-- Testimonials Section -->
-<section class="py-20 bg-gray-50">
+<section class="py-20 bg-gray-50 dark:bg-gray-900">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
-            <h2 class="text-4xl font-bold text-gray-900 mb-4">
+            <h2 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
                 What Our Users Say
             </h2>
         </div>
-        
+
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             {% for testimonial in testimonials %}
-            <div class="bg-white rounded-xl p-8 shadow-lg">
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-8 shadow-lg">
                 <div class="flex mb-4">
                     {% for i in range(testimonial.rating) %}
                     <i class="fas fa-star text-yellow-400"></i>
                     {% endfor %}
                 </div>
-                <p class="text-gray-600 mb-6 italic">"{{ testimonial.content }}"</p>
+                <p class="text-gray-600 dark:text-gray-300 mb-6 italic">"{{ testimonial.content }}"</p>
                 <div class="flex items-center">
-                    <div class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mr-4">
-                        <span class="font-semibold text-indigo-600">{{ testimonial.name[0] }}</span>
+                    <div
+                        class="w-12 h-12 bg-indigo-100 dark:bg-indigo-900 rounded-full flex items-center justify-center mr-4">
+                        <span class="font-semibold text-indigo-600 dark:text-indigo-400">{{ testimonial.name[0]
+                            }}</span>
                     </div>
                     <div>
-                        <div class="font-semibold text-gray-900">{{ testimonial.name }}</div>
-                        <div class="text-gray-500 text-sm">{{ testimonial.role }}</div>
+                        <div class="font-semibold text-gray-900 dark:text-white">{{ testimonial.name }}</div>
+                        <div class="text-gray-500 dark:text-gray-400 text-sm">{{ testimonial.role }}</div>
                     </div>
                 </div>
             </div>
@@ -180,12 +190,12 @@
             Join thousands of users who have already taken control of their finances with Imhotep.
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="/register" 
-               class="bg-white text-indigo-600 hover:bg-gray-100 font-semibold py-4 px-8 rounded-full text-lg transition-all duration-300 transform hover:scale-105">
+            <a href="/register"
+                class="bg-white text-indigo-600 hover:bg-gray-100 font-semibold py-4 px-8 rounded-full text-lg transition-all duration-300 transform hover:scale-105">
                 Start Your Journey
             </a>
-            <a href="/login_page" 
-               class="border-2 border-white text-white hover:bg-white hover:text-indigo-600 font-semibold py-4 px-8 rounded-full text-lg transition-all duration-300 transform hover:scale-105">
+            <a href="/login_page"
+                class="border-2 border-white text-white hover:bg-white hover:text-indigo-600 font-semibold py-4 px-8 rounded-full text-lg transition-all duration-300 transform hover:scale-105">
                 Sign In
             </a>
         </div>
