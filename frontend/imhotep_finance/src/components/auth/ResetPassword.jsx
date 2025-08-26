@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Footer from '../common/Footer';
-import PharaohfolioLogo from '../../assets/PharaohfolioLogo.png';
+import Logo from '../../assets/Logo.jpeg';
 
 const ResetPassword = () => {
   const [formData, setFormData] = useState({
@@ -156,33 +156,47 @@ const ResetPassword = () => {
 
   if (validating) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-100 via-indigo-100 to-blue-100 bg-chef-pattern flex items-center justify-center p-4">
+      <div
+        className="min-h-screen bg-chef-pattern flex items-center justify-center p-4"
+        style={{
+          background: 'linear-gradient(135deg, #eaf6f6 0%, #d6efee 50%, #1a3535 100%)',
+        }}
+      >
         {/* Floating decorative elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-20 left-20 w-32 h-32 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float"></div>
-          <div className="absolute top-40 right-20 w-24 h-24 bg-indigo-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style={{animationDelay: '2s'}}></div>
-          <div className="absolute bottom-20 left-40 w-40 h-40 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style={{animationDelay: '4s'}}></div>
+          <div className="absolute top-20 left-20 w-32 h-32 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style={{ backgroundColor: '#366c6b' }}></div>
+          <div className="absolute top-40 right-20 w-24 h-24 rounded-full mix-blend-multiply filter blur-xl opacity-18 animate-float" style={{ backgroundColor: 'rgba(26,53,53,0.9)', animationDelay: '2s' }}></div>
+          <div className="absolute bottom-20 left-40 w-40 h-40 rounded-full mix-blend-multiply filter blur-xl opacity-16 animate-float" style={{ backgroundColor: '#2f7775', animationDelay: '4s' }}></div>
         </div>
         <div className="relative w-full max-w-md">
-          <div className="chef-card rounded-3xl p-8 shadow-2xl border border-white/30 backdrop-blur-2xl bg-white/90 text-center">
+          <div
+            className="chef-card rounded-3xl p-8 shadow-2xl border backdrop-blur-2xl text-center"
+            style={{
+              border: '1px solid rgba(54,108,107,0.14)',
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.94), rgba(242,251,250,0.9))',
+            }}
+          >
             {/* Loading Icon */}
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-full mb-6 shadow-lg border-4 border-white">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[#366c6b] to-[#244746] rounded-full mb-6 shadow-lg border-4 border-white">
               <svg className="animate-spin w-8 h-8 text-white" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
             </div>
             <div
-              className="font-extrabold text-3xl sm:text-4xl mb-2 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 bg-clip-text text-transparent font-chef drop-shadow-lg tracking-wide"
+              className="font-extrabold text-3xl sm:text-4xl mb-2 bg-clip-text text-transparent font-chef drop-shadow-lg tracking-wide"
               style={{
                 letterSpacing: '0.04em',
                 lineHeight: '1.1',
-                textShadow: '0 2px 8px rgba(124,58,237,0.12)'
+                backgroundImage: 'linear-gradient(90deg, #366c6b 0%, #1a3535 100%)',
+                textShadow: '0 2px 8px rgba(26,53,53,0.12)',
               }}
             >
-              Pharaohfolio
+              Imhotep Finance
             </div>
-            <p className="text-gray-500 text-sm mb-2">Simple Hosting for Single-Page Portfolios</p>
+            <p className="text-sm mb-2" style={{ color: '#1a3535', opacity: 0.8 }}>
+              Manage your finances efficiently with Imhotep Financial Manager
+            </p>
             <h2 className="text-3xl font-bold font-chef text-gray-800 mb-4">
               Validating Reset Link...
             </h2>
@@ -197,8 +211,8 @@ const ResetPassword = () => {
             </div>
           </div>
           <div className="text-center mt-8">
-            <p className="text-gray-500 text-sm font-medium">
-              👑 Pharaohfolio – Simple Hosting for Single-Page Portfolios 👑
+            <p className="text-sm font-medium" style={{ color: '#1a3535', opacity: 0.8 }}>
+              📈 Imhotep Finance –  Manage your finances efficiently with Imhotep Financial Manager 📈
             </p>
           </div>
         </div>
@@ -208,15 +222,26 @@ const ResetPassword = () => {
 
   if (!isValidToken) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 via-rose-50 to-pink-50 bg-chef-pattern flex items-center justify-center p-4">
+      <div
+        className="min-h-screen bg-chef-pattern flex items-center justify-center p-4"
+        style={{
+          background: 'linear-gradient(135deg, #fbeaea 0%, #f7e6e6 50%, #e7caca 100%)',
+        }}
+      >
         {/* Floating decorative elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-20 left-20 w-32 h-32 bg-red-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float"></div>
-          <div className="absolute top-40 right-20 w-24 h-24 bg-rose-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style={{animationDelay: '2s'}}></div>
-          <div className="absolute bottom-20 left-40 w-40 h-40 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style={{animationDelay: '4s'}}></div>
+          <div className="absolute top-20 left-20 w-32 h-32 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style={{ backgroundColor: '#e7caca' }}></div>
+          <div className="absolute top-40 right-20 w-24 h-24 rounded-full mix-blend-multiply filter blur-xl opacity-18 animate-float" style={{ backgroundColor: '#f7e6e6', animationDelay: '2s' }}></div>
+          <div className="absolute bottom-20 left-40 w-40 h-40 rounded-full mix-blend-multiply filter blur-xl opacity-16 animate-float" style={{ backgroundColor: '#fbeaea', animationDelay: '4s' }}></div>
         </div>
         <div className="relative w-full max-w-md">
-          <div className="chef-card rounded-3xl p-8 shadow-2xl border border-white/30 backdrop-blur-2xl bg-white/90 text-center">
+          <div
+            className="chef-card rounded-3xl p-8 shadow-2xl border backdrop-blur-2xl text-center"
+            style={{
+              border: '1px solid #e7caca',
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.94), #fbeaea 90%)',
+            }}
+          >
             {/* Error Icon */}
             <div className="inline-flex items-center justify-center w-20 h-20 bg-red-500 rounded-full mb-6 shadow-lg">
               <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -224,16 +249,19 @@ const ResetPassword = () => {
               </svg>
             </div>
             <div
-              className="font-extrabold text-3xl sm:text-4xl mb-2 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 bg-clip-text text-transparent font-chef drop-shadow-lg tracking-wide"
+              className="font-extrabold text-3xl sm:text-4xl mb-2 bg-clip-text text-transparent font-chef drop-shadow-lg tracking-wide"
               style={{
                 letterSpacing: '0.04em',
                 lineHeight: '1.1',
-                textShadow: '0 2px 8px rgba(124,58,237,0.12)'
+                backgroundImage: 'linear-gradient(90deg, #c44d4d 0%, #a82e2e 100%)',
+                textShadow: '0 2px 8px rgba(196,77,77,0.12)',
               }}
             >
-              Pharaohfolio
+              Imhotep Finance
             </div>
-            <p className="text-gray-500 text-sm mb-2">Simple Hosting for Single-Page Portfolios</p>
+            <p className="text-sm mb-2" style={{ color: '#a82e2e', opacity: 0.8 }}>
+              Manage your finances efficiently with Imhotep Financial Manager
+            </p>
             <h2 className="text-3xl font-bold font-chef text-gray-800 mb-4">
               Invalid Reset Link
             </h2>
@@ -253,22 +281,27 @@ const ResetPassword = () => {
                 </div>
               </div>
             </div>
-            <Link 
-              to="/forgot-password" 
-              className="chef-button bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white w-full mb-4"
+            <Link
+              to="/forgot-password"
+              className="chef-button w-full mb-4"
+              style={{
+                background: 'linear-gradient(90deg, #c44d4d 0%, #a82e2e 100%)',
+                color: 'white',
+              }}
             >
               Request New Reset Link
             </Link>
-            <Link 
-              to="/login" 
-              className="text-gray-600 hover:text-gray-800 font-medium text-sm transition-colors duration-200"
+            <Link
+              to="/login"
+              className="font-medium text-sm transition-colors duration-200"
+              style={{ color: '#a82e2e' }}
             >
               Back to Login
             </Link>
           </div>
           <div className="text-center mt-8">
-            <p className="text-gray-500 text-sm font-medium">
-              👑 Pharaohfolio – Simple Hosting for Single-Page Portfolios 👑
+            <p className="text-sm font-medium" style={{ color: '#a82e2e', opacity: 0.8 }}>
+              📈 Imhotep Finance –  Manage your finances efficiently with Imhotep Financial Manager 📈
             </p>
           </div>
         </div>
@@ -278,16 +311,27 @@ const ResetPassword = () => {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 bg-chef-pattern">
+      <div
+        className="min-h-screen bg-chef-pattern"
+        style={{
+          background: 'linear-gradient(135deg, #eaf6f6 0%, #d6efee 50%, #1a3535 100%)',
+        }}
+      >
         {/* Floating decorative elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-20 left-20 w-32 h-32 bg-green-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float"></div>
-          <div className="absolute top-40 right-20 w-24 h-24 bg-emerald-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style={{animationDelay: '2s'}}></div>
-          <div className="absolute bottom-20 left-40 w-40 h-40 bg-teal-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style={{animationDelay: '4s'}}></div>
+          <div className="absolute top-20 left-20 w-32 h-32 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style={{ backgroundColor: '#366c6b' }}></div>
+          <div className="absolute top-40 right-20 w-24 h-24 rounded-full mix-blend-multiply filter blur-xl opacity-18 animate-float" style={{ backgroundColor: 'rgba(26,53,53,0.9)', animationDelay: '2s' }}></div>
+          <div className="absolute bottom-20 left-40 w-40 h-40 rounded-full mix-blend-multiply filter blur-xl opacity-16 animate-float" style={{ backgroundColor: '#2f7775', animationDelay: '4s' }}></div>
         </div>
         <div className="flex items-center justify-center min-h-screen p-4">
           <div className="relative w-full max-w-md">
-            <div className="chef-card rounded-3xl p-8 shadow-2xl border border-white/30 backdrop-blur-2xl bg-white/90 text-center">
+            <div
+              className="chef-card rounded-3xl p-8 shadow-2xl border backdrop-blur-2xl text-center"
+              style={{
+                border: '1px solid rgba(54,108,107,0.14)',
+                background: 'linear-gradient(180deg, rgba(255,255,255,0.94), rgba(242,251,250,0.9))',
+              }}
+            >
               {/* Success Icon */}
               <div className="inline-flex items-center justify-center w-20 h-20 bg-green-500 rounded-full mb-6 shadow-lg animate-pulse-slow">
                 <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -295,21 +339,24 @@ const ResetPassword = () => {
                 </svg>
               </div>
               <div
-                className="font-extrabold text-3xl sm:text-4xl mb-2 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 bg-clip-text text-transparent font-chef drop-shadow-lg tracking-wide"
+                className="font-extrabold text-3xl sm:text-4xl mb-2 bg-clip-text text-transparent font-chef drop-shadow-lg tracking-wide"
                 style={{
                   letterSpacing: '0.04em',
                   lineHeight: '1.1',
-                  textShadow: '0 2px 8px rgba(124,58,237,0.12)'
+                  backgroundImage: 'linear-gradient(90deg, #366c6b 0%, #1a3535 100%)',
+                  textShadow: '0 2px 8px rgba(26,53,53,0.12)',
                 }}
               >
-                Pharaohfolio
+                Imhotep Finance
               </div>
-              <p className="text-gray-500 text-sm mb-2">Simple Hosting for Single-Page Portfolios</p>
+              <p className="text-sm mb-2" style={{ color: '#1a3535', opacity: 0.8 }}>
+                Manage your finances efficiently with Imhotep Financial Manager
+              </p>
               <h2 className="text-3xl font-bold font-chef text-gray-800 mb-4">
                 Password Reset Successful!
               </h2>
               <p className="text-gray-600 font-medium mb-8 leading-relaxed">
-                Your password has been successfully reset. You can now login with your new password and start cooking amazing recipes!
+                Your password has been successfully reset. You can now login with your new password!
               </p>
               <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
                 <div className="flex items-start">
@@ -324,9 +371,13 @@ const ResetPassword = () => {
                   </div>
                 </div>
               </div>
-              <Link 
-                to="/login" 
-                className="chef-button bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white w-full"
+              <Link
+                to="/login"
+                className="chef-button w-full"
+                style={{
+                  background: 'linear-gradient(90deg, #366c6b 0%, #1a3535 100%)',
+                  color: 'white',
+                }}
               >
                 Continue to Login
               </Link>
@@ -337,8 +388,8 @@ const ResetPassword = () => {
               </div>
             </div>
             <div className="text-center mt-8">
-              <p className="text-gray-500 text-sm font-medium">
-                👑 Pharaohfolio – Simple Hosting for Single-Page Portfolios 👑
+              <p className="text-sm font-medium" style={{ color: '#1a3535', opacity: 0.8 }}>
+                📈 Imhotep Finance –  Manage your finances efficiently with Imhotep Financial Manager 📈
               </p>
             </div>
           </div>
@@ -349,43 +400,57 @@ const ResetPassword = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-100 via-indigo-100 to-blue-100 bg-chef-pattern">
+    <div
+      className="min-h-screen bg-chef-pattern"
+      style={{
+        background: 'linear-gradient(135deg, #eaf6f6 0%, #d6efee 50%, #1a3535 100%)',
+      }}
+    >
       {/* Floating decorative elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-20 w-32 h-32 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float"></div>
-        <div className="absolute top-40 right-20 w-24 h-24 bg-indigo-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style={{animationDelay: '2s'}}></div>
-        <div className="absolute bottom-20 left-40 w-40 h-40 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style={{animationDelay: '4s'}}></div>
+        <div className="absolute top-20 left-20 w-32 h-32 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style={{ backgroundColor: '#366c6b' }}></div>
+        <div className="absolute top-40 right-20 w-24 h-24 rounded-full mix-blend-multiply filter blur-xl opacity-18 animate-float" style={{ backgroundColor: 'rgba(26,53,53,0.9)', animationDelay: '2s' }}></div>
+        <div className="absolute bottom-20 left-40 w-40 h-40 rounded-full mix-blend-multiply filter blur-xl opacity-16 animate-float" style={{ backgroundColor: '#2f7775', animationDelay: '4s' }}></div>
       </div>
       <div className="flex items-center justify-center min-h-screen p-4">
         <div className="relative w-full max-w-md">
           {/* Glassmorphism Card */}
-          <div className="chef-card rounded-3xl p-8 shadow-2xl border border-white/30 backdrop-blur-2xl bg-white/90">
+          <div
+            className="chef-card rounded-3xl p-8 shadow-2xl border backdrop-blur-2xl"
+            style={{
+              border: '1px solid rgba(54,108,107,0.14)',
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.94), rgba(242,251,250,0.9))',
+            }}
+          >
             {/* Header with Logo and Brand */}
             <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-full mb-4 shadow-lg border-4 border-white">
-                <img 
-                  src={PharaohfolioLogo} 
-                  alt="Pharaohfolio Logo" 
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[#366c6b] to-[#244746] rounded-full mb-4 shadow-lg border-4 border-white">
+                <img
+                  src={Logo}
+                  alt="Logo"
                   className="w-14 h-14 object-contain"
                 />
               </div>
               <div
-                className="font-extrabold text-3xl sm:text-4xl mb-2 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 bg-clip-text text-transparent font-chef drop-shadow-lg tracking-wide"
+                className="font-extrabold text-3xl sm:text-4xl mb-2 bg-clip-text text-transparent font-chef drop-shadow-lg tracking-wide"
                 style={{
                   letterSpacing: '0.04em',
                   lineHeight: '1.1',
-                  textShadow: '0 2px 8px rgba(124,58,237,0.12)'
+                  backgroundImage: 'linear-gradient(90deg, #366c6b 0%, #1a3535 100%)',
+                  textShadow: '0 2px 8px rgba(26,53,53,0.12)',
                 }}
               >
-                Pharaohfolio
+                Imhotep Finance
               </div>
-              <p className="text-gray-500 text-sm mb-2">Simple Hosting for Single-Page Portfolios</p>
+              <p className="text-sm mb-2" style={{ color: '#1a3535', opacity: 0.8 }}>
+                Manage your finances efficiently with Imhotep Financial Manager
+              </p>
               <h2 className="text-3xl font-bold font-chef text-gray-800 mb-2">
                 Set New Password
               </h2>
               <p className="text-gray-600 font-medium">
                 Create a secure new password for{' '}
-                <span className="font-semibold text-purple-600">{userEmail}</span>
+                <span className="font-semibold" style={{ color: '#366c6b' }}>{userEmail}</span>
               </p>
             </div>
             {/* Error Alert */}
@@ -437,7 +502,7 @@ const ResetPassword = () => {
                     ) : (
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268-2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                       </svg>
                     )}
                   </button>
@@ -510,7 +575,10 @@ const ResetPassword = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="chef-button bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white w-full disabled:opacity-50 disabled:cursor-not-allowed"
+                className="chef-button text-white w-full disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  background: 'linear-gradient(90deg, #366c6b 0%, #1a3535 100%)',
+                }}
               >
                 {loading ? (
                   <div className="flex items-center justify-center">
@@ -543,9 +611,10 @@ const ResetPassword = () => {
             <div className="text-center mt-8">
               <p className="text-gray-600 text-sm">
                 Remember your password?{' '}
-                <Link 
-                  to="/login" 
-                  className="text-purple-600 hover:text-purple-800 font-semibold transition-colors duration-200"
+                <Link
+                  to="/login"
+                  className="font-semibold transition-colors hover:underline"
+                  style={{ color: '#366c6b' }}
                 >
                   Back to Login
                 </Link>
@@ -554,8 +623,8 @@ const ResetPassword = () => {
           </div>
           {/* Bottom decorative text */}
           <div className="text-center mt-8">
-            <p className="text-gray-500 text-sm font-medium">
-              👑 Pharaohfolio – Simple Hosting for Single-Page Portfolios 👑
+            <p className="text-sm font-medium" style={{ color: '#1a3535', opacity: 0.8 }}>
+              📈 Imhotep Finance –  Manage your finances efficiently with Imhotep Financial Manager 📈
             </p>
           </div>
         </div>

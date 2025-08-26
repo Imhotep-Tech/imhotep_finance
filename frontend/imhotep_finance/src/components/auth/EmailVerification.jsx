@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-import PharaohfolioLogo from '../../assets/PharaohfolioLogo.png';
+import Logo from '../../assets/Logo.jpeg';
 
 const EmailVerification = () => {
   const { uid, token } = useParams();
@@ -50,43 +50,35 @@ const EmailVerification = () => {
   }, [uid, token, navigate]);
 
   // Theme helpers
-  const getBackgroundGradient = () => {
+  const getBackgroundStyle = (status) => {
     switch (status) {
       case 'verifying':
-        return 'from-purple-100 via-indigo-100 to-blue-100';
       case 'success':
-        return 'from-green-50 via-emerald-50 to-teal-50';
+        return { background: 'linear-gradient(135deg, #eaf6f6 0%, #d6efee 50%, #1a3535 100%)' };
       case 'error':
-        return 'from-red-50 via-rose-50 to-pink-50';
+        return { background: 'linear-gradient(135deg, #fbeaea 0%, #f7e6e6 50%, #e7caca 100%)' };
       default:
-        return 'from-purple-100 via-indigo-100 to-blue-100';
+        return {};
     }
   };
 
-  const getFloatingElements = () => {
+  const getFloatingElements = (status) => {
     switch (status) {
       case 'verifying':
-        return (
-          <>
-            <div className="absolute top-20 left-20 w-32 h-32 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float"></div>
-            <div className="absolute top-40 right-20 w-24 h-24 bg-indigo-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style={{animationDelay: '2s'}}></div>
-            <div className="absolute bottom-20 left-40 w-40 h-40 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style={{animationDelay: '4s'}}></div>
-          </>
-        );
       case 'success':
         return (
           <>
-            <div className="absolute top-20 left-20 w-32 h-32 bg-green-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float"></div>
-            <div className="absolute top-40 right-20 w-24 h-24 bg-emerald-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style={{animationDelay: '2s'}}></div>
-            <div className="absolute bottom-20 left-40 w-40 h-40 bg-teal-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style={{animationDelay: '4s'}}></div>
+            <div className="absolute top-20 left-20 w-32 h-32 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style={{ backgroundColor: '#366c6b' }}></div>
+            <div className="absolute top-40 right-20 w-24 h-24 rounded-full mix-blend-multiply filter blur-xl opacity-18 animate-float" style={{ backgroundColor: 'rgba(26,53,53,0.9)', animationDelay: '2s' }}></div>
+            <div className="absolute bottom-20 left-40 w-40 h-40 rounded-full mix-blend-multiply filter blur-xl opacity-16 animate-float" style={{ backgroundColor: '#2f7775', animationDelay: '4s' }}></div>
           </>
         );
       case 'error':
         return (
           <>
-            <div className="absolute top-20 left-20 w-32 h-32 bg-red-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float"></div>
-            <div className="absolute top-40 right-20 w-24 h-24 bg-rose-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style={{animationDelay: '2s'}}></div>
-            <div className="absolute bottom-20 left-40 w-40 h-40 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style={{animationDelay: '4s'}}></div>
+            <div className="absolute top-20 left-20 w-32 h-32 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style={{ backgroundColor: '#e7caca' }}></div>
+            <div className="absolute top-40 right-20 w-24 h-24 rounded-full mix-blend-multiply filter blur-xl opacity-18 animate-float" style={{ backgroundColor: '#f7e6e6', animationDelay: '2s' }}></div>
+            <div className="absolute bottom-20 left-40 w-40 h-40 rounded-full mix-blend-multiply filter blur-xl opacity-16 animate-float" style={{ backgroundColor: '#fbeaea', animationDelay: '4s' }}></div>
           </>
         );
       default:
@@ -94,11 +86,80 @@ const EmailVerification = () => {
     }
   };
 
+  const getCardStyle = (status) => {
+    switch (status) {
+      case 'verifying':
+      case 'success':
+        return {
+          border: '1px solid rgba(54,108,107,0.14)',
+          background: 'linear-gradient(180deg, rgba(255,255,255,0.94), rgba(242,251,250,0.9))',
+        };
+      case 'error':
+        return {
+          border: '1px solid #e7caca',
+          background: 'linear-gradient(180deg, rgba(255,255,255,0.94), #fbeaea 90%)',
+        };
+      default:
+        return {};
+    }
+  };
+
+  const getTitleStyle = (status) => {
+    switch (status) {
+      case 'verifying':
+      case 'success':
+        return {
+          letterSpacing: '0.04em',
+          lineHeight: '1.1',
+          backgroundImage: 'linear-gradient(90deg, #366c6b 0%, #1a3535 100%)',
+          textShadow: '0 2px 8px rgba(26,53,53,0.12)',
+        };
+      case 'error':
+        return {
+          letterSpacing: '0.04em',
+          lineHeight: '1.1',
+          backgroundImage: 'linear-gradient(90deg, #c44d4d 0%, #a82e2e 100%)',
+          textShadow: '0 2px 8px rgba(196,77,77,0.12)',
+        };
+      default:
+        return {};
+    }
+  };
+
+  const getSubtitleColor = (status) => {
+    switch (status) {
+      case 'verifying':
+      case 'success':
+        return { color: '#1a3535', opacity: 0.8 };
+      case 'error':
+        return { color: '#a82e2e', opacity: 0.8 };
+      default:
+        return {};
+    }
+  };
+
+  const getButtonStyle = (status) => {
+    switch (status) {
+      case 'success':
+        return {
+          background: 'linear-gradient(90deg, #366c6b 0%, #1a3535 100%)',
+          color: 'white',
+        };
+      case 'error':
+        return {
+          background: 'linear-gradient(90deg, #c44d4d 0%, #a82e2e 100%)',
+          color: 'white',
+        };
+      default:
+        return {};
+    }
+  };
+
   const getIcon = () => {
     switch (status) {
       case 'verifying':
         return (
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-full mb-6 shadow-lg border-4 border-white">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[#366c6b] to-[#244746] rounded-full mb-6 shadow-lg border-4 border-white">
             <svg className="animate-spin w-10 h-10 text-white" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -179,7 +240,7 @@ const EmailVerification = () => {
       case 'verifying':
         return '⏳ Setting up your culinary workspace ⏳';
       case 'success':
-        return '🎉 Ready to create amazing recipes with AI 🎉';
+        return '🎉 Ready to manage you finance 🎉';
       case 'error':
         return '💡 Need help? Contact our support team 💡';
       default:
@@ -188,34 +249,42 @@ const EmailVerification = () => {
   };
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br ${getBackgroundGradient()} bg-chef-pattern flex items-center justify-center p-4`}>
+    <div
+      className={`min-h-screen bg-chef-pattern flex items-center justify-center p-4`}
+      style={getBackgroundStyle(status)}
+    >
       {/* Floating decorative elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {getFloatingElements()}
+        {getFloatingElements(status)}
       </div>
       <div className="relative w-full max-w-md">
         {/* Glassmorphism Card */}
-        <div className="chef-card rounded-3xl p-8 shadow-2xl border border-white/30 backdrop-blur-2xl bg-white/90 text-center">
+        <div
+          className="chef-card rounded-3xl p-8 shadow-2xl border backdrop-blur-2xl text-center"
+          style={getCardStyle(status)}
+        >
           {/* Brand Header */}
           <div className="text-center mb-6">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-full mb-4 shadow-lg border-4 border-white">
-              <img 
-                src={PharaohfolioLogo} 
-                alt="Pharaohfolio Logo" 
+            <div className={`inline-flex items-center justify-center w-20 h-20 rounded-full mb-4 shadow-lg border-4 border-white ${
+              status === 'verifying' ? 'bg-gradient-to-br from-[#366c6b] to-[#244746]' :
+              status === 'success' ? 'bg-gradient-to-br from-[#366c6b] to-[#244746]' :
+              'bg-gradient-to-br from-[#c44d4d] to-[#a82e2e]'
+            }`}>
+              <img
+                src={Logo}
+                alt="Logo"
                 className="w-14 h-14 object-contain"
               />
             </div>
             <div
-              className="font-extrabold text-3xl sm:text-4xl mb-2 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 bg-clip-text text-transparent font-chef drop-shadow-lg tracking-wide"
-              style={{
-                letterSpacing: '0.04em',
-                lineHeight: '1.1',
-                textShadow: '0 2px 8px rgba(124,58,237,0.12)'
-              }}
+              className="font-extrabold text-3xl sm:text-4xl mb-2 bg-clip-text text-transparent font-chef drop-shadow-lg tracking-wide"
+              style={getTitleStyle(status)}
             >
-              Pharaohfolio
+              Imhotep Finance
             </div>
-            <p className="text-gray-500 text-sm mb-2">Simple Hosting for Single-Page Portfolios</p>
+            <p className="text-sm mb-2" style={getSubtitleColor(status)}>
+              Manage your finances efficiently with Imhotep Financial Manager
+            </p>
           </div>
           {/* Icon */}
           {getIcon()}
@@ -224,15 +293,16 @@ const EmailVerification = () => {
             {getTitle()}
           </h1>
           {/* Subtitle */}
-          <p className="text-gray-600 font-medium mb-8 leading-relaxed">
+          <p className="font-medium mb-8 leading-relaxed" style={getSubtitleColor(status)}>
             {getSubtitle()}
           </p>
           {/* Action Button */}
           {status !== 'verifying' && (
             <div className="mb-6">
-              <Link 
+              <Link
                 to={getButtonLink()}
                 className="chef-button inline-block text-center no-underline"
+                style={getButtonStyle(status)}
               >
                 {getButtonText()}
               </Link>
@@ -255,7 +325,7 @@ const EmailVerification = () => {
           {status === 'verifying' && (
             <div className="mt-6">
               <div className="w-full bg-gray-200 rounded-full h-2">
-                <div className="bg-gradient-to-r from-purple-500 to-indigo-500 h-2 rounded-full animate-pulse" style={{width: '70%'}}></div>
+                <div className="bg-gradient-to-r from-[#366c6b] to-[#1a3535] h-2 rounded-full animate-pulse" style={{ width: '70%' }}></div>
               </div>
               <p className="text-gray-500 text-sm mt-2">Processing verification...</p>
             </div>
@@ -265,9 +335,10 @@ const EmailVerification = () => {
             <div className="mt-6 text-center">
               <p className="text-gray-600 text-sm mb-4">
                 If you continue to experience issues, please{' '}
-                <Link 
-                  to="/register" 
-                  className="text-purple-600 hover:text-purple-800 font-semibold transition-colors hover:underline"
+                <Link
+                  to="/register"
+                  className="font-semibold transition-colors hover:underline"
+                  style={{ color: '#c44d4d' }}
                 >
                   register again
                 </Link>
@@ -278,7 +349,7 @@ const EmailVerification = () => {
         </div>
         {/* Bottom decorative text */}
         <div className="text-center mt-8">
-          <p className="text-gray-500 text-sm font-medium">
+          <p className="text-sm font-medium" style={getSubtitleColor(status)}>
             {getBottomMessage()}
           </p>
         </div>

@@ -3,338 +3,245 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verify Your New Email Address - Pharaohfolio</title>
+    <title>Verify Your New Email Address - Imhotep Finance</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        /* Theme colors: primary teal and deep slate */
+        :root {
+            --teal: #366c6b;
+            --dark-slate: #1a3535;
+            --muted: #9ca3a3;
+            --bg-gradient-start: #e6f2f1;
+            --bg-gradient-end: #d1e8e7;
         }
-        
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            font-family: 'Arial', 'Helvetica', sans-serif;
+            font-family: Arial, Helvetica, sans-serif;
             line-height: 1.6;
-            color: #374151;
-            background: linear-gradient(135deg, #ddd6fe 0%, #c7d2fe 50%, #a5b4fc 100%);
-            margin: 0;
+            color: var(--dark-slate);
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, #e0efee 50%, #cfe9e8 100%);
             padding: 30px 20px;
             min-height: 100vh;
         }
-        
+
         .floating-element {
             position: absolute;
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(45deg, #8b5cf6, #7c3aed);
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(45deg, rgba(54,108,107,0.9), rgba(26,53,53,0.9));
             border-radius: 50%;
-            opacity: 0.1;
+            opacity: 0.08;
             animation: float 6s ease-in-out infinite;
+            filter: blur(1px);
         }
-        
-        .floating-element:nth-child(1) {
-            top: 10%;
-            left: 10%;
-            animation-delay: 0s;
-        }
-        
-        .floating-element:nth-child(2) {
-            top: 20%;
-            right: 15%;
-            width: 40px;
-            height: 40px;
-            animation-delay: 2s;
-        }
-        
-        .floating-element:nth-child(3) {
-            bottom: 20%;
-            left: 20%;
-            width: 50px;
-            height: 50px;
-            animation-delay: 4s;
-        }
-        
+
+        .floating-element:nth-child(1) { top: 8%; left: 6%; animation-delay: 0s; transform: scale(1.1); }
+        .floating-element:nth-child(2) { top: 18%; right: 12%; width:48px; height:48px; animation-delay: 2s; }
+        .floating-element:nth-child(3) { bottom: 18%; left: 18%; width:56px; height:56px; animation-delay: 4s; }
+
         @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(180deg); }
+            0%,100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-18px) rotate(160deg); }
         }
-        
+
         .container {
-            max-width: 650px;
+            max-width: 680px;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            padding: 3rem 2.5rem;
-            border-radius: 24px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255,255,255,0.98);
+            padding: 2.5rem;
+            border-radius: 18px;
+            box-shadow: 0 18px 50px rgba(26,53,53,0.08);
+            border: 1px solid rgba(54,108,107,0.08);
             position: relative;
             overflow: hidden;
         }
-        
+
         .container::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #8b5cf6, #7c3aed, #6d28d9);
+            top: 0; left: 0; right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--teal), var(--dark-slate));
         }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 2.5rem;
-        }
-        
+
+        .header { text-align: center; margin-bottom: 2rem; }
+
         .logo {
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.25rem;
+            background: linear-gradient(135deg, var(--teal), var(--dark-slate));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            filter: drop-shadow(2px 2px 4px rgba(139, 92, 246, 0.3));
+            filter: drop-shadow(1px 1px 3px rgba(26,53,53,0.08));
         }
-        
+
         .icon {
-            display: inline-block;
-            width: 4rem;
-            height: 4rem;
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-            border-radius: 50%;
-            color: white;
-            font-size: 2rem;
-            line-height: 4rem;
-            text-align: center;
-            margin-bottom: 1rem;
-            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3);
-            animation: float 3s ease-in-out infinite;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 3.6rem;
+            height: 3.6rem;
+            background: linear-gradient(135deg, var(--teal), var(--dark-slate));
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1.6rem;
+            margin-bottom: 0.75rem;
+            box-shadow: 0 10px 26px rgba(54,108,107,0.12);
         }
-        
+
         h1 {
-            color: #374151;
-            margin-bottom: 1rem;
-            font-size: 2rem;
+            color: var(--dark-slate);
+            margin-bottom: 0.75rem;
+            font-size: 1.85rem;
             font-weight: 700;
-            font-family: 'Georgia', serif;
+            font-family: Georgia, serif;
         }
-        
+
         .subtitle {
-            color: #6b7280;
-            font-size: 1rem;
-            line-height: 1.6;
-            margin-bottom: 2rem;
+            color: var(--muted);
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
         }
-        
-        p {
-            color: #6b7280;
-            line-height: 1.6;
-            margin-bottom: 1.5rem;
-            font-size: 1rem;
-        }
-        
+
+        p { color: #475b5b; line-height: 1.6; margin-bottom: 1rem; font-size: 1rem; }
+
         .email-highlight {
-            background: linear-gradient(135deg, #ddd6fe, #c7d2fe);
-            padding: 0.75rem 1.25rem;
-            border-radius: 12px;
-            font-family: 'Monaco', 'Menlo', monospace;
-            color: #7c3aed;
-            font-weight: 600;
-            border: 2px solid rgba(139, 92, 246, 0.2);
-            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.1);
+            background: linear-gradient(90deg, rgba(54,108,107,0.07), rgba(26,53,53,0.03));
+            padding: 0.8rem 1.2rem;
+            border-radius: 10px;
+            font-family: Monaco, Menlo, monospace;
+            color: var(--dark-slate);
+            font-weight: 700;
+            border: 1px solid rgba(54,108,107,0.08);
+            display: inline-block;
         }
-        
-        .button-container {
-            text-align: center;
-            margin: 2.5rem 0;
-        }
-        
+
+        .button-container { text-align: center; margin: 1.75rem 0; }
+
         .button {
             display: inline-block;
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            background: linear-gradient(135deg, var(--teal), var(--dark-slate));
             color: white;
             text-decoration: none;
-            padding: 1rem 2rem;
+            padding: 0.95rem 1.9rem;
             border-radius: 12px;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 1rem;
-            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
-            transition: all 0.3s ease;
-            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 28px rgba(26,53,53,0.12);
+            transition: transform .18s ease, box-shadow .18s ease;
+            border: 1px solid rgba(255,255,255,0.06);
         }
-        
-        .button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 35px rgba(139, 92, 246, 0.5);
-        }
-        
+
+        .button:hover { transform: translateY(-3px); box-shadow: 0 14px 40px rgba(26,53,53,0.16); }
+
         .link-fallback {
-            background: linear-gradient(135deg, #f9fafb, #f3f4f6);
-            padding: 1.5rem;
-            border-radius: 16px;
-            margin: 1.5rem 0;
-            border: 1px solid rgba(139, 92, 246, 0.2);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            background: #f8fdfd;
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            border: 1px solid rgba(54,108,107,0.06);
         }
-        
+
         .link-text {
             word-break: break-all;
-            font-family: 'Monaco', 'Menlo', monospace;
+            font-family: Monaco, Menlo, monospace;
             font-size: 0.9rem;
-            color: #374151;
+            color: var(--dark-slate);
             background: white;
-            padding: 0.75rem;
-            border-radius: 8px;
-            border: 1px solid #e5e7eb;
+            padding: 0.6rem;
+            border-radius: 6px;
+            border: 1px solid #e6efee;
+            display: block;
         }
-        
+
         .warning {
-            background: linear-gradient(135deg, #ddd6fe, #c7d2fe);
-            color: #5b21b6;
-            padding: 1.5rem;
-            border-radius: 16px;
-            margin: 1.5rem 0;
-            border: 2px solid rgba(139, 92, 246, 0.2);
+            background: linear-gradient(90deg, rgba(54,108,107,0.06), rgba(26,53,53,0.02));
+            color: var(--dark-slate);
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            border: 1px solid rgba(54,108,107,0.06);
             font-size: 0.95rem;
-            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.1);
         }
-        
-        .warning ul {
-            margin: 0.5rem 0;
-            padding-left: 1.5rem;
-        }
-        
-        .warning li {
-            margin-bottom: 0.5rem;
-            color: #5b21b6;
-        }
-        
+
+        .warning ul { margin: 0.5rem 0 0 1.25rem; color: var(--dark-slate); }
+        .warning li { margin-bottom: 0.45rem; }
+
         .footer {
-            margin-top: 2.5rem;
-            padding-top: 2rem;
-            border-top: 2px solid rgba(139, 92, 246, 0.1);
+            margin-top: 1.75rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(54,108,107,0.06);
             text-align: center;
-            background: linear-gradient(135deg, #ddd6fe, #c7d2fe);
-            border-radius: 16px;
-            padding: 2rem;
-            margin-left: -2.5rem;
-            margin-right: -2.5rem;
-            margin-bottom: -3rem;
+            color: var(--muted);
+            font-size: 0.92rem;
         }
-        
-        .footer p {
-            font-size: 0.9rem;
-            color: #78716c;
-            margin-bottom: 0.5rem;
-        }
-        
-        .support-info {
-            color: #5b21b6;
-            font-weight: 600;
-        }
-        
-        /* Mobile responsiveness */
+
+        .support-info { color: var(--teal); font-weight: 700; }
+
         @media only screen and (max-width: 640px) {
-            body {
-                padding: 20px 10px;
-            }
-            .container {
-                padding: 2rem 1.5rem;
-                border-radius: 12px;
-            }
-            h1 {
-                font-size: 1.75rem;
-            }
-            .logo {
-                font-size: 1.75rem;
-            }
-            .icon {
-                width: 3rem;
-                height: 3rem;
-                font-size: 1.5rem;
-            }
-            .button {
-                padding: 0.875rem 1.5rem;
-                font-size: 0.95rem;
-            }
+            body { padding: 20px 12px; }
+            .container { padding: 1.5rem; border-radius: 12px; }
+            h1 { font-size: 1.5rem; }
+            .logo { font-size: 1.4rem; }
+            .icon { width: 3rem; height: 3rem; font-size: 1.25rem; border-radius: 8px; }
+            .button { padding: 0.75rem 1.25rem; font-size: 0.95rem; }
         }
     </style>
 </head>
 <body>
-    <div class="floating-element"></div>
-    <div class="floating-element"></div>
-    <div class="floating-element"></div>
-    
+    <div class="floating-element" aria-hidden="true"></div>
+    <div class="floating-element" aria-hidden="true"></div>
+    <div class="floating-element" aria-hidden="true"></div>
+
     <div class="container">
         <div class="header">
-            <div class="icon">👑</div>
-            <div class="logo">Pharaohfolio</div>
-            <p class="subtitle">Simple Hosting for Single-Page Portfolios</p>
+            <div class="icon" aria-hidden="true">📈</div>
+            <div class="logo">Imhotep Finance</div>
+            <p class="subtitle">Manage your finances efficiently with Imhotep Financial Manager</p>
             <h1>Verify Your New Email Address</h1>
         </div>
-        
+
         <div class="content">
             <p>Hello <strong>{{ user.first_name|default:user.username }}</strong>,</p>
-            
+
             <p>We need to verify your new email address to complete your profile update.</p>
-            
+
             <p>You've requested to change your email address to:</p>
-            
+
             <div class="email-highlight">{{ new_email }}</div>
-            
+
             <p>Click the button below to confirm this change and verify your new email address:</p>
-            
+
             <div class="button-container">
-                <a href="{{ verification_url }}" class="button">
+                <a href="{{ verification_url }}" class="button" target="_blank" rel="noopener noreferrer">
                     📧 Verify New Email Address
                 </a>
             </div>
-            
+
             <div class="link-fallback">
-                <p><strong>If the button above doesn't work,</strong> you can copy and paste the following link into your browser:</p>
+                <p><strong>If the button above doesn't work,</strong> copy and paste this link into your browser:</p>
                 <div class="link-text">{{ verification_url }}</div>
             </div>
-            
-            <div class="warning">
+
+            <div class="warning" role="note" aria-label="Security notice">
                 <strong>🔒 Security Notice:</strong>
                 <ul>
-                    <li>This verification link will expire in <strong>24 hours</strong> for security reasons</li>
-                    <li>If you didn't request this email change, please ignore this email and contact support immediately</li>
-                    <li>Your current email address will remain active until this verification is completed</li>
-                    <li>Contact support if you continue to experience issues</li>
+                    <li>This verification link will expire in <strong>24 hours</strong>.</li>
+                    <li>If you didn't request this change, please ignore this email and contact support.</li>
+                    <li>Your current email address will remain active until verification is completed.</li>
                 </ul>
             </div>
         </div>
-        
+
         <div class="footer">
-            <p><strong>👑 Pharaohfolio</strong> - Simple Hosting for Single-Page Portfolios</p>
-            <p class="support-info">If you have any questions, please contact our support team.</p>
-            <p style="font-size: 0.8rem; color: #9ca3af; margin-top: 1rem;">
+            <p><strong>Imhotep Finance</strong> — Manage your finances efficiently with Imhotep Financial Manager</p>
+            <p class="support-info">Need help? Contact us at <strong>imhoteptech@outlook.com</strong></p>
+            <p style="margin-top: 0.75rem; font-size: 0.8rem; color: #94a7a6;">
                 This email was sent automatically. Please do not reply to this email.
             </p>
         </div>
     </div>
 </body>
-</html>
-                {{ verification_url }}
-            </div>
-        </div>
-        
-        <div class="security-notice">
-            <strong>Security Notice:</strong>
-            <ul>
-                <li>This verification link will expire in 24 hours for security reasons</li>
-                <li>If you didn't request this email change, please ignore this email and contact support immediately</li>
-                <li>Your current email address will remain active until this verification is completed</li>
-            </ul>
-        </div>
-        
-        <div class="footer">
-            <p>If you didn't request this email change, please contact our support team immediately.</p>
-            <p class="support-info">Need help? Contact us at <strong>imhoteptech@outlook.com</strong></p>
-            <p style="margin-top: 1rem; font-size: 0.8rem;">© 2025 Pharaohfolio. All rights reserved.</p>
-        </div>
-    </div>
-</body>
-</html>

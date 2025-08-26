@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import axios from 'axios';
 import Footer from '../common/Footer';
-import PharaohfolioLogo from '../../assets/PharaohfolioLogo.png';
-import CodeEditor from './components/CodeEditor';
+import Logo from '../../assets/Logo.jpeg';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -86,8 +85,8 @@ const Dashboard = () => {
             {/* Header with Chef Logo and Brand */}
             <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-full mb-4 shadow-lg border-4 border-white">
               <img 
-                src={PharaohfolioLogo} 
-                alt="Pharaohfolio Logo" 
+                src={Logo} 
+                alt="Logo" 
                 className="w-14 h-14 object-contain"
               />
             </div>
@@ -99,9 +98,9 @@ const Dashboard = () => {
                 textShadow: '0 2px 8px rgba(124,58,237,0.12)'
               }}
             >
-              Pharaohfolio
+              Imhotep Finance
             </div>
-            <p className="text-gray-500 text-sm mb-2">Simple Hosting for Single-Page Portfolios</p>
+            <p className="text-gray-500 text-sm mb-2"> Manage your finances efficiently with Imhotep Financial Manager</p>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold font-chef text-gray-800 mb-4">
               Welcome, {user?.first_name || user?.username}!
             </h1>
@@ -155,7 +154,7 @@ const Dashboard = () => {
               View Your Portfolio
             </a>
             <p className="text-gray-500 text-sm mt-4">
-              Share this link: <span className="font-mono">{`pharaohfolio.vercel.app/u/${user?.username}`}</span>
+              Share this link: <span className="font-mono">{`imhotep-finance.vercel.app/u/${user?.username}`}</span>
             </p>
           </div>
         )}
@@ -184,23 +183,6 @@ const Dashboard = () => {
               <br />
               <b>Navigation bars and navigation links are not allowed and will be removed for security.</b>
             </div>
-            {/* Prompt Examples */}
-            <div className="mt-8">
-              <h4 className="text-lg font-semibold text-gray-800 mb-2">Prompt Examples for AI</h4>
-              <ul className="space-y-2 text-left text-gray-700 text-sm">
-                <PromptExample text={`Create a personal portfolio website for a frontend developer named Sarah, with a modern design, a hero section, about, projects, and contact form. Use HTML, CSS, and JavaScript in one file. For images, use only links from https://i.imgur.com/ or https://live.staticflickr.com/. Do not include navigation bars or navigation links.`} />
-                <PromptExample text={`Generate a single-file HTML/CSS/JS portfolio for a graphic designer named Alex, with a gallery section (use imgur or flickr images), animated transitions, and a dark theme. Only use images from https://i.imgur.com/ or https://live.staticflickr.com/. Do not include navigation bars or navigation links.`} />
-                <PromptExample text={`Build a responsive portfolio page for a data scientist named Priya, including sections for bio, skills, projects (with charts using only CSS/HTML), and contact info. Use only HTML, CSS, and JavaScript. Images must be from https://i.imgur.com/ or https://live.staticflickr.com/. Do not include navigation bars or navigation links.`} />
-                <PromptExample text={`Create a one-page resume website for a backend engineer named Ahmed, with a timeline of experience, skills, and a downloadable CV button. Use HTML, CSS, and JavaScript in one file. Images only from https://i.imgur.com/ or https://live.staticflickr.com/. Do not include navigation bars or navigation links.`} />
-                <PromptExample text={`Make a creative portfolio for a photographer named Emily, with a fullscreen color slider, about section, and contact form. Use imgur or flickr images only (https://i.imgur.com/ or https://live.staticflickr.com/). Do not include navigation bars or navigation links.`} />
-                <PromptExample text={`Design a portfolio for a UI/UX designer named Lucas, with a case studies section, testimonials, and a minimal, clean layout. Use HTML, CSS, and JavaScript in one file. Images only from https://i.imgur.com/ or https://live.staticflickr.com/. Do not include navigation bars or navigation links.`} />
-                <PromptExample text={`Create a personal landing page for a student named Maria, with sections for education, projects, and social links (as text or <a> tags). Use only HTML, CSS, and JavaScript. Images only from https://i.imgur.com/ or https://live.staticflickr.com/. Do not include navigation bars or navigation links.`} />
-                <PromptExample text={`Build a portfolio for a mobile app developer named John, featuring app screenshots as imgur images, skills, and a contact form. All code in one HTML file. Images only from https://i.imgur.com/ or https://live.staticflickr.com/. Do not include navigation bars or navigation links.`} />
-              </ul>
-              <div className="text-xs text-gray-400 mt-2">
-                Click the copy icon to use a prompt with your favorite AI!
-              </div>
-            </div>
           </div>
         )}
       </div>
@@ -222,15 +204,6 @@ const Dashboard = () => {
             <p className="text-gray-600 mb-4 text-sm">
               Paste your HTML, CSS, and JavaScript code below. This will be your live portfolio.
             </p>
-            {loading ? (
-              <div className="text-center py-12">Loading...</div>
-            ) : (
-              <CodeEditor
-                value={portfolioCode}
-                onChange={setPortfolioCode}
-                language="html"
-              />
-            )}
             <div className="flex justify-end mt-4 gap-2">
               <button
                 className="chef-button-secondary"
@@ -261,28 +234,5 @@ const Dashboard = () => {
     </div>
   );
 };
-
-// Add this helper component at the bottom of the file (before export)
-function PromptExample({ text }) {
-  const handleCopy = () => {
-    navigator.clipboard.writeText(text);
-  };
-  return (
-    <li className="flex items-start gap-2">
-      <span className="flex-1">{text}</span>
-      <button
-        onClick={handleCopy}
-        title="Copy prompt"
-        className="ml-2 text-gray-400 hover:text-purple-600 transition"
-        style={{ minWidth: 24 }}
-      >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-          <rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" />
-          <rect x="3" y="3" width="13" height="13" rx="2" stroke="currentColor" />
-        </svg>
-      </button>
-    </li>
-  );
-}
 
 export default Dashboard;
