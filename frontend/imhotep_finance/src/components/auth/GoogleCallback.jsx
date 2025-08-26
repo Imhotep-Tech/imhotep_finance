@@ -74,7 +74,7 @@ const GoogleCallback = () => {
           setStatus('success');
           setIsNewUser(result.isNewUser);
           if (result.isNewUser) {
-            setMessage('Welcome to Pharaohfolio! Your account has been created successfully.');
+            setMessage('Welcome to Imhotep Finance! Your account has been created successfully.');
           } else {
             setMessage('Login successful! Redirecting to dashboard...');
           }
@@ -94,49 +94,126 @@ const GoogleCallback = () => {
     handleGoogleCallback();
   }, [searchParams, login, navigate]);
 
+  // Update color theme for all states
   const getBackgroundGradient = () => {
     switch (status) {
       case 'processing':
-        return 'from-blue-50 via-google-blue-50 to-indigo-50';
+        return 'bg-chef-pattern';
       case 'success':
-        return 'from-green-50 via-emerald-50 to-teal-50';
+        return 'bg-chef-pattern';
       case 'error':
-        return 'from-red-50 via-rose-50 to-pink-50';
+        return 'bg-chef-pattern';
       default:
-        return 'from-blue-50 via-google-blue-50 to-indigo-50';
+        return 'bg-chef-pattern';
+    }
+  };
+
+  const getBackgroundStyle = () => {
+    switch (status) {
+      case 'processing':
+      case 'success':
+        return {
+          background: 'linear-gradient(135deg, #eaf6f6 0%, #d6efee 50%, #1a3535 100%)',
+        };
+      case 'error':
+        return {
+          background: 'linear-gradient(135deg, #fbeaea 0%, #f7e6e6 50%, #e7caca 100%)',
+        };
+      default:
+        return {};
     }
   };
 
   const getFloatingElements = () => {
     switch (status) {
       case 'processing':
-        return (
-          <>
-            <div className="absolute top-20 left-20 w-32 h-32 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-float"></div>
-            <div className="absolute top-40 right-20 w-24 h-24 bg-red-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-float" style={{animationDelay: '2s'}}></div>
-            <div className="absolute bottom-20 left-40 w-40 h-40 bg-yellow-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-float" style={{animationDelay: '4s'}}></div>
-          </>
-        );
       case 'success':
         return (
           <>
-            <div className="absolute top-20 left-20 w-32 h-32 bg-green-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-float"></div>
-            <div className="absolute top-40 right-20 w-24 h-24 bg-emerald-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-float" style={{animationDelay: '2s'}}></div>
-            <div className="absolute bottom-20 left-40 w-40 h-40 bg-teal-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-float" style={{animationDelay: '4s'}}></div>
+            <div className="absolute top-20 left-20 w-32 h-32 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style={{ backgroundColor: '#366c6b' }}></div>
+            <div className="absolute top-40 right-20 w-24 h-24 rounded-full mix-blend-multiply filter blur-xl opacity-18 animate-float" style={{ backgroundColor: 'rgba(26,53,53,0.9)', animationDelay: '2s' }}></div>
+            <div className="absolute bottom-20 left-40 w-40 h-40 rounded-full mix-blend-multiply filter blur-xl opacity-16 animate-float" style={{ backgroundColor: '#2f7775', animationDelay: '4s' }}></div>
           </>
         );
       case 'error':
         return (
           <>
-            <div className="absolute top-20 left-20 w-32 h-32 bg-red-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-float"></div>
-            <div className="absolute top-40 right-20 w-24 h-24 bg-rose-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-float" style={{animationDelay: '2s'}}></div>
-            <div className="absolute bottom-20 left-40 w-40 h-40 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-float" style={{animationDelay: '4s'}}></div>
+            <div className="absolute top-20 left-20 w-32 h-32 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style={{ backgroundColor: '#e7caca' }}></div>
+            <div className="absolute top-40 right-20 w-24 h-24 rounded-full mix-blend-multiply filter blur-xl opacity-18 animate-float" style={{ backgroundColor: '#f7e6e6', animationDelay: '2s' }}></div>
+            <div className="absolute bottom-20 left-40 w-40 h-40 rounded-full mix-blend-multiply filter blur-xl opacity-16 animate-float" style={{ backgroundColor: '#fbeaea', animationDelay: '4s' }}></div>
           </>
         );
       default:
         return null;
     }
   };
+
+  // Card background and accent colors
+  const getCardStyle = () => {
+    switch (status) {
+      case 'processing':
+      case 'success':
+        return {
+          border: '1px solid rgba(54,108,107,0.14)',
+          background: 'linear-gradient(180deg, rgba(255,255,255,0.94), rgba(242,251,250,0.9))',
+        };
+      case 'error':
+        return {
+          border: '1px solid #e7caca',
+          background: 'linear-gradient(180deg, rgba(255,255,255,0.94), #fbeaea 90%)',
+        };
+      default:
+        return {};
+    }
+  };
+
+  // Title gradient
+  const getTitleStyle = () => {
+    switch (status) {
+      case 'processing':
+      case 'success':
+        return {
+          letterSpacing: '0.04em',
+          lineHeight: '1.1',
+          backgroundImage: 'linear-gradient(90deg, #366c6b 0%, #1a3535 100%)',
+          textShadow: '0 2px 8px rgba(26,53,53,0.12)',
+        };
+      case 'error':
+        return {
+          letterSpacing: '0.04em',
+          lineHeight: '1.1',
+          backgroundImage: 'linear-gradient(90deg, #c44d4d 0%, #a82e2e 100%)',
+          textShadow: '0 2px 8px rgba(196,77,77,0.12)',
+        };
+      default:
+        return {};
+    }
+  };
+
+  // Subtitle color
+  const getSubtitleColor = () => {
+    switch (status) {
+      case 'processing':
+      case 'success':
+        return { color: '#1a3535', opacity: 0.8 };
+      case 'error':
+        return { color: '#a82e2e', opacity: 0.8 };
+      default:
+        return {};
+    }
+  };
+
+  // Success button color
+  const getSuccessButtonStyle = () => ({
+    background: 'linear-gradient(90deg, #366c6b 0%, #1a3535 100%)',
+    color: 'white',
+  });
+
+  // Error button color
+  const getErrorButtonStyle = () => ({
+    background: 'linear-gradient(90deg, #c44d4d 0%, #a82e2e 100%)',
+    color: 'white',
+  });
 
   const getIcon = () => {
     switch (status) {
@@ -177,7 +254,7 @@ const GoogleCallback = () => {
       case 'processing':
         return 'Connecting with Google...';
       case 'success':
-        return isNewUser ? 'Welcome to the Pharaohfolio!' : 'Welcome Back!';
+        return isNewUser ? 'Welcome to the Imhotep Finance!' : 'Welcome Back!';
       case 'error':
         return 'Authentication Failed';
       default:
@@ -205,7 +282,7 @@ const GoogleCallback = () => {
       case 'processing':
         return '🔐 Securing your Google connection 🔐';
       case 'success':
-        return isNewUser ? '🎉 Your culinary journey begins now! 🎉' : '👨‍🍳 Ready to create amazing recipes! 👩‍🍳';
+        return isNewUser ? '🎉 Your culinary journey begins now! 🎉' : '📈 Ready to create manage your finance! 📈';
       case 'error':
         return '💡 Try logging in with Google again 💡';
       default:
@@ -214,7 +291,10 @@ const GoogleCallback = () => {
   };
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br ${getBackgroundGradient()} bg-chef-pattern flex items-center justify-center p-4`}>
+    <div
+      className={`min-h-screen ${getBackgroundGradient()} flex items-center justify-center p-4`}
+      style={getBackgroundStyle()}
+    >
       {/* Floating decorative elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {getFloatingElements()}
@@ -222,19 +302,28 @@ const GoogleCallback = () => {
 
       <div className="relative w-full max-w-md">
         {/* Main Authentication Card */}
-        <div className="chef-card rounded-3xl p-8 shadow-2xl border border-white/30 backdrop-blur-xl text-center">
+        <div
+          className="chef-card rounded-3xl p-8 shadow-2xl border backdrop-blur-xl text-center"
+          style={getCardStyle()}
+        >
           {/* Icon */}
           <div className="mb-6">
             {getIcon()}
           </div>
           
           {/* Title */}
+          <div
+            className="font-extrabold text-3xl sm:text-4xl mb-2 bg-clip-text text-transparent font-chef drop-shadow-lg tracking-wide"
+            style={getTitleStyle()}
+          >
+            Imhotep Finance
+          </div>
           <h1 className="text-3xl font-bold font-chef text-gray-800 mb-4">
             {getTitle()}
           </h1>
           
           {/* Subtitle */}
-          <p className="text-gray-600 font-medium mb-8 leading-relaxed">
+          <p className="font-medium mb-8 leading-relaxed" style={getSubtitleColor()}>
             {getSubtitle()}
           </p>
           
@@ -242,7 +331,7 @@ const GoogleCallback = () => {
           {status === 'processing' && (
             <div className="mt-6">
               <div className="w-full bg-gray-200 rounded-full h-2">
-                <div className="bg-gradient-to-r from-blue-500 via-red-500 to-yellow-500 h-2 rounded-full animate-pulse" style={{width: '75%'}}></div>
+                <div className="bg-gradient-to-r from-blue-500 via-red-500 to-yellow-500 h-2 rounded-full animate-pulse" style={{ width: '75%' }}></div>
               </div>
               <p className="text-gray-500 text-sm mt-2">Authenticating with Google...</p>
             </div>
@@ -257,9 +346,6 @@ const GoogleCallback = () => {
                 </svg>
                 <div className="text-left">
                   <p className="text-green-700 font-medium text-sm">Account Created Successfully!</p>
-                  <p className="text-green-600 text-sm mt-1">
-                    Your chef profile is ready. You can now start creating amazing recipes with AI assistance!
-                  </p>
                 </div>
               </div>
             </div>
@@ -312,7 +398,7 @@ const GoogleCallback = () => {
 
         {/* Bottom decorative text */}
         <div className="text-center mt-8">
-          <p className="text-gray-500 text-sm font-medium">
+          <p className="text-sm font-medium" style={getSubtitleColor()}>
             {getBottomMessage()}
           </p>
         </div>
