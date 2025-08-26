@@ -118,35 +118,49 @@ const Profile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-100 via-indigo-100 to-blue-100 bg-chef-pattern">
+    <div
+      className="min-h-screen bg-chef-pattern"
+      style={{
+        background: 'linear-gradient(135deg, #eaf6f6 0%, #d6efee 50%, #1a3535 100%)',
+      }}
+    >
       {/* Floating decorative elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-20 w-32 h-32 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float"></div>
-        <div className="absolute top-40 right-20 w-24 h-24 bg-indigo-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style={{animationDelay: '2s'}}></div>
-        <div className="absolute bottom-20 left-40 w-40 h-40 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style={{animationDelay: '4s'}}></div>
+        <div className="absolute top-20 left-20 w-32 h-32 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style={{ backgroundColor: '#366c6b' }}></div>
+        <div className="absolute top-40 right-20 w-24 h-24 rounded-full mix-blend-multiply filter blur-xl opacity-18 animate-float" style={{ backgroundColor: 'rgba(26,53,53,0.9)', animationDelay: '2s' }}></div>
+        <div className="absolute bottom-20 left-40 w-40 h-40 rounded-full mix-blend-multiply filter blur-xl opacity-16 animate-float" style={{ backgroundColor: '#2f7775', animationDelay: '4s' }}></div>
       </div>
 
       <div className="relative z-10 w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Brand Header */}
-        <div className="chef-card rounded-3xl p-6 sm:p-8 lg:p-12 shadow-2xl border border-white/30 backdrop-blur-2xl bg-white/90">
+        <div
+          className="chef-card rounded-3xl p-6 sm:p-8 lg:p-12 shadow-2xl border backdrop-blur-2xl bg-white/90"
+          style={{
+            border: '1px solid rgba(54,108,107,0.14)',
+            background: 'linear-gradient(180deg, rgba(255,255,255,0.94), rgba(242,251,250,0.9))',
+          }}
+        >
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
             <div className="text-center sm:text-left">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-full mb-4 shadow-lg border-4 border-white mx-auto sm:mx-0">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-[#366c6b] to-[#244746] rounded-full mb-4 shadow-lg border-4 border-white mx-auto sm:mx-0">
                 <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </div>
               <div
-                className="font-extrabold text-3xl sm:text-4xl mb-2 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 bg-clip-text text-transparent font-chef drop-shadow-lg tracking-wide"
+                className="font-extrabold text-3xl sm:text-4xl mb-2 bg-clip-text text-transparent font-chef drop-shadow-lg tracking-wide"
                 style={{
                   letterSpacing: '0.04em',
                   lineHeight: '1.1',
-                  textShadow: '0 2px 8px rgba(124,58,237,0.12)'
+                  backgroundImage: 'linear-gradient(90deg, #366c6b 0%, #1a3535 100%)',
+                  textShadow: '0 2px 8px rgba(26,53,53,0.12)',
                 }}
               >
-                Pharaohfolio
+                Imhotep Finance
               </div>
-              <p className="text-gray-500 text-sm mb-2">Simple Hosting for Single-Page Portfolios</p>
+              <p className="text-sm mb-2" style={{ color: '#1a3535', opacity: 0.8 }}>
+                Manage your finances efficiently with Imhotep Financial Manager
+              </p>
               <h1 className="text-3xl sm:text-4xl font-bold font-chef text-gray-800 mb-2">
                 My Profile
               </h1>
@@ -178,12 +192,18 @@ const Profile = () => {
         </div>
 
         {/* Tabs Navigation */}
-        <div className="chef-card rounded-2xl p-2 shadow-lg border border-white/30 backdrop-blur-2xl bg-white/90">
+        <div
+          className="chef-card rounded-2xl p-2 shadow-lg border backdrop-blur-2xl bg-white/90"
+          style={{
+            border: '1px solid rgba(54,108,107,0.14)',
+            background: 'linear-gradient(180deg, rgba(255,255,255,0.97), rgba(242,251,250,0.97))',
+          }}
+        >
           <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
             <button
               className={`chef-button flex-1 ${
                 activeTab === 'profile'
-                  ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-lg scale-105'
+                  ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white shadow-lg scale-105'
                   : 'bg-white/70 text-gray-700 hover:bg-white/90 border border-gray-300'
               } flex items-center space-x-2 justify-center transition-all duration-200`}
               onClick={() => setActiveTab('profile')}
@@ -242,7 +262,13 @@ const Profile = () => {
 
         {/* Profile Information Form */}
         {activeTab === 'profile' && (
-          <div className="chef-card rounded-2xl p-6 sm:p-8 shadow-lg border border-white/30 backdrop-blur-2xl bg-white/90">
+          <div
+            className="chef-card rounded-2xl p-6 sm:p-8 shadow-lg border backdrop-blur-2xl bg-white/90"
+            style={{
+              border: '1px solid rgba(54,108,107,0.14)',
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.97), rgba(242,251,250,0.97))',
+            }}
+          >
             <div className="mb-6">
               <h2 className="text-2xl font-bold font-chef text-gray-800 mb-2">Profile Information</h2>
               <p className="text-gray-600 font-medium">Update your personal information and account details</p>
@@ -354,8 +380,13 @@ const Profile = () => {
                   className={`chef-button w-full ${
                     loading
                       ? 'bg-gray-400 cursor-not-allowed'
-                      : 'bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 hover:shadow-lg'
-                  } text-white flex items-center space-x-2 justify-center transition-all duration-200`}
+                      : 'text-white'
+                  } flex items-center space-x-2 justify-center`}
+                  style={
+                    loading
+                      ? {}
+                      : { background: 'linear-gradient(90deg, #366c6b 0%, #1a3535 100%)' }
+                  }
                 >
                   {loading ? (
                     <>
@@ -381,11 +412,39 @@ const Profile = () => {
 
         {/* Change Password Form */}
         {activeTab === 'password' && (
-          <div className="chef-card rounded-2xl p-6 sm:p-8 shadow-lg border border-white/30 backdrop-blur-2xl bg-white/90">
+          <div
+            className="chef-card rounded-2xl p-6 sm:p-8 shadow-lg border backdrop-blur-2xl bg-white/90"
+            style={{
+              border: '1px solid rgba(54,108,107,0.14)',
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.97), rgba(242,251,250,0.97))',
+            }}
+          >
             <div className="mb-6">
               <h2 className="text-2xl font-bold font-chef text-gray-800 mb-2">Change Password</h2>
               <p className="text-gray-600 font-medium">Update your password to keep your account secure</p>
             </div>
+
+            {/* Error and Success Messages for password tab */}
+            {error && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+                <div className="flex items-center">
+                  <svg className="w-5 h-5 text-red-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-red-700 font-medium">{error}</span>
+                </div>
+              </div>
+            )}
+            {success && (
+              <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
+                <div className="flex items-center">
+                  <svg className="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-green-700 font-medium">{success}</span>
+                </div>
+              </div>
+            )}
 
             <form onSubmit={handlePasswordSubmit} className="space-y-6">
               <div className="space-y-2">
@@ -511,8 +570,13 @@ const Profile = () => {
                   disabled={loading}
                   className={`chef-button w-full ${loading 
                     ? 'bg-gray-400 cursor-not-allowed' 
-                    : 'bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 hover:shadow-lg'
-                  } text-white flex items-center space-x-2 justify-center`}
+                    : 'text-white'
+                  } flex items-center space-x-2 justify-center`}
+                  style={
+                    loading
+                      ? {}
+                      : { background: 'linear-gradient(90deg, #366c6b 0%, #1a3535 100%)' }
+                  }
                 >
                   {loading ? (
                     <>
@@ -533,6 +597,20 @@ const Profile = () => {
                 </button>
               </div>
             </form>
+            {/* Security Notice */}
+            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+              <div className="flex items-start">
+                <svg className="w-5 h-5 text-blue-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                </svg>
+                <div className="text-left">
+                  <p className="text-blue-700 font-medium text-sm">Security Notice</p>
+                  <p className="text-blue-600 text-sm mt-1">
+                    Your new password will be encrypted and stored securely. We recommend using a unique password you haven't used elsewhere.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>

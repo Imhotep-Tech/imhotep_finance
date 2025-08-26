@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import axios from 'axios';
 import Footer from '../common/Footer';
-import PharaohfolioLogo from '../../assets/PharaohfolioLogo.png';
+import Logo from '../../assets/Logo.jpeg';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -85,8 +85,8 @@ const Dashboard = () => {
             {/* Header with Chef Logo and Brand */}
             <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-full mb-4 shadow-lg border-4 border-white">
               <img 
-                src={PharaohfolioLogo} 
-                alt="Pharaohfolio Logo" 
+                src={Logo} 
+                alt="Logo" 
                 className="w-14 h-14 object-contain"
               />
             </div>
@@ -98,9 +98,9 @@ const Dashboard = () => {
                 textShadow: '0 2px 8px rgba(124,58,237,0.12)'
               }}
             >
-              Pharaohfolio
+              Imhotep Finance
             </div>
-            <p className="text-gray-500 text-sm mb-2">Simple Hosting for Single-Page Portfolios</p>
+            <p className="text-gray-500 text-sm mb-2"> Manage your finances efficiently with Imhotep Financial Manager</p>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold font-chef text-gray-800 mb-4">
               Welcome, {user?.first_name || user?.username}!
             </h1>
@@ -154,7 +154,7 @@ const Dashboard = () => {
               View Your Portfolio
             </a>
             <p className="text-gray-500 text-sm mt-4">
-              Share this link: <span className="font-mono">{`pharaohfolio.vercel.app/u/${user?.username}`}</span>
+              Share this link: <span className="font-mono">{`imhotep-finance.vercel.app/u/${user?.username}`}</span>
             </p>
           </div>
         )}

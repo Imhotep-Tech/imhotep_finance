@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Link, useLocation } from 'react-router-dom';
-import PharaohfolioLogo from '../../assets/PharaohfolioLogo.png';
+import Logo from '../../assets/Logo.jpeg';
 
 const Navbar = ({ onToggle }) => {
   const { user, logout } = useAuth();
@@ -52,8 +52,8 @@ const Navbar = ({ onToggle }) => {
       {/* Floating decorative elements - visible when navbar is open */}
       {isOpen && (
         <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-          <div className="absolute top-20 left-20 w-32 h-32 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float"></div>
-          <div className="absolute top-40 right-20 w-24 h-24 bg-indigo-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style={{animationDelay: '2s'}}></div>
+          <div className="absolute top-20 left-20 w-32 h-32 bg-[#366c6b] rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float"></div>
+          <div className="absolute top-40 right-20 w-24 h-24 bg-[#1a3535] rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style={{animationDelay: '2s'}}></div>
           <div className="absolute bottom-20 left-40 w-40 h-40 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style={{animationDelay: '4s'}}></div>
         </div>
       )}
@@ -66,7 +66,7 @@ const Navbar = ({ onToggle }) => {
         title={isOpen ? 'Collapse sidebar' : 'Expand sidebar'}
       >
         <svg 
-          className={`w-6 h-6 text-gray-700 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''} group-hover:text-purple-600`}
+          className={`w-6 h-6 text-gray-700 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''} group-hover:text-[#366c6b]`}
           fill="none" 
           stroke="currentColor" 
           viewBox="0 0 24 24"
@@ -92,26 +92,26 @@ const Navbar = ({ onToggle }) => {
               {/* Logo/Brand Section */}
               <div className="mb-8 pt-12">
                 <div className="flex items-center justify-center mb-4">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-full shadow-lg border-4 border-white">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-[#366c6b] to-[#1a3535] rounded-full shadow-lg border-4 border-white">
                     <img 
-                      src={PharaohfolioLogo} 
-                      alt="Pharaohfolio Logo" 
+                      src={Logo} 
+                      alt="Logo" 
                       className="w-12 h-12 object-contain"
                     />
                   </div>
                 </div>
                 <div
-                  className="font-extrabold text-2xl sm:text-3xl mb-2 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 bg-clip-text text-transparent font-chef drop-shadow-lg tracking-wide text-center"
+                  className="font-extrabold text-2xl sm:text-3xl mb-2 bg-gradient-to-r from-[#366c6b] via-[#1a3535] to-[#366c6b] bg-clip-text text-transparent font-chef drop-shadow-lg tracking-wide text-center"
                   style={{
                     letterSpacing: '0.04em',
                     lineHeight: '1.1',
                     textShadow: '0 2px 8px rgba(124,58,237,0.12)'
                   }}
                 >
-                  Pharaohfolio
+                  Imhotep Finance
                 </div>
                 <p className="text-center text-gray-500 text-sm font-medium mt-1">
-                  Simple Hosting for Single-Page Portfolios
+                   Manage your finances efficiently with Imhotep Financial Manager
                 </p>
               </div>
 
@@ -119,7 +119,7 @@ const Navbar = ({ onToggle }) => {
               <div className="mb-8">
                 <div className="chef-card rounded-2xl p-4 shadow-lg border border-white/30 backdrop-blur-xl bg-white/90">
                   <div className="flex items-center space-x-3 mb-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-xl shadow-md flex items-center justify-center text-white font-bold text-lg">
+                    <div className="w-12 h-12 bg-gradient-to-br from-[#366c6b] to-[#1a3535] rounded-xl shadow-md flex items-center justify-center text-white font-bold text-lg">
                       {user?.first_name ? user.first_name.charAt(0).toUpperCase() : user?.username?.charAt(0).toUpperCase() || 'U'}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -151,7 +151,7 @@ const Navbar = ({ onToggle }) => {
                   to="/dashboard" 
                   className={`navbar-link group flex items-center p-4 rounded-2xl transition-all duration-300 ${
                     isActive('/dashboard') 
-                      ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-lg transform scale-105' 
+                      ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white shadow-lg transform scale-105' 
                       : 'text-gray-700 hover:bg-white/70 hover:shadow-md hover:scale-105'
                   }`}
                   onClick={closeNavbar}
@@ -159,9 +159,9 @@ const Navbar = ({ onToggle }) => {
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center mr-3 transition-colors duration-300 ${
                     isActive('/dashboard') 
                       ? 'bg-white/20' 
-                      : 'bg-purple-100 group-hover:bg-purple-200'
+                      : 'bg-gray-100 group-hover:bg-[#eaf6f6]'
                   }`}>
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className={`w-5 h-5 ${isActive('/dashboard') ? 'text-white' : 'text-[#366c6b]'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                     </svg>
                   </div>
@@ -172,7 +172,7 @@ const Navbar = ({ onToggle }) => {
                   to="/profile" 
                   className={`navbar-link group flex items-center p-4 rounded-2xl transition-all duration-300 ${
                     isActive('/profile') 
-                      ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-lg transform scale-105' 
+                      ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white shadow-lg transform scale-105' 
                       : 'text-gray-700 hover:bg-white/70 hover:shadow-md hover:scale-105'
                   }`}
                   onClick={closeNavbar}
@@ -180,9 +180,9 @@ const Navbar = ({ onToggle }) => {
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center mr-3 transition-colors duration-300 ${
                     isActive('/profile') 
                       ? 'bg-white/20' 
-                      : 'bg-indigo-100 group-hover:bg-indigo-200'
+                      : 'bg-gray-100 group-hover:bg-[#eaf6f6]'
                   }`}>
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className={`w-5 h-5 ${isActive('/profile') ? 'text-white' : 'text-[#366c6b]'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                   </div>
@@ -206,7 +206,7 @@ const Navbar = ({ onToggle }) => {
               </button>
               <div className="text-center">
                 <p className="text-gray-500 text-xs font-medium">
-                  👑 Pharaohfolio – Simple Hosting for Single-Page Portfolios 👑
+                  📈 Imhotep Finance –  Manage your finances efficiently with Imhotep Financial Manager 📈
                 </p>
               </div>
             </div>
