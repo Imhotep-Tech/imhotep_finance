@@ -12,8 +12,6 @@ import EmailVerification from './components/auth/EmailVerification'
 import GoogleCallback from './components/auth/GoogleCallback'
 import Profile from './components/profile/Profile'
 import EmailChangeVerification from './components/profile/EmailChangeVerification'
-import PublicPortfolio from './components/main/PublicPortfolio'
-import PromptExamples from './components/main/PromptExamples'
 
 function App() {
   return (
@@ -75,19 +73,10 @@ function App() {
                 </ProtectedRoute>
               } 
             />
-            <Route
-             path="/prompts"
-              element={
-                <ProtectedRoute>
-                  <PromptExamples />
-                </ProtectedRoute>
-            }
-            />
             <Route 
               path="/verify-email-change/:uid/:token/:new_email" 
               element={<EmailChangeVerification />} 
             />
-            <Route path="/u/:username" element={<PublicPortfolio />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>

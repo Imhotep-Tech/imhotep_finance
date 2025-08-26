@@ -188,27 +188,6 @@ const Navbar = ({ onToggle }) => {
                   </div>
                   <span className="font-semibold">Profile</span>
                 </Link>
-
-                <Link 
-                  to="/prompts"
-                  className={`navbar-link group flex items-center p-4 rounded-2xl transition-all duration-300 ${
-                    isActive('/prompts') 
-                      ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-lg transform scale-105' 
-                      : 'text-gray-700 hover:bg-white/70 hover:shadow-md hover:scale-105'
-                  }`}
-                  onClick={closeNavbar}
-                >
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center mr-3 transition-colors duration-300 ${
-                    isActive('/prompts') 
-                      ? 'bg-white/20' 
-                      : 'bg-indigo-100 group-hover:bg-indigo-200'
-                  }`}>
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2a4 4 0 014-4h2a4 4 0 014 4v2M7 7a4 4 0 014-4 4 4 0 014 4v2a4 4 0 01-4 4H7a4 4 0 01-4-4V7a4 4 0 014-4z" />
-                    </svg>
-                  </div>
-                  <span className="font-semibold">Prompt Examples</span>
-                </Link>
               </div>
             </div>
 
