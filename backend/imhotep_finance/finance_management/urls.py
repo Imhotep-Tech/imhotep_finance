@@ -8,6 +8,7 @@ urlpatterns = [
     #user data
     path('get-fav-currency/', views.get_favorite_currency, name='get_fav_currency'),
     path('get-networth/', views.get_user_networth, name='get_networth'),
+    path('get-category/', views.get_user_category, name='get_category'),
 
     #trans management
     path('add-transactions/', transactions_management.add_transactions, name='add_transactions'),
