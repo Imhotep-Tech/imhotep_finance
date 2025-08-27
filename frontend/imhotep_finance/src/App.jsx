@@ -16,6 +16,7 @@ import EmailChangeVerification from './components/profile/EmailChangeVerificatio
 
 //main app
 import Dashboard from './components/main/Dashboard'
+import ShowTransactions from './components/main/ShowTransactions'
 
 function App() {
   return (
@@ -80,6 +81,14 @@ function App() {
             <Route 
               path="/verify-email-change/:uid/:token/:new_email" 
               element={<EmailChangeVerification />} 
+            />
+            <Route 
+              path="/show_trans"
+              element={
+                <ProtectedRoute>
+                  <ShowTransactions />
+                </ProtectedRoute>
+              }
             />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

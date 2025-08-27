@@ -3,6 +3,7 @@ import datetime
 import requests
 from django.contrib.auth import get_user_model
 from decouple import config
+from ..models import Transactions, NetWorth
 
 def get_fav_currency(user):
     return getattr(user, 'favorite_currency', 'USD')
@@ -64,3 +65,15 @@ def convert_to_fav_currency(request, dictionary):
             total_favorite_currency += converted_amount
 
     return total_favorite_currency, favorite_currency
+
+def select_currencies(user):
+    """Get all currencies that the user has transactions in."""
+    #get all currencies user has networth in
+
+    currency_db = NetWorth.objects.filter(user=user)
+
+    currency_all = [] #initialize currency list
+    for item in currency_db: #iterate through currency results
+        currency_all.append(item['currency']) #add currency to list
+
+    return(currency_all) #return list of user currencies
