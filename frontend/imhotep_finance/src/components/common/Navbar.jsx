@@ -2,12 +2,17 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Link, useLocation } from 'react-router-dom';
 import Logo from '../../assets/Logo.jpeg';
+import axios from 'axios';
+import NetWorthCard from '../main/components/NetWorthCard';
 
 const Navbar = ({ onToggle }) => {
   const { user, logout } = useAuth();
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+  const [networth, setNetworth] = useState('0');
+  const [favoriteCurrency, setFavoriteCurrency] = useState('');
+  const [loadingNetworth, setLoadingNetworth] = useState(true);
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -24,6 +29,23 @@ const Navbar = ({ onToggle }) => {
     
     return () => window.removeEventListener('resize', checkScreenSize);
   }, [onToggle]);
+
+  useEffect(() => {
+    // Fetch net worth for sidebar
+    const fetchNetworth = async () => {
+      setLoadingNetworth(true);
+      try {
+        const res = await axios.get('/api/finance-management/get-networth/');
+        setNetworth(res.data.networth || '0');
+        setFavoriteCurrency(res.data.favorite_currency || '');
+      } catch {
+        setNetworth('0');
+        setFavoriteCurrency('');
+      }
+      setLoadingNetworth(false);
+    };
+    fetchNetworth();
+  }, []);
 
   const isActive = (path) => location.pathname === path;
 
@@ -145,6 +167,16 @@ const Navbar = ({ onToggle }) => {
                 </div>
               </div>
 
+              {/* Net Worth Card in Sidebar */}
+              <div className="mb-8 flex items-center justify-center w-full">
+                <NetWorthCard
+                  networth={networth}
+                  favoriteCurrency={favoriteCurrency}
+                  loading={loadingNetworth}
+                  mode="navbar"
+                />
+              </div>
+
               {/* Navigation Links */}
               <div className="space-y-2 mb-8">
                 <Link 
@@ -166,6 +198,27 @@ const Navbar = ({ onToggle }) => {
                     </svg>
                   </div>
                   <span className="font-semibold">Dashboard</span>
+                </Link>
+
+                <Link 
+                  to="/show_trans"
+                  className={`navbar-link group flex items-center p-4 rounded-2xl transition-all duration-300 ${
+                    isActive('/show_trans') 
+                      ? 'bg-gradient-to-r from-blue-400 to-blue-600 text-white shadow-lg transform scale-105' 
+                      : 'text-gray-700 hover:bg-blue-50 hover:shadow-md hover:scale-105'
+                  }`}
+                  onClick={closeNavbar}
+                >
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center mr-3 transition-colors duration-300 ${
+                    isActive('/show_trans') 
+                      ? 'bg-white/20' 
+                      : 'bg-blue-100 group-hover:bg-blue-50'
+                  }`}>
+                    <svg className={`w-5 h-5 ${isActive('/show_trans') ? 'text-white' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 13h2v7H3zM7 9h2v11H7zM11 5h2v15h-2zM15 11h2v9h-2zM19 7h2v13h-2z"/>
+                    </svg>
+                  </div>
+                  <span className="font-semibold">Transactions</span>
                 </Link>
 
                 <Link 
