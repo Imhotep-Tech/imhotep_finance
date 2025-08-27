@@ -15,8 +15,8 @@ class Transactions(models.Model):
     amount = models.FloatField()
     currency = models.CharField(max_length=4)
     trans_status = models.CharField(max_length=8, choices=TRANSACTIONS_STATUS)
-    trans_details = models.TextField()
-    category = models.TextField()
+    trans_details = models.TextField(blank=True, null=True)
+    category = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
