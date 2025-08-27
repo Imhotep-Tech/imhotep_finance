@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: imhotep_finance_db
+      POSTGRES_USER: imhotep_finance_user
+      POSTGRES_PASSWORD: imhotep_finance_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"  # External port 5433 maps to internal port 5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U imhotep_finance_user -d imhotep_finance_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/imhotep_finance/.env
+    volumes:
+      - ./backend/imhotep_finance:/app
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend/imhotep_finance
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    volumes:
+      - ./frontend/imhotep_finance:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
