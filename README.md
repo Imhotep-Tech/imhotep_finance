@@ -1,4 +1,4 @@
-# Imhotep Financial Manager
+# Imhotep Financial Manager (Under Development)
 
 [![Project Status: Active](https://img.shields.io/badge/Project%20Status-Active-green.svg)](https://github.com/yourusername/imhotep_finance)
 [![License](https://img.shields.io/badge/License-Dual-blue.svg)](LICENSE)
