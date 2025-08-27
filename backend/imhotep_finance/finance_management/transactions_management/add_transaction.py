@@ -6,6 +6,7 @@ from ..utils.get_networth import get_networth
 from rest_framework.response import Response
 from ..models import Transactions, NetWorth
 from datetime import datetime
+from ..utils.currencies import get_allowed_currencies
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -15,19 +16,27 @@ def add_transactions(request):
         user = request.user
 
         date = request.data.get("date")
-        amount = float(request.data.get("amount"))
+        amount = request.data.get("amount")
         currency = request.data.get("currency")
         trans_details = request.data.get("trans_details")
         category = request.data.get("category")
         trans_status = request.data.get("trans_status")
 
+        if currency is None or amount is None:
+            return Response(
+                {'error': "You have to choose the currency and amount!"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        amount = float(amount)
+
         # If date is not provided, use current date
         if not date:
             date = datetime.now().date()
 
-        if currency is None or amount is None:
+        if currency not in get_allowed_currencies():
             return Response(
-                {'error': "You have to choose the currency and amount!"},
+                {'error': "Currency code not supported"},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -41,6 +50,12 @@ def add_transactions(request):
         if trans_status not in available_status:
             return Response(
                 {'error': "Transaction Status Must Be Deposit Or Withdraw"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if amount <= 0:
+            return Response(
+                {'error': "Amount Should be a positive number"},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
