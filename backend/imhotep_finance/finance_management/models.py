@@ -16,7 +16,6 @@ class Transactions(models.Model):
     currency = models.CharField(max_length=4)
     trans_status = models.CharField(max_length=8, choices=TRANSACTIONS_STATUS)
     trans_details = models.TextField()
-    trans_details_link = models.TextField()
     category = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     

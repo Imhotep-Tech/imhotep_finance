@@ -2,13 +2,19 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { currencies } from '../../../utils/currencies';
 
-const AddTransactionModal = ({ onClose, onSuccess, initialType = 'deposit' }) => {
+const AddTransactionModal = ({
+  onClose,
+  onSuccess,
+  initialType = 'deposit',
+  initialValues = {},
+  editMode = false,
+}) => {
   const [status, setStatus] = useState(initialType);
-  const [amount, setAmount] = useState('');
-  const [desc, setDesc] = useState('');
-  const [category, setCategory] = useState('');
-  const [currency, setCurrency] = useState('');
-  const [date, setDate] = useState('');
+  const [amount, setAmount] = useState(initialValues.amount || '');
+  const [desc, setDesc] = useState(initialValues.desc || '');
+  const [category, setCategory] = useState(initialValues.category || '');
+  const [currency, setCurrency] = useState(initialValues.currency || '');
+  const [date, setDate] = useState(initialValues.date || '');
   const [currencySearch, setCurrencySearch] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -45,6 +51,18 @@ const AddTransactionModal = ({ onClose, onSuccess, initialType = 'deposit' }) =>
     }
   }, [currencySearch]);
 
+  // If editMode, update fields when initialValues change
+  useEffect(() => {
+    if (editMode && initialValues) {
+      setAmount(initialValues.amount || '');
+      setDesc(initialValues.desc || '');
+      setCategory(initialValues.category || '');
+      setCurrency(initialValues.currency || '');
+      setDate(initialValues.date || '');
+      setStatus(initialValues.trans_status || initialType);
+    }
+  }, [editMode, initialValues, initialType]);
+
   const handleCategorySelect = (e) => {
     setCategory(e.target.value);
   };
@@ -60,22 +78,37 @@ const AddTransactionModal = ({ onClose, onSuccess, initialType = 'deposit' }) =>
       return;
     }
     try {
-      await axios.post('/api/finance-management/add-transactions/', {
-        amount,
-        currency,
-        trans_status: status,
-        category,
-        trans_details: desc,
-        date: date || undefined,
-      });
-      setSuccess('Transaction added successfully!');
+      if (editMode && initialValues.id) {
+        await axios.post(
+          `/api/finance-management/transaction/update-transactions/${initialValues.id}/`,
+          {
+            amount,
+            currency,
+            trans_status: status,
+            category,
+            trans_details: desc,
+            date: date || undefined,
+          }
+        );
+        setSuccess('Transaction updated successfully!');
+      } else {
+        await axios.post('/api/finance-management/transaction/add-transactions/', {
+          amount,
+          currency,
+          trans_status: status,
+          category,
+          trans_details: desc,
+          date: date || undefined,
+        });
+        setSuccess('Transaction added successfully!');
+      }
       setTimeout(() => {
         if (onSuccess) onSuccess();
       }, 1000);
     } catch (err) {
       setError(
         err.response?.data?.error ||
-        'Failed to add transaction.'
+        (editMode ? 'Failed to update transaction.' : 'Failed to add transaction.')
       );
     }
     setLoading(false);
@@ -97,7 +130,9 @@ const AddTransactionModal = ({ onClose, onSuccess, initialType = 'deposit' }) =>
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
-        <h2 className="text-2xl font-bold mb-4 text-gray-800">Add Transaction</h2>
+        <h2 className="text-2xl font-bold mb-4 text-gray-800">
+          {editMode ? 'Edit Transaction' : 'Add Transaction'}
+        </h2>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">Type</label>
@@ -216,7 +251,7 @@ const AddTransactionModal = ({ onClose, onSuccess, initialType = 'deposit' }) =>
               }}
               disabled={loading}
             >
-              {loading ? 'Saving...' : 'Add'}
+              {loading ? (editMode ? 'Saving...' : 'Saving...') : (editMode ? 'Save' : 'Add')}
             </button>
           </div>
           {success && (
