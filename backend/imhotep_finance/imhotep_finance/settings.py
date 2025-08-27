@@ -70,6 +70,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'csp',
     'accounts',
+    'finance_management',
 ]
 
 # REST Framework configuration

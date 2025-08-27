@@ -2,12 +2,17 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Link, useLocation } from 'react-router-dom';
 import Logo from '../../assets/Logo.jpeg';
+import axios from 'axios';
+import NetWorthCard from '../main/components/NetWorthCard';
 
 const Navbar = ({ onToggle }) => {
   const { user, logout } = useAuth();
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+  const [networth, setNetworth] = useState('0');
+  const [favoriteCurrency, setFavoriteCurrency] = useState('');
+  const [loadingNetworth, setLoadingNetworth] = useState(true);
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -24,6 +29,23 @@ const Navbar = ({ onToggle }) => {
     
     return () => window.removeEventListener('resize', checkScreenSize);
   }, [onToggle]);
+
+  useEffect(() => {
+    // Fetch net worth for sidebar
+    const fetchNetworth = async () => {
+      setLoadingNetworth(true);
+      try {
+        const res = await axios.get('/api/finance-management/get-networth/');
+        setNetworth(res.data.networth || '0');
+        setFavoriteCurrency(res.data.favorite_currency || '');
+      } catch {
+        setNetworth('0');
+        setFavoriteCurrency('');
+      }
+      setLoadingNetworth(false);
+    };
+    fetchNetworth();
+  }, []);
 
   const isActive = (path) => location.pathname === path;
 
@@ -143,6 +165,11 @@ const Navbar = ({ onToggle }) => {
                     </div>
                   )}
                 </div>
+              </div>
+
+              {/* Net Worth Card in Sidebar */}
+              <div className="mb-8">
+                <NetWorthCard networth={networth} favoriteCurrency={favoriteCurrency} loading={loadingNetworth} />
               </div>
 
               {/* Navigation Links */}

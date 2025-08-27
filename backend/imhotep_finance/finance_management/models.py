@@ -18,6 +18,7 @@ class Transactions(models.Model):
     trans_details = models.TextField()
     trans_details_link = models.TextField()
     category = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
         return f"Transaction of {self.user.username} ({self.date.strftime('%Y-%m-%d')}) with amount {self.amount} and Status of {self.trans_status}"
@@ -30,8 +31,9 @@ class Transactions(models.Model):
 class NetWorth(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='netWorths')
-    total = models.FloatField()
+    total = models.FloatField(default=0.0)
     currency = models.CharField(max_length=4)
+    created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
         return f"NetWorth of {self.user.username} with currency {self.currency}"
