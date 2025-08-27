@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { currencies } from '../../../utils/currencies';
 
-const AddTransactionModal = ({ onClose, onSuccess }) => {
-  const [type, setType] = useState('income');
+const AddTransactionModal = ({ onClose, onSuccess, initialType = 'deposit' }) => {
+  const [status, setStatus] = useState(initialType);
   const [amount, setAmount] = useState('');
   const [desc, setDesc] = useState('');
   const [category, setCategory] = useState('');
@@ -42,7 +42,7 @@ const AddTransactionModal = ({ onClose, onSuccess }) => {
       await axios.post('/api/finance-management/add-transactions/', {
         amount,
         currency,
-        trans_status: type === 'income' ? 'Deposit' : 'Withdraw',
+        trans_status: status,
         category,
         trans_details: desc,
         date: date || undefined,
@@ -83,15 +83,15 @@ const AddTransactionModal = ({ onClose, onSuccess }) => {
             <div className="flex gap-4">
               <button
                 type="button"
-                className={`chef-button-secondary px-4 py-2 rounded ${type === 'income' ? 'bg-green-100 text-green-700 font-bold' : ''}`}
-                onClick={() => setType('income')}
+                className={`chef-button-secondary px-4 py-2 rounded ${status === 'deposit' ? 'bg-green-100 text-green-700 font-bold' : ''}`}
+                onClick={() => setStatus('deposit')}
               >
                 Income
               </button>
               <button
                 type="button"
-                className={`chef-button-secondary px-4 py-2 rounded ${type === 'expense' ? 'bg-red-100 text-red-700 font-bold' : ''}`}
-                onClick={() => setType('expense')}
+                className={`chef-button-secondary px-4 py-2 rounded ${status === 'withdraw' ? 'bg-red-100 text-red-700 font-bold' : ''}`}
+                onClick={() => setStatus('withdraw')}
               >
                 Expense
               </button>
@@ -176,7 +176,7 @@ const AddTransactionModal = ({ onClose, onSuccess }) => {
               type="submit"
               className="chef-button text-white"
               style={{
-                background: type === 'income'
+                background: status === 'deposit'
                   ? 'linear-gradient(90deg, #10b981 0%, #059669 100%)'
                   : 'linear-gradient(90deg, #ef4444 0%, #dc2626 100%)',
               }}

@@ -15,6 +15,7 @@ const Dashboard = () => {
   const [target, setTarget] = useState('');
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [initialType, setInitialType] = useState('deposit'); // new state
 
   // Fetch dashboard data
   useEffect(() => {
@@ -101,13 +102,21 @@ const Dashboard = () => {
         </div>
 
         {/* Net Worth Section */}
-        <NetWorthCard networth={networth} favoriteCurrency={favoriteCurrency} loading={loading} />
+        <NetWorthCard
+          networth={networth}
+          favoriteCurrency={favoriteCurrency}
+          loading={loading}
+          mode="dashboard"
+        />
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <button
             className="rounded-xl p-6 metric-card hover:shadow-lg transition-all duration-300 group flex items-center space-x-4 w-full"
-            onClick={() => setShowAddModal(true)}
+            onClick={() => {
+              setInitialType('deposit');
+              setShowAddModal(true);
+            }}
           >
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center group-hover:bg-green-200 transition-colors">
               <svg className="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 5v14m7-7H5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -119,7 +128,10 @@ const Dashboard = () => {
           </button>
           <button
             className="rounded-xl p-6 metric-card hover:shadow-lg transition-all duration-300 group flex items-center space-x-4 w-full"
-            onClick={() => setShowAddModal(true)}
+            onClick={() => {
+              setInitialType('withdraw');
+              setShowAddModal(true);
+            }}
           >
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center group-hover:bg-red-200 transition-colors">
               <svg className="w-8 h-8 text-red-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 5v14m-7-7h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -252,6 +264,7 @@ const Dashboard = () => {
       {/* Add Transaction Modal */}
       {showAddModal && (
         <AddTransactionModal
+          initialType={initialType}
           onClose={() => setShowAddModal(false)}
           onSuccess={() => {
             setShowAddModal(false);

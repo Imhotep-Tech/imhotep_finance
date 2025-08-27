@@ -168,8 +168,13 @@ const Navbar = ({ onToggle }) => {
               </div>
 
               {/* Net Worth Card in Sidebar */}
-              <div className="mb-8">
-                <NetWorthCard networth={networth} favoriteCurrency={favoriteCurrency} loading={loadingNetworth} />
+              <div className="mb-8 flex items-center justify-center w-full">
+                <NetWorthCard
+                  networth={networth}
+                  favoriteCurrency={favoriteCurrency}
+                  loading={loadingNetworth}
+                  mode="navbar"
+                />
               </div>
 
               {/* Navigation Links */}
