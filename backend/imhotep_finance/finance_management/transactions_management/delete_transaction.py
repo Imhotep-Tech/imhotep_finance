@@ -4,7 +4,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from ..utils.get_networth import get_networth
 from rest_framework.response import Response
-from ..models import Transactions, NetWorth
+from ..models import Transactions, NetWorth, Wishlist
 from datetime import datetime
 
 @api_view(['DELETE'])
@@ -15,11 +15,10 @@ def delete_transaction(request, trans_id):
     #get transaction data for deletion
     trans_db = get_object_or_404(Transactions, user=user, id=trans_id)
 
-    old_amount =  trans_db.amount #get transaction amount
-    old_currency = trans_db.currency #get transaction currency
-    old_trans_status = trans_db.trans_status #get transaction status
+    old_amount =  trans_db.amount
+    old_currency = trans_db.currency
+    old_trans_status = trans_db.trans_status
 
-    # Get current networth for the currency
     netWorth = get_object_or_404(NetWorth, user=user, currency=old_currency)
     old_total = float(netWorth.total)
 
@@ -38,6 +37,18 @@ def delete_transaction(request, trans_id):
             status=status.HTTP_400_BAD_REQUEST
         )
 
+    # Only update wish if it exists for this transaction
+    try:
+        wish = Wishlist.objects.filter(transaction=trans_db, user=user).first()
+        if wish:
+            wish.status = False
+            wish.save()
+    except Exception as e:
+        return Response(
+            {'error': f'Error happened while updating wish: {str(e)}'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+        
     try:
         trans_db.delete()
     except Exception as e:
@@ -55,13 +66,6 @@ def delete_transaction(request, trans_id):
             {'error': f'Error happened while updating netWorth: {str(e)}'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
-
-    #! add update any wishlist items linked to this transaction
-    # db.session.execute(
-    #     text("UPDATE wishlist SET status = :status WHERE trans_key = :trans_key"),
-    #     {"status" :"pending", "trans_key" :trans_key}
-    # )
-    # db.session.commit() #commit wishlist update
 
     return Response({
         "success": True,

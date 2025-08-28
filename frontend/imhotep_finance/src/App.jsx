@@ -18,6 +18,7 @@ import EmailChangeVerification from './components/profile/EmailChangeVerificatio
 import Dashboard from './components/main/Dashboard'
 import ShowTransactions from './components/main/ShowTransactions'
 import ShowNetWorthDetails from './components/main/ShowNetWorthDetails'
+import ShowWishlist from './components/main/ShowWishlist'
 
 function App() {
   return (
@@ -98,6 +99,14 @@ function App() {
                   <ShowNetWorthDetails />
                 </ProtectedRoute>
               }
+            />
+            <Route 
+              path="/wishlist" 
+              element={
+                <ProtectedRoute>
+                  <ShowWishlist />
+                </ProtectedRoute>
+              } 
             />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
