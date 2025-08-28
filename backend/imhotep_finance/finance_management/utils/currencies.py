@@ -74,7 +74,7 @@ def select_currencies(user):
 
     currency_all = [] #initialize currency list
     for item in currency_db: #iterate through currency results
-        currency_all.append(item['currency']) #add currency to list
+        currency_all.append(item.currency) #use attribute, not dict key
 
     return(currency_all) #return list of user currencies
 
