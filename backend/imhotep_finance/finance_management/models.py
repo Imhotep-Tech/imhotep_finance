@@ -53,7 +53,14 @@ class Wishlist(models.Model):
         (False, "Pending"),
     ]
     
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='wishlist')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='wishlist_user')
+    transaction = models.ForeignKey(
+        'Transactions',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='wishlist_transaction'
+    )
     year = models.IntegerField(default=current_year)
     price = models.FloatField()
     currency = models.CharField(max_length=4)
