@@ -32,11 +32,14 @@ const NetWorthCard = ({ networth, favoriteCurrency, loading, mode = 'dashboard' 
   }
 
   return (
-    <div className="rounded-2xl p-8 text-white shadow-lg flex items-center justify-center"
+    <div
+      className="rounded-2xl p-8 text-white shadow-lg flex items-center justify-center transition-all duration-200 hover:shadow-2xl hover:scale-[1.02]"
       style={{
         background: 'linear-gradient(135deg, #51adac 0%, #428a89 100%)',
         minHeight: '180px',
-      }}>
+        cursor: 'pointer'
+      }}
+    >
       <div className="w-full flex flex-col items-center justify-center text-center">
         <h2 className="text-lg font-medium text-white/90 mb-2">Total Net Worth</h2>
         {mode === 'navbar' && tooltip ? (

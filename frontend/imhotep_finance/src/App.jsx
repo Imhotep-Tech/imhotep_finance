@@ -17,6 +17,7 @@ import EmailChangeVerification from './components/profile/EmailChangeVerificatio
 //main app
 import Dashboard from './components/main/Dashboard'
 import ShowTransactions from './components/main/ShowTransactions'
+import ShowNetWorthDetails from './components/main/ShowNetWorthDetails'
 
 function App() {
   return (
@@ -87,6 +88,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ShowTransactions />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="/show_networth_details"
+              element={
+                <ProtectedRoute>
+                  <ShowNetWorthDetails />
                 </ProtectedRoute>
               }
             />
