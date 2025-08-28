@@ -52,14 +52,14 @@ def update_wish_status(request, wish_id):
 
     if not wish_status: #marking wish as done
         new_total = float(user_balance) - float(amount) #subtract amount from balance
-        trans_status = "withdraw"
 
         new_transaction = Transactions.objects.create(
             user=user,
             currency=currency,
             amount=amount,
             trans_details=wish_details,
-            trans_status=trans_status,
+            trans_status='Withdraw',
+            category='Wishes',
             date=current_date
         )
         new_transaction.save()
