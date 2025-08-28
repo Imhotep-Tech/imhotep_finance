@@ -45,7 +45,7 @@ def update_transactions(request, trans_id):
             status=status.HTTP_400_BAD_REQUEST
         )
     
-    if amount <= 0:
+    if amount < 0:
         return Response(
             {'error': "Amount Should be a positive number"},
             status=status.HTTP_400_BAD_REQUEST

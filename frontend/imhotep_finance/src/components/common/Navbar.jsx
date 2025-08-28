@@ -224,6 +224,28 @@ const Navbar = ({ onToggle }) => {
                 </Link>
 
                 <Link 
+                  to="/wishlist"
+                  className={`navbar-link group flex items-center p-4 rounded-2xl transition-all duration-300 ${
+                    isActive('/wishlist') 
+                      ? 'bg-gradient-to-r from-blue-400 to-blue-600 text-white shadow-lg transform scale-105' 
+                      : 'text-gray-700 hover:bg-blue-50 hover:shadow-md hover:scale-105'
+                  }`}
+                  onClick={closeNavbar}
+                >
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center mr-3 transition-colors duration-300 ${
+                    isActive('/wishlist') 
+                      ? 'bg-white/20' 
+                      : 'bg-blue-100 group-hover:bg-blue-50'
+                  }`}>
+                    {/* Wishlist Heart Icon */}
+                    <svg className={`w-5 h-5 ${isActive('/wishlist') ? 'text-white' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 21.364l-7.682-7.682a4.5 4.5 0 010-6.364z" />
+                    </svg>
+                  </div>
+                  <span className="font-semibold">Wishlist</span>
+                </Link>
+
+                <Link 
                   to="/profile" 
                   className={`navbar-link group flex items-center p-4 rounded-2xl transition-all duration-300 ${
                     isActive('/profile') 
