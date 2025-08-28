@@ -5,6 +5,7 @@ import Footer from '../common/Footer';
 import Logo from '../../assets/Logo.jpeg';
 import AddTransactionModal from './components/AddTransactionModal';
 import NetWorthCard from './components/NetWorthCard';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -16,6 +17,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [initialType, setInitialType] = useState('deposit'); // new state
+  const navigate = useNavigate();
 
   // Fetch dashboard data
   useEffect(() => {
@@ -102,12 +104,14 @@ const Dashboard = () => {
         </div>
 
         {/* Net Worth Section */}
-        <NetWorthCard
-          networth={networth}
-          favoriteCurrency={favoriteCurrency}
-          loading={loading}
-          mode="dashboard"
-        />
+        <div onClick={() => navigate('/show_networth_details')} style={{ cursor: 'pointer' }}>
+          <NetWorthCard
+            networth={networth}
+            favoriteCurrency={favoriteCurrency}
+            loading={loading}
+            mode="dashboard"
+          />
+        </div>
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
