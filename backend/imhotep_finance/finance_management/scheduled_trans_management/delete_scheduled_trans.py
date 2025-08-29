@@ -1,0 +1,26 @@
+from django.shortcuts import get_object_or_404
+from rest_framework import status
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from ..models import ScheduledTransaction
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_scheduled_trans(request, scheduled_trans_id):
+    """Delete a scheduled transaction"""
+    user = request.user
+    # get the scheduled transaction instance (use ScheduledTransaction model)
+    scheduled_trans = get_object_or_404(ScheduledTransaction, user=user, id=scheduled_trans_id)
+
+    try:
+        scheduled_trans.delete()
+    except Exception as e:
+        return Response(
+            {'error': f'Error happened while deleting: {str(e)}'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+    return Response({
+        "success": True,
+    }, status=status.HTTP_200_OK)

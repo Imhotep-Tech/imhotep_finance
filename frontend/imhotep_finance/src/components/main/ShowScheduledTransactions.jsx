@@ -1,88 +1,87 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Footer from '../common/Footer';
-import AddTransactionModal from './components/AddTransactionModal';
+import AddScheduledTransactionModal from './components/AddScheduledTransactionModal';
 
-const ShowTransactions = () => {
-  const [transactions, setTransactions] = useState([]);
+const ShowScheduledTransactions = () => {
+  const [scheduledTrans, setScheduledTrans] = useState([]);
   const [pagination, setPagination] = useState({});
   const [loading, setLoading] = useState(true);
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
   const [page, setPage] = useState(1);
   const [error, setError] = useState('');
-  const [dateRange, setDateRange] = useState({});
   const [showAddModal, setShowAddModal] = useState(false);
   const [editModal, setEditModal] = useState({ open: false, transaction: null });
+  const [statusLoading, setStatusLoading] = useState({});
+  const [deleteLoading, setDeleteLoading] = useState({});
+  const [refetchFlag, setRefetchFlag] = useState(false);
+  const [actionError, setActionError] = useState('');
 
-  // Call backend apply-scheduled-trans once per day (uses localStorage to avoid repeated calls)
   useEffect(() => {
-    const runApplyIfNeeded = async () => {
-      try {
-        const key = 'lastApplyScheduledDate';
-        const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-        const last = localStorage.getItem(key);
-        if (last === today) return;
-
-        await axios.post('/api/finance-management/scheduled-trans/apply-scheduled-trans/', {}, { withCredentials: true });
-        localStorage.setItem(key, today);
-      } catch (err) {
-        // silent fail - UI shouldn't break if backend call fails
-      }
-    };
-    runApplyIfNeeded();
-  }, []);
-
-  // Fetch transactions
-  useEffect(() => {
-    const fetchTransactions = async () => {
+    const fetchScheduledTrans = async () => {
       setLoading(true);
       setError('');
+      setActionError('');
       try {
-        const params = {};
-        if (startDate) params.start_date = startDate;
-        if (endDate) params.end_date = endDate;
-        params.page = page;
-        const res = await axios.get('/api/finance-management/transaction/get-transactions/', { params });
-        setTransactions(res.data.transactions || []);
+        const params = { page };
+        const res = await axios.get('/api/finance-management/scheduled-trans/get-scheduled-trans/', { params });
+        setScheduledTrans(res.data.scheduled_transactions || []);
         setPagination(res.data.pagination || {});
-        setDateRange(res.data.date_range || {});
       } catch (err) {
-        setError('Failed to fetch transactions');
-        setTransactions([]);
+        setError(
+          err.response?.data?.error ||
+          'Failed to fetch scheduled transactions'
+        );
+        setScheduledTrans([]);
         setPagination({});
       }
       setLoading(false);
     };
-    fetchTransactions();
-  }, [startDate, endDate, page, showAddModal, editModal.open]);
-
-  const handleDateChange = (setter) => (e) => {
-    setter(e.target.value);
-    setPage(1);
-  };
+    fetchScheduledTrans();
+  }, [page, showAddModal, editModal.open, refetchFlag]);
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
   };
 
-  // Edit transaction
   const handleEdit = (tx) => {
     setEditModal({ open: true, transaction: tx });
   };
 
-  // Delete transaction
   const handleDelete = async (tx) => {
-    if (!window.confirm('Are you sure you want to delete this transaction?')) return;
+    setActionError('');
+    if (!window.confirm('Are you sure you want to delete this scheduled transaction?')) return;
+    setDeleteLoading(prev => ({ ...prev, [tx.id]: true }));
     try {
-      await axios.delete(`/api/finance-management/transaction/delete-transactions/${tx.id}/`);
-      setTransactions(transactions.filter(t => t.id !== tx.id));
+      await axios.delete(`/api/finance-management/scheduled-trans/delete-scheduled-trans/${tx.id}/`);
+      setScheduledTrans(scheduledTrans.filter(t => t.id !== tx.id));
     } catch (err) {
-      alert('Failed to delete transaction');
+      if (err.response?.status === 404) {
+        setActionError('Scheduled transaction not found (may already be deleted).');
+      } else {
+        setActionError(
+          err.response?.data?.error ||
+          'Failed to delete scheduled transaction'
+        );
+      }
     }
+    setDeleteLoading(prev => ({ ...prev, [tx.id]: false }));
   };
 
-  // Helper for type badge
+  const handleStatusToggle = async (tx) => {
+    setActionError('');
+    setStatusLoading(prev => ({ ...prev, [tx.id]: true }));
+    try {
+      await axios.post(`/api/finance-management/scheduled-trans/update-scheduled-trans-status/${tx.id}/`);
+      setRefetchFlag(flag => !flag);
+    } catch (err) {
+      setActionError(
+        err.response?.data?.error ||
+        'Failed to update scheduled transaction status'
+      );
+    }
+    setStatusLoading(prev => ({ ...prev, [tx.id]: false }));
+  };
+
   const TypeBadge = ({ type }) => (
     type === 'deposit' || type === 'Deposit' ? (
       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -97,7 +96,6 @@ const ShowTransactions = () => {
     )
   );
 
-  // Helper for category tag
   const CategoryTag = ({ type, category }) => {
     if (!category) return <span className="text-gray-400 italic text-xs">No category</span>;
     return (
@@ -111,7 +109,6 @@ const ShowTransactions = () => {
     );
   };
 
-  // Helper for amount
   const AmountCell = ({ type, amount, currency }) => (
     <span className={`font-semibold ${type === 'deposit' || type === 'Deposit' ? 'text-green-600' : 'text-red-600'}`}>
       {type === 'deposit' || type === 'Deposit' ? '+' : '-'}
@@ -119,15 +116,15 @@ const ShowTransactions = () => {
     </span>
   );
 
-  // Prepare props for edit modal
   const getEditModalProps = (tx) => ({
-    initialType: tx.trans_status.toLowerCase(),
+    initialType: tx.scheduled_trans_status.toLowerCase(),
     initialValues: {
+      day_of_month: tx.day_of_month,
       amount: tx.amount,
       currency: tx.currency,
       category: tx.category,
-      desc: tx.trans_details,
-      date: tx.date,
+      scheduled_trans_details: tx.scheduled_trans_details,
+      status: tx.status,
       id: tx.id,
     },
     onClose: () => setEditModal({ open: false, transaction: null }),
@@ -146,9 +143,9 @@ const ShowTransactions = () => {
         <div className="chef-card rounded-3xl p-8 shadow-2xl backdrop-blur-2xl border border-white/30 bg-white/90 mb-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold font-chef text-gray-800 mb-2">Transactions</h1>
+              <h1 className="text-3xl font-bold font-chef text-gray-800 mb-2">Scheduled Transactions</h1>
               <p className="text-lg text-gray-600 font-medium leading-relaxed mb-4">
-                View and filter your transaction history
+                View and manage your recurring transactions
               </p>
             </div>
             <button
@@ -158,53 +155,30 @@ const ShowTransactions = () => {
               <svg className="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path d="M12 5v14m7-7H5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-              Add Transaction
+              Add Scheduled
             </button>
-          </div>
-          <div className="flex flex-wrap gap-4 items-center mb-4">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">From</label>
-              <input
-                type="date"
-                value={startDate}
-                onChange={handleDateChange(setStartDate)}
-                className="chef-input"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">To</label>
-              <input
-                type="date"
-                value={endDate}
-                onChange={handleDateChange(setEndDate)}
-                className="chef-input"
-              />
-            </div>
-            <div className="text-sm text-gray-500 ml-2">
-              {dateRange.start_date && dateRange.end_date && (
-                <span>
-                  Showing: <b>{dateRange.start_date}</b> to <b>{dateRange.end_date}</b>
-                </span>
-              )}
-            </div>
           </div>
         </div>
 
         <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
+          {actionError && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-center">
+              {actionError}
+            </div>
+          )}
           {loading ? (
-            <div className="text-center text-gray-500 py-8">Loading transactions...</div>
+            <div className="text-center text-gray-500 py-8">Loading scheduled transactions...</div>
           ) : error ? (
             <div className="text-center text-red-600 py-8">{error}</div>
-          ) : transactions.length === 0 ? (
-            <div className="text-center text-gray-500 py-8">No transactions found.</div>
+          ) : scheduledTrans.length === 0 ? (
+            <div className="text-center text-gray-500 py-8">No scheduled transactions found.</div>
           ) : (
             <>
-              {/* Desktop Table */}
               <div className="hidden md:block overflow-x-auto">
                 <table className="min-w-full text-sm">
                   <thead>
                     <tr className="bg-gray-50">
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700">Date</th>
+                      <th className="px-4 py-2 text-left font-semibold text-gray-700">Day</th>
                       <th className="px-4 py-2 text-left font-semibold text-gray-700">Type</th>
                       <th className="px-4 py-2 text-left font-semibold text-gray-700">Amount</th>
                       <th className="px-4 py-2 text-left font-semibold text-gray-700">Currency</th>
@@ -214,26 +188,26 @@ const ShowTransactions = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {transactions.map(tx => (
-                      <tr key={tx.id} className="border-b border-gray-100 hover:bg-gray-50 transaction-row">
-                        <td className="px-4 py-2 whitespace-nowrap text-gray-900">
-                          {tx.date}
+                    {scheduledTrans.map(tx => (
+                      <tr key={tx.id} className="border-b border-gray-100 hover:bg-gray-50">
+                        <td className="px-4 py-2 whitespace-nowrap text-gray-900 font-medium">
+                          {tx.day_of_month}
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap">
-                          <TypeBadge type={tx.trans_status} />
+                          <TypeBadge type={tx.scheduled_trans_status} />
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap">
-                          <AmountCell type={tx.trans_status} amount={tx.amount} currency={tx.currency} />
+                          <AmountCell type={tx.scheduled_trans_status} amount={tx.amount} currency={tx.currency} />
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap text-gray-700 font-medium">
                           {tx.currency}
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap">
-                          <CategoryTag type={tx.trans_status} category={tx.category} />
+                          <CategoryTag type={tx.scheduled_trans_status} category={tx.category} />
                         </td>
                         <td className="px-4 py-2 text-gray-700 max-w-xs">
                           <div className="truncate">
-                            {tx.trans_details ? tx.trans_details : <span className="text-gray-400 italic">No description</span>}
+                            {tx.scheduled_trans_details ? tx.scheduled_trans_details : <span className="text-gray-400 italic">No description</span>}
                           </div>
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap">
@@ -247,8 +221,40 @@ const ShowTransactions = () => {
                             <button
                               className="chef-button-secondary px-2 py-1 text-xs text-red-600"
                               onClick={() => handleDelete(tx)}
+                              disabled={!!deleteLoading[tx.id]}
                             >
-                              Delete
+                              {deleteLoading[tx.id] ? (
+                                <svg className="w-4 h-4 animate-spin text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <circle cx="12" cy="12" r="10" strokeWidth="4" stroke="currentColor" fill="none"/>
+                                </svg>
+                              ) : (
+                                'Delete'
+                              )}
+                            </button>
+                            <button
+                              className={`chef-button-secondary px-3 py-1 flex items-center gap-2 ${tx.status ? 'bg-green-100 text-green-700' : ''}`}
+                              onClick={() => handleStatusToggle(tx)}
+                              disabled={!!statusLoading[tx.id]}
+                            >
+                              {statusLoading[tx.id] ? (
+                                <svg className="w-4 h-4 animate-spin text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <circle cx="12" cy="12" r="10" strokeWidth="4" stroke="currentColor" fill="none"/>
+                                </svg>
+                              ) : tx.status ? (
+                                <>
+                                  <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path d="M5 13l4 4L19 7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                  </svg>
+                                  Active
+                                </>
+                              ) : (
+                                <>
+                                  <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 5v14m7-7H5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                  </svg>
+                                  Inactive
+                                </>
+                              )}
                             </button>
                           </div>
                         </td>
@@ -257,12 +263,11 @@ const ShowTransactions = () => {
                   </tbody>
                 </table>
               </div>
-              {/* Mobile Cards */}
               <div className="md:hidden space-y-4">
-                {transactions.map(tx => (
+                {scheduledTrans.map(tx => (
                   <div
                     key={tx.id}
-                    className={`transaction-card border rounded-xl p-4 ${tx.trans_status === 'deposit' || tx.trans_status === 'Deposit'
+                    className={`scheduled-card border rounded-xl p-4 ${tx.scheduled_trans_status === 'deposit' || tx.scheduled_trans_status === 'Deposit'
                       ? 'bg-green-50 border-l-4 border-green-400'
                       : 'bg-red-50 border-l-4 border-red-400'
                     }`}
@@ -270,39 +275,36 @@ const ShowTransactions = () => {
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center space-x-2">
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center
-                          ${tx.trans_status === 'deposit' || tx.trans_status === 'Deposit'
+                          ${tx.scheduled_trans_status === 'deposit' || tx.scheduled_trans_status === 'Deposit'
                             ? 'bg-green-100'
                             : 'bg-red-100'
                           }`}>
-                          {tx.trans_status === 'deposit' || tx.trans_status === 'Deposit' ? (
+                          {tx.scheduled_trans_status === 'deposit' || tx.scheduled_trans_status === 'Deposit' ? (
                             <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 5v14m7-7H5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                           ) : (
                             <svg className="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 5v14m-7-7h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                           )}
                         </div>
-                        <span className={`font-medium ${tx.trans_status === 'deposit' || tx.trans_status === 'Deposit' ? 'text-green-800' : 'text-red-800'}`}>
-                          {tx.trans_status === 'deposit' || tx.trans_status === 'Deposit' ? 'Income' : 'Expense'}
+                        <span className={`font-medium ${tx.scheduled_trans_status === 'deposit' || tx.scheduled_trans_status === 'Deposit' ? 'text-green-800' : 'text-red-800'}`}>
+                          {tx.scheduled_trans_status === 'deposit' || tx.scheduled_trans_status === 'Deposit' ? 'Income' : 'Expense'}
                         </span>
                       </div>
                       <div className="text-right">
-                        <div className={`text-lg font-bold ${tx.trans_status === 'deposit' || tx.trans_status === 'Deposit' ? 'text-green-600' : 'text-red-600'}`}>
-                          {tx.trans_status === 'deposit' || tx.trans_status === 'Deposit' ? '+' : '-'}
+                        <div className={`text-lg font-bold ${tx.scheduled_trans_status === 'deposit' || tx.scheduled_trans_status === 'Deposit' ? 'text-green-600' : 'text-red-600'}`}>
+                          {tx.scheduled_trans_status === 'deposit' || tx.scheduled_trans_status === 'Deposit' ? '+' : '-'}
                           {Number(tx.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {tx.currency}
                         </div>
-                        <div className="text-sm text-gray-500">{tx.date}</div>
+                        <div className="text-sm text-gray-500">Day {tx.day_of_month}</div>
                       </div>
                     </div>
-                    {/* Category Section */}
                     <div className="mb-2">
-                      <CategoryTag type={tx.trans_status} category={tx.category} />
+                      <CategoryTag type={tx.scheduled_trans_status} category={tx.category} />
                     </div>
-                    {/* Description Section */}
-                    {tx.trans_details && (
+                    {tx.scheduled_trans_details && (
                       <div className="mb-2">
-                        <p className="text-gray-700 text-sm">{tx.trans_details}</p>
+                        <p className="text-gray-700 text-sm">{tx.scheduled_trans_details}</p>
                       </div>
                     )}
-                    {/* Actions */}
                     <div className="flex gap-2 mt-2">
                       <button
                         className="chef-button-secondary px-2 py-1 text-xs"
@@ -313,8 +315,40 @@ const ShowTransactions = () => {
                       <button
                         className="chef-button-secondary px-2 py-1 text-xs text-red-600"
                         onClick={() => handleDelete(tx)}
+                        disabled={!!deleteLoading[tx.id]}
                       >
-                        Delete
+                        {deleteLoading[tx.id] ? (
+                          <svg className="w-4 h-4 animate-spin text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10" strokeWidth="4" stroke="currentColor" fill="none"/>
+                          </svg>
+                        ) : (
+                          'Delete'
+                        )}
+                      </button>
+                      <button
+                        className={`chef-button-secondary px-3 py-1 flex items-center gap-2 ${tx.status ? 'bg-green-100 text-green-700' : ''}`}
+                        onClick={() => handleStatusToggle(tx)}
+                        disabled={!!statusLoading[tx.id]}
+                      >
+                        {statusLoading[tx.id] ? (
+                          <svg className="w-4 h-4 animate-spin text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10" strokeWidth="4" stroke="currentColor" fill="none"/>
+                          </svg>
+                        ) : tx.status ? (
+                          <>
+                            <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path d="M5 13l4 4L19 7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                            Active
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path d="M12 5v14m7-7H5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                            Inactive
+                          </>
+                        )}
                       </button>
                     </div>
                   </div>
@@ -322,7 +356,6 @@ const ShowTransactions = () => {
               </div>
             </>
           )}
-          {/* Pagination */}
           {pagination.num_pages > 1 && (
             <div className="flex justify-center items-center mt-6 gap-2">
               <button
@@ -343,17 +376,15 @@ const ShowTransactions = () => {
           )}
         </div>
       </div>
-      {/* Add Transaction Modal */}
       {showAddModal && (
-        <AddTransactionModal
+        <AddScheduledTransactionModal
           initialType="deposit"
           onClose={() => setShowAddModal(false)}
           onSuccess={() => setShowAddModal(false)}
         />
       )}
-      {/* Edit Transaction Modal */}
       {editModal.open && (
-        <AddTransactionModal
+        <AddScheduledTransactionModal
           {...getEditModalProps(editModal.transaction)}
         />
       )}
@@ -362,4 +393,4 @@ const ShowTransactions = () => {
   );
 };
 
-export default ShowTransactions;
+export default ShowScheduledTransactions;

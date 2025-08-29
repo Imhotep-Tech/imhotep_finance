@@ -347,9 +347,6 @@ const ShowWishlist = () => {
               >
                 Prev
               </button>
-              <span className="mx-2 text-gray-700">
-                Page {pagination.page} of {pagination.num_pages}
-              </span>
               <button
                 className="chef-button-secondary px-3 py-1"
                 disabled={page >= pagination.num_pages}
