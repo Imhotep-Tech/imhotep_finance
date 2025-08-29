@@ -53,6 +53,27 @@ const Dashboard = () => {
     fetchData();
   }, []);
 
+  // Call backend apply-scheduled-trans once per day (uses localStorage to avoid repeated calls)
+  useEffect(() => {
+    const runApplyIfNeeded = async () => {
+        try {
+          const key = 'lastApplyScheduledDate';
+          const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+          const last = localStorage.getItem(key);
+          if (last === today) return;
+
+          await axios.post('/api/finance-management/scheduled-trans/apply-scheduled-trans/');
+
+          // mark as done for today
+          localStorage.setItem(key, today);
+        } catch (err) {
+          console.warn('apply_scheduled_trans failed', err);
+        }
+      };
+      runApplyIfNeeded();
+  }, []);
+
+
   // UI helpers
   const scoreClass = score > 0
     ? 'score-positive'
