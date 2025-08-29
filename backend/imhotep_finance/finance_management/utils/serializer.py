@@ -26,3 +26,18 @@ def serialize_wishlist(wish):
         "wish_details": wish.wish_details,
         "created_at": wish.created_at.isoformat() if wish.created_at else None,
     }
+
+def serialize_scheduled_trans(scheduled_trans):
+
+    return {
+        "id": scheduled_trans.id,
+        "user_id": scheduled_trans.user.id if scheduled_trans.user else None,
+        "day_of_month": scheduled_trans.date,
+        "amount": scheduled_trans.amount,
+        "currency": scheduled_trans.currency,
+        "scheduled_trans_status": scheduled_trans.scheduled_trans_status,
+        "scheduled_trans_details": scheduled_trans.scheduled_trans_details,
+        "category": scheduled_trans.category,
+        "status": scheduled_trans.status,
+        "created_at": scheduled_trans.created_at.isoformat() if scheduled_trans.created_at else None,
+    }

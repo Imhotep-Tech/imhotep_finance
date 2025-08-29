@@ -19,6 +19,7 @@ import Dashboard from './components/main/Dashboard'
 import ShowTransactions from './components/main/ShowTransactions'
 import ShowNetWorthDetails from './components/main/ShowNetWorthDetails'
 import ShowWishlist from './components/main/ShowWishlist'
+import ShowScheduledTransactions from './components/main/ShowScheduledTransactions'
 
 function App() {
   return (
@@ -107,6 +108,14 @@ function App() {
                   <ShowWishlist />
                 </ProtectedRoute>
               } 
+            />
+            <Route 
+              path="/show_scheduled_trans"
+              element={
+                <ProtectedRoute>
+                  <ShowScheduledTransactions />
+                </ProtectedRoute>
+              }
             />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
