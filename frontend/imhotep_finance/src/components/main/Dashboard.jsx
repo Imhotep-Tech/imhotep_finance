@@ -26,7 +26,7 @@ const Dashboard = () => {
       try {
         const [networthRes, favRes] = await Promise.all([
           axios.get('/api/finance-management/get-networth/'),
-          axios.get('/api/finance-management/get-fav-currency/')
+          axios.get('/api/get-fav-currency/')
         ]);
         setNetworth(networthRes.data.networth || '0');
         setFavoriteCurrency(networthRes.data.favorite_currency || favRes.data.favorite_currency || '');

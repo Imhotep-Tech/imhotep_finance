@@ -7,7 +7,6 @@ from .wishlist_management import add_wish, get_wishlist, update_wish, update_wis
 
 urlpatterns = [
     #user data
-    path('get-fav-currency/', views.get_favorite_currency, name='get_fav_currency'),
     path('get-networth/', views.get_user_networth, name='get_networth'),
     path('get-networth-details/', views.get_user_netWorth_details, name='get_netWorth_details'),
     path('get-category/', views.get_user_category, name='get_category'),
