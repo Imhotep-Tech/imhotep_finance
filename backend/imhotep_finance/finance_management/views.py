@@ -27,7 +27,6 @@ def get_user_netWorth_details(request):
     Get current authenticated user netWorth details
     """
     user = request.user
-    print(get_netWorth_details(request))
     return Response({
         'id': user.id,
         'networth_details': get_netWorth_details(request),
