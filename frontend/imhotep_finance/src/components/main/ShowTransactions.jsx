@@ -15,6 +15,24 @@ const ShowTransactions = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editModal, setEditModal] = useState({ open: false, transaction: null });
 
+  // Call backend apply-scheduled-trans once per day (uses localStorage to avoid repeated calls)
+  useEffect(() => {
+    const runApplyIfNeeded = async () => {
+      try {
+        const key = 'lastApplyScheduledDate';
+        const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+        const last = localStorage.getItem(key);
+        if (last === today) return;
+
+        await axios.post('/api/finance-management/scheduled-trans/apply-scheduled-trans/', {}, { withCredentials: true });
+        localStorage.setItem(key, today);
+      } catch (err) {
+        // silent fail - UI shouldn't break if backend call fails
+      }
+    };
+    runApplyIfNeeded();
+  }, []);
+
   // Fetch transactions
   useEffect(() => {
     const fetchTransactions = async () => {
