@@ -25,6 +25,7 @@ def update_wish(request, wish_id):
             status=status.HTTP_400_BAD_REQUEST
         )
 
+    price = float(price)
     if currency not in get_allowed_currencies():
         return Response(
             {'error': "Currency code not supported"},
