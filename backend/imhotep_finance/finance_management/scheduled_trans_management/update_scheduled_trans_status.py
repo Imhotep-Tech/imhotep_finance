@@ -1,0 +1,33 @@
+from django.shortcuts import get_object_or_404
+from rest_framework import status
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from ..utils.get_networth import get_networth
+from ..utils.currencies import select_currencies
+from rest_framework.response import Response
+from ..models import ScheduledTransaction
+from ..utils.currencies import get_allowed_currencies
+from datetime import date
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def update_scheduled_trans_status(request, scheduled_trans_id):
+    """Handle update of the wish status for the logged-in user."""
+    user = request.user
+
+    scheduled_trans = get_object_or_404(ScheduledTransaction, id=scheduled_trans_id, user=user)
+
+    new_status = not scheduled_trans.status
+
+    try:
+        scheduled_trans.status = new_status
+        scheduled_trans.save()
+    except Exception as e:
+        return Response(
+            {'error': f'Error happened while updating netWorth: {str(e)}'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+    
+    return Response({
+        "success": True,
+    }, status=status.HTTP_200_OK)

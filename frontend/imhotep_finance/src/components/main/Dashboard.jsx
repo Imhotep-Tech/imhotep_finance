@@ -26,7 +26,7 @@ const Dashboard = () => {
       try {
         const [networthRes, favRes] = await Promise.all([
           axios.get('/api/finance-management/get-networth/'),
-          axios.get('/api/finance-management/get-fav-currency/')
+          axios.get('/api/get-fav-currency/')
         ]);
         setNetworth(networthRes.data.networth || '0');
         setFavoriteCurrency(networthRes.data.favorite_currency || favRes.data.favorite_currency || '');
@@ -53,6 +53,27 @@ const Dashboard = () => {
     fetchData();
   }, []);
 
+  // Call backend apply-scheduled-trans once per day (uses localStorage to avoid repeated calls)
+  useEffect(() => {
+    const runApplyIfNeeded = async () => {
+        try {
+          const key = 'lastApplyScheduledDate';
+          const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+          const last = localStorage.getItem(key);
+          if (last === today) return;
+
+          await axios.post('/api/finance-management/scheduled-trans/apply-scheduled-trans/');
+
+          // mark as done for today
+          localStorage.setItem(key, today);
+        } catch (err) {
+          console.warn('apply_scheduled_trans failed', err);
+        }
+      };
+      runApplyIfNeeded();
+  }, []);
+
+
   // UI helpers
   const scoreClass = score > 0
     ? 'score-positive'
@@ -62,7 +83,7 @@ const Dashboard = () => {
 
   return (
     <div
-      className="min-h-screen bg-chef-pattern"
+      className="min-h-screen overflow-y-auto pb-8 bg-chef-pattern"
       style={{
         background: 'linear-gradient(135deg, #eaf6f6 0%, #d6efee 50%, #1a3535 100%)',
       }}

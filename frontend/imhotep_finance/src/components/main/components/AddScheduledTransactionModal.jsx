@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import CurrencySelect from './CurrencySelect';
 
-const AddTransactionModal = ({
+const AddScheduledTransactionModal = ({
   onClose,
   onSuccess,
   initialType = 'deposit',
@@ -10,18 +10,30 @@ const AddTransactionModal = ({
   editMode = false,
 }) => {
   const [status, setStatus] = useState(initialType);
+  const [dayOfMonth, setDayOfMonth] = useState(initialValues.day_of_month || '');
   const [amount, setAmount] = useState(initialValues.amount || '');
-  const [desc, setDesc] = useState(initialValues.desc || '');
-  const [category, setCategory] = useState(initialValues.category || '');
   const [currency, setCurrency] = useState(initialValues.currency || '');
-  const [date, setDate] = useState(initialValues.date || '');
+  const [category, setCategory] = useState(initialValues.category || '');
+  const [details, setDetails] = useState(initialValues.scheduled_trans_details || '');
+  const [isActive, setIsActive] = useState(initialValues.status !== undefined ? initialValues.status : true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [categoriesList, setCategoriesList] = useState([]);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
+  const modalRef = useRef(null);
 
-  // Fetch categories when status changes
+  // Close on Escape
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        if (onClose) onClose();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   useEffect(() => {
     const fetchCategories = async () => {
       setCategoriesLoading(true);
@@ -36,74 +48,74 @@ const AddTransactionModal = ({
     fetchCategories();
   }, [status]);
 
-  // If editMode, update fields when initialValues change
   useEffect(() => {
     if (editMode && initialValues) {
       setAmount(initialValues.amount || '');
-      setDesc(initialValues.desc || '');
-      setCategory(initialValues.category || '');
       setCurrency(initialValues.currency || '');
-      setDate(initialValues.date || '');
-      setStatus(initialValues.trans_status || initialType);
+      setCategory(initialValues.category || '');
+      setDetails(initialValues.scheduled_trans_details || '');
+      setDayOfMonth(initialValues.day_of_month || '');
+      setIsActive(initialValues.status !== undefined ? initialValues.status : true);
+      setStatus(initialValues.scheduled_trans_status || initialType);
     }
   }, [editMode, initialValues, initialType]);
-
-  const handleCategorySelect = (e) => {
-    setCategory(e.target.value);
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
     setSuccess('');
-    if (!amount || !currency) {
-      setError('Amount and currency are required.');
+    if (!amount || !currency || !dayOfMonth) {
+      setError('Amount, currency, and day of month are required.');
       setLoading(false);
       return;
     }
     try {
+      const data = {
+        scheduled_trans_status: status,
+        day_of_month: dayOfMonth,
+        amount,
+        currency,
+        category,
+        scheduled_trans_details: details,
+        status: isActive,
+      };
       if (editMode && initialValues.id) {
         await axios.post(
-          `/api/finance-management/transaction/update-transactions/${initialValues.id}/`,
-          {
-            amount,
-            currency,
-            trans_status: status,
-            category,
-            trans_details: desc,
-            date: date || undefined,
-          }
+          `/api/finance-management/scheduled-trans/update-scheduled-trans/${initialValues.id}/`,
+          data
         );
-        setSuccess('Transaction updated successfully!');
+        setSuccess('Scheduled transaction updated successfully!');
       } else {
-        await axios.post('/api/finance-management/transaction/add-transactions/', {
-          amount,
-          currency,
-          trans_status: status,
-          category,
-          trans_details: desc,
-          date: date || undefined,
-        });
-        setSuccess('Transaction added successfully!');
+        await axios.post('/api/finance-management/scheduled-trans/add-scheduled-trans/', data);
+        setSuccess('Scheduled transaction added successfully!');
       }
+      // let parent refresh its data, then close this modal
       setTimeout(() => {
         if (onSuccess) onSuccess();
-      }, 1000);
+        if (onClose) onClose();
+      }, 800);
     } catch (err) {
       setError(
         err.response?.data?.error ||
-        (editMode ? 'Failed to update transaction.' : 'Failed to add transaction.')
+        (editMode ? 'Failed to update scheduled transaction.' : 'Failed to add scheduled transaction.')
       );
     }
     setLoading(false);
   };
 
   return (
-    <div className="fixed inset-0 z-[100] overflow-y-auto bg-black/40 backdrop-blur-sm">
+    <div
+      className="fixed inset-0 z-[100] overflow-y-auto bg-black/40 backdrop-blur-sm"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+    >
       <div className="flex items-start sm:items-center justify-center min-h-screen p-4">
         <div
           className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative chef-card mx-auto my-8"
+          ref={modalRef}
+          onClick={(e) => e.stopPropagation()}
           style={{
             border: '1px solid rgba(54,108,107,0.14)',
             background: 'linear-gradient(180deg, rgba(255,255,255,0.94), rgba(242,251,250,0.9))',
@@ -121,7 +133,7 @@ const AddTransactionModal = ({
             </svg>
           </button>
           <h2 className="text-2xl font-bold mb-4 text-gray-800">
-            {editMode ? 'Edit Transaction' : 'Add Transaction'}
+            {editMode ? 'Edit Scheduled Transaction' : 'Add Scheduled Transaction'}
           </h2>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
@@ -144,10 +156,24 @@ const AddTransactionModal = ({
               </div>
             </div>
             <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Day of Month</label>
+              <select
+                value={dayOfMonth}
+                onChange={e => setDayOfMonth(e.target.value)}
+                required
+                className="chef-input"
+              >
+                <option value="" disabled>Select day</option>
+                {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
+                  <option key={day} value={day}>{day}</option>
+                ))}
+              </select>
+            </div>
+            <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">Amount</label>
               <input
                 type="number"
-                min="0"
+                min="0.01"
                 step="0.01"
                 value={amount}
                 onChange={e => setAmount(e.target.value)}
@@ -171,7 +197,7 @@ const AddTransactionModal = ({
                 <select
                   className="chef-input"
                   value={category}
-                  onChange={handleCategorySelect}
+                  onChange={e => setCategory(e.target.value)}
                   disabled={categoriesLoading || categoriesList.length === 0}
                 >
                   <option value="">Select category</option>
@@ -190,23 +216,32 @@ const AddTransactionModal = ({
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">Description</label>
-              <input
-                type="text"
-                value={desc}
-                onChange={e => setDesc(e.target.value)}
-                className="chef-input"
+              <textarea
+                value={details}
+                onChange={e => setDetails(e.target.value)}
+                className="chef-input resize-none"
+                rows="3"
                 placeholder="Description (optional)"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Date</label>
-              <input
-                type="date"
-                value={date}
-                onChange={e => setDate(e.target.value)}
-                className="chef-input"
-                placeholder="Date (optional)"
-              />
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Status</label>
+              <div className="flex gap-4">
+                <button
+                  type="button"
+                  className={`chef-button-secondary px-4 py-2 rounded ${isActive ? 'bg-green-100 text-green-700 font-bold' : ''}`}
+                  onClick={() => setIsActive(true)}
+                >
+                  Active
+                </button>
+                <button
+                  type="button"
+                  className={`chef-button-secondary px-4 py-2 rounded ${!isActive ? 'bg-gray-100 text-gray-700 font-bold' : ''}`}
+                  onClick={() => setIsActive(false)}
+                >
+                  Inactive
+                </button>
+              </div>
             </div>
             <div className="flex justify-end gap-2 mt-4">
               <button
@@ -243,4 +278,4 @@ const AddTransactionModal = ({
   );
 };
 
-export default AddTransactionModal;
+export default AddScheduledTransactionModal;
