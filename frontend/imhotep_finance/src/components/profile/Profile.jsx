@@ -3,6 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import Footer from '../common/Footer';
+import { currencies } from '../../utils/currencies';
 
 const Profile = () => {
   const { user, logout, updateUser } = useAuth();
@@ -32,7 +33,19 @@ const Profile = () => {
     confirm: false,
   });
 
-  // Load profile data on component mount
+  // Currency form data
+  const [currencyData, setCurrencyData] = useState({
+    current: '',
+    selected: '',
+    search: '',
+  });
+
+  // Filtered currencies for dropdown search
+  const filteredCurrencies = currencies.filter(c =>
+    c.toLowerCase().includes(currencyData.search.toLowerCase())
+  );
+
+  // Load profile data and current favorite currency on component mount
   useEffect(() => {
     if (user) {
       setProfileData({
@@ -42,7 +55,27 @@ const Profile = () => {
         email: user.email || '',
       });
     }
+    fetchCurrentCurrency();
   }, [user]);
+
+  // Auto-select first filtered currency when search changes
+  useEffect(() => {
+    if (filteredCurrencies.length > 0) {
+      setCurrencyData(prev => ({ ...prev, selected: filteredCurrencies[0] }));
+    } else {
+      setCurrencyData(prev => ({ ...prev, selected: '' }));
+    }
+  }, [currencyData.search]);
+
+  const fetchCurrentCurrency = async () => {
+    try {
+      const response = await axios.get('/api/get-fav-currency/');
+      const currentCurrency = response.data.favorite_currency || '';
+      setCurrencyData(prev => ({ ...prev, current: currentCurrency, selected: currentCurrency }));
+    } catch {
+      setCurrencyData(prev => ({ ...prev, current: '', selected: '' }));
+    }
+  };
 
   const handleProfileChange = (e) => {
     setProfileData({
@@ -56,6 +89,15 @@ const Profile = () => {
   const handlePasswordChange = (e) => {
     setPasswordData({
       ...passwordData,
+      [e.target.name]: e.target.value,
+    });
+    if (error) setError('');
+    if (success) setSuccess('');
+  };
+
+  const handleCurrencyChange = (e) => {
+    setCurrencyData({
+      ...currencyData,
       [e.target.name]: e.target.value,
     });
     if (error) setError('');
@@ -105,6 +147,33 @@ const Profile = () => {
       });
     } catch (error) {
       setError(error.response?.data?.error || 'Failed to change password');
+    }
+    
+    setLoading(false);
+  };
+
+  const handleCurrencySubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    setSuccess('');
+
+    if (!currencyData.selected) {
+      setError('Please select a currency.');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await axios.post('/api/change-fav-currency/', { fav_currency: currencyData.selected });
+      if (response.data.success) {
+        setSuccess('Favorite currency updated successfully!');
+        fetchCurrentCurrency(); // Refresh current currency
+      } else {
+        setError('Failed to update favorite currency');
+      }
+    } catch (error) {
+      setError(error.response?.data?.error || 'Failed to update favorite currency');
     }
     
     setLoading(false);
@@ -225,6 +294,19 @@ const Profile = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
               <span>Change Password</span>
+            </button>
+            <button
+              className={`chef-button flex-1 ${
+                activeTab === 'currency'
+                  ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg scale-105'
+                  : 'bg-white/70 text-gray-700 hover:bg-white/90 border border-gray-300'
+              } flex items-center space-x-2 justify-center transition-all duration-200`}
+              onClick={() => setActiveTab('currency')}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+              </svg>
+              <span>Change Currency</span>
             </button>
           </div>
         </div>
@@ -611,6 +693,87 @@ const Profile = () => {
                 </div>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Change Favorite Currency Form */}
+        {activeTab === 'currency' && (
+          <div
+            className="chef-card rounded-2xl p-6 sm:p-8 shadow-lg border backdrop-blur-2xl bg-white/90"
+            style={{
+              border: '1px solid rgba(54,108,107,0.14)',
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.97), rgba(242,251,250,0.97))',
+            }}
+          >
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold font-chef text-gray-800 mb-2">Change Favorite Currency</h2>
+              <p className="text-gray-600 font-medium">Update your preferred currency for financial tracking</p>
+            </div>
+
+            <div className="mb-4">
+              <p className="text-sm text-gray-700">Current Favorite Currency: <strong>{currencyData.current || 'Not set'}</strong></p>
+            </div>
+
+            <form onSubmit={handleCurrencySubmit} className="space-y-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Currency</label>
+                <input
+                  type="text"
+                  className="chef-input mb-2"
+                  placeholder="Search currency..."
+                  value={currencyData.search}
+                  onChange={handleCurrencyChange}
+                  name="search"
+                />
+                <select
+                  className="chef-input"
+                  value={currencyData.selected}
+                  onChange={handleCurrencyChange}
+                  name="selected"
+                  required
+                >
+                  {filteredCurrencies.length === 0 && (
+                    <option value="">No currencies found</option>
+                  )}
+                  {filteredCurrencies.map(cur => (
+                    <option key={cur} value={cur}>{cur}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="pt-4">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className={`chef-button w-full ${loading 
+                    ? 'bg-gray-400 cursor-not-allowed' 
+                    : 'text-white'
+                  } flex items-center space-x-2 justify-center`}
+                  style={
+                    loading
+                      ? {}
+                      : { background: 'linear-gradient(90deg, #366c6b 0%, #1a3535 100%)' }
+                  }
+                >
+                  {loading ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span>Updating...</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                      </svg>
+                      <span>Update Currency</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         )}
       </div>
