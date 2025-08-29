@@ -83,7 +83,7 @@ const Dashboard = () => {
 
   return (
     <div
-      className="min-h-screen bg-chef-pattern"
+      className="min-h-screen overflow-y-auto pb-8 bg-chef-pattern"
       style={{
         background: 'linear-gradient(135deg, #eaf6f6 0%, #d6efee 50%, #1a3535 100%)',
       }}
