@@ -1,14 +1,14 @@
 {
-  "name": "Imhotep Tasks - Task Management App",
-  "short_name": "Imhotep Tasks",
-  "description": "Organize, prioritize, and track your daily tasks efficiently with Imhotep Tasks. Stay productive and never miss a deadline.",
+  "name": "Imhotep Finance - Personal Finance Management App",
+  "short_name": "Imhotep Finance",
+  "description": "Manage your finances efficiently with Imhotep Finance. Track transactions, monitor net worth, and achieve your financial goals.",
   "theme_color": "#007bff",
   "background_color": "#ffffff",
   "display": "standalone",
   "scope": "/",
   "start_url": "/login",
   "orientation": "portrait",
-  "categories": ["productivity", "utilities", "task management"],
+  "categories": ["productivity", "utilities", "finance management"],
   "lang": "en",
   "dir": "ltr",
   "icons": [
@@ -17,53 +17,59 @@
       "sizes": "32x32",
       "type": "image/png",
       "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-monochrome.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "monochrome"
     }
   ],
   "shortcuts": [
     {
-      "name": "Today's Tasks",
-      "short_name": "Today",
-      "description": "View and manage today's tasks",
-      "url": "/today-tasks",
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "View your financial dashboard",
+      "url": "/dashboard",
       "icons": [
         {
-          "src": "/imhotep_tasks.png",
+          "src": "/favicon.png",
           "sizes": "192x192"
         }
       ]
     },
     {
-      "name": "Next 7 Days",
-      "short_name": "Next Week",
-      "description": "See tasks for the upcoming week",
-      "url": "/next-week-tasks",
+      "name": "Transactions",
+      "short_name": "Transactions",
+      "description": "View and manage your transactions",
+      "url": "/show_trans",
       "icons": [
         {
-          "src": "/imhotep_tasks.png",
+          "src": "/favicon.png",
           "sizes": "192x192"
         }
       ]
     },
     {
-      "name": "All Tasks",
-      "short_name": "All",
-      "description": "View all your tasks",
-      "url": "/all-tasks",
+      "name": "Net Worth Details",
+      "short_name": "Net Worth",
+      "description": "Monitor your net worth details",
+      "url": "/show_networth_details",
       "icons": [
         {
-          "src": "/imhotep_tasks.png",
+          "src": "/favicon.png",
           "sizes": "192x192"
         }
       ]
     },
     {
-      "name": "Routines",
-      "short_name": "Routines",
-      "description": "Manage your routines and habits",
-      "url": "/routines",
+      "name": "Wishlist",
+      "short_name": "Wishlist",
+      "description": "Manage your financial wishlist",
+      "url": "/wishlist",
       "icons": [
         {
-          "src": "/imhotep_tasks.png",
+          "src": "/favicon.png",
           "sizes": "192x192"
         }
       ]
