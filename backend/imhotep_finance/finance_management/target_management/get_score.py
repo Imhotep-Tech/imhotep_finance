@@ -11,13 +11,12 @@ from  ..utils.currencies import convert_to_fav_currency
 @permission_classes([IsAuthenticated])
 def get_score(request):
     """Return score with respect to the target for the current month for the logged-in user."""
-    now = datetime.datetime.now()
+    now = datetime.now()
     user = request.user
 
     # Filter Target by user
     target_qs = get_object_or_404(
-        Target.objects.order_by('-created_at'),
-        user=request.user
+        Target.objects.filter(user=user).order_by('-created_at')
     )
 
     target_db = target_qs.target #get latest target amount
@@ -31,13 +30,12 @@ def get_score(request):
     if month_db != current_month or year_db != current_year: #check if new month or year
         #insert a new target
         try:
-            new_target = Target.objects.create(
+            target_qs = Target.objects.create(
                 user=user,
                 target=target_db,
                 month=current_month,
                 year=current_year,
             )
-            new_target.save()
         except Exception as e:
             return Response(
                 {'error': f'Failed to save transaction: {str(e)}'},
@@ -57,36 +55,42 @@ def get_score(request):
     score_deposit = Transactions.objects.filter(
             user=request.user,
             date__gte=from_date,
-            date__lte=to_date,
-            status="deposit"
-        ).order_by('-date').all()
+            date__lt=to_date,
+            trans_status="deposit"
+        ).values_list("amount", "currency")
 
     score_withdraw = Transactions.objects.filter(
             user=request.user,
             date__gte=from_date,
-            date__lte=to_date,
-            status="withdraw"
-        ).order_by('-date').all()
+            date__lt=to_date,
+            trans_status="withdraw"
+        ).values_list("amount", "currency")
 
-    currency_totals_deposit = {} #initialize deposit totals by currency
-    for amount, currency in score_deposit: #iterate through deposits
-        amount = float(amount) #convert amount to float
-        if currency in currency_totals_deposit: #check if currency already exists
-            currency_totals_deposit[currency] += amount #add to existing total
-        else:
-            currency_totals_deposit[currency] = amount #create new currency entry
-    total_favorite_currency_deposit, favorite_currency_deposit = convert_to_fav_currency(request, currency_totals_deposit) #convert deposits to favorite currency
+    # Aggregate deposits by currency
+    currency_totals_deposit = {}
+    for amount, currency in score_deposit:
+        amount = float(amount)
+        currency_totals_deposit[currency] = currency_totals_deposit.get(currency, 0) + amount
 
-    currency_totals_withdraw= {} #initialize withdrawal totals by currency
-    for amount, currency in score_withdraw: #iterate through withdrawals
-        amount = float(amount) #convert amount to float
-        if currency in currency_totals_withdraw: #check if currency already exists
-            currency_totals_withdraw[currency] += amount #add to existing total
-        else:
-            currency_totals_withdraw[currency] = amount #create new currency entry
-    total_favorite_currency_withdraw, favorite_currency_withdraw = convert_to_fav_currency(request, currency_totals_withdraw) #convert withdrawals to favorite currency
+    total_favorite_currency_deposit, _ = convert_to_fav_currency(request, currency_totals_deposit)
 
-    score = (total_favorite_currency_deposit - target_db) - total_favorite_currency_withdraw #calculate target score
+    # Aggregate withdrawals by currency
+    currency_totals_withdraw = {}
+    for amount, currency in score_withdraw:
+        amount = float(amount)
+        currency_totals_withdraw[currency] = currency_totals_withdraw.get(currency, 0) + amount
+
+    total_favorite_currency_withdraw, _ = convert_to_fav_currency(request, currency_totals_withdraw)
+
+    score = total_favorite_currency_deposit - total_favorite_currency_withdraw - target_db #calculate target score
+    
+    if score == 0:
+        score_txt = "On target"
+    elif score > 0:
+        score_txt = "Above target"
+    else:
+        score_txt = "Below target"
+
     try:
         target_qs.score = score
         target_qs.save()
@@ -99,6 +103,10 @@ def get_score(request):
 
     response_data = {
         "score": score,
-        "target": target_db
+        "target": target_db,
+        "month": current_month,
+        "year": current_year,
+        "score_txt":score_txt
     }
     return Response(response_data, status=status.HTTP_200_OK)
+
