@@ -205,7 +205,7 @@ const EmailVerification = () => {
       case 'verifying':
         return 'Please wait while we verify your email address and prepare your chef station...';
       case 'success':
-        return 'Your email has been verified successfully! You can now log in and start your AI-powered culinary journey.';
+        return 'Your email has been verified successfully! You can now log in.';
       case 'error':
         return message;
       default:

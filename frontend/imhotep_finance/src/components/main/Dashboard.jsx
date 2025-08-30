@@ -74,7 +74,6 @@ const Dashboard = () => {
       runApplyIfNeeded();
   }, []);
 
-
   // UI helpers
   const scoreClass = score > 0
     ? 'score-positive'
@@ -153,20 +152,23 @@ const Dashboard = () => {
             </div>
           </button>
           <button
-            className="rounded-xl p-6 metric-card hover:shadow-lg transition-all duration-300 group flex items-center space-x-4 w-full"
-            onClick={() => {
-              setInitialType('withdraw');
-              setShowAddModal(true);
-            }}
-          >
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center group-hover:bg-red-200 transition-colors">
-              <svg className="w-8 h-8 text-red-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 5v14m-7-7h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-1">Add Expense</h3>
-              <p className="text-gray-600">Track your spending and manage budget</p>
-            </div>
-          </button>
+          className="rounded-xl p-6 metric-card hover:shadow-lg transition-all duration-300 group flex items-center space-x-4 w-full"
+          onClick={() => {
+            setInitialType('withdraw');
+            setShowAddModal(true);
+          }}
+        >
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center group-hover:bg-red-200 transition-colors">
+            {/* Minus sign */}
+            <svg className="w-8 h-8 text-red-600" fill="none" viewBox="0 0 24 24">
+              <path d="M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+          <div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-1">Add Expense</h3>
+            <p className="text-gray-600">Track your spending and manage budget</p>
+          </div>
+        </button>
         </div>
 
         {/* Monthly Target Score Section */}

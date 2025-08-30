@@ -1,0 +1,72 @@
+{
+  "name": "Imhotep Tasks - Task Management App",
+  "short_name": "Imhotep Tasks",
+  "description": "Organize, prioritize, and track your daily tasks efficiently with Imhotep Tasks. Stay productive and never miss a deadline.",
+  "theme_color": "#007bff",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "/login",
+  "orientation": "portrait",
+  "categories": ["productivity", "utilities", "task management"],
+  "lang": "en",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "32x32",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Today's Tasks",
+      "short_name": "Today",
+      "description": "View and manage today's tasks",
+      "url": "/today-tasks",
+      "icons": [
+        {
+          "src": "/imhotep_tasks.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Next 7 Days",
+      "short_name": "Next Week",
+      "description": "See tasks for the upcoming week",
+      "url": "/next-week-tasks",
+      "icons": [
+        {
+          "src": "/imhotep_tasks.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "All Tasks",
+      "short_name": "All",
+      "description": "View all your tasks",
+      "url": "/all-tasks",
+      "icons": [
+        {
+          "src": "/imhotep_tasks.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Routines",
+      "short_name": "Routines",
+      "description": "Manage your routines and habits",
+      "url": "/routines",
+      "icons": [
+        {
+          "src": "/imhotep_tasks.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}

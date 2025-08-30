@@ -15,7 +15,7 @@ A comprehensive financial management web application that helps you track transa
 
 ### Automation & Intelligence
 - **Scheduled Transactions**: Set up automated monthly recurring transactions for bills, income, and regular expenses
-- **Smart Suggestions**: AI-powered category recommendations based on your transaction history and patterns
+- **Smart Suggestions**: Category recommendations based on your transaction history and patterns
 - **Error Handling**: Comprehensive error management system with user-friendly custom error pages
 
 ### Goal Setting & Planning

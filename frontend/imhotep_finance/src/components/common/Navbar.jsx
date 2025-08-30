@@ -9,9 +9,6 @@ const Navbar = ({ onToggle }) => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
-  const [networth, setNetworth] = useState('0');
-  const [favoriteCurrency, setFavoriteCurrency] = useState('');
-  const [loadingNetworth, setLoadingNetworth] = useState(true);
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -173,17 +170,17 @@ const Navbar = ({ onToggle }) => {
                   to="/show_trans"
                   className={`navbar-link group flex items-center p-4 rounded-2xl transition-all duration-300 ${
                     isActive('/show_trans') 
-                      ? 'bg-gradient-to-r from-blue-400 to-blue-600 text-white shadow-lg transform scale-105' 
-                      : 'text-gray-700 hover:bg-blue-50 hover:shadow-md hover:scale-105'
+                      ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white shadow-lg transform scale-105' 
+                      : 'text-gray-700 hover:bg-white/70 hover:shadow-md hover:scale-105'
                   }`}
                   onClick={closeNavbar}
                 >
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center mr-3 transition-colors duration-300 ${
                     isActive('/show_trans') 
                       ? 'bg-white/20' 
-                      : 'bg-blue-100 group-hover:bg-blue-50'
+                      : 'bg-gray-100 group-hover:bg-[#eaf6f6]'
                   }`}>
-                    <svg className={`w-5 h-5 ${isActive('/show_trans') ? 'text-white' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className={`w-5 h-5 ${isActive('/show_trans') ? 'text-white' : 'text-[#366c6b]'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 13h2v7H3zM7 9h2v11H7zM11 5h2v15h-2zM15 11h2v9h-2zM19 7h2v13h-2z"/>
                     </svg>
                   </div>
@@ -194,17 +191,17 @@ const Navbar = ({ onToggle }) => {
                   to="/show_scheduled_trans"
                   className={`navbar-link group flex items-center p-4 rounded-2xl transition-all duration-300 ${
                     isActive('/show_scheduled_trans') 
-                      ? 'bg-gradient-to-r from-blue-400 to-blue-600 text-white shadow-lg transform scale-105' 
-                      : 'text-gray-700 hover:bg-blue-50 hover:shadow-md hover:scale-105'
+                      ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white shadow-lg transform scale-105' 
+                      : 'text-gray-700 hover:bg-white/70 hover:shadow-md hover:scale-105'
                   }`}
                   onClick={closeNavbar}
                 >
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center mr-3 transition-colors duration-300 ${
                     isActive('/show_scheduled_trans') 
                       ? 'bg-white/20' 
-                      : 'bg-blue-100 group-hover:bg-blue-50'
+                      : 'bg-gray-100 group-hover:bg-[#eaf6f6]'
                   }`}>
-                    <svg className={`w-5 h-5 ${isActive('/show_scheduled_trans') ? 'text-white' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className={`w-5 h-5 ${isActive('/show_scheduled_trans') ? 'text-white' : 'text-[#366c6b]'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                   </div>
@@ -215,22 +212,43 @@ const Navbar = ({ onToggle }) => {
                   to="/wishlist"
                   className={`navbar-link group flex items-center p-4 rounded-2xl transition-all duration-300 ${
                     isActive('/wishlist') 
-                      ? 'bg-gradient-to-r from-blue-400 to-blue-600 text-white shadow-lg transform scale-105' 
-                      : 'text-gray-700 hover:bg-blue-50 hover:shadow-md hover:scale-105'
+                      ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white shadow-lg transform scale-105' 
+                      : 'text-gray-700 hover:bg-white/70 hover:shadow-md hover:scale-105'
                   }`}
                   onClick={closeNavbar}
                 >
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center mr-3 transition-colors duration-300 ${
                     isActive('/wishlist') 
                       ? 'bg-white/20' 
-                      : 'bg-blue-100 group-hover:bg-blue-50'
+                      : 'bg-gray-100 group-hover:bg-[#eaf6f6]'
                   }`}>
                     {/* Wishlist Heart Icon */}
-                    <svg className={`w-5 h-5 ${isActive('/wishlist') ? 'text-white' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className={`w-5 h-5 ${isActive('/wishlist') ? 'text-white' : 'text-[#366c6b]'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 21.364l-7.682-7.682a4.5 4.5 0 010-6.364z" />
                     </svg>
                   </div>
                   <span className="font-semibold">Wishlist</span>
+                </Link>
+                  
+                <Link 
+                  to="/monthly-reports" 
+                  className={`navbar-link group flex items-center p-4 rounded-2xl transition-all duration-300 ${
+                    isActive('/monthly-reports') 
+                      ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white shadow-lg transform scale-105' 
+                      : 'text-gray-700 hover:bg-white/70 hover:shadow-md hover:scale-105'
+                  }`}
+                  onClick={closeNavbar}
+                >
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center mr-3 transition-colors duration-300 ${
+                    isActive('/monthly-reports') 
+                      ? 'bg-white/20' 
+                      : 'bg-gray-100 group-hover:bg-[#eaf6f6]'
+                  }`}>
+                    <svg className={`w-5 h-5 ${isActive('/monthly-reports') ? 'text-white' : 'text-[#366c6b]'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                  </div>
+                  <span className="font-semibold">Monthly Reports</span>
                 </Link>
 
                 <Link 
