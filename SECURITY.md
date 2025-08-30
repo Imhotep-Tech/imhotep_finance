@@ -2,12 +2,12 @@
 
 ## Supported Versions
 
-versions that are currently being supported with security updates.
+Versions that are currently being supported with security updates.
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 5.0   | :white_check_mark: |
-| < 4.3.2   | :x:   (No longer supported)|
+| 7.0   | :white_check_mark: |
+| <= 6.0.0   | :x:   (No longer supported)|
 
 ## Reporting a Vulnerability
 We appreciate your help in keeping our application secure. If you discover a security vulnerability, please report it responsibly by following these steps:
