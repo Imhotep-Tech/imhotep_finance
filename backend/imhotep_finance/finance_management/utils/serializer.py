@@ -41,3 +41,16 @@ def serialize_scheduled_trans(scheduled_trans):
         "status": scheduled_trans.status,
         "created_at": scheduled_trans.created_at.isoformat() if scheduled_trans.created_at else None,
     }
+
+
+def serialize_target(target_obj):
+
+    return {
+        "id": target_obj.id,
+        "user_id": target_obj.user.id if target_obj.user else None,
+        "target": target_obj.target,
+        "month": target_obj.month,
+        "year": target_obj.year,
+        "score": target_obj.score,
+        "created_at": target_obj.created_at.isoformat() if target_obj.created_at else None,
+    }

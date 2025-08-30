@@ -114,9 +114,6 @@ const Navbar = ({ onToggle }) => {
                 >
                   Imhotep Finance
                 </div>
-                <p className="text-center text-gray-500 text-sm font-medium mt-1">
-                   Manage your finances efficiently with Imhotep Financial Manager
-                </p>
               </div>
 
               {/* User Info Card */}
@@ -256,6 +253,7 @@ const Navbar = ({ onToggle }) => {
                   </div>
                   <span className="font-semibold">Profile</span>
                 </Link>
+                
               </div>
             </div>
 
@@ -274,7 +272,7 @@ const Navbar = ({ onToggle }) => {
               </button>
               <div className="text-center">
                 <p className="text-gray-500 text-xs font-medium">
-                  📈 Imhotep Finance –  Manage your finances efficiently with Imhotep Financial Manager 📈
+                  📈 Imhotep Finance –  Manage your finances efficiently 📈
                 </p>
               </div>
             </div>

@@ -200,7 +200,7 @@ const Dashboard = () => {
                 </div>
                 <div className="bg-white/20 rounded-xl p-4 backdrop-blur-sm">
                   <p className="text-white/80 text-sm">Current Score</p>
-                  <p className="text-2xl font-bold">{score > 0 ? '+' : ''}{score?.toFixed(2)} {favoriteCurrency}</p>
+                  <p className="text-2xl font-bold">{score > 0 ? '+' : ''}{score?.toFixed(0)} {favoriteCurrency}</p>
                 </div>
                 <div className="bg-white/20 rounded-xl p-4 backdrop-blur-sm">
                   <p className="text-white/80 text-sm">Status</p>
@@ -210,7 +210,7 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className="mt-6">
-                <a href="/show_scores_history" className="inline-flex items-center px-6 py-3 bg-white/20 hover:bg-white/30 rounded-xl transition-all duration-200 backdrop-blur-sm">
+                <a href="/show-target-history" className="inline-flex items-center px-6 py-3 bg-white/20 hover:bg-white/30 rounded-xl transition-all duration-200 backdrop-blur-sm">
                   <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
                   View Target History
                 </a>
