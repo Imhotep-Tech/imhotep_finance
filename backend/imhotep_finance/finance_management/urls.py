@@ -41,6 +41,6 @@ urlpatterns = [
     path('target/get-score-history/', get_score_history.get_score_history, name='get_score_history'),
 
     #monthly report
-    path('get-monthly-report/', get_monthly_report.get_monthly_reports, name='get_monthly_report'),
+    path('get-monthly-report/', get_monthly_report.get_monthly_reports, name='get_monthly_reports'),
 
 ]

@@ -43,7 +43,6 @@ def get_monthly_reports(request):
             "current_month": now.strftime("%B %Y"),
             "favorite_currency": user.favorite_currency or 'USD'  # Add favorite currency
         }
-        print(response_data)
         return Response(response_data, status=status.HTTP_200_OK)
     except Exception as e:
         return Response(
