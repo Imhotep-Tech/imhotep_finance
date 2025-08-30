@@ -24,18 +24,19 @@ const Dashboard = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [networthRes, favRes] = await Promise.all([
+        const [networthRes, favRes, targetRes] = await Promise.all([
           axios.get('/api/finance-management/get-networth/'),
-          axios.get('/api/get-fav-currency/')
+          axios.get('/api/get-fav-currency/'),
+          axios.get('/api/finance-management/target/get-score/')
         ]);
         setNetworth(networthRes.data.networth || '0');
         setFavoriteCurrency(networthRes.data.favorite_currency || favRes.data.favorite_currency || '');
 
         // Monthly target score
-        if (networthRes.data.score_txt) {
-          setScore(networthRes.data.score);
-          setScoreTxt(networthRes.data.score_txt);
-          setTarget(networthRes.data.target);
+        if (targetRes.data.score_txt) {
+          setScore(targetRes.data.score);
+          setScoreTxt(targetRes.data.score_txt);
+          setTarget(targetRes.data.target);
         } else {
           setScore(null);
           setScoreTxt('');
@@ -247,12 +248,12 @@ const Dashboard = () => {
               <p className="text-sm text-gray-600 mt-1">Details</p>
             </div>
           </a>
-          <a href="/settings/set_target" className="metric-card rounded-xl p-6 hover:shadow-lg transition-all duration-300">
+          <a href="/profile" className="metric-card rounded-xl p-6 hover:shadow-lg transition-all duration-300">
             <div className="text-center">
               <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
                 <svg className="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 14.93V17h-2v-.07A8.001 8.001 0 014.07 13H7v-2H4.07A8.001 8.001 0 0111 4.07V7h2V4.07A8.001 8.001 0 0119.93 11H17v2h2.93A8.001 8.001 0 0113 19.93z"/></svg>
               </div>
-              <h3 className="font-semibold text-gray-900">Set Target</h3>
+              <h3 className="font-semibold text-gray-900">Manage Target</h3>
               <p className="text-sm text-gray-600 mt-1">Goals</p>
             </div>
           </a>
@@ -276,7 +277,7 @@ const Dashboard = () => {
                   <svg className="w-6 h-6 text-red-600 mb-2" fill="currentColor" viewBox="0 0 24 24"><path d="M12 5v14m-7-7h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                   <span className="font-medium text-red-700">Add Expense</span>
                 </button>
-                <a href="/settings/set_target" className="flex flex-col items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors">
+                <a href="/profile" className="flex flex-col items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors">
                   <svg className="w-6 h-6 text-purple-600 mb-2" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
                   <span className="font-medium text-purple-700">Set Target</span>
                 </a>
