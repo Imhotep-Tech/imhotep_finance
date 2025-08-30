@@ -26,14 +26,12 @@ def update_wish_status(request, wish_id):
     current_date = date.today() #get current date
     
     if amount < 0:
-        print("Amount is negative:", amount)
         return Response(
             {'error': "Amount Should be a positive number"},
             status=status.HTTP_400_BAD_REQUEST
         )
 
     if currency not in select_currencies(user):
-        print("Currency not in user's networth:", currency, select_currencies(user))
         return Response(
             {'error': "You don't have on your balance enough of this currency!"},
             status=status.HTTP_400_BAD_REQUEST
@@ -44,7 +42,6 @@ def update_wish_status(request, wish_id):
     user_balance = float(netWorth.total)
 
     if user_balance < float(amount) and not wish_status:
-        print("Insufficient balance:", user_balance, "<", amount)
         return Response(
             {'error': "You don't have on your balance enough of this currency!"},
             status=status.HTTP_400_BAD_REQUEST
