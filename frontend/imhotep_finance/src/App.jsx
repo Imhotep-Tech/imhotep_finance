@@ -21,6 +21,7 @@ import ShowNetWorthDetails from './components/main/ShowNetWorthDetails'
 import ShowWishlist from './components/main/ShowWishlist'
 import ShowScheduledTransactions from './components/main/ShowScheduledTransactions'
 import ShowTargetHistory from './components/main/ShowTargetHistory'
+import MonthlyReports from './components/main/MonthlyReports'
 
 function App() {
   return (
@@ -123,6 +124,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ShowTargetHistory />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="/monthly-reports"
+              element={
+                <ProtectedRoute>
+                  <MonthlyReports />
                 </ProtectedRoute>
               }
             />
