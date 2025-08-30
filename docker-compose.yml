@@ -27,6 +27,7 @@ services:
       - ./backend/imhotep_finance/.env
     volumes:
       - ./backend/imhotep_finance:/app
+      - ./backend/imhotep_finance/old_data:/old_data
     depends_on:
       db:
         condition: service_healthy
