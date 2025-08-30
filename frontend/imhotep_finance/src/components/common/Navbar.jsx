@@ -3,7 +3,6 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Link, useLocation } from 'react-router-dom';
 import Logo from '../../assets/Logo.jpeg';
 import axios from 'axios';
-import NetWorthCard from '../main/components/NetWorthCard';
 
 const Navbar = ({ onToggle }) => {
   const { user, logout } = useAuth();
@@ -29,23 +28,6 @@ const Navbar = ({ onToggle }) => {
     
     return () => window.removeEventListener('resize', checkScreenSize);
   }, [onToggle]);
-
-  useEffect(() => {
-    // Fetch net worth for sidebar
-    const fetchNetworth = async () => {
-      setLoadingNetworth(true);
-      try {
-        const res = await axios.get('/api/finance-management/get-networth/');
-        setNetworth(res.data.networth || '0');
-        setFavoriteCurrency(res.data.favorite_currency || '');
-      } catch {
-        setNetworth('0');
-        setFavoriteCurrency('');
-      }
-      setLoadingNetworth(false);
-    };
-    fetchNetworth();
-  }, []);
 
   const isActive = (path) => location.pathname === path;
 
@@ -132,9 +114,6 @@ const Navbar = ({ onToggle }) => {
                 >
                   Imhotep Finance
                 </div>
-                <p className="text-center text-gray-500 text-sm font-medium mt-1">
-                   Manage your finances efficiently with Imhotep Financial Manager
-                </p>
               </div>
 
               {/* User Info Card */}
@@ -165,18 +144,6 @@ const Navbar = ({ onToggle }) => {
                     </div>
                   )}
                 </div>
-              </div>
-
-              {/* Net Worth Card in Sidebar */}
-              <div className="mb-8 flex items-center justify-center w-full">
-                <Link to="/show_networth_details" style={{ width: '100%' }}>
-                  <NetWorthCard
-                    networth={networth}
-                    favoriteCurrency={favoriteCurrency}
-                    loading={loadingNetworth}
-                    mode="navbar"
-                  />
-                </Link>
               </div>
 
               {/* Navigation Links */}
@@ -286,6 +253,7 @@ const Navbar = ({ onToggle }) => {
                   </div>
                   <span className="font-semibold">Profile</span>
                 </Link>
+                
               </div>
             </div>
 
@@ -304,7 +272,7 @@ const Navbar = ({ onToggle }) => {
               </button>
               <div className="text-center">
                 <p className="text-gray-500 text-xs font-medium">
-                  📈 Imhotep Finance –  Manage your finances efficiently with Imhotep Financial Manager 📈
+                  📈 Imhotep Finance –  Manage your finances efficiently 📈
                 </p>
               </div>
             </div>

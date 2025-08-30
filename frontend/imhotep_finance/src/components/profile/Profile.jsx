@@ -40,6 +40,11 @@ const Profile = () => {
     search: '',
   });
 
+  // Target form data
+  const [targetData, setTargetData] = useState({
+    target: '',
+  });
+
   // Filtered currencies for dropdown search
   const filteredCurrencies = currencies.filter(c =>
     c.toLowerCase().includes(currencyData.search.toLowerCase())
@@ -67,6 +72,13 @@ const Profile = () => {
     }
   }, [currencyData.search]);
 
+  // Fetch current target on component mount or when target tab is active
+  useEffect(() => {
+    if (activeTab === 'target') {
+      fetchCurrentTarget();
+    }
+  }, [activeTab]);
+
   const fetchCurrentCurrency = async () => {
     try {
       const response = await axios.get('/api/get-fav-currency/');
@@ -74,6 +86,20 @@ const Profile = () => {
       setCurrencyData(prev => ({ ...prev, current: currentCurrency, selected: currentCurrency }));
     } catch {
       setCurrencyData(prev => ({ ...prev, current: '', selected: '' }));
+    }
+  };
+
+  const fetchCurrentTarget = async () => {
+    try {
+      const response = await axios.get('/api/finance-management/target/get-target/');
+      setTargetData({ target: response.data.target || '' });
+    } catch (error) {
+      if (error.response?.status === 404) {
+        // Target not found, leave input empty
+        setTargetData({ target: '' });
+      } else {
+        setError(error.response?.data?.error || 'Failed to fetch target');
+      }
     }
   };
 
@@ -98,6 +124,15 @@ const Profile = () => {
   const handleCurrencyChange = (e) => {
     setCurrencyData({
       ...currencyData,
+      [e.target.name]: e.target.value,
+    });
+    if (error) setError('');
+    if (success) setSuccess('');
+  };
+
+  const handleTargetChange = (e) => {
+    setTargetData({
+      ...targetData,
       [e.target.name]: e.target.value,
     });
     if (error) setError('');
@@ -174,6 +209,28 @@ const Profile = () => {
       }
     } catch (error) {
       setError(error.response?.data?.error || 'Failed to update favorite currency');
+    }
+    
+    setLoading(false);
+  };
+
+  const handleTargetSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    setSuccess('');
+
+    if (!targetData.target || parseFloat(targetData.target) <= 0) {
+      setError('Please enter a valid target amount greater than 0.');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await axios.post('/api/finance-management/target/manage-target/', { target: targetData.target });
+      setSuccess(response.data.message || 'Target updated successfully!');
+    } catch (error) {
+      setError(error.response?.data?.error || 'Failed to update target');
     }
     
     setLoading(false);
@@ -307,6 +364,19 @@ const Profile = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
               </svg>
               <span>Change Currency</span>
+            </button>
+            <button
+              className={`chef-button flex-1 ${
+                activeTab === 'target'
+                  ? 'bg-gradient-to-r from-green-500 to-teal-500 text-white shadow-lg scale-105'
+                  : 'bg-white/70 text-gray-700 hover:bg-white/90 border border-gray-300'
+              } flex items-center space-x-2 justify-center transition-all duration-200`}
+              onClick={() => setActiveTab('target')}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>Target</span>
             </button>
           </div>
         </div>
@@ -769,6 +839,84 @@ const Profile = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                       </svg>
                       <span>Update Currency</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* Target Setting Form */}
+        {activeTab === 'target' && (
+          <div
+            className="chef-card rounded-2xl p-6 sm:p-8 shadow-lg border backdrop-blur-2xl bg-white/90"
+            style={{
+              border: '1px solid rgba(54,108,107,0.14)',
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.97), rgba(242,251,250,0.97))',
+            }}
+          >
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold font-chef text-gray-800 mb-2">Set Monthly Target</h2>
+              <p className="text-gray-600 font-medium">Define your financial goal for this month</p>
+            </div>
+
+            <form onSubmit={handleTargetSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-gray-700">
+                  Target Amount <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                    </svg>
+                  </div>
+                  <input
+                    type="number"
+                    name="target"
+                    value={targetData.target}
+                    onChange={handleTargetChange}
+                    className="chef-input pl-10"
+                    placeholder="Enter your target amount"
+                    min="0"
+                    step="0.01"
+                    required
+                  />
+                </div>
+                <p className="text-sm text-gray-500 mt-1">
+                  Enter the amount you want to achieve by the end of this month
+                </p>
+              </div>
+
+              <div className="pt-4">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className={`chef-button w-full ${loading
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'text-white'
+                  } flex items-center space-x-2 justify-center`}
+                  style={
+                    loading
+                      ? {}
+                      : { background: 'linear-gradient(90deg, #366c6b 0%, #1a3535 100%)' }
+                  }
+                >
+                  {loading ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span>Setting Target...</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span>Set Target</span>
                     </>
                   )}
                 </button>
