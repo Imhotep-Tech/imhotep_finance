@@ -41,7 +41,6 @@ services:
       - VITE_API_URL=http://localhost:8000
     volumes:
       - ./frontend/imhotep_finance:/app
-      - /app/node_modules
     depends_on:
       - backend
 
