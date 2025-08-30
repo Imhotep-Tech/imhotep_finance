@@ -4,6 +4,7 @@ from . import views
 from .transactions_management import add_transaction, get_tranaction, update_transaction, delete_transaction
 from .wishlist_management import add_wish, get_wishlist, update_wish, update_wish_status, delete_wish
 from .scheduled_trans_management import add_scheduled_trans, get_scheduled_trans, update_scheduled_trans, update_scheduled_trans_status, delete_scheduled_trans, apply_scheduled_trans
+from .target_management import get_score, get_target, manage_target, get_score_history
 
 urlpatterns = [
     #user data
@@ -31,4 +32,11 @@ urlpatterns = [
     path('scheduled-trans/update-scheduled-trans/<int:scheduled_trans_id>/', update_scheduled_trans.update_scheduled_transactions, name='update_scheduled_transactions'),
     path('scheduled-trans/delete-scheduled-trans/<int:scheduled_trans_id>/', delete_scheduled_trans.delete_scheduled_trans, name='delete_scheduled_trans'),
     path('scheduled-trans/apply-scheduled-trans/', apply_scheduled_trans.apply_scheduled_trans, name='apply_scheduled_trans'),
+
+    #Target Management
+    path('target/get-score/', get_score.get_score, name='get_score'),
+    path('target/get-target/', get_target.get_target, name='get_target'),
+    path('target/manage-target/', manage_target.manage_target, name='manage_target'),
+    path('target/get-score-history/', get_score_history.get_score_history, name='get_score_history'),
+
 ]
