@@ -62,7 +62,7 @@ const PublicRoute = ({ children }) => {
               Welcome!
             </h2>
             <p className="text-gray-600 font-medium mb-6">
-              Your AI-powered portfolio is starting up...
+              Your Financial Manager is starting up...
             </p>
             <div className="flex items-center justify-center space-x-1">
               <div className="w-2 h-2 rounded-full animate-bounce" style={{ background: 'linear-gradient(90deg, #366c6b 0%, #1a3535 100%)' }}></div>

@@ -141,7 +141,7 @@ const AddWishModal = ({
               </button>
               <button
                 type="submit"
-                className="chef-button text-white bg-blue-600"
+                className="chef-button bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                 disabled={loading}
               >
                 {loading ? 'Saving...' : 'Add'}
