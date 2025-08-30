@@ -23,15 +23,31 @@ import ShowScheduledTransactions from './components/main/ShowScheduledTransactio
 import ShowTargetHistory from './components/main/ShowTargetHistory'
 import MonthlyReports from './components/main/MonthlyReports'
 
+// PWA Components
+import InstallPrompt from './components/pwa/InstallPrompt';
+import OfflineIndicator from './components/pwa/OfflineIndicator';
+import UpdatePrompt from './components/pwa/UpdatePrompt';
+import InstallButton from './components/pwa/InstallButton';
+
 function App() {
   return (
     <AuthProvider>
       <Router>
         <div>
+          {/* Global PWA Components */}
+          <InstallPrompt />
+          <OfflineIndicator />
+          <UpdatePrompt />
+          
           <Routes>
             <Route 
               path="/" 
-              element={<LandingPage />} 
+              element={
+                <div>
+                  <LandingPage />
+                  <InstallButton className="fixed bottom-4 right-4 z-50" />
+                </div>
+              } 
             />
             <Route 
               path="/login" 
