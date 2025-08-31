@@ -35,4 +35,8 @@ urlpatterns = [
     path('profile/update/', profile.update_profile, name='update_profile'),
     path('profile/change-password/', profile.change_password, name='change_password'),
     path('profile/verify-email-change/', profile.verify_email_change, name='verify_email_change'),
+
+    #Favorite Currency
+    path('get-fav-currency/', views.get_favorite_currency, name='get_fav_currency'),
+    path('change-fav-currency/', views.change_favorite_currency, name='change_favorite_currency'),
 ]

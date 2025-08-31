@@ -1,0 +1,53 @@
+from rest_framework import status
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from ..utils.serializer import serialize_wishlist
+from rest_framework.response import Response
+from ..models import Wishlist
+from datetime import date
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+import calendar
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_wishlist(request):
+    """Return paginated transactions for the logged-in user, filtered by date range."""
+    try:
+        year = request.query_params.get('year')
+       
+        if year is None: #check if no year provided
+            today = date.today() #get current date
+            year = today.year #use current year
+
+        # Filter transactions by user and date range
+        user_wish_qs = Wishlist.objects.filter(
+            user=request.user,
+            year=year
+        ).order_by('-created_at').all()
+
+        paginator = Paginator(
+        user_wish_qs, 20)
+        page_num = request.GET.get('page', 1)
+        try:
+            page_obj = paginator.page(page_num)
+        except (PageNotAnInteger, EmptyPage):
+            page_obj = paginator.page(1)
+
+        wishlist = [serialize_wishlist(w) for w in page_obj.object_list]
+
+        response_data = {
+            "wishlist": wishlist,
+            "pagination": {
+                "page": page_obj.number,
+                "num_pages": paginator.num_pages,
+                "per_page": paginator.per_page,
+                "total": paginator.count,
+            },
+            "year": year
+        }
+        return Response(response_data, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response(
+            {'error': f'Error Happened: {str(e)}'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

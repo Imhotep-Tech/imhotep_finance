@@ -237,7 +237,7 @@ const Register = () => {
                 Join Our Kitchen!
               </h1>
               <p className="font-medium" style={{ color: '#1a3535', opacity: 0.9 }}>
-                Create your account and start your AI-powered culinary adventure
+                Create your account and start your Finance Management
               </p>
             </div>
             {/* Error Message */}

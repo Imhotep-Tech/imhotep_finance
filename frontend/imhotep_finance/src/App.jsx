@@ -17,16 +17,37 @@ import EmailChangeVerification from './components/profile/EmailChangeVerificatio
 //main app
 import Dashboard from './components/main/Dashboard'
 import ShowTransactions from './components/main/ShowTransactions'
+import ShowNetWorthDetails from './components/main/ShowNetWorthDetails'
+import ShowWishlist from './components/main/ShowWishlist'
+import ShowScheduledTransactions from './components/main/ShowScheduledTransactions'
+import ShowTargetHistory from './components/main/ShowTargetHistory'
+import MonthlyReports from './components/main/MonthlyReports'
+
+// PWA Components
+import InstallPrompt from './components/pwa/InstallPrompt';
+import OfflineIndicator from './components/pwa/OfflineIndicator';
+import UpdatePrompt from './components/pwa/UpdatePrompt';
+import InstallButton from './components/pwa/InstallButton';
 
 function App() {
   return (
     <AuthProvider>
       <Router>
         <div>
+          {/* Global PWA Components */}
+          <InstallPrompt />
+          <OfflineIndicator />
+          <UpdatePrompt />
+          
           <Routes>
             <Route 
               path="/" 
-              element={<LandingPage />} 
+              element={
+                <div>
+                  <LandingPage />
+                  <InstallButton className="fixed bottom-4 right-4 z-50" />
+                </div>
+              } 
             />
             <Route 
               path="/login" 
@@ -87,6 +108,46 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ShowTransactions />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="/show_networth_details"
+              element={
+                <ProtectedRoute>
+                  <ShowNetWorthDetails />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="/wishlist" 
+              element={
+                <ProtectedRoute>
+                  <ShowWishlist />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/show_scheduled_trans"
+              element={
+                <ProtectedRoute>
+                  <ShowScheduledTransactions />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="/show-target-history"
+              element={
+                <ProtectedRoute>
+                  <ShowTargetHistory />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="/monthly-reports"
+              element={
+                <ProtectedRoute>
+                  <MonthlyReports />
                 </ProtectedRoute>
               }
             />

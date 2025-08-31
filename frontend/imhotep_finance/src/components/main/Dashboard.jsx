@@ -5,6 +5,7 @@ import Footer from '../common/Footer';
 import Logo from '../../assets/Logo.jpeg';
 import AddTransactionModal from './components/AddTransactionModal';
 import NetWorthCard from './components/NetWorthCard';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -16,24 +17,26 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [initialType, setInitialType] = useState('deposit'); // new state
+  const navigate = useNavigate();
 
   // Fetch dashboard data
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [networthRes, favRes] = await Promise.all([
+        const [networthRes, favRes, targetRes] = await Promise.all([
           axios.get('/api/finance-management/get-networth/'),
-          axios.get('/api/finance-management/get-fav-currency/')
+          axios.get('/api/get-fav-currency/'),
+          axios.get('/api/finance-management/target/get-score/')
         ]);
         setNetworth(networthRes.data.networth || '0');
         setFavoriteCurrency(networthRes.data.favorite_currency || favRes.data.favorite_currency || '');
 
         // Monthly target score
-        if (networthRes.data.score_txt) {
-          setScore(networthRes.data.score);
-          setScoreTxt(networthRes.data.score_txt);
-          setTarget(networthRes.data.target);
+        if (targetRes.data.score_txt) {
+          setScore(targetRes.data.score);
+          setScoreTxt(targetRes.data.score_txt);
+          setTarget(targetRes.data.target);
         } else {
           setScore(null);
           setScoreTxt('');
@@ -51,6 +54,26 @@ const Dashboard = () => {
     fetchData();
   }, []);
 
+  // Call backend apply-scheduled-trans once per day (uses localStorage to avoid repeated calls)
+  useEffect(() => {
+    const runApplyIfNeeded = async () => {
+        try {
+          const key = 'lastApplyScheduledDate';
+          const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+          const last = localStorage.getItem(key);
+          if (last === today) return;
+
+          await axios.post('/api/finance-management/scheduled-trans/apply-scheduled-trans/');
+
+          // mark as done for today
+          localStorage.setItem(key, today);
+        } catch (err) {
+          console.warn('apply_scheduled_trans failed', err);
+        }
+      };
+      runApplyIfNeeded();
+  }, []);
+
   // UI helpers
   const scoreClass = score > 0
     ? 'score-positive'
@@ -60,7 +83,7 @@ const Dashboard = () => {
 
   return (
     <div
-      className="min-h-screen bg-chef-pattern"
+      className="min-h-screen overflow-y-auto pb-8 bg-chef-pattern"
       style={{
         background: 'linear-gradient(135deg, #eaf6f6 0%, #d6efee 50%, #1a3535 100%)',
       }}
@@ -102,12 +125,14 @@ const Dashboard = () => {
         </div>
 
         {/* Net Worth Section */}
-        <NetWorthCard
-          networth={networth}
-          favoriteCurrency={favoriteCurrency}
-          loading={loading}
-          mode="dashboard"
-        />
+        <div onClick={() => navigate('/show_networth_details')} style={{ cursor: 'pointer' }}>
+          <NetWorthCard
+            networth={networth}
+            favoriteCurrency={favoriteCurrency}
+            loading={loading}
+            mode="dashboard"
+          />
+        </div>
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -127,20 +152,23 @@ const Dashboard = () => {
             </div>
           </button>
           <button
-            className="rounded-xl p-6 metric-card hover:shadow-lg transition-all duration-300 group flex items-center space-x-4 w-full"
-            onClick={() => {
-              setInitialType('withdraw');
-              setShowAddModal(true);
-            }}
-          >
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center group-hover:bg-red-200 transition-colors">
-              <svg className="w-8 h-8 text-red-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 5v14m-7-7h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-1">Add Expense</h3>
-              <p className="text-gray-600">Track your spending and manage budget</p>
-            </div>
-          </button>
+          className="rounded-xl p-6 metric-card hover:shadow-lg transition-all duration-300 group flex items-center space-x-4 w-full"
+          onClick={() => {
+            setInitialType('withdraw');
+            setShowAddModal(true);
+          }}
+        >
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center group-hover:bg-red-200 transition-colors">
+            {/* Minus sign */}
+            <svg className="w-8 h-8 text-red-600" fill="none" viewBox="0 0 24 24">
+              <path d="M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+          <div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-1">Add Expense</h3>
+            <p className="text-gray-600">Track your spending and manage budget</p>
+          </div>
+        </button>
         </div>
 
         {/* Monthly Target Score Section */}
@@ -174,7 +202,7 @@ const Dashboard = () => {
                 </div>
                 <div className="bg-white/20 rounded-xl p-4 backdrop-blur-sm">
                   <p className="text-white/80 text-sm">Current Score</p>
-                  <p className="text-2xl font-bold">{score > 0 ? '+' : ''}{score?.toFixed(2)} {favoriteCurrency}</p>
+                  <p className="text-2xl font-bold">{score > 0 ? '+' : ''}{score?.toFixed(0)} {favoriteCurrency}</p>
                 </div>
                 <div className="bg-white/20 rounded-xl p-4 backdrop-blur-sm">
                   <p className="text-white/80 text-sm">Status</p>
@@ -184,7 +212,7 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className="mt-6">
-                <a href="/show_scores_history" className="inline-flex items-center px-6 py-3 bg-white/20 hover:bg-white/30 rounded-xl transition-all duration-200 backdrop-blur-sm">
+                <a href="/show-target-history" className="inline-flex items-center px-6 py-3 bg-white/20 hover:bg-white/30 rounded-xl transition-all duration-200 backdrop-blur-sm">
                   <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
                   View Target History
                 </a>
@@ -216,18 +244,27 @@ const Dashboard = () => {
           <a href="/show_networth_details" className="metric-card rounded-xl p-6 hover:shadow-lg transition-all duration-300">
             <div className="text-center">
               <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <svg className="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 20c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8zm0-14c3.314 0 6 2.686 6 6s-2.686 6-6 6-6-2.686-6-6 2.686-6 6-6z"/></svg>
+                <svg className="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l1.5 4.5h4.5l-3.75 2.75L15 14l-3-2.25L9 14l1.75-4.75L7 6.5h4.5z"/></svg>
               </div>
               <h3 className="font-semibold text-gray-900">Net Worth</h3>
               <p className="text-sm text-gray-600 mt-1">Details</p>
             </div>
           </a>
-          <a href="/settings/set_target" className="metric-card rounded-xl p-6 hover:shadow-lg transition-all duration-300">
+          <a href="/monthly-reports" className="metric-card rounded-xl p-6 hover:shadow-lg transition-all duration-300">
+            <div className="text-center">
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l1.5 4.5h4.5l-3.75 2.75L15 14l-3-2.25L9 14l1.75-4.75L7 6.5h4.5z"/></svg>
+              </div>
+              <h3 className="font-semibold text-gray-900">Monthly Reports</h3>
+              <p className="text-sm text-gray-600 mt-1">Charts & Totals</p>
+            </div>
+          </a>
+          <a href="/profile" className="metric-card rounded-xl p-6 hover:shadow-lg transition-all duration-300">
             <div className="text-center">
               <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
                 <svg className="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 14.93V17h-2v-.07A8.001 8.001 0 014.07 13H7v-2H4.07A8.001 8.001 0 0111 4.07V7h2V4.07A8.001 8.001 0 0119.93 11H17v2h2.93A8.001 8.001 0 0113 19.93z"/></svg>
               </div>
-              <h3 className="font-semibold text-gray-900">Set Target</h3>
+              <h3 className="font-semibold text-gray-900">Manage Target</h3>
               <p className="text-sm text-gray-600 mt-1">Goals</p>
             </div>
           </a>
@@ -251,7 +288,7 @@ const Dashboard = () => {
                   <svg className="w-6 h-6 text-red-600 mb-2" fill="currentColor" viewBox="0 0 24 24"><path d="M12 5v14m-7-7h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                   <span className="font-medium text-red-700">Add Expense</span>
                 </button>
-                <a href="/settings/set_target" className="flex flex-col items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors">
+                <a href="/profile" className="flex flex-col items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors">
                   <svg className="w-6 h-6 text-purple-600 mb-2" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
                   <span className="font-medium text-purple-700">Set Target</span>
                 </a>
