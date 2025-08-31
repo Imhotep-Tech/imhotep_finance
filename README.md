@@ -3,39 +3,39 @@
 [![Project Status: Active](https://img.shields.io/badge/Project%20Status-Active-green.svg)](https://github.com/Imhotep-Tech/imhotep_finance)
 [![License](https://img.shields.io/badge/License-Dual-blue.svg)](LICENSE)
 
-A comprehensive financial management web application that helps you track transactions, manage deposits and withdrawals, create wishlists, and set financial goals with intelligent automation and advanced analytics. Now powered by Django and React for enhanced performance, security, and scalability.
+Take control of your finances with Imhotep Financial Manager – a powerful, open-source personal finance app built with Django and React. Track transactions, manage budgets, create wishlists, set savings goals, and automate recurring expenses effortlessly. Perfect for individuals seeking a secure, user-friendly way to monitor spending, analyze patterns, and achieve financial freedom.
 
 
 ## 💰 Features
 
 ### Core Financial Management
-- **Financial Tracking**: Easily deposit and withdraw funds with detailed transaction history
+- **Financial Tracking**: Easily deposit and withdraw funds with detailed transaction history (powered by Django models for robust data handling)
 - **Smart Categories**: Enhanced transaction categorization with intelligent suggestions based on your most frequent categories
 - **Transaction Analysis**: View and analyze your spending patterns with detailed pie charts for expenses and income categories
 
 ### Automation & Intelligence
-- **Scheduled Transactions**: Set up automated monthly recurring transactions for bills, income, and regular expenses
+- **Scheduled Transactions**: Set up automated monthly recurring transactions for bills, income, and regular expenses (managed via Django's ScheduledTransaction model)
 - **Smart Suggestions**: Category recommendations based on your transaction history and patterns
 - **Error Handling**: Comprehensive error management system with user-friendly custom error pages
 
 ### Goal Setting & Planning
-- **Wishlist Management**: Create and prioritize items you want to purchase with detailed tracking
-- **Goal Setting**: Set monthly savings targets to help achieve your financial objectives
+- **Wishlist Management**: Create and prioritize items you want to purchase with detailed tracking (fully integrated with Django's Wishlist model and status updates)
+- **Goal Setting**: Set monthly savings targets to help achieve your financial objectives (using Django's Target model)
 - **Financial Analytics**: Advanced charts and visualizations to understand your spending habits
 
 ### User Experience
 - **Multi-Currency Support**: Support for multiple currencies with real-time exchange rates
 - **Responsive Design**: Optimized experience across desktop, tablet, and mobile devices
-- **Dark Mode**: Toggle between light and dark themes for comfortable viewing
 - **Enhanced Navigation**: Improved mobile navigation with better responsiveness
 - **Modern UI/UX**: Clean, intuitive interface with modern design patterns
 
 ### Security & Performance
-- **Advanced Security**: CSRF protection, JWT authentication, and enhanced security measures
+- **Advanced Security**: CSRF protection, JWT authentication, and enhanced security measures in Django
 - **Performance Optimized**: Fast loading times with React's efficient rendering and Django's robust backend
-- **Google OAuth**: Secure login with Google account integration
+- **Google OAuth**: Secure login with Google account integration via Django
 - **Data Backup**: Automated database backup system for data protection
 - **Docker Support**: Containerized deployment for easy setup and scalability
+- **Data Migration**: Includes a Django management command to migrate data from the old version (see `migrate_old_data.py`)
 
 ## 🖼️ Screenshots
 
@@ -65,7 +65,7 @@ A comprehensive financial management web application that helps you track transa
 ## 🔧 Technology Stack
 
 - **Frontend**: React, Vite, Tailwind CSS
-- **Backend**: Django REST Framework
+- **Backend**: Django REST Framework (with models for Transactions, NetWorth, Wishlist, etc.)
 - **Database**: PostgreSQL
 - **Deployment**: Docker, Docker Compose
 - **Authentication**: JWT, Google OAuth
