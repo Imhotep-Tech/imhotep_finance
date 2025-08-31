@@ -3,7 +3,7 @@
 [![Project Status: Active](https://img.shields.io/badge/Project%20Status-Active-green.svg)](https://github.com/yourusername/imhotep_finance)
 [![License](https://img.shields.io/badge/License-Dual-blue.svg)](LICENSE)
 
-A comprehensive financial management web application that helps you track transactions, manage deposits and withdrawals, create wishlists, and set financial goals with intelligent automation and advanced analytics.
+A comprehensive financial management web application that helps you track transactions, manage deposits and withdrawals, create wishlists, and set financial goals with intelligent automation and advanced analytics. Now powered by Django and React for enhanced performance, security, and scalability.
 
 ## 💰 Features
 
@@ -15,7 +15,7 @@ A comprehensive financial management web application that helps you track transa
 
 ### Automation & Intelligence
 - **Scheduled Transactions**: Set up automated monthly recurring transactions for bills, income, and regular expenses
-- **Smart Suggestions**: AI-powered category recommendations based on your transaction history and patterns
+- **Smart Suggestions**: Category recommendations based on your transaction history and patterns
 - **Error Handling**: Comprehensive error management system with user-friendly custom error pages
 
 ### Goal Setting & Planning
@@ -31,10 +31,11 @@ A comprehensive financial management web application that helps you track transa
 - **Modern UI/UX**: Clean, intuitive interface with modern design patterns
 
 ### Security & Performance
-- **Advanced Security**: CSRF protection and enhanced security measures
-- **Performance Optimized**: Fast loading times and optimized user experience
+- **Advanced Security**: CSRF protection, JWT authentication, and enhanced security measures
+- **Performance Optimized**: Fast loading times with React's efficient rendering and Django's robust backend
 - **Google OAuth**: Secure login with Google account integration
 - **Data Backup**: Automated database backup system for data protection
+- **Docker Support**: Containerized deployment for easy setup and scalability
 
 ## 🖼️ Screenshots
 
@@ -63,10 +64,66 @@ A comprehensive financial management web application that helps you track transa
 
 ## 🔧 Technology Stack
 
-- Frontend: Jinja syntax, Javascript, tailwindcss, Bootstrap
-- Backend: Flask
-- Database: MYSql
-- Deployment: Pythonanywhere
+- **Frontend**: React, Vite, Tailwind CSS
+- **Backend**: Django REST Framework
+- **Database**: PostgreSQL
+- **Deployment**: Docker, Docker Compose
+- **Authentication**: JWT, Google OAuth
+
+## 🚀 Quick Start
+
+### Prerequisites
+- **Docker & Docker Compose** - [Install Docker](https://docs.docker.com/get-docker/)
+- **Git** - [Install Git](https://git-scm.com/downloads)
+
+### Setup with Docker (Recommended)
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/Imhotep-Tech/imhotep_finance.git
+   cd imhotep_finance
+   ```
+
+2. **Set up environment variables**
+   Create `.env` files for backend and frontend as needed (adapt from your project structure).
+
+3. **Launch the application**
+   ```bash
+   docker compose up --build
+   ```
+
+   This will:
+   - Set up PostgreSQL database
+   - Build and run the Django backend API
+   - Build and run the React frontend
+   - Enable hot reloading for development
+
+4. **Access the application**
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:8000
+   - Django Admin: http://localhost:8000/admin/
+
+### Manual Setup (Alternative)
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/Imhotep-Tech/imhotep_finance.git
+   cd imhotep_finance
+   ```
+
+2. **Backend Setup (Django)**
+   - Install Python 3.11+
+   - Create virtual environment and install dependencies
+   - Set up PostgreSQL database
+   - Run migrations and start server
+
+3. **Frontend Setup (React)**
+   - Install Node.js 20+
+   - Install dependencies with `npm install`
+   - Start development server with `npm run dev`
+
+4. **Environment Variables**
+   Create `.env` files with necessary configurations (DATABASE_URL, SECRET_KEY, etc.).
 
 ## 👥 Contributing
 
@@ -93,36 +150,10 @@ We welcome contributions to Imhotep Financial Manager! Here's how you can contri
 
 ### Development Setup
 
-1. Clone the repository
-   ```
-   git clone https://github.com/Imhotep-Tech/imhotep_finance.git
-   cd imhotep_finance
-   ```
-
-2. Install dependencies
-   ```
-   pip install -r requirements.txt
-   ```
-
-3. Database Setup
-   - Create a MySQL or PostgreSQL database for the application
-   - Make sure you have a database user with appropriate permissions
-
-4. Environment Variables
-   Create a `.env` file in the root directory with the following variables:
-   ```
-   DATABASE_URL=mysql://username:password@localhost/database_name
-   MAIL_PASSWORD=your_email_service_password
-   EXCHANGE_API_KEY_PRIMARY=your_exchange_rate_api_key
-   SECRET_KEY=your_flask_secret_key
-   GOOGLE_CLIENT_ID=your_google_oauth_client_id
-   GOOGLE_CLIENT_SECRET=your_google_oauth_client_secret
-   ```
-
-5. Start the development server
-   ```
-   flask run --debug
-   ```
+Follow the Docker or manual setup instructions above. For Docker:
+- Hot reloading is enabled for live code changes
+- Volumes are mounted for instant updates
+- Debug mode is active for both frontend and backend
 
 ## 📝 Code of Conduct
 

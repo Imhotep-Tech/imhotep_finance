@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from ..utils.get_networth import get_networth
-from .utils.serializer import serialize_transaction
+from ..utils.serializer import serialize_transaction
 from rest_framework.response import Response
 from ..models import Transactions, NetWorth
 from datetime import datetime, date

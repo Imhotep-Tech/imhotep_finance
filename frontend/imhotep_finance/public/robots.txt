@@ -4,12 +4,15 @@ Allow: /login
 Allow: /register
 Allow: /forgot-password
 
+# Disallow backend API paths
+Disallow: /api/
+
+# Disallow authenticated frontend routes
 Disallow: /dashboard
-Disallow: /recipe-history
+Disallow: /show_trans
+Disallow: /show_scheduled_trans
+Disallow: /wishlist
+Disallow: /monthly-reports
 Disallow: /profile
-Disallow: /verify-email/
-Disallow: /verify-email-change/
-Disallow: /auth/google/callback
-Disallow: /reset-password
 
 Sitemap: https://imhotep-finance.vercel.app/sitemap.xml

@@ -74,6 +74,22 @@ def select_currencies(user):
 
     currency_all = [] #initialize currency list
     for item in currency_db: #iterate through currency results
-        currency_all.append(item['currency']) #add currency to list
+        currency_all.append(item.currency) #use attribute, not dict key
 
     return(currency_all) #return list of user currencies
+
+def get_allowed_currencies():
+    # Validate currency
+        return [
+            'USD', 'EUR', 'GBP', 'JPY', 'CAD', 'AUD', 'CHF', 'CNY', 'SEK', 'NZD', 'EGP', 'AED', 'SAR', 'KWD', 'QAR',
+            'BHD', 'OMR', 'JOD', 'LBP', 'SYP', 'INR', 'PKR', 'BDT', 'LKR', 'NPR', 'BTN', 'AFN', 'IRR', 'IQD', 'TRY',
+            'RUB', 'UAH', 'PLN', 'CZK', 'HUF', 'RON', 'BGN', 'HRK', 'RSD', 'MKD', 'ALL', 'BAM', 'MDL', 'GEL', 'AMD',
+            'AZN', 'KGS', 'KZT', 'UZS', 'TJS', 'TMT', 'MNT', 'KRW', 'THB', 'VND', 'LAK', 'KHR', 'MMK', 'IDR', 'MYR',
+            'SGD', 'PHP', 'BND', 'TWD', 'HKD', 'MOP', 'ZAR', 'BWP', 'NAD', 'SZL', 'LSL', 'ZMW', 'ZWL', 'MWK', 'TZS',
+            'UGX', 'KES', 'RWF', 'BIF', 'DJF', 'ERN', 'ETB', 'SOS', 'SCR', 'MUR', 'MGA', 'KMF', 'AOA', 'CDF', 'XAF',
+            'XOF', 'XPF', 'MAD', 'DZD', 'TND', 'LYD', 'SDG', 'SSP', 'NGN', 'GHS', 'SLE', 'LRD', 'GMD', 'GNF', 'SLL',
+            'CVE', 'STN', 'BRL', 'ARS', 'CLP', 'COP', 'PEN', 'BOB', 'PYG', 'UYU', 'GYD', 'SRD', 'VES', 'TTD', 'JMD',
+            'BBD', 'BSD', 'BZD', 'GTQ', 'HNL', 'NIO', 'CRC', 'PAB', 'CUP', 'HTG', 'DOP', 'MXN', 'XCD', 'AWG', 'ANG',
+            'FJD', 'PGK', 'SBD', 'VUV', 'WST', 'TOP', 'TVD', 'KID', 'CKD', 'FKP', 'GIP', 'GGP', 'IMP', 'JEP', 'SHP',
+            'ISK', 'NOK', 'DKK', 'FOK'
+        ]

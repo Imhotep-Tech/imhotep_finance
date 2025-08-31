@@ -119,7 +119,7 @@ const ShowTransactions = () => {
 
   return (
     <div
-      className="min-h-screen bg-chef-pattern"
+      className="min-h-screen overflow-y-auto pb-8 bg-chef-pattern"
       style={{
         background: 'linear-gradient(135deg, #eaf6f6 0%, #d6efee 50%, #1a3535 100%)',
       }}
@@ -134,7 +134,7 @@ const ShowTransactions = () => {
               </p>
             </div>
             <button
-              className="chef-button bg-green-600 text-white px-6 py-2 rounded-xl shadow hover:bg-green-700 transition"
+              className="chef-button bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white px-6 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
               onClick={() => setShowAddModal(true)}
             >
               <svg className="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -314,9 +314,6 @@ const ShowTransactions = () => {
               >
                 Prev
               </button>
-              <span className="mx-2 text-gray-700">
-                Page {pagination.page} of {pagination.num_pages}
-              </span>
               <button
                 className="chef-button-secondary px-3 py-1"
                 disabled={page >= pagination.num_pages}

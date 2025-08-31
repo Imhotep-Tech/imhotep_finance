@@ -27,6 +27,7 @@ services:
       - ./backend/imhotep_finance/.env
     volumes:
       - ./backend/imhotep_finance:/app
+      - ./backend/imhotep_finance/old_data:/old_data
     depends_on:
       db:
         condition: service_healthy
@@ -41,7 +42,6 @@ services:
       - VITE_API_URL=http://localhost:8000
     volumes:
       - ./frontend/imhotep_finance:/app
-      - /app/node_modules
     depends_on:
       - backend
 
