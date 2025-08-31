@@ -97,7 +97,7 @@ const MonthlyReports = () => {
       <div className="min-h-screen flex items-center justify-center bg-chef-pattern">
         <div className="text-center">
           <p className="text-red-600">{error}</p>
-          <Link to="/dashboard" className="mt-4 inline-block chef-button bg-gray-600 text-white px-4 py-2 rounded-xl">
+          <Link to="/dashboard" className="mt-4 inline-block chef-button bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white px-4 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
             Back to Dashboard
           </Link>
         </div>
@@ -124,7 +124,7 @@ const MonthlyReports = () => {
             </div>
             <Link
               to="/dashboard"
-              className="chef-button bg-gray-600 text-white px-6 py-2 rounded-xl shadow hover:bg-gray-700 transition"
+              className="chef-button bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white px-6 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
             >
               Back to Dashboard
             </Link>

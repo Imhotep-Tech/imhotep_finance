@@ -131,10 +131,14 @@ const Profile = () => {
   };
 
   const handleTargetChange = (e) => {
-    setTargetData({
-      ...targetData,
-      [e.target.name]: e.target.value,
-    });
+    const value = e.target.value;
+    // Only allow empty string or non-negative numbers (including 0)
+    if (value === '' || (!isNaN(value) && parseFloat(value) >= 0)) {
+      setTargetData({
+        ...targetData,
+        [e.target.name]: value,
+      });
+    }
     if (error) setError('');
     if (success) setSuccess('');
   };
@@ -220,8 +224,8 @@ const Profile = () => {
     setError('');
     setSuccess('');
 
-    if (!targetData.target || parseFloat(targetData.target) <= 0) {
-      setError('Please enter a valid target amount greater than 0.');
+    if (!targetData.target || parseFloat(targetData.target) < 0) {
+      setError('Please enter a valid target amount greater than or equal 0.');
       setLoading(false);
       return;
     }
@@ -330,7 +334,7 @@ const Profile = () => {
               className={`chef-button flex-1 ${
                 activeTab === 'profile'
                   ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white shadow-lg scale-105'
-                  : 'bg-white/70 text-gray-700 hover:bg-white/90 border border-gray-300'
+                  : 'bg-gradient-to-r from-[#eaf6f6] to-[#d6efee] text-[#366c6b] hover:bg-[#d6efee] border border-[#366c6b]/30'
               } flex items-center space-x-2 justify-center transition-all duration-200`}
               onClick={() => setActiveTab('profile')}
             >
@@ -343,7 +347,7 @@ const Profile = () => {
               className={`chef-button flex-1 ${
                 activeTab === 'password'
                   ? 'bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg scale-105'
-                  : 'bg-white/70 text-gray-700 hover:bg-white/90 border border-gray-300'
+                  : 'bg-gradient-to-r from-[#eaf6f6] to-[#d6efee] text-[#366c6b] hover:bg-[#d6efee] border border-[#366c6b]/30'
               } flex items-center space-x-2 justify-center transition-all duration-200`}
               onClick={() => setActiveTab('password')}
             >
@@ -356,7 +360,7 @@ const Profile = () => {
               className={`chef-button flex-1 ${
                 activeTab === 'currency'
                   ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg scale-105'
-                  : 'bg-white/70 text-gray-700 hover:bg-white/90 border border-gray-300'
+                  : 'bg-gradient-to-r from-[#eaf6f6] to-[#d6efee] text-[#366c6b] hover:bg-[#d6efee] border border-[#366c6b]/30'
               } flex items-center space-x-2 justify-center transition-all duration-200`}
               onClick={() => setActiveTab('currency')}
             >
@@ -369,7 +373,7 @@ const Profile = () => {
               className={`chef-button flex-1 ${
                 activeTab === 'target'
                   ? 'bg-gradient-to-r from-green-500 to-teal-500 text-white shadow-lg scale-105'
-                  : 'bg-white/70 text-gray-700 hover:bg-white/90 border border-gray-300'
+                  : 'bg-gradient-to-r from-[#eaf6f6] to-[#d6efee] text-[#366c6b] hover:bg-[#d6efee] border border-[#366c6b]/30'
               } flex items-center space-x-2 justify-center transition-all duration-200`}
               onClick={() => setActiveTab('target')}
             >
@@ -436,7 +440,7 @@ const Profile = () => {
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
+                    </svg>
                     </div>
                     <input
                       type="text"
@@ -457,7 +461,7 @@ const Profile = () => {
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
+                    </svg>
                     </div>
                     <input
                       type="text"
@@ -592,7 +596,7 @@ const Profile = () => {
                 <div className="flex items-center">
                   <svg className="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
+                </svg>
                   <span className="text-green-700 font-medium">{success}</span>
                 </div>
               </div>
@@ -720,8 +724,8 @@ const Profile = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className={`chef-button w-full ${loading 
-                    ? 'bg-gray-400 cursor-not-allowed' 
+                  className={`chef-button w-full ${loading
+                    ? 'bg-gray-400 cursor-not-allowed'
                     : 'text-white'
                   } flex items-center space-x-2 justify-center`}
                   style={
