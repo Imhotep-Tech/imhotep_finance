@@ -13,7 +13,6 @@ CREATE TABLE IF NOT EXISTS users (
     user_mail_verify VARCHAR(20) DEFAULT 'not_verified',
     favorite_currency VARCHAR(3) DEFAULT 'USD',
     user_photo_path VARCHAR(255) DEFAULT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ============================================
@@ -30,7 +29,6 @@ CREATE TABLE IF NOT EXISTS trans (
     trans_details TEXT,
     trans_details_link TEXT,
     category VARCHAR(100),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
@@ -42,8 +40,6 @@ CREATE TABLE IF NOT EXISTS networth (
     user_id INTEGER NOT NULL,
     currency VARCHAR(3) NOT NULL,
     total DECIMAL(15,2) DEFAULT 0.00,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     UNIQUE(user_id, currency)
 );
 
@@ -61,7 +57,6 @@ CREATE TABLE IF NOT EXISTS wishlist (
     wish_details TEXT,
     year INTEGER NOT NULL,
     trans_key INTEGER DEFAULT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     FOREIGN KEY (trans_key) REFERENCES trans(trans_key) ON DELETE SET NULL
 );
@@ -82,7 +77,6 @@ CREATE TABLE IF NOT EXISTS scheduled_trans (
     category VARCHAR(100),
     last_time_added DATE DEFAULT NULL,
     status BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
@@ -96,7 +90,6 @@ CREATE TABLE IF NOT EXISTS target (
     mounth INTEGER NOT NULL CHECK (mounth BETWEEN 1 AND 12), -- Note: keeping original column name "mounth"
     year INTEGER NOT NULL,
     score DECIMAL(15,2) DEFAULT 0.00,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     UNIQUE(user_id, mounth, year)
 );
