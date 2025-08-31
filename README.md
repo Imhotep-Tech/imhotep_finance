@@ -1,9 +1,10 @@
-# Imhotep Financial Manager (Under Development)
+# Imhotep Financial Manager
 
-[![Project Status: Active](https://img.shields.io/badge/Project%20Status-Active-green.svg)](https://github.com/yourusername/imhotep_finance)
+[![Project Status: Active](https://img.shields.io/badge/Project%20Status-Active-green.svg)](https://github.com/Imhotep-Tech/imhotep_finance)
 [![License](https://img.shields.io/badge/License-Dual-blue.svg)](LICENSE)
 
 A comprehensive financial management web application that helps you track transactions, manage deposits and withdrawals, create wishlists, and set financial goals with intelligent automation and advanced analytics. Now powered by Django and React for enhanced performance, security, and scalability.
+
 
 ## 💰 Features
 
@@ -11,7 +12,6 @@ A comprehensive financial management web application that helps you track transa
 - **Financial Tracking**: Easily deposit and withdraw funds with detailed transaction history
 - **Smart Categories**: Enhanced transaction categorization with intelligent suggestions based on your most frequent categories
 - **Transaction Analysis**: View and analyze your spending patterns with detailed pie charts for expenses and income categories
-- **Data Export**: Export your transaction data to CSV format for external analysis and record-keeping
 
 ### Automation & Intelligence
 - **Scheduled Transactions**: Set up automated monthly recurring transactions for bills, income, and regular expenses
@@ -41,23 +41,23 @@ A comprehensive financial management web application that helps you track transa
 
 <div align="center">
   <!--Main Page-->
-  <img src="https://github.com/user-attachments/assets/34e1e1c5-b6c3-4765-bfd7-8a0ac9af862f" alt="Goals Setting" width="700"/>
+  <img width="1730" height="889" alt="Screenshot from 2025-08-31 12-07-04" src="https://github.com/user-attachments/assets/c2055670-8cbd-44fc-a349-372ab5be0f8a" />
   <p><em>Landing Page</em></p>
 
   <!--Login-->
-  <img src="https://github.com/user-attachments/assets/b095332b-e3a9-45ba-886e-2a197dda2ba8" alt="Goals Setting" width="700"/>
+  <img width="1727" height="969" alt="Screenshot from 2025-08-31 12-07-18" src="https://github.com/user-attachments/assets/5b60f4f1-d90d-4842-9739-8dad34be524f" />
   <p><em>Login Page</em></p>
 
   <!--Dashboard-->
-  <img src="https://github.com/user-attachments/assets/7fc74e14-1468-4d69-9aef-d3fd882f724f" alt="Goals Setting" width="700"/>
+  <img width="1727" height="969" alt="Screenshot from 2025-08-31 12-28-37" src="https://github.com/user-attachments/assets/235f3c77-73af-4b56-9162-032740b1ccb0" />
   <p><em>Dashboard with transaction overview</em></p>
 
   <!--Transactions -->
-  <img src="https://github.com/user-attachments/assets/1aa2f117-83af-4d31-ad22-b050cea258dd" alt="Transaction History" width="700"/>
-  <p><em>Transaction history and analytics</em></p>
+  <img width="1727" height="969" alt="Screenshot from 2025-08-31 12-30-19" src="https://github.com/user-attachments/assets/5ce73361-c498-4c85-b9fe-5776e208e2c3" />
+  <p><em>Transaction history</em></p>
   
   <!--Monthly Reports -->
-  <img src="https://github.com/user-attachments/assets/02a243a5-423b-42b7-85df-678a6b6720ee" alt="Dashboard View" width="700"/>
+  <img width="1727" height="969" alt="Screenshot from 2025-08-31 12-30-25" src="https://github.com/user-attachments/assets/97ca7695-2554-40fa-8327-25bc8f3e89b7" />
   <p><em>Monthly Reports</em></p>
   
 </div>
