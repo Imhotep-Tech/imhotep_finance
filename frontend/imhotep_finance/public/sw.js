@@ -11,7 +11,7 @@ const STATIC_CACHE_URLS = [
   '/show_scheduled_trans',
   '/show-target-history',
   '/monthly-reports',
-  '/favicon.png',
+  '/imhotep_finance.png',
   '/manifest.json'
 ];
 
