@@ -1,28 +1,25 @@
 {
-  "name": "Imhotep Finance - Personal Finance Management App",
+  "name": "Imhotep Finance",
   "short_name": "Imhotep Finance",
-  "description": "Manage your finances efficiently with Imhotep Finance. Track transactions, monitor net worth, and achieve your financial goals.",
-  "theme_color": "#007bff",
-  "background_color": "#ffffff",
+  "description": "Manage your finances efficiently with Imhotep Financial Manager",
+  "start_url": "/",
   "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#366c6b",
+  "orientation": "portrait-primary",
   "scope": "/",
-  "start_url": "/login",
-  "orientation": "portrait",
-  "categories": ["productivity", "utilities", "finance management"],
-  "lang": "en",
-  "dir": "ltr",
   "icons": [
     {
-      "src": "/favicon.png",
-      "sizes": "32x32",
+      "src": "/icon-192.png",
+      "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icons/icon-monochrome.png",
+      "src": "/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "monochrome"
+      "purpose": "any maskable"
     }
   ],
   "shortcuts": [
@@ -31,48 +28,22 @@
       "short_name": "Dashboard",
       "description": "View your financial dashboard",
       "url": "/dashboard",
-      "icons": [
-        {
-          "src": "/favicon.png",
-          "sizes": "192x192"
-        }
-      ]
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "Transactions",
       "short_name": "Transactions",
-      "description": "View and manage your transactions",
+      "description": "View your transactions",
       "url": "/show_trans",
-      "icons": [
-        {
-          "src": "/favicon.png",
-          "sizes": "192x192"
-        }
-      ]
-    },
-    {
-      "name": "Net Worth Details",
-      "short_name": "Net Worth",
-      "description": "Monitor your net worth details",
-      "url": "/show_networth_details",
-      "icons": [
-        {
-          "src": "/favicon.png",
-          "sizes": "192x192"
-        }
-      ]
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "Wishlist",
       "short_name": "Wishlist",
-      "description": "Manage your financial wishlist",
+      "description": "Manage your wishlist",
       "url": "/wishlist",
-      "icons": [
-        {
-          "src": "/favicon.png",
-          "sizes": "192x192"
-        }
-      ]
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     }
-  ]
+  ],
+  "categories": ["finance", "productivity"]
 }
