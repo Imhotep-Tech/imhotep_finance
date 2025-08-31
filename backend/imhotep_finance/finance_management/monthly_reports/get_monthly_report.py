@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from datetime import datetime
 from .utils.calculate_user_report import calculate_user_report
+import calendar
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -19,10 +20,8 @@ def get_monthly_reports(request):
         start_date = now.replace(day=1).date() #set start date to first day of month
         
         # End date: first day of next month
-        if now.month == 12: #check if december
-            end_date = now.replace(year=now.year + 1, month=1, day=1).date() #set to january next year
-        else:
-            end_date = now.replace(month=now.month + 1, day=1).date() #set to first day next month
+        last_day = calendar.monthrange(now.year, now.month)[1]  # returns (weekday, number_of_days)
+        end_date = now.replace(day=last_day).date()
 
         (
             user_withdraw_on_range,
