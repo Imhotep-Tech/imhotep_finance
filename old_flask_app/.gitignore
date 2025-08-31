@@ -1,8 +1,0 @@
-flask_session/
-__pycache__/
-.vscode/
-electron_app/node_modules/
-electron_app/dist/
-.env
-static/user_photo/
-task.py
