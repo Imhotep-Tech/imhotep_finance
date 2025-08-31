@@ -79,7 +79,7 @@ class Command(BaseCommand):
                 amount=float(amount) if amount else 0.0,
                 currency=(currency or "USD")[:4],
                 date=date or timezone.now().date(),
-                trans_status=status.capitalize() if status else "Deposit",
+                trans_status=status.lower() if status else "deposit",
                 trans_details=details,
                 category=category,
             )

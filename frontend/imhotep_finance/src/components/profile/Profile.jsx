@@ -131,10 +131,14 @@ const Profile = () => {
   };
 
   const handleTargetChange = (e) => {
-    setTargetData({
-      ...targetData,
-      [e.target.name]: e.target.value,
-    });
+    const value = e.target.value;
+    // Only allow empty string or non-negative numbers (including 0)
+    if (value === '' || (!isNaN(value) && parseFloat(value) >= 0)) {
+      setTargetData({
+        ...targetData,
+        [e.target.name]: value,
+      });
+    }
     if (error) setError('');
     if (success) setSuccess('');
   };
@@ -220,8 +224,8 @@ const Profile = () => {
     setError('');
     setSuccess('');
 
-    if (!targetData.target || parseFloat(targetData.target) <= 0) {
-      setError('Please enter a valid target amount greater than 0.');
+    if (!targetData.target || parseFloat(targetData.target) < 0) {
+      setError('Please enter a valid target amount greater than or equal 0.');
       setLoading(false);
       return;
     }
@@ -436,7 +440,7 @@ const Profile = () => {
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
+                    </svg>
                     </div>
                     <input
                       type="text"
@@ -457,7 +461,7 @@ const Profile = () => {
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
+                    </svg>
                     </div>
                     <input
                       type="text"
@@ -720,8 +724,8 @@ const Profile = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className={`chef-button w-full ${loading 
-                    ? 'bg-gray-400 cursor-not-allowed' 
+                  className={`chef-button w-full ${loading
+                    ? 'bg-gray-400 cursor-not-allowed'
                     : 'text-white'
                   } flex items-center space-x-2 justify-center`}
                   style={
