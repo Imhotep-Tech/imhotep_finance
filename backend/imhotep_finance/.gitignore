@@ -1,5 +1,4 @@
 __pycache__/
 .env
-.env.docker
 migrations/
 old_data/
