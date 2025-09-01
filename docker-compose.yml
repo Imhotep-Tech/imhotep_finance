@@ -24,7 +24,7 @@ services:
     ports:
       - "8000:8000"
     env_file:
-      - ./backend/imhotep_finance/.env
+      - ./backend/imhotep_finance/.env.docker
     volumes:
       - ./backend/imhotep_finance:/app
       - ./backend/imhotep_finance/old_data:/old_data
@@ -42,6 +42,7 @@ services:
       - VITE_API_URL=http://localhost:8000
     volumes:
       - ./frontend/imhotep_finance:/app
+      - /app/node_modules
     depends_on:
       - backend
 
