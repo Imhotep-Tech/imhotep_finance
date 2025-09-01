@@ -165,14 +165,13 @@ AUTH_USER_MODEL = 'accounts.User'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DATABASE_NAME', default='imhotep_finance_db'),
-        'USER': config('DATABASE_USER', default='imhotep_finance_user'),
-        'PASSWORD': config('DATABASE_PASSWORD', default='imhotep_finance_password'),
-        'HOST': config('DATABASE_HOST', default='localhost'), 
+        'NAME': config('DATABASE_NAME'),
+        'USER': config('DATABASE_USER'),
+        'PASSWORD': config('DATABASE_PASSWORD'),
+        'HOST': config('DATABASE_HOST'), 
         'PORT': '5432',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
