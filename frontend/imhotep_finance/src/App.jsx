@@ -22,6 +22,7 @@ import ShowWishlist from './components/main/ShowWishlist'
 import ShowScheduledTransactions from './components/main/ShowScheduledTransactions'
 import ShowTargetHistory from './components/main/ShowTargetHistory'
 import MonthlyReports from './components/main/MonthlyReports'
+import Version from './components/common/Version'
 
 // PWA Components
 import InstallPrompt from './components/pwa/InstallPrompt';
@@ -150,6 +151,10 @@ function App() {
                   <MonthlyReports />
                 </ProtectedRoute>
               }
+            />
+            <Route 
+              path="/version-history" 
+              element={<Version />} 
             />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
