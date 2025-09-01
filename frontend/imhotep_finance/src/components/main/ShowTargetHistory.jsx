@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Footer from '../common/Footer';
+import Pagination from '../common/Pagination';
 import { Link } from 'react-router-dom';
 
 const ShowTargetHistory = () => {
@@ -174,25 +175,16 @@ const ShowTargetHistory = () => {
               </div>
             </>
           )}
-          {/* Pagination */}
-          {pagination.num_pages > 1 && (
-            <div className="flex justify-center items-center mt-6 gap-2">
-              <button
-                className="chef-button-secondary px-3 py-1"
-                disabled={page <= 1}
-                onClick={() => handlePageChange(page - 1)}
-              >
-                Prev
-              </button>
-              <button
-                className="chef-button-secondary px-3 py-1"
-                disabled={page >= pagination.num_pages}
-                onClick={() => handlePageChange(page + 1)}
-              >
-                Next
-              </button>
-            </div>
-          )}
+          
+          {/* New Pagination Component */}
+          <Pagination
+            currentPage={page}
+            totalPages={pagination.num_pages || 1}
+            onPageChange={handlePageChange}
+            showInfo={true}
+            totalItems={pagination.total_count}
+            itemsPerPage={pagination.per_page || 10}
+          />
         </div>
       </div>
       <Footer />

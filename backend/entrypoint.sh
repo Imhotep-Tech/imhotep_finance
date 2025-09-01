@@ -29,7 +29,7 @@ fi
 # Run migrations
 echo "Running database migrations..."
 python manage.py makemigrations accounts
-python manage.py makemigrations task_management
+python manage.py makemigrations finance_management
 python manage.py makemigrations
 python manage.py migrate
 
