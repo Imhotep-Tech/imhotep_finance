@@ -84,12 +84,11 @@ def get_score(request):
     total_favorite_currency_withdraw, _ = convert_to_fav_currency(request, currency_totals_withdraw)
 
     # Calculate score
-    score = total_favorite_currency_deposit - total_favorite_currency_withdraw
-    remaining = target_obj.target - score
+    score = (total_favorite_currency_deposit - target_obj.target ) - total_favorite_currency_withdraw
 
-    if remaining == 0:
+    if score == 0:
         score_txt = "On target"
-    elif remaining > 0:
+    elif score > 0:
         score_txt = "Below target"
     else:
         score_txt = "Above target"
