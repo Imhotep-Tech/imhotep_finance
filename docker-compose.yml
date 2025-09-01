@@ -24,7 +24,7 @@ services:
     ports:
       - "8000:8000"
     env_file:
-      - ./backend/imhotep_finance/.env.docker
+      - ./backend/imhotep_finance/.env
     volumes:
       - ./backend/imhotep_finance:/app
       - ./backend/imhotep_finance/old_data:/old_data
