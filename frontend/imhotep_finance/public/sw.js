@@ -12,11 +12,12 @@ const STATIC_CACHE_URLS = [
   '/show-target-history',
   '/monthly-reports',
   '/imhotep_finance.png',
+  '/icon-monochrome.png',
   '/manifest.json'
 ];
 
-const RUNTIME_CACHE = 'imhotep-tasks-runtime-v1';
-const API_CACHE = 'imhotep-tasks-api-v1';
+const RUNTIME_CACHE = 'imhotep-finance-runtime-v1';
+const API_CACHE = 'imhotep-finance-api-v1';
 
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
@@ -352,8 +353,8 @@ self.addEventListener('sync', (event) => {
 self.addEventListener('push', (event) => {
   const options = {
     body: event.data ? event.data.text() : 'New financial update available!',
-    icon: '/imhotep_tasks.png',
-    badge: '/imhotep_tasks.png',
+    icon: '/imhotep_finance.png',
+    badge: '/imhotep_finance.png',
     vibrate: [100, 50, 100],
     data: {
       dateOfArrival: Date.now(),
@@ -363,12 +364,12 @@ self.addEventListener('push', (event) => {
       {
         action: 'explore',
         title: 'View Update',
-        icon: '/imhotep_tasks.png'
+        icon: '/imhotep_finance.png'
       },
       {
         action: 'close',
         title: 'Close',
-        icon: '/imhotep_tasks.png'
+        icon: '/imhotep_finance.png'
       }
     ]
   };
