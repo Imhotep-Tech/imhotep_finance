@@ -40,9 +40,7 @@ jobs:
     - name: Set up Database (SQLite for CI)
       run: |
         cd backend/imhotep_finance
-        # Override DATABASES to use SQLite for tests
-        export DATABASE_URL="sqlite:///test.db"
-        python manage.py migrate
+        python manage.py migrate --settings=imhotep_finance.settings_test
     - name: Run Tests
       run: |
         cd backend/imhotep_finance
