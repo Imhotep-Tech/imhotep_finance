@@ -25,6 +25,24 @@ jobs:
         cd backend/imhotep_finance
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+    - name: Set up Environment Variables
+      run: |
+        cd backend/imhotep_finance
+        cp .env.example .env
+        # Override with dummy values for CI (replace placeholders)
+        echo "DEBUG=True" >> .env
+        echo "SECRET_KEY=django-insecure-test-key-for-ci-only" >> .env
+        echo "DATABASE_NAME=test_db" >> .env
+        echo "DATABASE_USER=test_user" >> .env
+        echo "DATABASE_PASSWORD=test_pass" >> .env
+        echo "DATABASE_HOST=localhost" >> .env
+        # Add other required vars as needed
+    - name: Set up Database (SQLite for CI)
+      run: |
+        cd backend/imhotep_finance
+        # Override DATABASES to use SQLite for tests
+        export DATABASE_URL="sqlite:///test.db"
+        python manage.py migrate
     - name: Run Tests
       run: |
         cd backend/imhotep_finance
