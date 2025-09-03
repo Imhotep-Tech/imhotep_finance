@@ -12,19 +12,25 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+
+    - name: Prepare environment file
+      run: cp backend/imhotep_finance/.env.example backend/imhotep_finance/.env
+
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
+
     - name: Build Docker images
       run: docker compose build
+
     - name: Start database
       run: docker compose up -d db
+
     - name: Run Django migrations
       run: docker compose run --rm backend python manage.py migrate
+
     - name: Run Django tests
       run: docker compose run --rm backend python manage.py test finance_management.tests
+
     - name: Tear down services
       if: always()
       run: docker compose down
-    - name: Run Tests
-      run: |
-        python manage.py test
