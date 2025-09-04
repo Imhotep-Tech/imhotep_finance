@@ -92,9 +92,9 @@ def update_transactions(request, trans_id):
         transaction.currency = currency
         transaction.trans_status = trans_status
         transaction.save()
-    except Exception as e:
+    except Exception:
         return Response(
-            {'error': f'Error happened while saving: {str(e)}'},
+            {'error': f'Error happened while saving'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
@@ -104,7 +104,7 @@ def update_transactions(request, trans_id):
         netWorth.save()
     except Exception as e:
         return Response(
-            {'error': f'Error happened while updating netWorth: {str(e)}'},
+            {'error': f'Error happened while updating netWorth'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 

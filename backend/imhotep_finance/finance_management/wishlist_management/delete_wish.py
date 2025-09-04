@@ -26,9 +26,9 @@ def delete_wish(request, wish_id):
 
     try:
         wish_db.delete()
-    except Exception as e:
+    except Exception:
         return Response(
-            {'error': f'Error happened while deleting: {str(e)}'},
+            {'error': f'Error happened while deleting'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 

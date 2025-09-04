@@ -22,9 +22,9 @@ def update_scheduled_trans_status(request, scheduled_trans_id):
     try:
         scheduled_trans.status = new_status
         scheduled_trans.save()
-    except Exception as e:
+    except Exception:
         return Response(
-            {'error': f'Error happened while updating netWorth: {str(e)}'},
+            {'error': f'Error happened while updating netWorth'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
     

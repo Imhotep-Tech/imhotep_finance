@@ -46,8 +46,8 @@ def get_wishlist(request):
             "year": year
         }
         return Response(response_data, status=status.HTTP_200_OK)
-    except Exception as e:
+    except Exception:
         return Response(
-            {'error': f'Error Happened: {str(e)}'},
+            {'error': f'Error Happened'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )

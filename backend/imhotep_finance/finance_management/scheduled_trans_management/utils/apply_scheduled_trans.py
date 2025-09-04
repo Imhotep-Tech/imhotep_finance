@@ -117,9 +117,9 @@ def apply_scheduled_transactions_fn(user):
 			"errors": errors_list,
 		}
 
-	except Exception as e:
+	except Exception:
 		return {
 			"success": False,
 			"applied_count": 0,
-			"errors": [f"Unexpected server error: {str(e)}"],
+			"errors": [f"Unexpected server error"],
 		}

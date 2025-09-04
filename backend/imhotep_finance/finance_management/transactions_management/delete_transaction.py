@@ -43,9 +43,9 @@ def delete_transaction(request, trans_id):
         if wish:
             wish.status = False
             wish.save()
-    except Exception as e:
+    except Exception:
         return Response(
-            {'error': f'Error happened while updating wish: {str(e)}'},
+            {'error': f'Error happened while updating wish'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
         
@@ -53,7 +53,7 @@ def delete_transaction(request, trans_id):
         trans_db.delete()
     except Exception as e:
         return Response(
-            {'error': f'Error happened while deleting: {str(e)}'},
+            {'error': f'Error happened while deleting'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
@@ -63,7 +63,7 @@ def delete_transaction(request, trans_id):
         netWorth.save()
     except Exception as e:
         return Response(
-            {'error': f'Error happened while updating netWorth: {str(e)}'},
+            {'error': f'Error happened while updating netWorth'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 

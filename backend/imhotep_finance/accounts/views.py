@@ -40,9 +40,9 @@ def change_favorite_currency(request):
     try:
         user.favorite_currency = fav_currency
         user.save()
-    except Exception as e:
+    except Exception:
             return Response(
-                {'error': f'Failed to save transaction: {str(e)}'},
+                {'error': f'Failed to save transaction'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
     
