@@ -56,9 +56,9 @@ def update_wish(request, wish_id):
         wish.wish_details=wish_details
         wish.link=link
         wish.save()
-    except Exception as e:
+    except Exception:
         return Response(
-            {'error': f'Error happened while saving: {str(e)}'},
+            {'error': f'Error happened while saving'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 

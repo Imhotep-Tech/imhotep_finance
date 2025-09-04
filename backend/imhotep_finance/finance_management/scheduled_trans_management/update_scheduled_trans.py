@@ -49,9 +49,9 @@ def update_scheduled_transactions(request, scheduled_trans_id):
         scheduled_transaction.category = category
         scheduled_transaction.currency = currency
         scheduled_transaction.save()
-    except Exception as e:
+    except Exception:
         return Response(
-            {'error': f'Error happened while saving: {str(e)}'},
+            {'error': f'Error happened while saving'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 

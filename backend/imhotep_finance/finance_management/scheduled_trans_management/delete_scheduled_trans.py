@@ -15,9 +15,9 @@ def delete_scheduled_trans(request, scheduled_trans_id):
 
     try:
         scheduled_trans.delete()
-    except Exception as e:
+    except Exception:
         return Response(
-            {'error': f'Error happened while deleting: {str(e)}'},
+            {'error': f'Error happened while deleting'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 

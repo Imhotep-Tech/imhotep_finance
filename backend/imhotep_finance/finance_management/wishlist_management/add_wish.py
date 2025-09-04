@@ -53,9 +53,9 @@ def add_wish(request):
                 link=link,
             )
             user_wish.save()
-        except Exception as e:
+        except Exception:
             return Response(
-                {'error': f'Failed to save wish: {str(e)}'},
+                {'error': f'Failed to save wish'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
@@ -63,9 +63,9 @@ def add_wish(request):
             "success": True,
         }, status=status.HTTP_200_OK)
 
-    except Exception as e:
+    except Exception:
         return Response(
-            {'error': f'Error Happened: {str(e)}'},
+            {'error': f'Error Happened'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
     

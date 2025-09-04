@@ -147,9 +147,9 @@ def google_auth(request):
                 'is_new_user': True
             })
 
-    except Exception as e:
+    except Exception:
         return Response(
-            {'error': f'An error occurred during Google authentication: {str(e)}'}, 
+            {'error': f'An error occurred during Google authentication'}, 
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 

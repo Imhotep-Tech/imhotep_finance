@@ -38,9 +38,9 @@ def get_score(request):
                 month=current_month,
                 year=current_year,
             )
-        except Exception as e:
+        except Exception:
             return Response(
-                {'error': f'Failed to save new target: {str(e)}'},
+                {'error': f'Failed to save new target'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
@@ -97,9 +97,9 @@ def get_score(request):
     try:
         target_obj.score = score
         target_obj.save()
-    except Exception as e:
+    except Exception:
         return Response(
-            {'error': f'Error saving score: {str(e)}'},
+            {'error': f'Error saving score'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 

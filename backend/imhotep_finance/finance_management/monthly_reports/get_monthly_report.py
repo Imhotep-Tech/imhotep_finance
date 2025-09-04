@@ -43,8 +43,8 @@ def get_monthly_reports(request):
             "favorite_currency": user.favorite_currency or 'USD'  # Add favorite currency
         }
         return Response(response_data, status=status.HTTP_200_OK)
-    except Exception as e:
+    except Exception:
         return Response(
-            {'error': f'Error Happened: {str(e)}'},
+            {'error': f'Error Happened'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )

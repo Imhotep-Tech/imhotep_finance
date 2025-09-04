@@ -72,9 +72,9 @@ def update_wish_status(request, wish_id):
             if trans_wish:
                 trans_wish.delete()
                 wish.transaction = None
-        except Exception as e:
+        except Exception:
             return Response(
-                {'error': f'Error happened while Deleting the transaction: {str(e)}'},
+                {'error': f'Error happened while Deleting the transaction'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
         
@@ -83,18 +83,18 @@ def update_wish_status(request, wish_id):
     try:
         netWorth.total = new_total
         netWorth.save()
-    except Exception as e:
+    except Exception:
         return Response(
-            {'error': f'Error happened while updating netWorth: {str(e)}'},
+            {'error': f'Error happened while updating netWorth'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
     try:
         wish.status = new_status
         wish.save()
-    except Exception as e:
+    except Exception:
         return Response(
-                {'error': f'Error happened while updating wish: {str(e)}'},
+                {'error': f'Error happened while updating wish'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 

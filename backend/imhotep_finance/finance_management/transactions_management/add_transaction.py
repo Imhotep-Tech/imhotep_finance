@@ -80,9 +80,9 @@ def add_transactions(request):
                 trans_details=trans_details
             )
             user_transaction.save()
-        except Exception as e:
+        except Exception:
             return Response(
-                {'error': f'Failed to save transaction: {str(e)}'},
+                {'error': f'Failed to save transaction'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
@@ -106,9 +106,9 @@ def add_transactions(request):
             "networth": get_networth(request)
         }, status=status.HTTP_200_OK)
 
-    except Exception as e:
+    except Exception:
         return Response(
-            {'error': f'Error Happened: {str(e)}'},
+            {'error': f'Error Happened'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
