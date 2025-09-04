@@ -87,9 +87,9 @@ def register_view(request):
                 last_name=last_name
             )
             user.save()
-        except Exception as create_error:
+        except Exception:
             return Response(
-                {'error': f'Failed to create user: {str(create_error)}'}, 
+                {'error': f'Failed to create user'}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
