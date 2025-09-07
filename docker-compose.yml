@@ -8,14 +8,17 @@ services:
       POSTGRES_USER: imhotep_finance_user
       POSTGRES_PASSWORD: imhotep_finance_password
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data:Z
     ports:
-      - "5433:5432"  # External port 5433 maps to internal port 5432
+      - "5433:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U imhotep_finance_user -d imhotep_finance_db"]
       interval: 5s
       timeout: 5s
       retries: 5
+    security_opt:
+      - seccomp=unconfined
+      - label=disable
 
   backend:
     build:
@@ -26,11 +29,14 @@ services:
     env_file:
       - ./backend/imhotep_finance/.env
     volumes:
-      - ./backend/imhotep_finance:/app
-      - ./backend/imhotep_finance/old_data:/old_data
+      - ./backend/imhotep_finance:/app:Z
+      - ./backend/imhotep_finance/old_data:/old_data:Z
     depends_on:
       db:
         condition: service_healthy
+    security_opt:
+      - seccomp=unconfined
+      - label=disable
 
   frontend:
     build:
@@ -41,10 +47,13 @@ services:
     environment:
       - VITE_API_URL=http://localhost:8000
     volumes:
-      - ./frontend/imhotep_finance:/app
+      - ./frontend/imhotep_finance:/app:Z
       - /app/node_modules
     depends_on:
       - backend
+    security_opt:
+      - seccomp=unconfined
+      - label=disable
 
 volumes:
   postgres_data:
