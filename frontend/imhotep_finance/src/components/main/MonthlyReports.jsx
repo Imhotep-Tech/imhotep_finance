@@ -77,7 +77,7 @@ const MonthlyReports = () => {
     maintainAspectRatio: false,
     plugins: {
       legend: { position: 'bottom' },
-      tooltip: { callbacks: { label: (context) => `${context.label}: ${context.parsed}%` } },
+      tooltip: { callbacks: { label: (context) => `${context.label}: ${context.parsed.toFixed(2)} ${favoriteCurrency}` } },
     },
   };
 
