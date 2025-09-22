@@ -27,7 +27,6 @@ def calculate_user_report(start_date, end_date, user, request):
         )
 
         total_withdraw = 0.0
-
         # Convert withdrawals to favorite currency
         for trans in user_withdraw_on_range:
             withdraw_totals = {}
@@ -42,6 +41,19 @@ def calculate_user_report(start_date, end_date, user, request):
             else:
                 trans["converted_amount"] = 0
             total_withdraw += trans["converted_amount"]
+
+        # Concatenate Withdraw transactions on the categories
+        withdraw_categories = {}
+        for trans in user_withdraw_on_range:
+            category = trans["category"] or "Uncategorized"
+            if category not in withdraw_categories:
+                withdraw_categories[category] = trans["converted_amount"]
+            else:
+                withdraw_categories[category] += trans["converted_amount"]
+        user_withdraw_on_range = [
+            {"category": category, "converted_amount": amount}
+            for category, amount in withdraw_categories.items()
+        ]
 
         total_deposit = 0.0
         # Convert deposits to favorite currency
@@ -59,6 +71,19 @@ def calculate_user_report(start_date, end_date, user, request):
                 trans["converted_amount"] = 0
             total_deposit += trans["converted_amount"]
 
+        # Concatenate Deposit transactions on the categories
+        deposit_categories = {}
+        for trans in user_deposit_on_range:
+            category = trans["category"] or "Uncategorized"
+            if category not in deposit_categories:
+                deposit_categories[category] = trans["converted_amount"]
+            else:
+                deposit_categories[category] += trans["converted_amount"]
+        user_deposit_on_range = [
+            {"category": category, "converted_amount": amount}
+            for category, amount in deposit_categories.items()
+        ]
+         
         # Calculate percentages
         withdraw_percentages = []
         deposit_percentages = []
@@ -74,7 +99,6 @@ def calculate_user_report(start_date, end_date, user, request):
                 round((trans["converted_amount"] / total_deposit) * 100, 1)
                 for trans in user_deposit_on_range
             ]
-        
         return user_withdraw_on_range, user_deposit_on_range, withdraw_percentages, deposit_percentages, total_withdraw or 0.0, total_deposit or 0.0
         
     except Exception as e:

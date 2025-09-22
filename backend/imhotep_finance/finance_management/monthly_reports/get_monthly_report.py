@@ -34,18 +34,14 @@ def get_monthly_reports(request):
         response_data = {
             "user_withdraw_on_range": [
                 {
-                    "category": item['category'] or "Uncategorized",
-                    "original_amount": float(item['amount']),
-                    "original_currency": item['currency'],
+                    "category": item['category'],
                     "converted_amount": float(item['converted_amount']),
                 }
                 for item in user_withdraw_on_range
             ],
             "user_deposit_on_range": [
                 {
-                    "category": item['category'] or "Uncategorized",
-                    "original_amount": float(item['amount']),
-                    "original_currency": item['currency'],
+                    "category": item['category'],
                     "converted_amount": float(item['converted_amount']),
                 }
                 for item in user_deposit_on_range
