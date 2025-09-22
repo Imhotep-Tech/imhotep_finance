@@ -22,7 +22,6 @@ def get_monthly_reports(request):
         # End date: first day of next month
         last_day = calendar.monthrange(now.year, now.month)[1]  # returns (weekday, number_of_days)
         end_date = now.replace(day=last_day).date()
-
         (
             user_withdraw_on_range,
             user_deposit_on_range,
@@ -30,21 +29,38 @@ def get_monthly_reports(request):
             deposit_percentages,
             total_withdraw,
             total_deposit,
-        ) = calculate_user_report(start_date, end_date, user) #calculate monthly report data
+        ) = calculate_user_report(start_date, end_date, user, request) #calculate monthly report data
 
         response_data = {
-            "user_withdraw_on_range": user_withdraw_on_range, 
-            "user_deposit_on_range": user_deposit_on_range,
+            "user_withdraw_on_range": [
+                {
+                    "category": item['category'] or "Uncategorized",
+                    "original_amount": float(item['amount']),
+                    "original_currency": item['currency'],
+                    "converted_amount": float(item['converted_amount']),
+                }
+                for item in user_withdraw_on_range
+            ],
+            "user_deposit_on_range": [
+                {
+                    "category": item['category'] or "Uncategorized",
+                    "original_amount": float(item['amount']),
+                    "original_currency": item['currency'],
+                    "converted_amount": float(item['converted_amount']),
+                }
+                for item in user_deposit_on_range
+            ],
             "withdraw_percentages": withdraw_percentages,
             "deposit_percentages": deposit_percentages,
-            "total_withdraw": total_withdraw,
-            "total_deposit": total_deposit,
+            "total_withdraw": float(total_withdraw) if total_withdraw is not None else 0.0,
+            "total_deposit": float(total_deposit) if total_deposit is not None else 0.0,
             "current_month": now.strftime("%B %Y"),
             "favorite_currency": user.favorite_currency or 'USD'  # Add favorite currency
         }
         return Response(response_data, status=status.HTTP_200_OK)
-    except Exception:
+    except Exception as e:
+        print(f"Monthly report error: {e}")  # Add detailed error logging
         return Response(
-            {'error': f'Error Happened'},
+            {'error': f'Error in generating monthly report'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )

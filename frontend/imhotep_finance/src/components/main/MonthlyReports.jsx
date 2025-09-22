@@ -50,10 +50,10 @@ const MonthlyReports = () => {
 
   // Prepare chart data for expenses
   const expenseChartData = {
-    labels: data?.user_withdraw_on_range?.map(item => item.effective_category) || [],
+    labels: data?.user_withdraw_on_range?.map(item => item.category) || [],
     datasets: [
       {
-        data: data?.user_withdraw_on_range?.map(item => item.total_amount) || [],
+        data: data?.user_withdraw_on_range?.map(item => item.converted_amount) || [],
         backgroundColor: data?.user_withdraw_on_range?.map((_, index) => `hsl(${0 + (index * 15)}, 70%, 50%)`) || [],
         borderWidth: 1,
       },
@@ -62,10 +62,10 @@ const MonthlyReports = () => {
 
   // Prepare chart data for income
   const incomeChartData = {
-    labels: data?.user_deposit_on_range?.map(item => item.effective_category) || [],
+    labels: data?.user_deposit_on_range?.map(item => item.category) || [],
     datasets: [
       {
-        data: data?.user_deposit_on_range?.map(item => item.total_amount) || [],
+        data: data?.user_deposit_on_range?.map(item => item.converted_amount) || [],
         backgroundColor: data?.user_deposit_on_range?.map((_, index) => `hsl(${120 + (index * 15)}, 70%, 50%)`) || [],
         borderWidth: 1,
       },
@@ -181,8 +181,10 @@ const MonthlyReports = () => {
             <h3 className="text-lg font-semibold text-red-600 mb-4">Expense Details</h3>
             {data?.user_withdraw_on_range?.map((item, index) => (
               <div key={index} className="flex justify-between py-2 border-b">
-                <span>{item.effective_category}</span>
-                <span className="font-semibold">{item.total_amount.toFixed(2)} ({data.withdraw_percentages[index]}%)</span>
+                <span>{item.category}</span>
+                <span className="font-semibold">
+                  {item.converted_amount.toFixed(2)} {favoriteCurrency} ({data.withdraw_percentages[index]}%)
+                </span>
               </div>
             )) || <p className="text-gray-500">No details available.</p>}
           </div>
@@ -192,8 +194,10 @@ const MonthlyReports = () => {
             <h3 className="text-lg font-semibold text-green-600 mb-4">Income Details</h3>
             {data?.user_deposit_on_range?.map((item, index) => (
               <div key={index} className="flex justify-between py-2 border-b">
-                <span>{item.effective_category}</span>
-                <span className="font-semibold">{item.total_amount.toFixed(2)} ({data.deposit_percentages[index]}%)</span>
+                <span>{item.category}</span>
+                <span className="font-semibold">
+                  {item.converted_amount.toFixed(2)} {favoriteCurrency} ({data.deposit_percentages[index]}%)
+                </span>
               </div>
             )) || <p className="text-gray-500">No details available.</p>}
           </div>
