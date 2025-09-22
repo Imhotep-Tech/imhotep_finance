@@ -57,13 +57,13 @@ def convert_to_fav_currency(request, dictionary):
                 rate = set_currency_session(request, favorite_currency)
             except Exception:
                 return "Error", favorite_currency
-
+    
     total_favorite_currency = 0
     for currency, amount in dictionary.items():
         if currency in rate and rate[currency]:
             converted_amount = amount / rate[currency]
             total_favorite_currency += converted_amount
-
+            
     return total_favorite_currency, favorite_currency
 
 def select_currencies(user):
