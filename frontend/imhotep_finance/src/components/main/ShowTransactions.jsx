@@ -49,6 +49,63 @@ const ShowTransactions = () => {
     setPage(newPage);
   };
 
+  // Export transactions as CSV
+  const handleExportCSV = async () => {
+    try {
+      const params = {};
+      if (startDate) params.start_date = startDate;
+      if (endDate) params.end_date = endDate;
+      
+      const response = await axios.get('/api/finance-management/transaction/export-csv/', {
+        params,
+        responseType: 'blob', // Important for file download
+      });
+
+      // Create blob and download
+      const blob = new Blob([response.data], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // Extract filename from response header (backend sets this)
+      const contentDisposition = response.headers['content-disposition'];
+      let filename = 'transactions.csv'; // fallback filename
+      
+      if (contentDisposition) {
+        // Try different patterns to extract filename
+        let filenameMatch = contentDisposition.match(/filename="([^"]+)"/);
+        if (!filenameMatch) {
+          filenameMatch = contentDisposition.match(/filename=([^;]+)/);
+        }
+        if (filenameMatch) {
+          filename = filenameMatch[1].trim();
+        }
+      } else {
+        // Create filename based on date range if header is not available
+        const today = new Date();
+        const dateStr = today.toISOString().split('T')[0];
+        if (startDate && endDate) {
+          filename = `transactions_${startDate}_to_${endDate}.csv`;
+        } else if (startDate) {
+          filename = `transactions_${startDate}_to_${dateStr}.csv`;
+        } else if (endDate) {
+          filename = `transactions_${dateStr}_to_${endDate}.csv`;
+        } else {
+          filename = `transactions_${dateStr}.csv`;
+        }
+      }
+      
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Export failed:', err);
+      alert('Failed to export transactions. Please try again.');
+    }
+  };
+
   // Edit transaction
   const handleEdit = (tx) => {
     setEditModal({ open: true, transaction: tx });
@@ -134,15 +191,26 @@ const ShowTransactions = () => {
                 View and filter your transaction history
               </p>
             </div>
-            <button
-              className="chef-button bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white px-6 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-              onClick={() => setShowAddModal(true)}
-            >
-              <svg className="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M12 5v14m7-7H5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              Add Transaction
-            </button>
+            <div className="flex gap-3">
+              <button
+                className="chef-button bg-gradient-to-r from-[#4a7c7a] to-[#366c6b] text-white px-6 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                onClick={handleExportCSV}
+              >
+                <svg className="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Export CSV
+              </button>
+              <button
+                className="chef-button bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white px-6 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                onClick={() => setShowAddModal(true)}
+              >
+                <svg className="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 5v14m7-7H5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Add Transaction
+              </button>
+            </div>
           </div>
           <div className="flex flex-wrap gap-4 items-center mb-4">
             <div>
