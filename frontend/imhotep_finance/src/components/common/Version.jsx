@@ -84,8 +84,56 @@ const Version = () => {
           </div>
         </div>
 
-        {/* Timeline (simplified, professional layout, with new v7.0.0 at top) */}
+        {/* Timeline */}
         <div className="relative space-y-8">
+
+          {/* Version 7.0.1 - Current (New Addition) */}
+          <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-200">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-teal-600 rounded-full flex items-center justify-center">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M5 13l4 4L19 7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Version 7.0.1</h3>
+                  <span className="inline-block mt-1 px-2 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded-full">CURRENT</span>
+                </div>
+              </div>
+              <span className="text-sm text-gray-500 mt-2 md:mt-0">September 24, 2025</span>
+            </div>
+            <p className="text-gray-600 mb-4">Fixed issues and performance enhancements</p>
+            <p className="text-gray-600 mb-4">
+            </p>
+            <ul className="space-y-2 text-sm text-gray-700">
+              {/* Fixed bugs and improved performance */}
+              <li className="flex items-start space-x-2">
+                <svg className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  {/* Wrench/Tool icon */}
+                  <path d="M15.232 5.232a3 3 0 11-4.243 4.243l-5.657 5.657a2 2 0 102.828 2.828l5.657-5.657a3 3 0 114.243-4.243z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <span>Fixed bugs and improved performance</span>
+              </li>
+              {/* Added export transactions as CSV */}
+              <li className="flex items-start space-x-2">
+                <svg className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  {/* Download/File Export icon */}
+                  <path d="M12 16v-8m0 8l-4-4m4 4l4-4M4 20h16" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <span>Added export transactions as CSV</span>
+              </li>
+              {/* Improved monthly financial analytics & reports */}
+              <li className="flex items-start space-x-2">
+                <svg className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  {/* Chart/Analytics icon */}
+                  <path d="M3 17v-6a2 2 0 012-2h2a2 2 0 012 2v6m4 0v-10a2 2 0 012-2h2a2 2 0 012 2v10" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <span>Improved monthly financial analytics & reports</span>
+              </li>
+            </ul>
+          </div>
+
           {/* Version 7.0.0 - Current (New Addition) */}
           <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-200">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
@@ -97,10 +145,9 @@ const Version = () => {
                 </div>
                 <div>
                   <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Version 7.0.0</h3>
-                  <span className="inline-block mt-1 px-2 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded-full">CURRENT</span>
                 </div>
               </div>
-              <span className="text-sm text-gray-500 mt-2 md:mt-0">September 2025</span>
+              <span className="text-sm text-gray-500 mt-2 md:mt-0">September 1, 2025</span>
             </div>
             <p className="text-gray-600 mb-4">
               Thrilled to unveil the next big chapter of my passion project: Imhotep Financial Manager v7.0.0 🎉<br />
@@ -152,7 +199,7 @@ const Version = () => {
             </ul>
           </div>
 
-          {/* Version 6.0.1 - Current */}
+          {/* Version 6.0.1 */}
           <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-200">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
               <div className="flex items-center space-x-3">
@@ -163,10 +210,9 @@ const Version = () => {
                 </div>
                 <div>
                   <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Version 6.0.1</h3>
-                  <span className="inline-block mt-1 px-2 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded-full">CURRENT</span>
                 </div>
               </div>
-              <span className="text-sm text-gray-500 mt-2 md:mt-0">18 June 2025</span>
+              <span className="text-sm text-gray-500 mt-2 md:mt-0">June 18, 2025</span>
             </div>
             <p className="text-gray-600 mb-4">Fixed issues and performance enhancements</p>
             <ul className="space-y-2 text-sm text-gray-700">
@@ -210,7 +256,7 @@ const Version = () => {
                   <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Version 6.0.0</h3>
                 </div>
               </div>
-              <span className="text-sm text-gray-500 mt-2 md:mt-0">9 June 2025</span>
+              <span className="text-sm text-gray-500 mt-2 md:mt-0">June 9, 2025</span>
             </div>
             <p className="text-gray-600 mb-4">Smart Features & Enhanced Analytics</p>
             <ul className="space-y-2 text-sm text-gray-700">
