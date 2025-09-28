@@ -34,6 +34,7 @@ function Footer() {
         <div className="flex justify-center space-x-4 text-xs mb-2">
           <a href="https://imhoteptech.vercel.app/" className="hover:underline" target="_blank" rel="noopener noreferrer">Imhotep Tech</a>
           <a href="https://github.com/Imhotep-Tech/imhotep_finance" className="hover:underline" target="_blank" rel="noopener noreferrer">Source</a>
+          <a href="https://tally.so/r/nPKe1P" className="hover:underline" target="_blank" rel="noopener noreferrer">Feedback & Bugs</a>
           <Link to="/version-history" className="hover:underline">Version 7.0.1</Link>
         </div>
         <p className="text-white/60 text-xs mt-4">&copy; 2025 Imhotep Finance</p>
