@@ -22,6 +22,7 @@ import ShowWishlist from './components/main/ShowWishlist'
 import ShowScheduledTransactions from './components/main/ShowScheduledTransactions'
 import ShowTargetHistory from './components/main/ShowTargetHistory'
 import MonthlyReports from './components/main/MonthlyReports'
+import Reports from './components/main/Reports'
 import Version from './components/common/Version'
 
 // PWA Components
@@ -149,6 +150,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <MonthlyReports />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="/reports"
+              element={
+                <ProtectedRoute>
+                  <Reports />
                 </ProtectedRoute>
               }
             />

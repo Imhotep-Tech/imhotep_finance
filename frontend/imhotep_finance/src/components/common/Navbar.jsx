@@ -231,24 +231,24 @@ const Navbar = ({ onToggle }) => {
                 </Link>
                   
                 <Link 
-                  to="/monthly-reports" 
+                  to="/reports" 
                   className={`navbar-link group flex items-center p-4 rounded-2xl transition-all duration-300 ${
-                    isActive('/monthly-reports') 
+                    isActive('/reports') 
                       ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white shadow-lg transform scale-105' 
                       : 'text-gray-700 hover:bg-white/70 hover:shadow-md hover:scale-105'
                   }`}
                   onClick={closeNavbar}
                 >
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center mr-3 transition-colors duration-300 ${
-                    isActive('/monthly-reports') 
+                    isActive('/reports') 
                       ? 'bg-white/20' 
                       : 'bg-gray-100 group-hover:bg-[#eaf6f6]'
                   }`}>
-                    <svg className={`w-5 h-5 ${isActive('/monthly-reports') ? 'text-white' : 'text-[#366c6b]'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className={`w-5 h-5 ${isActive('/reports') ? 'text-white' : 'text-[#366c6b]'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
                   </div>
-                  <span className="font-semibold">Monthly Reports</span>
+                  <span className="font-semibold">Reports</span>
                 </Link>
 
                 <Link 

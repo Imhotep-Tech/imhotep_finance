@@ -289,12 +289,12 @@ const Dashboard = () => {
               <p className="text-sm text-gray-600 mt-1">Details</p>
             </div>
           </a>
-          <a href="/monthly-reports" className="metric-card rounded-xl p-6 hover:shadow-lg transition-all duration-300">
+          <a href="/reports" className="metric-card rounded-xl p-6 hover:shadow-lg transition-all duration-300">
             <div className="text-center">
               <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
                 <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l1.5 4.5h4.5l-3.75 2.75L15 14l-3-2.25L9 14l1.75-4.75L7 6.5h4.5z"/></svg>
               </div>
-              <h3 className="font-semibold text-gray-900">Monthly Reports</h3>
+              <h3 className="font-semibold text-gray-900">Reports</h3>
               <p className="text-sm text-gray-600 mt-1">Charts & Totals</p>
             </div>
           </a>
