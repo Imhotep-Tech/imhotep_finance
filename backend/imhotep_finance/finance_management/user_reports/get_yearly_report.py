@@ -8,20 +8,18 @@ import calendar
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def get_monthly_reports(request):
-    """Return monthly reports for the logged-in user"""
+def get_yearly_reports(request):
+    """Return yearly reports for the logged-in user"""
     try:
         user = request.user
 
         # Get current date
         now = datetime.now() #get current datetime
         
-        # Start date: first day of current month
-        start_date = now.replace(day=1).date() #set start date to first day of month
-        
-        # End date: first day of next month
-        last_day = calendar.monthrange(now.year, now.month)[1]  # returns (weekday, number_of_days)
-        end_date = now.replace(day=last_day).date()
+        # Start date: first day of current year
+        start_date = now.replace(month=1, day=1).date()
+        # End date: last day of current year
+        end_date = now.replace(month=12, day=31).date()
         (
             user_withdraw_on_range,
             user_deposit_on_range,
@@ -53,9 +51,10 @@ def get_monthly_reports(request):
             "current_month": now.strftime("%B %Y"),
             "favorite_currency": user.favorite_currency or 'USD'  # Add favorite currency
         }
+
         return Response(response_data, status=status.HTTP_200_OK)
     except Exception as e:
-        print(f"Monthly report error: {e}")  # Add detailed error logging
+        print(f"Monthly report error")  # Add detailed error logging
         return Response(
             {'error': f'Error in generating monthly report'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
