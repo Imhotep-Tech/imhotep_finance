@@ -45,9 +45,25 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
+    }).then(() => {
+      // Notify all clients that the service worker is ready
+      return self.clients.claim();
+    }).then(() => {
+      // Send message to all clients that SW is activated
+      return self.clients.matchAll().then(clients => {
+        clients.forEach(client => {
+          client.postMessage({ type: 'SW_ACTIVATED' });
+        });
+      });
     })
   );
-  self.clients.claim();
+});
+
+// Listen for skip waiting message
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 // Fetch event - serve cached content when offline

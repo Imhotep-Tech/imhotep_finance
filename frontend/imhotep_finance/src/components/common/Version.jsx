@@ -6,6 +6,7 @@ import Logo from '../../assets/Logo.jpeg';
 const Version = () => {
   const navigate = useNavigate();
 
+  // Handles navigation back to the previous page
   const handleBack = () => {
     if (window.history.length > 1) {
       navigate(-1); // Go to previous page
@@ -87,7 +88,54 @@ const Version = () => {
         {/* Timeline */}
         <div className="relative space-y-8">
 
-          {/* Version 7.0.1 - Current (New Addition) */}
+          {/* Version 7.0.2 - Current (New Addition) */}
+          <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-200">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-teal-600 rounded-full flex items-center justify-center">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M5 13l4 4L19 7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Version 7.0.2</h3>
+                  <span className="inline-block mt-1 px-2 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded-full">CURRENT</span>
+                </div>
+              </div>
+              <span className="text-sm text-gray-500 mt-2 md:mt-0">October 2, 2025</span>
+            </div>
+            <p className="text-gray-600 mb-4">Fixed issues and added yearly reports</p>
+            <p className="text-gray-600 mb-4">
+            </p>
+            <ul className="space-y-2 text-sm text-gray-700">
+              {/* Fixed bugs and improved performance */}
+              <li className="flex items-start space-x-2">
+                <svg className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  {/* Wrench/Tool icon */}
+                  <path d="M15.232 5.232a3 3 0 11-4.243 4.243l-5.657 5.657a2 2 0 102.828 2.828l5.657-5.657a3 3 0 114.243-4.243z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <span>Fixed bugs and improved performance</span>
+              </li>
+              {/* Added export transactions as CSV */}
+              <li className="flex items-start space-x-2">
+                <svg className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  {/* Download/File Export icon */}
+                  <path d="M12 16v-8m0 8l-4-4m4 4l4-4M4 20h16" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <span>Added yearly reports</span>
+              </li>
+              {/* Improved monthly financial analytics & reports */}
+              <li className="flex items-start space-x-2">
+                <svg className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  {/* Chart/Analytics icon */}
+                  <path d="M3 17v-6a2 2 0 012-2h2a2 2 0 012 2v6m4 0v-10a2 2 0 012-2h2a2 2 0 012 2v10" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <span>Improved show password UI and google sign-in icon</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* Version 7.0.1 */}
           <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-200">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
               <div className="flex items-center space-x-3">
@@ -98,7 +146,6 @@ const Version = () => {
                 </div>
                 <div>
                   <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Version 7.0.1</h3>
-                  <span className="inline-block mt-1 px-2 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded-full">CURRENT</span>
                 </div>
               </div>
               <span className="text-sm text-gray-500 mt-2 md:mt-0">September 24, 2025</span>
@@ -134,7 +181,7 @@ const Version = () => {
             </ul>
           </div>
 
-          {/* Version 7.0.0 - Current (New Addition) */}
+          {/* Version 7.0.0 */}
           <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-200">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
               <div className="flex items-center space-x-3">
@@ -383,7 +430,7 @@ const Version = () => {
           <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-200">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-teal-500 to-slate-600 rounded-full flex items-center justify-center">
+                <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-teal-600 rounded-full flex items-center justify-center">
                   <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path d="M5 13l4 4L19 7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
@@ -404,13 +451,13 @@ const Version = () => {
               </li>
               <li className="flex items-start space-x-2">
                 <svg className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  <path d="M4 6h16M4 12h16M4 18h16" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
                 <span>Auto-hide notification messages after 5 seconds</span>
               </li>
               <li className="flex items-start space-x-2">
                 <svg className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                 </svg>
                 <span>Additional security enhancements and improvements</span>
               </li>
@@ -717,7 +764,7 @@ const Version = () => {
               </li>
               <li className="flex items-start space-x-2">
                 <svg className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                  <path d="M4 6h16M4 12h16M4 18h16" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
                 <span>Redesigned button styles and UI elements</span>
               </li>
@@ -726,65 +773,6 @@ const Version = () => {
                   <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                 </svg>
                 <span>Comprehensive UI/UX bug fixes</span>
-              </li>
-            </ul>
-          </div>
-
-          {/* Version 1.0 */}
-          <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg border-l-yellow-500">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-teal-500 to-slate-600 rounded-full flex items-center justify-center">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path d="M5 13l4 4L19 7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Version 1.0.0</h3>
-                  <span className="inline-block mt-1 px-2 py-1 bg-yellow-100 text-yellow-700 text-xs font-semibold rounded-full">LAUNCH</span>
-                </div>
-              </div>
-              <span className="text-sm text-gray-500 mt-2 md:mt-0">June 27, 2024</span>
-            </div>
-            <p className="text-gray-600 mb-6 leading-relaxed">
-              The foundation of Imhotep Financial Manager - a comprehensive financial management solution designed to help users take control of their finances with precision and ease.
-            </p>
-            <ul className="space-y-2 text-sm text-gray-700">
-              <li className="flex items-start space-x-2">
-                <svg className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-                <span>Personalized financial dashboard with net worth tracking</span>
-              </li>
-              <li className="flex items-start space-x-2">
-                <svg className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-                <span>Wishlist management and goal prioritization</span>
-              </li>
-              <li className="flex items-start space-x-2">
-                <svg className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-                <span>Comprehensive transaction tracking and categorization</span>
-              </li>
-              <li className="flex items-start space-x-2">
-                <svg className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-                <span>Live currency conversion with real-time exchange rates</span>
-              </li>
-              <li className="flex items-start space-x-2">
-                <svg className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-                <span>Secure user authentication and profile management</span>
-              </li>
-              <li className="flex items-start space-x-2">
-                <svg className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-                <span>Responsive design for seamless cross-device experience</span>
               </li>
             </ul>
           </div>

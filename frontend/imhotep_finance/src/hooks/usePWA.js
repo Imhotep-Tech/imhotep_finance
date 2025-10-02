@@ -6,6 +6,7 @@ export const usePWA = () => {
   const [isInstalled, setIsInstalled] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [updateAvailable, setUpdateAvailable] = useState(false);
+  const [waitingWorker, setWaitingWorker] = useState(null);
 
   useEffect(() => {
     // Check if app is already installed
@@ -42,15 +43,45 @@ export const usePWA = () => {
         try {
           const registration = await navigator.serviceWorker.register('/sw.js');
           
+          // Check for updates on page load
+          registration.update();
+
+          // Check for updates periodically (every 60 seconds)
+          setInterval(() => {
+            registration.update();
+          }, 60000);
+          
           // Check for updates
           registration.addEventListener('updatefound', () => {
             const newWorker = registration.installing;
             
             newWorker.addEventListener('statechange', () => {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                console.log('Update available!');
                 setUpdateAvailable(true);
+                setWaitingWorker(newWorker);
               }
             });
+          });
+
+          // Check if there's already a waiting worker
+          if (registration.waiting) {
+            console.log('Update already waiting');
+            setUpdateAvailable(true);
+            setWaitingWorker(registration.waiting);
+          }
+
+          // Listen for controller change (when new SW takes over)
+          navigator.serviceWorker.addEventListener('controllerchange', () => {
+            console.log('Controller changed, reloading page');
+            window.location.reload();
+          });
+
+          // Listen for messages from service worker
+          navigator.serviceWorker.addEventListener('message', (event) => {
+            if (event.data && event.data.type === 'SW_ACTIVATED') {
+              console.log('Service Worker activated');
+            }
           });
 
           console.log('Service Worker registered successfully');
@@ -99,12 +130,21 @@ export const usePWA = () => {
     }
   };
 
+  const updateApp = () => {
+    if (waitingWorker) {
+      // Tell the waiting service worker to skip waiting and become active
+      waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+      setUpdateAvailable(false);
+    }
+  };
+
   return {
     isInstallable,
     isInstalled,
     isOnline,
     updateAvailable,
     installApp,
-    reloadApp
+    reloadApp,
+    updateApp
   };
 };

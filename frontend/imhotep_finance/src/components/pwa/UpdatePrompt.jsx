@@ -1,35 +1,47 @@
 import { usePWA } from '../../hooks/usePWA';
 
 const UpdatePrompt = () => {
-  const { updateAvailable, reloadApp } = usePWA();
+  const { updateAvailable, updateApp } = usePWA();
 
   if (!updateAvailable) {
     return null;
   }
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-80 z-50">
-      <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 shadow-lg">
-        <div className="flex items-start space-x-3">
-          <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-            <span className="text-blue-600 text-lg">⬆️</span>
-          </div>
+    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 max-w-[90%] md:max-w-md">
+      <div
+        className="bg-gradient-to-r from-[#ed7143] to-[#ff6b6b] text-white rounded-xl p-4 shadow-2xl"
+        style={{
+          animation: 'slideUp 0.3s ease-out',
+        }}
+      >
+        <div className="flex items-center gap-4">
           <div className="flex-1">
-            <h3 className="text-sm font-semibold text-blue-900 mb-1">
-              Update Available
-            </h3>
-            <p className="text-xs text-blue-700 mb-3">
-              A new version of Imhotep Finance is available.
-            </p>
-            <button
-              onClick={reloadApp}
-              className="w-full bg-blue-600 text-white px-3 py-2 rounded-lg text-xs font-medium hover:bg-blue-700 transition-colors"
-            >
-              Update Now
-            </button>
+            <div className="font-semibold mb-1">🎉 New Update Available!</div>
+            <div className="text-sm opacity-90">
+              A new version of Imhotep Finance is ready to install.
+            </div>
           </div>
+          <button
+            onClick={updateApp}
+            className="bg-white text-[#ed7143] px-5 py-2.5 rounded-lg font-semibold whitespace-nowrap hover:scale-105 transition-transform"
+          >
+            Update Now
+          </button>
         </div>
       </div>
+      <style>{`
+        @keyframes slideUp {
+          from {
+            opacity: 0;
+            transform: translate(-50%, 20px);
+          }
+          to {
+            opacity: 1;
+            transform: translate(-50%, 0);
+          }
+        }
+      `}</style>
     </div>
   );
 };
