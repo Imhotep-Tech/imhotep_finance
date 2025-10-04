@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import Footer from '../common/Footer';
+import Footer from '../../components/common/Footer';
 
 const ShowNetWorthDetails = () => {
   const [details, setDetails] = useState([]);

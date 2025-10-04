@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import Footer from '../common/Footer';
+import Footer from '../../components/common/Footer';
 import { currencies } from '../../utils/currencies';
 
 const Profile = () => {

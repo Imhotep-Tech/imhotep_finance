@@ -1,41 +1,40 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Pie } from 'react-chartjs-2';
+import { Pie } from 'react-chartjs-2'; // For pie charts
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-import Footer from '../common/Footer';
+import Footer from '../../components/common/Footer';
 import { Link } from 'react-router-dom';
 
+// Register Chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-const Reports = () => {
-  const [reportType, setReportType] = useState('monthly'); // 'monthly' or 'yearly'
+const MonthlyReports = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [favoriteCurrency, setFavoriteCurrency] = useState(localStorage.getItem('favoriteCurrency') || 'USD');
+  const [favoriteCurrency, setFavoriteCurrency] = useState(localStorage.getItem('favoriteCurrency') || 'USD'); // Load from localStorage
 
-  // Fetch report data based on type
+  // Fetch monthly report data
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       setError('');
       try {
-        const endpoint = reportType === 'monthly' 
-          ? '/api/finance-management/get-monthly-report/' 
-          : '/api/finance-management/get-yearly-report/';
-        const res = await axios.get(endpoint);
+        const res = await axios.get('/api/finance-management/get-monthly-report/');
         setData(res.data);
 
+        // Update favorite currency from API if available and different
         if (res.data.favorite_currency && res.data.favorite_currency !== favoriteCurrency) {
           setFavoriteCurrency(res.data.favorite_currency);
           localStorage.setItem('favoriteCurrency', res.data.favorite_currency);
         }
       } catch (err) {
-        setError(err.response?.data?.error || `Failed to load ${reportType} reports`);
+        setError(err.response?.data?.error || 'Failed to load monthly reports');
       }
       setLoading(false);
     };
 
+    // If no favorite currency in localStorage, fetch it separately
     if (!localStorage.getItem('favoriteCurrency')) {
       axios.get('/api/get-fav-currency/')
         .then(res => {
@@ -47,8 +46,9 @@ const Reports = () => {
     }
 
     fetchData();
-  }, [reportType, favoriteCurrency]);
+  }, [favoriteCurrency]); // Depend on favoriteCurrency to refetch if updated
 
+  // Prepare chart data for expenses
   const expenseChartData = {
     labels: data?.user_withdraw_on_range?.map(item => item.category) || [],
     datasets: [
@@ -60,6 +60,7 @@ const Reports = () => {
     ],
   };
 
+  // Prepare chart data for income
   const incomeChartData = {
     labels: data?.user_deposit_on_range?.map(item => item.category) || [],
     datasets: [
@@ -85,7 +86,7 @@ const Reports = () => {
       <div className="min-h-screen flex items-center justify-center bg-chef-pattern">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#366c6b] mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading {reportType} reports...</p>
+          <p className="mt-4 text-gray-600">Loading monthly reports...</p>
         </div>
       </div>
     );
@@ -116,9 +117,9 @@ const Reports = () => {
         <div className="chef-card rounded-3xl p-8 shadow-2xl backdrop-blur-2xl border border-white/30 bg-white/90">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold font-chef text-gray-800 mb-2">Financial Reports</h1>
+              <h1 className="text-3xl font-bold font-chef text-gray-800 mb-2">Monthly Reports</h1>
               <p className="text-lg text-gray-600 font-medium leading-relaxed mb-4">
-                Breakdown for {data?.current_month || 'Current Period'}
+                Breakdown for {data?.current_month || 'Current Month'}
               </p>
             </div>
             <Link
@@ -128,30 +129,6 @@ const Reports = () => {
               Back to Dashboard
             </Link>
           </div>
-
-          {/* Report Type Toggle */}
-          <div className="mt-6 flex gap-4">
-            <button
-              onClick={() => setReportType('monthly')}
-              className={`flex-1 px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
-                reportType === 'monthly'
-                  ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white shadow-lg'
-                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              📅 Monthly Report
-            </button>
-            <button
-              onClick={() => setReportType('yearly')}
-              className={`flex-1 px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
-                reportType === 'yearly'
-                  ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white shadow-lg'
-                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              📊 Yearly Report
-            </button>
-          </div>
         </div>
 
         {/* Totals Section */}
@@ -159,7 +136,7 @@ const Reports = () => {
           <div className="chef-card rounded-xl p-6 bg-red-50 border-l-4 border-red-500">
             <h3 className="text-xl font-semibold text-red-600 mb-4">Total Expenses</h3>
             <p className="text-3xl font-bold text-red-800">
-              {data?.total_withdraw?.toFixed(2) || '0.00'} {favoriteCurrency}
+              {data?.total_withdraw?.toFixed(2) || '0.00'} {favoriteCurrency} 
             </p>
           </div>
           <div className="chef-card rounded-xl p-6 bg-green-50 border-l-4 border-green-500">
@@ -197,7 +174,7 @@ const Reports = () => {
           </div>
         </div>
 
-        {/* Detailed Lists */}
+        {/* Detailed Lists (Optional: Expandable) */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Expense Details */}
           <div className="chef-card rounded-xl p-6">
@@ -231,4 +208,4 @@ const Reports = () => {
   );
 };
 
-export default Reports;
+export default MonthlyReports;
