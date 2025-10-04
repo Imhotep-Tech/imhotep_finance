@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import Footer from '../common/Footer';
-import Pagination from '../common/Pagination';
-import AddWishModal from './components/AddWishModal';
-import UpdateWishModal from './components/UpdateWishModal';
+import Footer from '../../components/common/Footer';
+import Pagination from '../../components/common/Pagination';
+import AddWishModal from '../../components/AddWishModal';
+import UpdateWishModal from '../../components/UpdateWishModal';
 
 const ShowWishlist = () => {
   const [wishlist, setWishlist] = useState([]);

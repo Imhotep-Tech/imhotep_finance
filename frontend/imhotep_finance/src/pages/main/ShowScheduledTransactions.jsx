@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import Footer from '../common/Footer';
-import Pagination from '../common/Pagination';
-import AddScheduledTransactionModal from './components/AddScheduledTransactionModal';
+import Footer from '../../components/common/Footer';
+import Pagination from '../../components/common/Pagination';
+import AddScheduledTransactionModal from '../../components/AddScheduledTransactionModal';
 
 const ShowScheduledTransactions = () => {
   const [scheduledTrans, setScheduledTrans] = useState([]);

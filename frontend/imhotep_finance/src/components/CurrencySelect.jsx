@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { currencies } from '../../../utils/currencies';
+import { currencies } from '../utils/currencies';
 
 const CurrencySelect = ({ value, onChange, required = false, className = '' }) => {
   const [search, setSearch] = useState('');

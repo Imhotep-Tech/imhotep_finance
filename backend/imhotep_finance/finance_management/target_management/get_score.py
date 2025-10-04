@@ -14,6 +14,12 @@ def get_score(request):
     now = datetime.now()
     user = request.user
 
+    if not user:
+        return Response(
+            {'error': 'User Not found'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
     # Get the latest target for this user
     target_obj = Target.objects.filter(user=user).order_by('-created_at').first()
     if not target_obj:

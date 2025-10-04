@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-import Footer from '../common/Footer';
+import Footer from '../../components/common/Footer';
 import Logo from '../../assets/Logo.jpeg';
 
 const Login = () => {

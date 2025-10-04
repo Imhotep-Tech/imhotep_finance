@@ -53,4 +53,4 @@ def export_transactions_csv(request):
         
         return response
     except Exception as e:
-        return HttpResponse(f"Error occurred while exporting transactions: {str(e)}", status=500)
+        return HttpResponse(f"Error occurred while exporting transactions", status=500)

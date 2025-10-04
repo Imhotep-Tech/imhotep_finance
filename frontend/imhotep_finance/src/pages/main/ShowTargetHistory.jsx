@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import Footer from '../common/Footer';
-import Pagination from '../common/Pagination';
+import Footer from '../../components/common/Footer';
+import Pagination from '../../components/common/Pagination';
 import { Link } from 'react-router-dom';
 
 const ShowTargetHistory = () => {

@@ -28,39 +28,3 @@
     @apply w-full py-3 px-6 border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 bg-white/70 backdrop-blur-sm focus:outline-none focus:ring-4 focus:ring-orange-300;
   }
 }
-
-/* Custom animations */
-@keyframes float {
-  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
-  33% { transform: translate3d(30px, -30px, 0) rotate(120deg); }
-  66% { transform: translate3d(-20px, 20px, 0) rotate(240deg); }
-}
-
-@keyframes float-delayed {
-  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
-  33% { transform: translate3d(-30px, -30px, 0) rotate(-120deg); }
-  66% { transform: translate3d(20px, 20px, 0) rotate(-240deg); }
-}
-
-@keyframes float-slow {
-  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
-  50% { transform: translate3d(0, -20px, 0) rotate(180deg); }
-}
-
-@layer utilities {
-  .animate-float {
-    animation: float 8s ease-in-out infinite;
-  }
-  
-  .animate-float-delayed {
-    animation: float-delayed 10s ease-in-out infinite;
-  }
-  
-  .animate-float-slow {
-    animation: float-slow 12s ease-in-out infinite;
-  }
-  
-  .scale-102 {
-    transform: scale(1.02);
-  }
-}

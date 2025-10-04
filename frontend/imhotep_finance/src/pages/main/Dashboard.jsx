@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import axios from 'axios';
-import Footer from '../common/Footer';
+import Footer from '../../components/common/Footer';
 import Logo from '../../assets/Logo.jpeg';
-import AddTransactionModal from './components/AddTransactionModal';
-import NetWorthCard from './components/NetWorthCard';
+import AddTransactionModal from '../../components/AddTransactionModal';
+import NetWorthCard from '../../components/NetWorthCard';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
