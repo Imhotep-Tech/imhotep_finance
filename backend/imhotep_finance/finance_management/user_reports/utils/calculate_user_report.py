@@ -93,6 +93,8 @@ def calculate_user_report(start_date, end_date, user, request):
             for trans in user_deposit_on_range:
                 trans["percentage"] = round((trans["converted_amount"] / total_deposit) * 100, 1)
 
+        user_withdraw_on_range = sorted(user_withdraw_on_range, key=lambda x: x['percentage'], reverse=True)
+        user_deposit_on_range = sorted(user_deposit_on_range, key=lambda x: x['percentage'], reverse=True)
         
         return user_withdraw_on_range, user_deposit_on_range, total_withdraw or 0.0, total_deposit or 0.0
         
