@@ -206,7 +206,7 @@ const Reports = () => {
               <div key={index} className="flex justify-between py-2 border-b">
                 <span>{item.category}</span>
                 <span className="font-semibold">
-                  {item.converted_amount.toFixed(2)} {favoriteCurrency} ({data.withdraw_percentages[index]}%)
+                  {item.converted_amount.toFixed(2)} {favoriteCurrency} ({item.percentage}%)
                 </span>
               </div>
             )) || <p className="text-gray-500">No details available.</p>}
@@ -219,7 +219,7 @@ const Reports = () => {
               <div key={index} className="flex justify-between py-2 border-b">
                 <span>{item.category}</span>
                 <span className="font-semibold">
-                  {item.converted_amount.toFixed(2)} {favoriteCurrency} ({data.deposit_percentages[index]}%)
+                  {item.converted_amount.toFixed(2)} {favoriteCurrency} ({item.percentage}%)
                 </span>
               </div>
             )) || <p className="text-gray-500">No details available.</p>}

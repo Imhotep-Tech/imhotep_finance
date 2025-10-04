@@ -23,8 +23,6 @@ def get_yearly_reports(request):
         (
             user_withdraw_on_range,
             user_deposit_on_range,
-            withdraw_percentages,
-            deposit_percentages,
             total_withdraw,
             total_deposit,
         ) = calculate_user_report(start_date, end_date, user, request) #calculate monthly report data
@@ -34,6 +32,7 @@ def get_yearly_reports(request):
                 {
                     "category": item['category'],
                     "converted_amount": float(item['converted_amount']),
+                    "percentage": float(item.get('percentage', 0))
                 }
                 for item in user_withdraw_on_range
             ],
@@ -41,11 +40,10 @@ def get_yearly_reports(request):
                 {
                     "category": item['category'],
                     "converted_amount": float(item['converted_amount']),
+                    "percentage": float(item.get('percentage', 0))
                 }
                 for item in user_deposit_on_range
             ],
-            "withdraw_percentages": withdraw_percentages,
-            "deposit_percentages": deposit_percentages,
             "total_withdraw": float(total_withdraw) if total_withdraw is not None else 0.0,
             "total_deposit": float(total_deposit) if total_deposit is not None else 0.0,
             "current_month": now.strftime("%B %Y"),

@@ -51,7 +51,7 @@ def calculate_user_report(start_date, end_date, user, request):
             else:
                 withdraw_categories[category] += trans["converted_amount"]
         user_withdraw_on_range = [
-            {"category": category, "converted_amount": amount}
+            {"category": category, "converted_amount": amount, "percentage": 0}
             for category, amount in withdraw_categories.items()
         ]
 
@@ -71,7 +71,7 @@ def calculate_user_report(start_date, end_date, user, request):
                 trans["converted_amount"] = 0
             total_deposit += trans["converted_amount"]
 
-        # Concatenate Deposit transactions on the categories
+        #concatenate Deposit transactions on the categories
         deposit_categories = {}
         for trans in user_deposit_on_range:
             category = trans["category"] or "Uncategorized"
@@ -80,31 +80,22 @@ def calculate_user_report(start_date, end_date, user, request):
             else:
                 deposit_categories[category] += trans["converted_amount"]
         user_deposit_on_range = [
-            {"category": category, "converted_amount": amount}
+            {"category": category, "converted_amount": amount, "percentage": 0}
             for category, amount in deposit_categories.items()
         ]
-         
-        # Calculate percentages
-        withdraw_percentages = []
-        deposit_percentages = []
         
+        #calculate percentages
         if user_withdraw_on_range and total_withdraw > 0:
-            withdraw_percentages = [
-                round((trans["converted_amount"] / total_withdraw) * 100, 1)
-                for trans in user_withdraw_on_range
-            ]
-        
-        if user_deposit_on_range and total_deposit > 0:
-            deposit_percentages = [
-                round((trans["converted_amount"] / total_deposit) * 100, 1)
-                for trans in user_deposit_on_range
-            ]
-        
-        withdraw_percentages.sort(reverse=True)
-        deposit_percentages.sort(reverse=True)
+            for trans in user_withdraw_on_range:
+                trans["percentage"] = round((trans["converted_amount"] / total_withdraw) * 100, 1)
 
-        return user_withdraw_on_range, user_deposit_on_range, withdraw_percentages, deposit_percentages, total_withdraw or 0.0, total_deposit or 0.0
+        if user_deposit_on_range and total_deposit > 0:
+            for trans in user_deposit_on_range:
+                trans["percentage"] = round((trans["converted_amount"] / total_deposit) * 100, 1)
+
         
-    except Exception as e:
-        print(f"Error in calculate_user_report: {e}")  # Print error message for debugging
+        return user_withdraw_on_range, user_deposit_on_range, total_withdraw or 0.0, total_deposit or 0.0
+        
+    except:
+        print(f"Error in calculate_user_report")  # Print error message for debugging
         return [], [], [], [], 0.0, 0.0  # Return empty lists and zero totals on error
