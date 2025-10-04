@@ -99,6 +99,10 @@ def calculate_user_report(start_date, end_date, user, request):
                 round((trans["converted_amount"] / total_deposit) * 100, 1)
                 for trans in user_deposit_on_range
             ]
+        
+        withdraw_percentages.sort(reverse=True)
+        deposit_percentages.sort(reverse=True)
+
         return user_withdraw_on_range, user_deposit_on_range, withdraw_percentages, deposit_percentages, total_withdraw or 0.0, total_deposit or 0.0
         
     except Exception as e:
