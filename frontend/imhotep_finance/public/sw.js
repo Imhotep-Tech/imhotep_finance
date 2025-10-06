@@ -10,10 +10,11 @@ const STATIC_CACHE_URLS = [
   '/wishlist',
   '/show_scheduled_trans',
   '/show-target-history',
-  '/monthly-reports',
+  '/reports',
   '/imhotep_finance.png',
   '/icon-monochrome.png',
-  '/manifest.json'
+  '/manifest.json',
+  '/version'
 ];
 
 const RUNTIME_CACHE = 'imhotep-finance-runtime-v1';
@@ -86,6 +87,7 @@ self.addEventListener('fetch', (event) => {
           
           // Cache successful responses
           if (response.ok) {
+            responseToCache.headers.set('sw-cache-date', Date.now().toString());
             caches.open(API_CACHE).then(cache => {
               cache.put(request, responseToCache);
             });
@@ -93,27 +95,29 @@ self.addEventListener('fetch', (event) => {
           
           return response;
         })
-        .catch(() => {
+        .catch(async () => {
           // Return cached API response if available
-          return caches.match(request).then(cached => {
-            if (cached) {
+          const cached = await caches.match(request);
+          if (cached) {
+            const cacheDate = cached.headers.get('sw-cache-date');
+            if (cacheDate && (Date.now() - parseInt(cacheDate)) < 300000) { // 5 min
               return cached;
             }
-            
-            // Return a custom offline API response
-            return new Response(
-              JSON.stringify({ 
-                error: 'Network unavailable',
-                offline: true,
-                message: 'You appear to be offline. Please check your connection and try again.'
-              }),
-              {
-                status: 503,
-                statusText: 'Service Unavailable',
-                headers: { 'Content-Type': 'application/json' }
-              }
-            );
-          });
+          }
+          
+          // Return a custom offline API response
+          return new Response(
+            JSON.stringify({ 
+              error: 'Network unavailable',
+              offline: true,
+              message: 'You appear to be offline. Please check your connection and try again.'
+            }),
+            {
+              status: 503,
+              statusText: 'Service Unavailable',
+              headers: { 'Content-Type': 'application/json' }
+            }
+          );
         })
     );
     return;
