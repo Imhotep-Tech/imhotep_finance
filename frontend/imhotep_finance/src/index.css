@@ -8,16 +8,22 @@
   font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
+  /* Light theme tokens */
+  --bg: #ffffff;
+  --bg-elevated: rgba(255,255,255,0.8);
+  --text: #0f172a; /* slate-900 */
+  --muted: #64748b; /* slate-500 */
+  --border: #e5e7eb; /* gray-200 */
 }
 
 /* Custom components */
 @layer components {
   .chef-card {
-    @apply bg-white backdrop-blur-lg bg-opacity-80 border border-white/20 shadow-2xl transition-all duration-300 hover:shadow-2xl hover:-translate-y-1;
+    @apply bg-[var(--bg-elevated)] backdrop-blur-lg border border-[var(--border)] shadow-2xl transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 dark:bg-gray-900/70 dark:border-white/10;
   }
   
   .chef-input {
-    @apply w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-300 bg-white/70 backdrop-blur-sm;
+    @apply w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-300 bg-white/70 backdrop-blur-sm dark:bg-gray-800/70 dark:border-gray-700 dark:text-gray-100 placeholder-gray-400;
   }
   
   .chef-button {
@@ -25,6 +31,15 @@
   }
   
   .chef-button-secondary {
-    @apply w-full py-3 px-6 border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 bg-white/70 backdrop-blur-sm focus:outline-none focus:ring-4 focus:ring-orange-300;
+    @apply w-full py-3 px-6 border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 bg-white/70 backdrop-blur-sm focus:outline-none focus:ring-4 focus:ring-orange-300 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800;
   }
+}
+
+.dark {
+  /* Dark theme tokens */
+  --bg: #0b1220; /* near slate-950 with a hint of blue */
+  --bg-elevated: rgba(17,24,39,0.6); /* gray-900 with translucency */
+  --text: #e5e7eb; /* gray-200 */
+  --muted: #94a3b8; /* slate-400 */
+  --border: #374151; /* gray-700 */
 }

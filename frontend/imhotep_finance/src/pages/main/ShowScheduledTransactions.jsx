@@ -135,17 +135,19 @@ const ShowScheduledTransactions = () => {
 
   return (
     <div
-      className="min-h-screen overflow-y-auto pb-8 bg-chef-pattern"
-      style={{
-        background: 'linear-gradient(135deg, #eaf6f6 0%, #d6efee 50%, #1a3535 100%)',
-      }}
+      className="min-h-screen overflow-y-auto pb-8 bg-[var(--bg)] text-[var(--text)] transition-colors relative"
     >
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-20 w-32 h-32 rounded-full filter blur-xl opacity-20 animate-float bg-[#366c6b] mix-blend-multiply dark:bg-emerald-600/40 dark:mix-blend-screen"></div>
+        <div className="absolute top-40 right-20 w-24 h-24 rounded-full filter blur-xl opacity-18 animate-float bg-[rgba(26,53,53,0.9)] dark:bg-teal-800/40" style={{animationDelay: '2s'}}></div>
+        <div className="absolute bottom-20 left-40 w-40 h-40 rounded-full filter blur-xl opacity-16 animate-float bg-[#2f7775] dark:bg-cyan-700/30 dark:mix-blend-screen" style={{animationDelay: '4s'}}></div>
+      </div>
       <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        <div className="chef-card rounded-3xl p-8 shadow-2xl backdrop-blur-2xl border border-white/30 bg-white/90 mb-8">
+        <div className="chef-card rounded-3xl p-8 shadow-2xl backdrop-blur-2xl mb-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold font-chef text-gray-800 mb-2">Scheduled Transactions</h1>
-              <p className="text-lg text-gray-600 font-medium leading-relaxed mb-4">
+              <h1 className="text-3xl font-bold font-chef text-gray-800 dark:text-gray-100 mb-2">Scheduled Transactions</h1>
+              <p className="text-lg text-gray-600 dark:text-gray-300 font-medium leading-relaxed mb-4">
                 View and manage your recurring transactions
               </p>
             </div>
@@ -161,18 +163,18 @@ const ShowScheduledTransactions = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-800 p-8">
           {actionError && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-center">
               {actionError}
             </div>
           )}
           {loading ? (
-            <div className="text-center text-gray-500 py-8">Loading scheduled transactions...</div>
+            <div className="text-center text-gray-500 dark:text-gray-400 py-8">Loading scheduled transactions...</div>
           ) : error ? (
-            <div className="text-center text-red-600 py-8">{error}</div>
+            <div className="text-center text-red-600 dark:text-red-400 py-8">{error}</div>
           ) : scheduledTrans.length === 0 ? (
-            <div className="text-center text-gray-500 py-8">No scheduled transactions found.</div>
+            <div className="text-center text-gray-500 dark:text-gray-400 py-8">No scheduled transactions found.</div>
           ) : (
             <>
               <div className="hidden md:block overflow-x-auto">

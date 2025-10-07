@@ -17,10 +17,7 @@ const Version = () => {
 
   return (
     <div
-      className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-teal-50 relative overflow-hidden"
-      style={{
-        background: 'linear-gradient(135deg, #eaf6f6 0%, #d6efee 50%, #1a3535 100%)',
-      }}
+      className="min-h-screen bg-[var(--bg)] text-[var(--text)] transition-colors relative overflow-hidden"
     >
       {/* Floating decorative elements (subtle and professional) */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -43,17 +40,17 @@ const Version = () => {
         <div className="flex justify-start">
           <button
             onClick={handleBack}
-            className="flex items-center space-x-2 px-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-lg shadow-md hover:shadow-lg hover:bg-white transition-all duration-200"
+            className="flex items-center space-x-2 px-4 py-2 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-gray-200 dark:border-gray-800 rounded-lg shadow-md hover:shadow-lg hover:bg-white dark:hover:bg-gray-800 transition-all duration-200"
           >
-            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            <span className="text-gray-700 font-medium">Back</span>
+            <span className="text-gray-700 dark:text-gray-200 font-medium">Back</span>
           </button>
         </div>
 
         {/* Header Section (professional and responsive) */}
-        <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 sm:p-8 shadow-xl border border-gray-100">
+        <div className="bg-white/90 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 sm:p-8 shadow-xl border border-gray-100 dark:border-gray-800">
           <div className="text-center">
             <div className="flex items-center justify-center mb-6">
               <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-teal-500 to-slate-600 rounded-full flex items-center justify-center shadow-lg">
@@ -62,8 +59,8 @@ const Version = () => {
                 </svg>
               </div>
             </div>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">Version History</h1>
-            <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4">Version History</h1>
+            <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
               Discover the evolution of Imhotep Financial Manager through our journey of continuous improvement and innovation
             </p>
           </div>
@@ -89,7 +86,7 @@ const Version = () => {
         <div className="relative space-y-8">
 
           {/* Version 7.0.2 - Current (New Addition) */}
-          <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-200">
+          <div className="bg-white/90 dark:bg-gray-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg border border-gray-100 dark:border-gray-800 hover:shadow-xl transition-shadow duration-200">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-teal-600 rounded-full flex items-center justify-center">
@@ -102,9 +99,9 @@ const Version = () => {
                   <span className="inline-block mt-1 px-2 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded-full">CURRENT</span>
                 </div>
               </div>
-              <span className="text-sm text-gray-500 mt-2 md:mt-0">October 2, 2025</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400 mt-2 md:mt-0">October 2, 2025</span>
             </div>
-            <p className="text-gray-600 mb-4">Fixed issues and added yearly reports</p>
+            <p className="text-gray-600 dark:text-gray-300 mb-4">Fixed issues and added yearly reports</p>
             <p className="text-gray-600 mb-4">
             </p>
             <ul className="space-y-2 text-sm text-gray-700">
@@ -136,7 +133,7 @@ const Version = () => {
           </div>
 
           {/* Version 7.0.1 */}
-          <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-200">
+          <div className="bg-white/90 dark:bg-gray-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg border border-gray-100 dark:border-gray-800 hover:shadow-xl transition-shadow duration-200">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-teal-600 rounded-full flex items-center justify-center">
@@ -148,9 +145,9 @@ const Version = () => {
                   <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Version 7.0.1</h3>
                 </div>
               </div>
-              <span className="text-sm text-gray-500 mt-2 md:mt-0">September 24, 2025</span>
+              <span className="text-sm text-gray-500 dark:text-gray-400 mt-2 md:mt-0">September 24, 2025</span>
             </div>
-            <p className="text-gray-600 mb-4">Fixed issues and performance enhancements</p>
+            <p className="text-gray-600 dark:text-gray-300 mb-4">Fixed issues and performance enhancements</p>
             <p className="text-gray-600 mb-4">
             </p>
             <ul className="space-y-2 text-sm text-gray-700">
@@ -182,7 +179,7 @@ const Version = () => {
           </div>
 
           {/* Version 7.0.0 */}
-          <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-200">
+          <div className="bg-white/90 dark:bg-gray-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg border border-gray-100 dark:border-gray-800 hover:shadow-xl transition-shadow duration-200">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-teal-600 rounded-full flex items-center justify-center">

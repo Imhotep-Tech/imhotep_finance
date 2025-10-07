@@ -117,17 +117,19 @@ const ShowWishlist = () => {
 
   return (
     <div
-      className="min-h-screen bg-chef-pattern"
-      style={{
-        background: 'linear-gradient(135deg, #eaf6f6 0%, #d6efee 50%, #1a3535 100%)',
-      }}
+      className="min-h-screen bg-[var(--bg)] text-[var(--text)] transition-colors relative"
     >
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-20 w-32 h-32 rounded-full filter blur-xl opacity-20 animate-float bg-[#366c6b] mix-blend-multiply dark:bg-emerald-600/40 dark:mix-blend-screen"></div>
+        <div className="absolute top-40 right-20 w-24 h-24 rounded-full filter blur-xl opacity-18 animate-float bg-[rgba(26,53,53,0.9)] dark:bg-teal-800/40" style={{animationDelay: '2s'}}></div>
+        <div className="absolute bottom-20 left-40 w-40 h-40 rounded-full filter blur-xl opacity-16 animate-float bg-[#2f7775] dark:bg-cyan-700/30 dark:mix-blend-screen" style={{animationDelay: '4s'}}></div>
+      </div>
       <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        <div className="chef-card rounded-3xl p-8 shadow-2xl backdrop-blur-2xl border border-white/30 bg-white/90 mb-8">
+        <div className="chef-card rounded-3xl p-8 shadow-2xl backdrop-blur-2xl mb-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold font-chef text-gray-800 mb-2">Wishlist</h1>
-              <p className="text-lg text-gray-600 font-medium leading-relaxed mb-4">
+              <h1 className="text-3xl font-bold font-chef text-gray-800 dark:text-gray-100 mb-2">Wishlist</h1>
+              <p className="text-lg text-gray-600 dark:text-gray-300 font-medium leading-relaxed mb-4">
                 View and manage your wishlist items
               </p>
             </div>
@@ -156,7 +158,7 @@ const ShowWishlist = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-800 p-8">
           {/* Show backend error messages */}
           {actionError && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-center">
@@ -164,47 +166,47 @@ const ShowWishlist = () => {
             </div>
           )}
           {loading ? (
-            <div className="text-center text-gray-500 py-8">Loading wishlist...</div>
+            <div className="text-center text-gray-500 dark:text-gray-400 py-8">Loading wishlist...</div>
           ) : error ? (
-            <div className="text-center text-red-600 py-8">{error}</div>
+            <div className="text-center text-red-600 dark:text-red-400 py-8">{error}</div>
           ) : wishlist.length === 0 ? (
-            <div className="text-center text-gray-500 py-8">No wishlist items found.</div>
+            <div className="text-center text-gray-500 dark:text-gray-400 py-8">No wishlist items found.</div>
           ) : (
             <>
               {/* Desktop Table */}
               <div className="hidden md:block overflow-x-auto">
                 <table className="min-w-full text-sm">
                   <thead>
-                    <tr className="bg-gray-50">
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700">Wish</th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700">Price</th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700">Currency</th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700">Year</th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700">Link</th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700">Status</th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700">Actions</th>
+                    <tr className="bg-gray-50 dark:bg-gray-800">
+                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Wish</th>
+                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Price</th>
+                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Currency</th>
+                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Year</th>
+                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Link</th>
+                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Status</th>
+                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {wishlist.map(w => (
-                      <tr key={w.id} className="border-b border-gray-100 hover:bg-gray-50">
-                        <td className="px-4 py-2 whitespace-nowrap text-gray-900">
+                      <tr key={w.id} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 hover:dark:bg-gray-800/60">
+                        <td className="px-4 py-2 whitespace-nowrap text-gray-900 dark:text-gray-100">
                           {w.wish_details || <span className="text-gray-400 italic">No details</span>}
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap">
                           <AmountCell price={w.price} currency={w.currency} />
                         </td>
-                        <td className="px-4 py-2 whitespace-nowrap text-gray-700 font-medium">
+                        <td className="px-4 py-2 whitespace-nowrap text-gray-700 dark:text-gray-300 font-medium">
                           {w.currency}
                         </td>
-                        <td className="px-4 py-2 whitespace-nowrap text-gray-700 font-medium">
+                        <td className="px-4 py-2 whitespace-nowrap text-gray-700 dark:text-gray-300 font-medium">
                           {w.year}
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap">
                           {w.link ? (
-                            <a href={w.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">View</a>
+                            <a href={w.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 underline">View</a>
                           ) : (
-                            <span className="text-gray-400 italic">No link</span>
+                            <span className="text-gray-400 dark:text-gray-500 italic">No link</span>
                           )}
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap">

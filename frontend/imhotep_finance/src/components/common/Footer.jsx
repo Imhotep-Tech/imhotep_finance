@@ -23,32 +23,17 @@ function Footer() {
 
   return (
     <footer
-      className="relative z-10 py-8"
-      style={{
-        background: 'linear-gradient(90deg, #366c6b 0%, #1a3535 100%)',
-        color: 'white',
-      }}
+      className="relative z-10 py-8 bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white dark:from-gray-950 dark:to-gray-900"
     >
       <div className="container mx-auto px-4 max-w-2xl text-center">
         <div className="flex justify-center mb-3">
           <div
-            className="inline-flex items-center justify-center w-12 h-12 rounded-full shadow-lg border-2 border-white"
-            style={{ background: 'linear-gradient(90deg, #366c6b 0%, #1a3535 100%)' }}
+            className="inline-flex items-center justify-center w-12 h-12 rounded-full shadow-lg border-2 border-white bg-gradient-to-r from-[#366c6b] to-[#1a3535]"
           >
             <img src={Logo} alt="Logo" className="w-8 h-8 object-contain" />
           </div>
         </div>
-        <div
-          className="font-extrabold text-xl mb-1 bg-clip-text text-transparent font-chef"
-          style={{
-            backgroundImage: 'linear-gradient(90deg, #eaf6f6 0%, #d6efee 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            letterSpacing: '0.04em',
-          }}
-        >
-          Imhotep Finance
-        </div>
+        <div className="font-extrabold text-xl mb-1 font-chef">Imhotep Finance</div>
         <p className="text-white/80 text-xs mb-2">
           Manage your finances efficiently with Imhotep Financial Manager
         </p>
