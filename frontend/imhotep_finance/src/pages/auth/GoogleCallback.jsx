@@ -94,35 +94,7 @@ const GoogleCallback = () => {
     handleGoogleCallback();
   }, [searchParams, login, navigate]);
 
-  // Update color theme for all states
-  const getBackgroundGradient = () => {
-    switch (status) {
-      case 'processing':
-        return 'bg-chef-pattern';
-      case 'success':
-        return 'bg-chef-pattern';
-      case 'error':
-        return 'bg-chef-pattern';
-      default:
-        return 'bg-chef-pattern';
-    }
-  };
-
-  const getBackgroundStyle = () => {
-    switch (status) {
-      case 'processing':
-      case 'success':
-        return {
-          background: 'linear-gradient(135deg, #eaf6f6 0%, #d6efee 50%, #1a3535 100%)',
-        };
-      case 'error':
-        return {
-          background: 'linear-gradient(135deg, #fbeaea 0%, #f7e6e6 50%, #e7caca 100%)',
-        };
-      default:
-        return {};
-    }
-  };
+  // Dark-mode friendly floating elements
 
   const getFloatingElements = () => {
     switch (status) {
@@ -130,40 +102,21 @@ const GoogleCallback = () => {
       case 'success':
         return (
           <>
-            <div className="absolute top-20 left-20 w-32 h-32 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style={{ backgroundColor: '#366c6b' }}></div>
-            <div className="absolute top-40 right-20 w-24 h-24 rounded-full mix-blend-multiply filter blur-xl opacity-18 animate-float" style={{ backgroundColor: 'rgba(26,53,53,0.9)', animationDelay: '2s' }}></div>
-            <div className="absolute bottom-20 left-40 w-40 h-40 rounded-full mix-blend-multiply filter blur-xl opacity-16 animate-float" style={{ backgroundColor: '#2f7775', animationDelay: '4s' }}></div>
+            <div className="absolute top-20 left-20 w-32 h-32 rounded-full filter blur-xl opacity-20 animate-float bg-[#366c6b] mix-blend-multiply dark:bg-emerald-600/40 dark:mix-blend-screen"></div>
+            <div className="absolute top-40 right-20 w-24 h-24 rounded-full filter blur-xl opacity-18 animate-float bg-[rgba(26,53,53,0.9)] dark:bg-teal-800/40" style={{animationDelay: '2s'}}></div>
+            <div className="absolute bottom-20 left-40 w-40 h-40 rounded-full filter blur-xl opacity-16 animate-float bg-[#2f7775] dark:bg-cyan-700/30 dark:mix-blend-screen" style={{animationDelay: '4s'}}></div>
           </>
         );
       case 'error':
         return (
           <>
-            <div className="absolute top-20 left-20 w-32 h-32 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style={{ backgroundColor: '#e7caca' }}></div>
-            <div className="absolute top-40 right-20 w-24 h-24 rounded-full mix-blend-multiply filter blur-xl opacity-18 animate-float" style={{ backgroundColor: '#f7e6e6', animationDelay: '2s' }}></div>
-            <div className="absolute bottom-20 left-40 w-40 h-40 rounded-full mix-blend-multiply filter blur-xl opacity-16 animate-float" style={{ backgroundColor: '#fbeaea', animationDelay: '4s' }}></div>
+            <div className="absolute top-20 left-20 w-32 h-32 rounded-full filter blur-xl opacity-20 animate-float bg-red-300/60 dark:bg-red-800/40"></div>
+            <div className="absolute top-40 right-20 w-24 h-24 rounded-full filter blur-xl opacity-18 animate-float bg-red-200/80 dark:bg-rose-900/40" style={{animationDelay: '2s'}}></div>
+            <div className="absolute bottom-20 left-40 w-40 h-40 rounded-full filter blur-xl opacity-16 animate-float bg-rose-200 dark:bg-rose-800/30 dark:mix-blend-screen" style={{animationDelay: '4s'}}></div>
           </>
         );
       default:
         return null;
-    }
-  };
-
-  // Card background and accent colors
-  const getCardStyle = () => {
-    switch (status) {
-      case 'processing':
-      case 'success':
-        return {
-          border: '1px solid rgba(54,108,107,0.14)',
-          background: 'linear-gradient(180deg, rgba(255,255,255,0.94), rgba(242,251,250,0.9))',
-        };
-      case 'error':
-        return {
-          border: '1px solid #e7caca',
-          background: 'linear-gradient(180deg, rgba(255,255,255,0.94), #fbeaea 90%)',
-        };
-      default:
-        return {};
     }
   };
 
@@ -292,8 +245,7 @@ const GoogleCallback = () => {
 
   return (
     <div
-      className={`min-h-screen ${getBackgroundGradient()} flex items-center justify-center p-4`}
-      style={getBackgroundStyle()}
+      className="min-h-screen bg-[var(--bg)] text-[var(--text)] transition-colors relative flex items-center justify-center p-4"
     >
       {/* Floating decorative elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -304,7 +256,6 @@ const GoogleCallback = () => {
         {/* Main Authentication Card */}
         <div
           className="chef-card rounded-3xl p-8 shadow-2xl border backdrop-blur-xl text-center"
-          style={getCardStyle()}
         >
           {/* Icon */}
           <div className="mb-6">
@@ -318,22 +269,22 @@ const GoogleCallback = () => {
           >
             Imhotep Finance
           </div>
-          <h1 className="text-3xl font-bold font-chef text-gray-800 mb-4">
+          <h1 className="text-3xl font-bold font-chef text-gray-800 dark:text-gray-100 mb-4">
             {getTitle()}
           </h1>
           
           {/* Subtitle */}
-          <p className="font-medium mb-8 leading-relaxed" style={getSubtitleColor()}>
+          <p className="font-medium mb-8 leading-relaxed text-[#1a3535] dark:text-gray-300" style={{opacity: 0.8}}>
             {getSubtitle()}
           </p>
           
           {/* Loading progress for processing state */}
           {status === 'processing' && (
             <div className="mt-6">
-              <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="w-full bg-gray-200 dark:bg-gray-800 rounded-full h-2">
                 <div className="bg-gradient-to-r from-blue-500 via-red-500 to-yellow-500 h-2 rounded-full animate-pulse" style={{ width: '75%' }}></div>
               </div>
-              <p className="text-gray-500 text-sm mt-2">Authenticating with Google...</p>
+              <p className="text-gray-500 dark:text-gray-400 text-sm mt-2">Authenticating with Google...</p>
             </div>
           )}
 
@@ -353,12 +304,12 @@ const GoogleCallback = () => {
 
           {/* Countdown/redirect info for success state */}
           {status === 'success' && (
-            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+            <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-900 rounded-xl">
               <div className="flex items-center justify-center">
-                <svg className="w-5 h-5 text-blue-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-5 h-5 text-blue-500 dark:text-blue-300 mr-3" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
                 </svg>
-                <span className="text-blue-700 font-medium text-sm">
+                <span className="text-blue-700 dark:text-blue-300 font-medium text-sm">
                   Redirecting to your dashboard...
                 </span>
               </div>
@@ -368,14 +319,14 @@ const GoogleCallback = () => {
           {/* Error state help */}
           {status === 'error' && (
             <div className="mt-6 space-y-4">
-              <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900 rounded-xl">
                 <div className="flex items-start">
-                  <svg className="w-5 h-5 text-red-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 text-red-500 dark:text-red-300 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                   </svg>
                   <div className="text-left">
-                    <p className="text-red-700 font-medium text-sm">Authentication Error</p>
-                    <p className="text-red-600 text-sm mt-1">
+                    <p className="text-red-700 dark:text-red-300 font-medium text-sm">Authentication Error</p>
+                    <p className="text-red-600 dark:text-red-300 text-sm mt-1">
                       {message}
                     </p>
                   </div>
@@ -389,8 +340,8 @@ const GoogleCallback = () => {
           )}
 
           {/* Google branding notice */}
-          <div className="mt-8 pt-4 border-t border-gray-200">
-            <p className="text-gray-500 text-xs">
+          <div className="mt-8 pt-4 border-t border-gray-200 dark:border-gray-800">
+            <p className="text-gray-500 dark:text-gray-400 text-xs">
               Powered by Google OAuth 2.0 • Secure Authentication
             </p>
           </div>
@@ -398,7 +349,7 @@ const GoogleCallback = () => {
 
         {/* Bottom decorative text */}
         <div className="text-center mt-8">
-          <p className="text-sm font-medium" style={getSubtitleColor()}>
+          <p className="text-sm font-medium text-[#1a3535] dark:text-gray-300" style={{opacity: 0.8}}>
             {getBottomMessage()}
           </p>
         </div>

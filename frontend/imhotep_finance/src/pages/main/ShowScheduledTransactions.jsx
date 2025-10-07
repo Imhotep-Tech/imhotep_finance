@@ -85,12 +85,12 @@ const ShowScheduledTransactions = () => {
 
   const TypeBadge = ({ type }) => (
     type === 'deposit' || type === 'Deposit' ? (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300">
         <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M12 5v14m7-7H5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
         Income
       </span>
     ) : (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300">
         <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M12 5v14m-7-7h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
         Expense
       </span>
@@ -102,8 +102,8 @@ const ShowScheduledTransactions = () => {
     return (
       <span className={`category-tag inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border
         ${type === 'deposit' || type === 'Deposit'
-          ? 'bg-green-50 text-green-700 border-green-200'
-          : 'bg-red-50 text-red-700 border-red-200'}`}>
+          ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800'
+          : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800'}`}>
         <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
         {category}
       </span>
@@ -135,17 +135,19 @@ const ShowScheduledTransactions = () => {
 
   return (
     <div
-      className="min-h-screen overflow-y-auto pb-8 bg-chef-pattern"
-      style={{
-        background: 'linear-gradient(135deg, #eaf6f6 0%, #d6efee 50%, #1a3535 100%)',
-      }}
+      className="min-h-screen overflow-y-auto pb-8 bg-[var(--bg)] text-[var(--text)] transition-colors relative"
     >
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-20 w-32 h-32 rounded-full filter blur-xl opacity-20 animate-float bg-[#366c6b] mix-blend-multiply dark:bg-emerald-600/40 dark:mix-blend-screen"></div>
+        <div className="absolute top-40 right-20 w-24 h-24 rounded-full filter blur-xl opacity-18 animate-float bg-[rgba(26,53,53,0.9)] dark:bg-teal-800/40" style={{animationDelay: '2s'}}></div>
+        <div className="absolute bottom-20 left-40 w-40 h-40 rounded-full filter blur-xl opacity-16 animate-float bg-[#2f7775] dark:bg-cyan-700/30 dark:mix-blend-screen" style={{animationDelay: '4s'}}></div>
+      </div>
       <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        <div className="chef-card rounded-3xl p-8 shadow-2xl backdrop-blur-2xl border border-white/30 bg-white/90 mb-8">
+        <div className="chef-card rounded-3xl p-8 shadow-2xl backdrop-blur-2xl mb-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold font-chef text-gray-800 mb-2">Scheduled Transactions</h1>
-              <p className="text-lg text-gray-600 font-medium leading-relaxed mb-4">
+              <h1 className="text-3xl font-bold font-chef text-gray-800 dark:text-gray-100 mb-2">Scheduled Transactions</h1>
+              <p className="text-lg text-gray-600 dark:text-gray-300 font-medium leading-relaxed mb-4">
                 View and manage your recurring transactions
               </p>
             </div>
@@ -161,37 +163,37 @@ const ShowScheduledTransactions = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-800 p-8">
           {actionError && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-center">
               {actionError}
             </div>
           )}
           {loading ? (
-            <div className="text-center text-gray-500 py-8">Loading scheduled transactions...</div>
+            <div className="text-center text-gray-500 dark:text-gray-400 py-8">Loading scheduled transactions...</div>
           ) : error ? (
-            <div className="text-center text-red-600 py-8">{error}</div>
+            <div className="text-center text-red-600 dark:text-red-400 py-8">{error}</div>
           ) : scheduledTrans.length === 0 ? (
-            <div className="text-center text-gray-500 py-8">No scheduled transactions found.</div>
+            <div className="text-center text-gray-500 dark:text-gray-400 py-8">No scheduled transactions found.</div>
           ) : (
             <>
               <div className="hidden md:block overflow-x-auto">
                 <table className="min-w-full text-sm">
                   <thead>
-                    <tr className="bg-gray-50">
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700">Day</th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700">Type</th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700">Amount</th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700">Currency</th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700">Category</th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700">Description</th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700">Actions</th>
+                    <tr className="bg-gray-50 dark:bg-gray-800">
+                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Day</th>
+                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Type</th>
+                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Amount</th>
+                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Currency</th>
+                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Category</th>
+                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Description</th>
+                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {scheduledTrans.map(tx => (
-                      <tr key={tx.id} className="border-b border-gray-100 hover:bg-gray-50">
-                        <td className="px-4 py-2 whitespace-nowrap text-gray-900 font-medium">
+                      <tr key={tx.id} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 hover:dark:bg-gray-800/60">
+                        <td className="px-4 py-2 whitespace-nowrap text-gray-900 dark:text-gray-100 font-medium">
                           {tx.day_of_month}
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap">
@@ -200,27 +202,27 @@ const ShowScheduledTransactions = () => {
                         <td className="px-4 py-2 whitespace-nowrap">
                           <AmountCell type={tx.scheduled_trans_status} amount={tx.amount} currency={tx.currency} />
                         </td>
-                        <td className="px-4 py-2 whitespace-nowrap text-gray-700 font-medium">
+                        <td className="px-4 py-2 whitespace-nowrap text-gray-700 dark:text-gray-300 font-medium">
                           {tx.currency}
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap">
                           <CategoryTag type={tx.scheduled_trans_status} category={tx.category} />
                         </td>
-                        <td className="px-4 py-2 text-gray-700 max-w-xs">
+                        <td className="px-4 py-2 text-gray-700 dark:text-gray-300 max-w-xs">
                           <div className="truncate">
-                            {tx.scheduled_trans_details ? tx.scheduled_trans_details : <span className="text-gray-400 italic">No description</span>}
+                            {tx.scheduled_trans_details ? tx.scheduled_trans_details : <span className="text-gray-400 dark:text-gray-500 italic">No description</span>}
                           </div>
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap">
                           <div className="flex gap-2">
                             <button
-                              className="chef-button-secondary px-2 py-1 text-xs"
+                              className="chef-button-secondary px-2 py-1 text-xs dark:text-gray-100 dark:bg-gray-800"
                               onClick={() => handleEdit(tx)}
                             >
                               Edit
                             </button>
                             <button
-                              className="chef-button-secondary px-2 py-1 text-xs text-red-600"
+                              className="chef-button-secondary px-2 py-1 text-xs text-red-600 dark:text-gray-100 dark:bg-gray-800"
                               onClick={() => handleDelete(tx)}
                               disabled={!!deleteLoading[tx.id]}
                             >
@@ -233,7 +235,7 @@ const ShowScheduledTransactions = () => {
                               )}
                             </button>
                             <button
-                              className={`chef-button-secondary px-3 py-1 flex items-center gap-2 ${tx.status ? 'bg-green-100 text-green-700' : ''}`}
+                              className={`chef-button-secondary px-3 py-1 flex items-center gap-2 dark:text-gray-100 dark:bg-gray-800 ${tx.status ? 'bg-green-100 text-green-700' : ''}`}
                               onClick={() => handleStatusToggle(tx)}
                               disabled={!!statusLoading[tx.id]}
                             >
@@ -269,33 +271,33 @@ const ShowScheduledTransactions = () => {
                   <div
                     key={tx.id}
                     className={`scheduled-card border rounded-xl p-4 ${tx.scheduled_trans_status === 'deposit' || tx.scheduled_trans_status === 'Deposit'
-                      ? 'bg-green-50 border-l-4 border-green-400'
-                      : 'bg-red-50 border-l-4 border-red-400'
+                      ? 'bg-green-50 dark:bg-green-900/20 border-l-4 border-green-400'
+                      : 'bg-red-50 dark:bg-red-900/20 border-l-4 border-red-400'
                     }`}
                   >
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center space-x-2">
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center
                           ${tx.scheduled_trans_status === 'deposit' || tx.scheduled_trans_status === 'Deposit'
-                            ? 'bg-green-100'
-                            : 'bg-red-100'
+                            ? 'bg-green-100 dark:bg-green-800'
+                            : 'bg-red-100 dark:bg-red-800'
                           }`}>
                           {tx.scheduled_trans_status === 'deposit' || tx.scheduled_trans_status === 'Deposit' ? (
-                            <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 5v14m7-7H5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                            <svg className="w-5 h-5 text-green-600 dark:text-green-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 5v14m7-7H5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                           ) : (
-                            <svg className="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 5v14m-7-7h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                            <svg className="w-5 h-5 text-red-600 dark:text-red-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 5v14m-7-7h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                           )}
                         </div>
-                        <span className={`font-medium ${tx.scheduled_trans_status === 'deposit' || tx.scheduled_trans_status === 'Deposit' ? 'text-green-800' : 'text-red-800'}`}>
+                        <span className={`font-medium ${tx.scheduled_trans_status === 'deposit' || tx.scheduled_trans_status === 'Deposit' ? 'text-green-800 dark:text-green-200' : 'text-red-800 dark:text-red-200'}`}>
                           {tx.scheduled_trans_status === 'deposit' || tx.scheduled_trans_status === 'Deposit' ? 'Income' : 'Expense'}
                         </span>
                       </div>
                       <div className="text-right">
-                        <div className={`text-lg font-bold ${tx.scheduled_trans_status === 'deposit' || tx.scheduled_trans_status === 'Deposit' ? 'text-green-600' : 'text-red-600'}`}>
+                        <div className={`text-lg font-bold ${tx.scheduled_trans_status === 'deposit' || tx.scheduled_trans_status === 'Deposit' ? 'text-green-600 dark:text-green-300' : 'text-red-600 dark:text-red-300'}`}>
                           {tx.scheduled_trans_status === 'deposit' || tx.scheduled_trans_status === 'Deposit' ? '+' : '-'}
                           {Number(tx.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {tx.currency}
                         </div>
-                        <div className="text-sm text-gray-500">Day {tx.day_of_month}</div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">Day {tx.day_of_month}</div>
                       </div>
                     </div>
                     <div className="mb-2">
@@ -303,18 +305,18 @@ const ShowScheduledTransactions = () => {
                     </div>
                     {tx.scheduled_trans_details && (
                       <div className="mb-2">
-                        <p className="text-gray-700 text-sm">{tx.scheduled_trans_details}</p>
+                        <p className="text-gray-700 dark:text-gray-300 text-sm">{tx.scheduled_trans_details}</p>
                       </div>
                     )}
                     <div className="flex gap-2 mt-2">
                       <button
-                        className="chef-button-secondary px-2 py-1 text-xs"
+                        className="chef-button-secondary px-2 py-1 text-xs dark:text-gray-100 dark:bg-gray-800"
                         onClick={() => handleEdit(tx)}
                       >
                         Edit
                       </button>
                       <button
-                        className="chef-button-secondary px-2 py-1 text-xs text-red-600"
+                        className="chef-button-secondary px-2 py-1 text-xs text-red-600 dark:text-gray-100 dark:bg-gray-800"
                         onClick={() => handleDelete(tx)}
                         disabled={!!deleteLoading[tx.id]}
                       >
@@ -327,7 +329,7 @@ const ShowScheduledTransactions = () => {
                         )}
                       </button>
                       <button
-                        className={`chef-button-secondary px-3 py-1 flex items-center gap-2 ${tx.status ? 'bg-green-100 text-green-700' : ''}`}
+                        className={`chef-button-secondary px-3 py-1 flex items-center gap-2 dark:text-gray-100 dark:bg-gray-800 ${tx.status ? 'bg-green-100 text-green-700' : ''}`}
                         onClick={() => handleStatusToggle(tx)}
                         disabled={!!statusLoading[tx.id]}
                       >

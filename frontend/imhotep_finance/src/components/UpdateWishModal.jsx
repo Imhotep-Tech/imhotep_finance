@@ -64,10 +64,8 @@ const UpdateWishModal = ({
     <div className="fixed inset-0 z-[100] overflow-y-auto bg-black/40 backdrop-blur-sm">
       <div className="flex items-start sm:items-center justify-center min-h-screen p-4">
         <div
-          className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative chef-card mx-auto my-8"
+          className="rounded-2xl shadow-2xl max-w-md w-full p-6 relative chef-card mx-auto my-8 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800"
           style={{
-            border: '1px solid rgba(54,108,107,0.14)',
-            background: 'linear-gradient(180deg, rgba(255,255,255,0.94), rgba(242,251,250,0.9))',
             maxHeight: 'calc(100vh - 4rem)',
             overflowY: 'auto',
           }}
@@ -81,12 +79,12 @@ const UpdateWishModal = ({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
-          <h2 className="text-2xl font-bold mb-4 text-gray-800">
+          <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">
             Edit Wish
           </h2>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Price</label>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Price</label>
               <input
                 type="number"
                 min="0"
@@ -99,7 +97,7 @@ const UpdateWishModal = ({
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Currency</label>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Currency</label>
 
               {/* Use shared CurrencySelect so the opened wish currency is preserved */}
               <CurrencySelect
@@ -109,7 +107,7 @@ const UpdateWishModal = ({
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Year</label>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Year</label>
               <input
                 type="number"
                 min="2000"
@@ -121,7 +119,7 @@ const UpdateWishModal = ({
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Wish Details</label>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Wish Details</label>
               <input
                 type="text"
                 value={wishDetails}
@@ -131,7 +129,7 @@ const UpdateWishModal = ({
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Link</label>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Link</label>
               <input
                 type="url"
                 value={link}
@@ -143,7 +141,7 @@ const UpdateWishModal = ({
             <div className="flex justify-end gap-2 mt-4">
               <button
                 type="button"
-                className="chef-button-secondary"
+                className="chef-button-secondary dark:text-gray-100 dark:bg-gray-800"
                 onClick={onClose}
                 disabled={loading}
               >
@@ -158,10 +156,10 @@ const UpdateWishModal = ({
               </button>
             </div>
             {success && (
-              <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded text-green-700 text-sm">{success}</div>
+              <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-900 rounded text-green-700 dark:text-green-300 text-sm">{success}</div>
             )}
             {error && (
-              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">{error}</div>
+              <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900 rounded text-red-700 dark:text-red-300 text-sm">{error}</div>
             )}
           </form>
         </div>

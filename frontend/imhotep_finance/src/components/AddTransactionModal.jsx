@@ -103,10 +103,8 @@ const AddTransactionModal = ({
     <div className="fixed inset-0 z-[100] overflow-y-auto bg-black/40 backdrop-blur-sm">
       <div className="flex items-start sm:items-center justify-center min-h-screen p-4">
         <div
-          className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative chef-card mx-auto my-8"
+          className="rounded-2xl shadow-2xl max-w-md w-full p-6 relative chef-card mx-auto my-8 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800"
           style={{
-            border: '1px solid rgba(54,108,107,0.14)',
-            background: 'linear-gradient(180deg, rgba(255,255,255,0.94), rgba(242,251,250,0.9))',
             maxHeight: 'calc(100vh - 4rem)',
             overflowY: 'auto',
           }}
@@ -120,31 +118,33 @@ const AddTransactionModal = ({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
-          <h2 className="text-2xl font-bold mb-4 text-gray-800">
+          <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">
             {editMode ? 'Edit Transaction' : 'Add Transaction'}
           </h2>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Type</label>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Type</label>
               <div className="flex gap-4">
                 <button
                   type="button"
-                  className={`chef-button-secondary px-4 py-2 rounded ${status === 'deposit' ? 'bg-green-100 text-green-700 font-bold' : ''}`}
+                  className={`chef-button-secondary px-4 py-2 rounded transition-all duration-200 dark:text-gray-100 dark:bg-gray-800 ${status === 'deposit' ? 'bg-green-100 text-green-700 font-bold ring-2 ring-green-300 dark:ring-green-700 shadow-sm scale-[1.02]' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}
                   onClick={() => setStatus('deposit')}
+                  aria-pressed={status === 'deposit'}
                 >
                   Income
                 </button>
                 <button
                   type="button"
-                  className={`chef-button-secondary px-4 py-2 rounded ${status === 'withdraw' ? 'bg-red-100 text-red-700 font-bold' : ''}`}
+                  className={`chef-button-secondary px-4 py-2 rounded transition-all duration-200 dark:text-gray-100 dark:bg-gray-800 ${status === 'withdraw' ? 'bg-red-100 text-red-700 font-bold ring-2 ring-red-300 dark:ring-red-700 shadow-sm scale-[1.02]' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}
                   onClick={() => setStatus('withdraw')}
+                  aria-pressed={status === 'withdraw'}
                 >
                   Expense
                 </button>
               </div>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Amount</label>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Amount</label>
               <input
                 type="number"
                 min="0"
@@ -157,7 +157,7 @@ const AddTransactionModal = ({
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Currency</label>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Currency</label>
 
               <CurrencySelect
                 value={currency}
@@ -166,7 +166,7 @@ const AddTransactionModal = ({
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Category</label>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Category</label>
               <div className="flex gap-2">
                 <select
                   className="chef-input"
@@ -189,7 +189,7 @@ const AddTransactionModal = ({
               </div>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Description</label>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Description</label>
               <input
                 type="text"
                 value={desc}
@@ -199,7 +199,7 @@ const AddTransactionModal = ({
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Date</label>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Date</label>
               <input
                 type="date"
                 value={date}
@@ -211,7 +211,7 @@ const AddTransactionModal = ({
             <div className="flex justify-end gap-2 mt-4">
               <button
                 type="button"
-                className="chef-button-secondary"
+                className="chef-button-secondary dark:text-gray-100 dark:bg-gray-800"
                 onClick={onClose}
                 disabled={loading}
               >
@@ -231,10 +231,10 @@ const AddTransactionModal = ({
               </button>
             </div>
             {success && (
-              <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded text-green-700 text-sm">{success}</div>
+              <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-900 rounded text-green-700 dark:text-green-300 text-sm">{success}</div>
             )}
             {error && (
-              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">{error}</div>
+              <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900 rounded text-red-700 dark:text-red-300 text-sm">{error}</div>
             )}
           </form>
         </div>

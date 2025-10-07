@@ -1,4 +1,5 @@
 import { AuthProvider } from './contexts/AuthContext'
+import { ThemeProvider } from './contexts/ThemeContext'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import ProtectedRoute from './components/ProtectedRoute'
 import PublicRoute from './components/PublicRoute'
@@ -33,9 +34,10 @@ import InstallButton from './components/pwa/InstallButton';
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <div>
+    <ThemeProvider>
+      <AuthProvider>
+        <Router>
+          <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] transition-colors">
           {/* Global PWA Components */}
           <InstallPrompt />
           <OfflineIndicator />
@@ -168,8 +170,9 @@ function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
-      </Router>
-    </AuthProvider>
+        </Router>
+      </AuthProvider>
+    </ThemeProvider>
   )
 }
 

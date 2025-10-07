@@ -152,11 +152,13 @@ const EmailChangeVerification = () => {
 
   return (
     <div
-      className={`min-h-screen bg-gradient-to-br ${getBackgroundGradient()} bg-chef-pattern flex items-center justify-center p-4`}
-      style={{
-        background: 'linear-gradient(135deg, #eaf6f6 0%, #d6efee 50%, #1a3535 100%)',
-      }}
+      className={`min-h-screen bg-[var(--bg)] text-[var(--text)] transition-colors relative flex items-center justify-center p-4`}
     >
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-20 w-32 h-32 rounded-full filter blur-xl opacity-20 animate-float bg-[#366c6b] mix-blend-multiply dark:bg-emerald-600/40 dark:mix-blend-screen"></div>
+        <div className="absolute top-40 right-20 w-24 h-24 rounded-full filter blur-xl opacity-18 animate-float bg-[rgba(26,53,53,0.9)] dark:bg-teal-800/40" style={{animationDelay: '2s'}}></div>
+        <div className="absolute bottom-20 left-40 w-40 h-40 rounded-full filter blur-xl opacity-16 animate-float bg-[#2f7775] dark:bg-cyan-700/30 dark:mix-blend-screen" style={{animationDelay: '4s'}}></div>
+      </div>
       {/* Floating decorative elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {getFloatingElements()}
@@ -164,10 +166,7 @@ const EmailChangeVerification = () => {
       <div className="relative w-full max-w-md">
         {/* Glassmorphism Card */}
         <div
-          className="chef-card rounded-3xl p-8 shadow-2xl border border-[#366c6b]/10 backdrop-blur-2xl"
-          style={{
-            background: 'linear-gradient(180deg, rgba(255,255,255,0.94), rgba(242,251,250,0.9))',
-          }}
+          className="chef-card rounded-3xl p-8 shadow-2xl backdrop-blur-2xl"
         >
           {/* Brand Header */}
           <div className="text-center mb-6">
@@ -196,11 +195,11 @@ const EmailChangeVerification = () => {
           {/* Icon */}
           {getIcon()}
           {/* Title */}
-          <h1 className="text-3xl font-bold font-chef text-gray-800 mb-4">
+          <h1 className="text-3xl font-bold font-chef text-gray-800 dark:text-gray-100 mb-4">
             {getTitle()}
           </h1>
           {/* Subtitle */}
-          <p className="text-gray-600 font-medium mb-8 leading-relaxed">
+          <p className="text-gray-600 dark:text-gray-300 font-medium mb-8 leading-relaxed">
             {getSubtitle()}
           </p>
           {/* Action Button */}
@@ -225,7 +224,7 @@ const EmailChangeVerification = () => {
                 <svg className="w-5 h-5 text-[#366c6b] mr-3" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
                 </svg>
-                <span className="text-[#1a3535] font-medium text-sm">
+                <span className="text-[#1a3535] dark:text-gray-300 font-medium text-sm">
                   Redirecting to login in {countdown} seconds...
                 </span>
               </div>
@@ -237,7 +236,7 @@ const EmailChangeVerification = () => {
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div className="bg-gradient-to-r from-[#366c6b] to-[#1a3535] h-2 rounded-full animate-pulse" style={{width: '80%'}}></div>
               </div>
-              <p className="text-gray-500 text-sm mt-2">Updating email address...</p>
+              <p className="text-gray-500 dark:text-gray-400 text-sm mt-2">Updating email address...</p>
             </div>
           )}
           {/* Security notice for success state */}
@@ -248,8 +247,8 @@ const EmailChangeVerification = () => {
                   <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                 </svg>
                 <div className="text-left">
-                  <p className="text-[#1a3535] font-medium text-sm">Security Notice</p>
-                  <p className="text-[#366c6b] text-sm mt-1">
+                  <p className="text-[#1a3535] dark:text-gray-300 font-medium text-sm">Security Notice</p>
+                  <p className="text-[#366c6b] dark:text-emerald-400 text-sm mt-1">
                     For your account security, you'll need to log in again using your new email address.
                   </p>
                 </div>

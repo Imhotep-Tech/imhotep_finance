@@ -100,34 +100,18 @@ const Register = () => {
   if (success) {
     return (
       <div
-        className="min-h-screen bg-chef-pattern"
-        style={{
-          background: 'linear-gradient(135deg, #eaf6f6 0%, #d6efee 50%, #1a3535 100%)',
-        }}
+        className="min-h-screen bg-[var(--bg)] text-[var(--text)] transition-colors relative"
       >
         {/* Floating decorative elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div
-            className="absolute top-20 left-20 w-32 h-32 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float"
-            style={{ backgroundColor: '#366c6b' }}
-          ></div>
-          <div
-            className="absolute top-40 right-20 w-24 h-24 rounded-full mix-blend-multiply filter blur-xl opacity-18 animate-float"
-            style={{ backgroundColor: 'rgba(26,53,53,0.9)', animationDelay: '2s' }}
-          ></div>
-          <div
-            className="absolute bottom-20 left-40 w-40 h-40 rounded-full mix-blend-multiply filter blur-xl opacity-16 animate-float"
-            style={{ backgroundColor: '#2f7775', animationDelay: '4s' }}
-          ></div>
+          <div className="absolute top-20 left-20 w-32 h-32 rounded-full filter blur-xl opacity-20 animate-float bg-[#366c6b] mix-blend-multiply dark:bg-emerald-600/40 dark:mix-blend-screen"></div>
+          <div className="absolute top-40 right-20 w-24 h-24 rounded-full filter blur-xl opacity-18 animate-float bg-[rgba(26,53,53,0.9)] dark:bg-teal-800/40" style={{animationDelay: '2s'}}></div>
+          <div className="absolute bottom-20 left-40 w-40 h-40 rounded-full filter blur-xl opacity-16 animate-float bg-[#2f7775] dark:bg-cyan-700/30 dark:mix-blend-screen" style={{animationDelay: '4s'}}></div>
         </div>
         <div className="flex items-center justify-center min-h-screen p-4">
           <div className="relative w-full max-w-md">
             <div
-              className="chef-card rounded-3xl p-8 shadow-2xl border backdrop-blur-2xl text-center"
-              style={{
-                border: '1px solid rgba(54,108,107,0.14)',
-                background: 'linear-gradient(180deg, rgba(255,255,255,0.94), rgba(242,251,250,0.9))',
-              }}
+              className="chef-card rounded-3xl p-8 shadow-2xl backdrop-blur-2xl text-center"
             >
               {/* Success Icon */}
               <div className="inline-flex items-center justify-center w-20 h-20 bg-[#366c6b] rounded-full mb-6 shadow-lg">
@@ -146,13 +130,13 @@ const Register = () => {
               >
                 Imhotep Finance
               </div>
-              <p className="text-sm mb-2" style={{ color: '#1a3535', opacity: 0.8 }}>
+              <p className="text-sm mb-2 text-[#1a3535] dark:text-gray-300 opacity-80">
                 Manage your finances efficiently with Imhotep Financial Manager
               </p>
-              <h2 className="text-3xl font-bold font-chef text-gray-800 mb-4">
+              <h2 className="text-3xl font-bold font-chef text-gray-800 dark:text-gray-100 mb-4">
                 Welcome to the Kitchen!
               </h2>
-              <p className="text-gray-600 font-medium mb-8">
+              <p className="text-gray-600 dark:text-gray-300 font-medium mb-8">
                 Your culinary journey begins now! Please check your email and click the verification link to activate your account before logging in.
               </p>
               <Link
@@ -180,11 +164,14 @@ const Register = () => {
 
   return (
     <div
-      className="min-h-screen bg-chef-pattern"
-      style={{
-        background: 'linear-gradient(135deg, #eaf6f6 0%, #d6efee 50%, #1a3535 100%)',
-      }}
+      className="min-h-screen bg-[var(--bg)] text-[var(--text)] transition-colors relative"
     >
+      {/* Floating decorative elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-20 w-32 h-32 rounded-full filter blur-xl opacity-20 animate-float bg-[#366c6b] mix-blend-multiply dark:bg-emerald-600/40 dark:mix-blend-screen"></div>
+        <div className="absolute top-40 right-20 w-24 h-24 rounded-full filter blur-xl opacity-18 animate-float bg-[rgba(26,53,53,0.9)] dark:bg-teal-800/40" style={{animationDelay: '2s'}}></div>
+        <div className="absolute bottom-20 left-40 w-40 h-40 rounded-full filter blur-xl opacity-16 animate-float bg-[#2f7775] dark:bg-cyan-700/30 dark:mix-blend-screen" style={{animationDelay: '4s'}}></div>
+      </div>
       {/* Floating decorative elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div
@@ -204,11 +191,7 @@ const Register = () => {
         <div className="relative w-full max-w-md">
           {/* Glassmorphism Card */}
           <div
-            className="chef-card rounded-3xl p-8 shadow-2xl border backdrop-blur-2xl"
-            style={{
-              border: '1px solid rgba(54,108,107,0.14)',
-              background: 'linear-gradient(180deg, rgba(255,255,255,0.94), rgba(242,251,250,0.9))',
-            }}
+            className="chef-card rounded-3xl p-8 shadow-2xl backdrop-blur-2xl"
           >
             {/* Header with Logo and Brand */}
             <div className="text-center mb-8">
@@ -230,13 +213,13 @@ const Register = () => {
               >
                 Imhotep Finance
               </div>
-              <p className="text-sm mb-2" style={{ color: '#1a3535', opacity: 0.8 }}>
+              <p className="text-sm mb-2 text-[#1a3535] dark:text-gray-300 opacity-80">
                 Manage your finances efficiently with Imhotep Financial Manager
               </p>
-              <h1 className="text-3xl font-bold font-chef text-gray-800 mb-2">
+              <h1 className="text-3xl font-bold font-chef text-gray-800 dark:text-gray-100 mb-2">
                 Join Our Kitchen!
               </h1>
-              <p className="font-medium" style={{ color: '#1a3535', opacity: 0.9 }}>
+              <p className="font-medium text-[#1a3535] dark:text-gray-300 opacity-90">
                 Create your account and start your Finance Management
               </p>
             </div>
@@ -255,7 +238,7 @@ const Register = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                     Username
                   </label>
                   <div className="relative">
@@ -277,7 +260,7 @@ const Register = () => {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                     Email Address
                   </label>
                   <div className="relative">
@@ -299,7 +282,7 @@ const Register = () => {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                     Password
                   </label>
                   <div className="relative">
@@ -338,7 +321,7 @@ const Register = () => {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                     Confirm Password
                   </label>
                   <div className="relative">
@@ -399,7 +382,7 @@ const Register = () => {
             </form>
             {/* Footer */}
             <div className="mt-8 text-center">
-              <p className="text-gray-600">
+              <p className="text-gray-600 dark:text-gray-300">
                 Already have an account?{' '}
                 <Link
                   to="/login"
@@ -413,7 +396,7 @@ const Register = () => {
           </div>
           {/* Bottom decorative text */}
           <div className="text-center mt-8">
-            <p className="text-sm font-medium" style={{ color: '#1a3535', opacity: 0.8 }}>
+            <p className="text-sm font-medium text-[#1a3535] dark:text-gray-300 opacity-80">
               📈 Imhotep Finance –  Manage your finances efficiently with Imhotep Financial Manager 📈
             </p>
           </div>

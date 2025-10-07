@@ -249,11 +249,13 @@ const Profile = () => {
 
   return (
     <div
-      className="min-h-screen bg-chef-pattern"
-      style={{
-        background: 'linear-gradient(135deg, #eaf6f6 0%, #d6efee 50%, #1a3535 100%)',
-      }}
+      className="min-h-screen bg-[var(--bg)] text-[var(--text)] transition-colors relative"
     >
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-20 w-32 h-32 rounded-full filter blur-xl opacity-20 animate-float bg-[#366c6b] mix-blend-multiply dark:bg-emerald-600/40 dark:mix-blend-screen"></div>
+        <div className="absolute top-40 right-20 w-24 h-24 rounded-full filter blur-xl opacity-18 animate-float bg-[rgba(26,53,53,0.9)] dark:bg-teal-800/40" style={{animationDelay: '2s'}}></div>
+        <div className="absolute bottom-20 left-40 w-40 h-40 rounded-full filter blur-xl opacity-16 animate-float bg-[#2f7775] dark:bg-cyan-700/30 dark:mix-blend-screen" style={{animationDelay: '4s'}}></div>
+      </div>
       {/* Floating decorative elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-20 w-32 h-32 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style={{ backgroundColor: '#366c6b' }}></div>
@@ -264,11 +266,7 @@ const Profile = () => {
       <div className="relative z-10 w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Brand Header */}
         <div
-          className="chef-card rounded-3xl p-6 sm:p-8 lg:p-12 shadow-2xl border backdrop-blur-2xl bg-white/90"
-          style={{
-            border: '1px solid rgba(54,108,107,0.14)',
-            background: 'linear-gradient(180deg, rgba(255,255,255,0.94), rgba(242,251,250,0.9))',
-          }}
+          className="chef-card rounded-3xl p-6 sm:p-8 lg:p-12 shadow-2xl backdrop-blur-2xl"
         >
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
             <div className="text-center sm:text-left">
@@ -288,13 +286,13 @@ const Profile = () => {
               >
                 Imhotep Finance
               </div>
-              <p className="text-sm mb-2" style={{ color: '#1a3535', opacity: 0.8 }}>
+              <p className="text-sm mb-2 text-[#1a3535] dark:text-gray-300 opacity-80">
                 Manage your finances efficiently with Imhotep Financial Manager
               </p>
-              <h1 className="text-3xl sm:text-4xl font-bold font-chef text-gray-800 mb-2">
+              <h1 className="text-3xl sm:text-4xl font-bold font-chef text-gray-800 dark:text-gray-100 mb-2">
                 My Profile
               </h1>
-              <p className="text-lg text-gray-600 font-medium">
+              <p className="text-lg text-gray-600 dark:text-gray-300 font-medium">
                 Manage your account and preferences
               </p>
             </div>
@@ -323,11 +321,7 @@ const Profile = () => {
 
         {/* Tabs Navigation */}
         <div
-          className="chef-card rounded-2xl p-2 shadow-lg border backdrop-blur-2xl bg-white/90"
-          style={{
-            border: '1px solid rgba(54,108,107,0.14)',
-            background: 'linear-gradient(180deg, rgba(255,255,255,0.97), rgba(242,251,250,0.97))',
-          }}
+          className="chef-card rounded-2xl p-2 shadow-lg backdrop-blur-2xl"
         >
           <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
             <button
@@ -387,7 +381,7 @@ const Profile = () => {
 
         {/* Error and Success Messages */}
         {error && (
-          <div className="chef-card rounded-2xl p-4 sm:p-6 shadow-lg border border-red-200 bg-red-50/80 backdrop-blur-2xl bg-white/90">
+          <div className="chef-card rounded-2xl p-4 sm:p-6 shadow-lg border border-red-200 dark:border-red-900 bg-red-50/80 dark:bg-red-900/20 backdrop-blur-2xl">
             <div className="flex items-center space-x-3">
               <div className="flex-shrink-0">
                 <svg className="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 20 20">
@@ -402,7 +396,7 @@ const Profile = () => {
         )}
 
         {success && (
-          <div className="chef-card rounded-2xl p-4 sm:p-6 shadow-lg border border-green-200 bg-green-50/80 backdrop-blur-2xl bg-white/90">
+          <div className="chef-card rounded-2xl p-4 sm:p-6 shadow-lg border border-green-200 dark:border-green-900 bg-green-50/80 dark:bg-green-900/20 backdrop-blur-2xl">
             <div className="flex items-center space-x-3">
               <div className="flex-shrink-0">
                 <svg className="w-6 h-6 text-green-500" fill="currentColor" viewBox="0 0 20 20">
@@ -419,21 +413,17 @@ const Profile = () => {
         {/* Profile Information Form */}
         {activeTab === 'profile' && (
           <div
-            className="chef-card rounded-2xl p-6 sm:p-8 shadow-lg border backdrop-blur-2xl bg-white/90"
-            style={{
-              border: '1px solid rgba(54,108,107,0.14)',
-              background: 'linear-gradient(180deg, rgba(255,255,255,0.97), rgba(242,251,250,0.97))',
-            }}
+            className="chef-card rounded-2xl p-6 sm:p-8 shadow-lg backdrop-blur-2xl"
           >
             <div className="mb-6">
-              <h2 className="text-2xl font-bold font-chef text-gray-800 mb-2">Profile Information</h2>
-              <p className="text-gray-600 font-medium">Update your personal information and account details</p>
+              <h2 className="text-2xl font-bold font-chef text-gray-800 dark:text-gray-100 mb-2">Profile Information</h2>
+              <p className="text-gray-600 dark:text-gray-300 font-medium">Update your personal information and account details</p>
             </div>
 
             <form onSubmit={handleProfileSubmit} className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-gray-700">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200">
                     First Name
                   </label>
                   <div className="relative">
@@ -454,7 +444,7 @@ const Profile = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-gray-700">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200">
                     Last Name
                   </label>
                   <div className="relative">
@@ -476,7 +466,7 @@ const Profile = () => {
               </div>
 
               <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200">
                   Username <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
@@ -498,7 +488,7 @@ const Profile = () => {
               </div>
 
               <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200">
                   Email <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
@@ -522,7 +512,7 @@ const Profile = () => {
                     <svg className="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                     </svg>
-                    <span className="text-sm text-amber-600 font-medium">
+                    <span className="text-sm text-amber-600 dark:text-amber-300 font-medium">
                       Email not verified. Please check your email.
                     </span>
                   </div>
@@ -569,20 +559,16 @@ const Profile = () => {
         {/* Change Password Form */}
         {activeTab === 'password' && (
           <div
-            className="chef-card rounded-2xl p-6 sm:p-8 shadow-lg border backdrop-blur-2xl bg-white/90"
-            style={{
-              border: '1px solid rgba(54,108,107,0.14)',
-              background: 'linear-gradient(180deg, rgba(255,255,255,0.97), rgba(242,251,250,0.97))',
-            }}
+            className="chef-card rounded-2xl p-6 sm:p-8 shadow-lg backdrop-blur-2xl"
           >
             <div className="mb-6">
-              <h2 className="text-2xl font-bold font-chef text-gray-800 mb-2">Change Password</h2>
-              <p className="text-gray-600 font-medium">Update your password to keep your account secure</p>
+              <h2 className="text-2xl font-bold font-chef text-gray-800 dark:text-gray-100 mb-2">Change Password</h2>
+              <p className="text-gray-600 dark:text-gray-300 font-medium">Update your password to keep your account secure</p>
             </div>
 
             {/* Error and Success Messages for password tab */}
             {error && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+              <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900 rounded-xl">
                 <div className="flex items-center">
                   <svg className="w-5 h-5 text-red-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
@@ -592,7 +578,7 @@ const Profile = () => {
               </div>
             )}
             {success && (
-              <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
+              <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-900 rounded-xl">
                 <div className="flex items-center">
                   <svg className="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
@@ -773,19 +759,15 @@ const Profile = () => {
         {/* Change Favorite Currency Form */}
         {activeTab === 'currency' && (
           <div
-            className="chef-card rounded-2xl p-6 sm:p-8 shadow-lg border backdrop-blur-2xl bg-white/90"
-            style={{
-              border: '1px solid rgba(54,108,107,0.14)',
-              background: 'linear-gradient(180deg, rgba(255,255,255,0.97), rgba(242,251,250,0.97))',
-            }}
+            className="chef-card rounded-2xl p-6 sm:p-8 shadow-lg backdrop-blur-2xl"
           >
             <div className="mb-6">
-              <h2 className="text-2xl font-bold font-chef text-gray-800 mb-2">Change Favorite Currency</h2>
-              <p className="text-gray-600 font-medium">Update your preferred currency for financial tracking</p>
+              <h2 className="text-2xl font-bold font-chef text-gray-800 dark:text-gray-100 mb-2">Change Favorite Currency</h2>
+              <p className="text-gray-600 dark:text-gray-300 font-medium">Update your preferred currency for financial tracking</p>
             </div>
 
             <div className="mb-4">
-              <p className="text-sm text-gray-700">Current Favorite Currency: <strong>{currencyData.current || 'Not set'}</strong></p>
+              <p className="text-sm text-gray-700 dark:text-gray-300">Current Favorite Currency: <strong>{currencyData.current || 'Not set'}</strong></p>
             </div>
 
             <form onSubmit={handleCurrencySubmit} className="space-y-6">
@@ -854,15 +836,11 @@ const Profile = () => {
         {/* Target Setting Form */}
         {activeTab === 'target' && (
           <div
-            className="chef-card rounded-2xl p-6 sm:p-8 shadow-lg border backdrop-blur-2xl bg-white/90"
-            style={{
-              border: '1px solid rgba(54,108,107,0.14)',
-              background: 'linear-gradient(180deg, rgba(255,255,255,0.97), rgba(242,251,250,0.97))',
-            }}
+            className="chef-card rounded-2xl p-6 sm:p-8 shadow-lg backdrop-blur-2xl"
           >
             <div className="mb-6">
-              <h2 className="text-2xl font-bold font-chef text-gray-800 mb-2">Set Monthly Target</h2>
-              <p className="text-gray-600 font-medium">Define your financial goal for this month</p>
+              <h2 className="text-2xl font-bold font-chef text-gray-800 dark:text-gray-100 mb-2">Set Monthly Target</h2>
+              <p className="text-gray-600 dark:text-gray-300 font-medium">Define your financial goal for this month</p>
             </div>
 
             <form onSubmit={handleTargetSubmit} className="space-y-6">
