@@ -282,25 +282,26 @@ const Login = () => {
              {/* Divider */}
             <div className="my-8 flex items-center">
               <div className="flex-1 border-t" style={{ borderColor: 'rgba(26,53,53,0.12)' }}></div>
-              <span className="px-4 text-sm font-medium" style={{ color: '#1a3535', opacity: 0.85 }}>or continue with</span>
+              <span className="px-4 text-sm font-medium dark:text-gray-300" style={{ color: '#1a3535', opacity: 0.85 }}>or continue with</span>
               <div className="flex-1 border-t" style={{ borderColor: 'rgba(26,53,53,0.12)' }}></div>
             </div>
  
-             {/* Google Login */}
-            <button
-              onClick={handleGoogleLogin}
-              disabled={loading || googleLoading}
-              className="chef-button flex items-center justify-center w-full"
-            >
-              <svg className="w-5 h-5 mr-3 text-white" viewBox="0 0 24 24" fill="currentColor">
+            {/* Google Login */}
+           <button
+             onClick={handleGoogleLogin}
+             disabled={loading || googleLoading}
+             className="chef-button flex items-center justify-center w-full disabled:opacity-50 disabled:cursor-not-allowed"
+             style={{ background: 'linear-gradient(90deg, #366c6b 0%, #1a3535 100%)' }}
+           >
+             <svg className="w-5 h-5 mr-3 text-white" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M21.35 11.1H12v2.8h5.35c-.25 1.45-1.62 4.1-5.35 4.1-3.23 0-5.86-2.67-5.86-5.99s2.63-5.99 5.86-5.99c1.84 0 3.08.78 3.79 1.45l1.96-1.88C16.3 3.99 14.35 3 12 3 6.98 3 2.94 7.03 2.94 12S6.98 21 12 21c6.69 0 7.86-5.86 7.86-8.39 0-.56-.05-.92-.11-1.51z" />
               </svg>
-              {googleLoading ? 'Redirecting...' : 'Sign in with Google'}
+             {googleLoading ? 'Redirecting...' : 'Sign in with Google'}
             </button>
  
              {/* Footer */}
              <div className="mt-8 text-center">
-               <p className="text-gray-600">
+               <p className="text-gray-600 dark:text-gray-300">
                  Don't have an account?{' '}
                  <Link 
                    to="/register" 

@@ -125,12 +125,12 @@ const ShowTransactions = () => {
   // Helper for type badge
   const TypeBadge = ({ type }) => (
     type === 'deposit' || type === 'Deposit' ? (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800 ring-1 ring-inset ring-green-300 dark:bg-green-900/30 dark:text-green-300 dark:ring-green-700">
         <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M12 5v14m7-7H5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
         Income
       </span>
     ) : (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-800 ring-1 ring-inset ring-red-300 dark:bg-red-900/30 dark:text-red-300 dark:ring-red-700">
         <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M12 5v14m-7-7h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
         Expense
       </span>
@@ -143,8 +143,8 @@ const ShowTransactions = () => {
     return (
       <span className={`category-tag inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border
         ${type === 'deposit' || type === 'Deposit'
-          ? 'bg-green-50 text-green-700 border-green-200'
-          : 'bg-red-50 text-red-700 border-red-200'}`}>
+          ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800'
+          : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800'}`}>
         <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
         {category}
       </span>
@@ -292,13 +292,13 @@ const ShowTransactions = () => {
                         <td className="px-4 py-2 whitespace-nowrap">
                           <div className="flex gap-2">
                             <button
-                              className="chef-button-secondary px-2 py-1 text-xs"
+                              className="chef-button-secondary px-2 py-1 text-xs dark:text-gary-100 dark:bg-gray-800"
                               onClick={() => handleEdit(tx)}
                             >
                               Edit
                             </button>
                             <button
-                              className="chef-button-secondary px-2 py-1 text-xs text-red-600"
+                              className="chef-button-secondary px-2 py-1 text-xs text-red-600 dark:text-gray-100 dark:bg-gray-800"
                               onClick={() => handleDelete(tx)}
                             >
                               Delete
@@ -358,13 +358,13 @@ const ShowTransactions = () => {
                     {/* Actions */}
                     <div className="flex gap-2 mt-2">
                       <button
-                        className="chef-button-secondary px-2 py-1 text-xs"
+                        className="chef-button-secondary px-2 py-1 text-xs dark:text-gray-100 dark:bg-gray-800"
                         onClick={() => handleEdit(tx)}
                       >
                         Edit
                       </button>
                       <button
-                        className="chef-button-secondary px-2 py-1 text-xs text-red-600"
+                        className="chef-button-secondary px-2 py-1 text-xs text-red-600 dark:text-gray-100 dark:bg-gray-800"
                         onClick={() => handleDelete(tx)}
                       >
                         Delete

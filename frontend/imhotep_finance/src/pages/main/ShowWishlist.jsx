@@ -52,7 +52,7 @@ const ShowWishlist = () => {
   };
 
   const AmountCell = ({ price, currency }) => (
-    <span className="font-semibold text-blue-600">
+    <span className="font-semibold text-blue-600 dark:text-blue-300">
       {Number(price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
     </span>
   );
@@ -211,7 +211,7 @@ const ShowWishlist = () => {
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap">
                           <button
-                            className={`chef-button-secondary px-3 py-1 flex items-center gap-2 ${w.status === true ? 'bg-green-100 text-green-700' : ''}`}
+                            className={`chef-button-secondary px-3 py-1 flex items-center gap-2 dark:text-gray-100 dark:bg-gray-800 ${w.status === true ? 'bg-green-100 text-green-700' : ''}`}
                             onClick={() => handleStatusToggle(w)}
                             disabled={!!statusLoading[w.id]}
                           >
@@ -239,14 +239,14 @@ const ShowWishlist = () => {
                         <td className="px-4 py-2 whitespace-nowrap">
                           <div className="flex gap-2">
                             <button
-                              className="chef-button-secondary px-2 py-1 text-xs"
+                              className="chef-button-secondary px-2 py-1 text-xs dark:text-gray-100 dark:bg-gray-800"
                               onClick={() => handleEdit(w)}
                               disabled={w.status === true}
                             >
                               Edit
                             </button>
                             <button
-                              className="chef-button-secondary px-2 py-1 text-xs text-red-600"
+                              className="chef-button-secondary px-2 py-1 text-xs text-red-600 dark:text-gray-100 dark:bg-gray-800"
                               onClick={() => handleDelete(w)}
                               disabled={!!deleteLoading[w.id] || w.status === true}
                             >
@@ -270,27 +270,27 @@ const ShowWishlist = () => {
                 {wishlist.map(w => (
                   <div
                     key={w.id}
-                    className="wishlist-card border rounded-xl p-4 bg-blue-50 border-l-4 border-blue-400"
+                    className="wishlist-card border rounded-xl p-4 bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400"
                   >
                     <div className="flex items-center justify-between mb-3">
-                      <div className="font-medium text-blue-800">
+                      <div className="font-medium text-blue-800 dark:text-blue-200">
                         {w.wish_details || <span className="text-gray-400 italic">No details</span>}
                       </div>
                       <div className="text-right">
-                        <div className="text-lg font-bold text-blue-600">
+                        <div className="text-lg font-bold text-blue-600 dark:text-blue-300">
                           <AmountCell price={w.price} currency={w.currency} />
                         </div>
-                        <div className="text-sm text-gray-500">{w.year}</div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">{w.year}</div>
                       </div>
                     </div>
                     {w.link && (
                       <div className="mb-2">
-                        <a href={w.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline text-sm">View Link</a>
+                        <a href={w.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 underline text-sm">View Link</a>
                       </div>
                     )}
                     <div className="flex gap-2 mt-2">
                       <button
-                        className={`chef-button-secondary px-3 py-1 flex items-center gap-2 ${w.status === true ? 'bg-green-100 text-green-700' : ''}`}
+                        className={`chef-button-secondary px-3 py-1 flex items-center gap-2 dark:text-gray-100 dark:bg-gray-800 ${w.status === true ? 'bg-green-100 text-green-700' : ''}`}
                         onClick={() => handleStatusToggle(w)}
                         disabled={!!statusLoading[w.id]}
                       >
@@ -315,14 +315,14 @@ const ShowWishlist = () => {
                         )}
                       </button>
                       <button
-                        className="chef-button-secondary px-2 py-1 text-xs"
+                        className="chef-button-secondary px-2 py-1 text-xs dark:text-gray-100 dark:bg-gray-800"
                         onClick={() => handleEdit(w)}
                         disabled={w.status === true}
                       >
                         Edit
                       </button>
                       <button
-                        className="chef-button-secondary px-2 py-1 text-xs text-red-600"
+                        className="chef-button-secondary px-2 py-1 text-xs text-red-600 dark:text-gray-100 dark:bg-gray-800"
                         onClick={() => handleDelete(w)}
                         disabled={!!deleteLoading[w.id] || w.status === true}
                       >

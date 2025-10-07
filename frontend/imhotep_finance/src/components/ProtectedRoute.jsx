@@ -62,7 +62,7 @@ const ProtectedRoute = ({ children }) => {
             <p className="text-gray-600 dark:text-gray-300 font-medium">
               Please wait while we check your authentication status.
             </p>
-            <div className="mt-6 w-full bg-gray-200 rounded-full h-2">
+            <div className="mt-6 w-full bg-gray-200 dark:bg-gray-800 rounded-full h-2">
               <div className="bg-gradient-to-r from-[#366c6b] to-[#1a3535] h-2 rounded-full animate-pulse" style={{ width: '70%' }}></div>
             </div>
           </div>

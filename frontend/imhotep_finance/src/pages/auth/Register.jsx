@@ -164,11 +164,14 @@ const Register = () => {
 
   return (
     <div
-      className="min-h-screen bg-chef-pattern"
-      style={{
-        background: 'linear-gradient(135deg, #eaf6f6 0%, #d6efee 50%, #1a3535 100%)',
-      }}
+      className="min-h-screen bg-[var(--bg)] text-[var(--text)] transition-colors relative"
     >
+      {/* Floating decorative elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-20 w-32 h-32 rounded-full filter blur-xl opacity-20 animate-float bg-[#366c6b] mix-blend-multiply dark:bg-emerald-600/40 dark:mix-blend-screen"></div>
+        <div className="absolute top-40 right-20 w-24 h-24 rounded-full filter blur-xl opacity-18 animate-float bg-[rgba(26,53,53,0.9)] dark:bg-teal-800/40" style={{animationDelay: '2s'}}></div>
+        <div className="absolute bottom-20 left-40 w-40 h-40 rounded-full filter blur-xl opacity-16 animate-float bg-[#2f7775] dark:bg-cyan-700/30 dark:mix-blend-screen" style={{animationDelay: '4s'}}></div>
+      </div>
       {/* Floating decorative elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div
@@ -235,7 +238,7 @@ const Register = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                     Username
                   </label>
                   <div className="relative">
@@ -257,7 +260,7 @@ const Register = () => {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                     Email Address
                   </label>
                   <div className="relative">
@@ -279,7 +282,7 @@ const Register = () => {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                     Password
                   </label>
                   <div className="relative">
@@ -318,7 +321,7 @@ const Register = () => {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                     Confirm Password
                   </label>
                   <div className="relative">
@@ -379,7 +382,7 @@ const Register = () => {
             </form>
             {/* Footer */}
             <div className="mt-8 text-center">
-              <p className="text-gray-600">
+              <p className="text-gray-600 dark:text-gray-300">
                 Already have an account?{' '}
                 <Link
                   to="/login"
@@ -393,7 +396,7 @@ const Register = () => {
           </div>
           {/* Bottom decorative text */}
           <div className="text-center mt-8">
-            <p className="text-sm font-medium" style={{ color: '#1a3535', opacity: 0.8 }}>
+            <p className="text-sm font-medium text-[#1a3535] dark:text-gray-300 opacity-80">
               📈 Imhotep Finance –  Manage your finances efficiently with Imhotep Financial Manager 📈
             </p>
           </div>

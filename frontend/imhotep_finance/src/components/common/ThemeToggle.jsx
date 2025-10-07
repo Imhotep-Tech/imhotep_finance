@@ -11,15 +11,14 @@ const ThemeToggle = ({ className = '' }) => {
 			className={`inline-flex items-center justify-center w-10 h-10 rounded-xl border transition-all duration-200 bg-white/80 dark:bg-gray-800/80 border-gray-200 dark:border-gray-700 hover:scale-105 shadow-sm ${className}`}
 		>
 			{theme === 'dark' ? (
-				/* Sun icon */
-				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-yellow-400">
-					<path d="M12 18a6 6 0 100-12 6 6 0 000 12z" />
-					<path fillRule="evenodd" d="M12 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm0 16a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm10-7a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM4 12a1 1 0 01-1 1H2a1 1 0 110-2h1a1 1 0 011 1zm14.95 6.364a1 1 0 010 1.414l-.707.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM6.464 6.464a1 1 0 010 1.414l-.707.707A1 1 0 113.343 7.17l.707-.707a1 1 0 011.414 0zm11.314-2.828a1 1 0 011.414 0l.707.707a1 1 0 11-1.414 1.414l-.707-.707a1 1 0 010-1.414zM6.464 17.536a1 1 0 011.414 0l.707.707a1 1 0 01-1.414 1.414l-.707-.707a1 1 0 010-1.414z" clipRule="evenodd" />
+				// Sun icon (outline)
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5 text-yellow-400">
+					<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 3v2.25M12 18.75V21M4.219 4.219l1.591 1.591M18.19 18.19l1.591 1.591M3 12h2.25M18.75 12H21M4.219 19.781l1.591-1.591M18.19 5.81l1.591-1.591M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
 				</svg>
 			) : (
-				/* Moon icon */
-				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-gray-700">
-					<path d="M21.752 15.002A9.718 9.718 0 0112 21.75 9.75 9.75 0 1112 3a9.718 9.718 0 019.752 6.748A7.5 7.5 0 0021.75 12c0 1.077-.224 2.102-.629 3.002h.631z" />
+				// Moon icon (outline)
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5 text-gray-700">
+					<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M21.752 15.002A9.718 9.718 0 0112 21.75a9.75 9.75 0 01-9.75-9.75 9.718 9.718 0 016.748-9.752 7.5 7.5 0 109.754 12.754z" />
 				</svg>
 			)}
 		</button>

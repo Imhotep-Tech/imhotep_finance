@@ -2,6 +2,7 @@
 import { useAuth } from '../contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
 import Logo from '../assets/Logo.jpeg';
+import ThemeToggle from './common/ThemeToggle';
 
 const PublicRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -11,6 +12,10 @@ const PublicRoute = ({ children }) => {
       <div
         className="min-h-screen bg-[var(--bg)] text-[var(--text)] transition-colors relative"
       >
+        {/* Theme toggle - top right */}
+        <div className="fixed top-4 right-4 z-50">
+          <ThemeToggle />
+        </div>
         {/* Floating decorative elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-20 left-20 w-32 h-32 rounded-full filter blur-xl opacity-20 animate-float bg-[#366c6b] mix-blend-multiply dark:bg-emerald-600/40 dark:mix-blend-screen"></div>
@@ -49,9 +54,9 @@ const PublicRoute = ({ children }) => {
               Your Financial Manager is starting up...
             </p>
             <div className="flex items-center justify-center space-x-1">
-              <div className="w-2 h-2 rounded-full animate-bounce" style={{ background: 'linear-gradient(90deg, #366c6b 0%, #1a3535 100%)' }}></div>
-              <div className="w-2 h-2 rounded-full animate-bounce" style={{ background: 'linear-gradient(90deg, #366c6b 0%, #1a3535 100%)', animationDelay: '0.1s' }}></div>
-              <div className="w-2 h-2 rounded-full animate-bounce" style={{ background: 'linear-gradient(90deg, #366c6b 0%, #1a3535 100%)', animationDelay: '0.2s' }}></div>
+              <div className="w-2 h-2 rounded-full animate-bounce bg-[#366c6b]"></div>
+              <div className="w-2 h-2 rounded-full animate-bounce bg-[#366c6b]" style={{ animationDelay: '0.1s' }}></div>
+              <div className="w-2 h-2 rounded-full animate-bounce bg-[#366c6b]" style={{ animationDelay: '0.2s' }}></div>
             </div>
           </div>
           <div className="text-center mt-8 absolute left-0 right-0 bottom-0">
@@ -64,7 +69,19 @@ const PublicRoute = ({ children }) => {
     );
   }
 
-  return isAuthenticated ? <Navigate to="/dashboard" replace /> : children;
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  // Render children with a floating theme toggle available on public pages
+  return (
+    <div className="relative min-h-screen">
+      <div className="fixed top-4 right-4 z-50">
+        <ThemeToggle />
+      </div>
+      {children}
+    </div>
+  );
 };
 
 export default PublicRoute;

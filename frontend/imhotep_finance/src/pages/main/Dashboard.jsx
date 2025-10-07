@@ -173,36 +173,36 @@ const Dashboard = () => {
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <button
-            className="rounded-xl p-6 metric-card hover:shadow-lg transition-all duration-300 group flex items-center space-x-4 w-full"
+            className="rounded-xl p-6 metric-card hover:shadow-lg transition-all duration-300 group flex items-center space-x-4 w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800"
             onClick={() => {
               setInitialType('deposit');
               setShowAddModal(true);
             }}
           >
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center group-hover:bg-green-200 transition-colors">
-              <svg className="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 5v14m7-7H5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            <div className="w-16 h-16 bg-green-100 dark:bg-green-800 rounded-full flex items-center justify-center group-hover:bg-green-200 dark:group-hover:bg-green-700 transition-colors">
+              <svg className="w-8 h-8 text-green-600 dark:text-green-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 5v14m7-7H5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </div>
             <div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-1">Add Income</h3>
-              <p className="text-gray-600">Record your earnings and financial growth</p>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-1">Add Income</h3>
+              <p className="text-gray-600 dark:text-gray-300">Record your earnings and financial growth</p>
             </div>
           </button>
           <button
-          className="rounded-xl p-6 metric-card hover:shadow-lg transition-all duration-300 group flex items-center space-x-4 w-full"
+          className="rounded-xl p-6 metric-card hover:shadow-lg transition-all duration-300 group flex items-center space-x-4 w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800"
           onClick={() => {
             setInitialType('withdraw');
             setShowAddModal(true);
           }}
         >
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center group-hover:bg-red-200 transition-colors">
+          <div className="w-16 h-16 bg-red-100 dark:bg-red-800 rounded-full flex items-center justify-center group-hover:bg-red-200 dark:group-hover:bg-red-700 transition-colors">
             {/* Minus sign */}
-            <svg className="w-8 h-8 text-red-600" fill="none" viewBox="0 0 24 24">
+            <svg className="w-8 h-8 text-red-600 dark:text-red-300" fill="none" viewBox="0 0 24 24">
               <path d="M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
           <div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-1">Add Expense</h3>
-            <p className="text-gray-600">Track your spending and manage budget</p>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-1">Add Expense</h3>
+            <p className="text-gray-600 dark:text-gray-300">Track your spending and manage budget</p>
           </div>
         </button>
         </div>
@@ -259,49 +259,49 @@ const Dashboard = () => {
 
         {/* Quick Links Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <a href="/show_trans" className="metric-card rounded-xl p-6 hover:shadow-lg transition-all duration-300">
+          <a href="/show_trans" className="metric-card rounded-xl p-6 hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
             <div className="text-center">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24"><path d="M3 13h2v7H3zM7 9h2v11H7zM11 5h2v15h-2zM15 11h2v9h-2zM19 7h2v13h-2z"/></svg>
+              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center mx-auto mb-3">
+                <svg className="w-6 h-6 text-blue-600 dark:text-blue-300" fill="currentColor" viewBox="0 0 24 24"><path d="M3 13h2v7H3zM7 9h2v11H7zM11 5h2v15h-2zM15 11h2v9h-2zM19 7h2v13h-2z"/></svg>
               </div>
-              <h3 className="font-semibold text-gray-900">Transactions</h3>
-              <p className="text-sm text-gray-600 mt-1">View All</p>
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100">Transactions</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">View All</p>
             </div>
           </a>
-          <a href="/show_scheduled_trans" className="metric-card rounded-xl p-6 hover:shadow-lg transition-all duration-300">
+          <a href="/show_scheduled_trans" className="metric-card rounded-xl p-6 hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
             <div className="text-center">
-              <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <svg className="w-6 h-6 text-indigo-600" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm0 16H5V8h14v11zm0-13H5V5h14v1z"/></svg>
+              <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-800 rounded-full flex items-center justify-center mx-auto mb-3">
+                <svg className="w-6 h-6 text-indigo-600 dark:text-indigo-300" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm0 16H5V8h14v11zm0-13H5V5h14v1z"/></svg>
               </div>
-              <h3 className="font-semibold text-gray-900">Scheduled</h3>
-              <p className="text-sm text-gray-600 mt-1">Recurring</p>
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100">Scheduled</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">Recurring</p>
             </div>
           </a>
-          <a href="/show_networth_details" className="metric-card rounded-xl p-6 hover:shadow-lg transition-all duration-300">
+          <a href="/show_networth_details" className="metric-card rounded-xl p-6 hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
             <div className="text-center">
-              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <svg className="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l1.5 4.5h4.5l-3.75 2.75L15 14l-3-2.25L9 14l1.75-4.75L7 6.5h4.5z"/></svg>
+              <div className="w-12 h-12 bg-purple-100 dark:bg-purple-800 rounded-full flex items-center justify-center mx-auto mb-3">
+                <svg className="w-6 h-6 text-purple-600 dark:text-purple-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l1.5 4.5h4.5l-3.75 2.75L15 14l-3-2.25L9 14l1.75-4.75L7 6.5h4.5z"/></svg>
               </div>
-              <h3 className="font-semibold text-gray-900">Net Worth</h3>
-              <p className="text-sm text-gray-600 mt-1">Details</p>
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100">Net Worth</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">Details</p>
             </div>
           </a>
-          <a href="/reports" className="metric-card rounded-xl p-6 hover:shadow-lg transition-all duration-300">
+          <a href="/reports" className="metric-card rounded-xl p-6 hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
             <div className="text-center">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l1.5 4.5h4.5l-3.75 2.75L15 14l-3-2.25L9 14l1.75-4.75L7 6.5h4.5z"/></svg>
+              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center mx-auto mb-3">
+                <svg className="w-6 h-6 text-blue-600 dark:text-blue-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l1.5 4.5h4.5l-3.75 2.75L15 14l-3-2.25L9 14l1.75-4.75L7 6.5h4.5z"/></svg>
               </div>
-              <h3 className="font-semibold text-gray-900">Reports</h3>
-              <p className="text-sm text-gray-600 mt-1">Charts & Totals</p>
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100">Reports</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">Charts & Totals</p>
             </div>
           </a>
-          <a href="/profile" className="metric-card rounded-xl p-6 hover:shadow-lg transition-all duration-300">
+          <a href="/profile"  className="metric-card rounded-xl p-6 hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
             <div className="text-center">
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <svg className="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 14.93V17h-2v-.07A8.001 8.001 0 014.07 13H7v-2H4.07A8.001 8.001 0 0111 4.07V7h2V4.07A8.001 8.001 0 0119.93 11H17v2h2.93A8.001 8.001 0 0113 19.93z"/></svg>
+              <div className="w-12 h-12 bg-green-100 dark:bg-blue-800 rounded-full flex items-center justify-center mx-auto mb-3">
+                <svg className="w-6 h-6 text-green-600 dark:text-blue-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 14.93V17h-2v-.07A8.001 8.001 0 014.07 13H7v-2H4.07A8.001 8.001 0 0111 4.07V7h2V4.07A8.001 8.001 0 0119.93 11H17v2h2.93A8.001 8.001 0 0113 19.93z"/></svg>
               </div>
-              <h3 className="font-semibold text-gray-900">Manage Target</h3>
-              <p className="text-sm text-gray-600 mt-1">Goals</p>
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100">Manage Target</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">Goals</p>
             </div>
           </a>
         </div>
