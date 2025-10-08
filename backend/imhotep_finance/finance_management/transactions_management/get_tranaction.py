@@ -18,7 +18,6 @@ def get_transaction(request):
         # Get date range from query params
         start_date = request.query_params.get('start_date')
         end_date = request.query_params.get('end_date')
-
        
         today = date.today()
         if not start_date:

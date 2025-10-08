@@ -4,7 +4,7 @@ from .transactions_management import add_transaction, get_tranaction, update_tra
 from .wishlist_management import add_wish, get_wishlist, update_wish, update_wish_status, delete_wish
 from .scheduled_trans_management import add_scheduled_trans, get_scheduled_trans, update_scheduled_trans, update_scheduled_trans_status, delete_scheduled_trans, apply_scheduled_trans
 from .target_management import get_score, get_target, manage_target, get_score_history
-from .user_reports import get_monthly_report, get_yearly_report
+from .user_reports import get_monthly_report, get_yearly_report, get_monthly_report_history
 
 urlpatterns = [
     #user data
@@ -42,6 +42,8 @@ urlpatterns = [
 
     #monthly report
     path('get-monthly-report/', get_monthly_report.get_monthly_reports, name='get_monthly_reports'),
+    path('get-monthly-report-history/', get_monthly_report_history.get_monthly_report_history, name='get_monthly_report_history'),
+    path('get-report-history-months/', get_monthly_report_history.get_report_history_months, name='get_report_history_months'),
     
     #yearly report
     path('get-yearly-report/', get_yearly_report.get_yearly_reports, name='get_yearly_reports'),

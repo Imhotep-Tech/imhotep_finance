@@ -288,8 +288,10 @@ const Dashboard = () => {
           </a>
           <a href="/reports" className="metric-card rounded-xl p-6 hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
             <div className="text-center">
-              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center mx-auto mb-3">
-                <svg className="w-6 h-6 text-blue-600 dark:text-blue-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l1.5 4.5h4.5l-3.75 2.75L15 14l-3-2.25L9 14l1.75-4.75L7 6.5h4.5z"/></svg>
+              <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-800 rounded-full flex items-center justify-center mx-auto mb-3">
+                <svg className="w-6 h-6 text-emerald-600 dark:text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
               </div>
               <h3 className="font-semibold text-gray-900 dark:text-gray-100">Reports</h3>
               <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">Charts & Totals</p>
@@ -298,7 +300,9 @@ const Dashboard = () => {
           <a href="/profile"  className="metric-card rounded-xl p-6 hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
             <div className="text-center">
               <div className="w-12 h-12 bg-green-100 dark:bg-blue-800 rounded-full flex items-center justify-center mx-auto mb-3">
-                <svg className="w-6 h-6 text-green-600 dark:text-blue-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 14.93V17h-2v-.07A8.001 8.001 0 014.07 13H7v-2H4.07A8.001 8.001 0 0111 4.07V7h2V4.07A8.001 8.001 0 0119.93 11H17v2h2.93A8.001 8.001 0 0113 19.93z"/></svg>
+                <svg className="w-6 h-6 text-green-600 dark:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
               </div>
               <h3 className="font-semibold text-gray-900 dark:text-gray-100">Manage Target</h3>
               <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">Goals</p>
