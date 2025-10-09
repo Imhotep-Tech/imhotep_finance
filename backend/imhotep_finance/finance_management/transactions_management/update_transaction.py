@@ -2,6 +2,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
+from ..user_reports.utils.save_user_report import save_user_report_with_transaction_update
 from ..utils.get_networth import get_networth
 from rest_framework.response import Response
 from ..models import Transactions, NetWorth
@@ -41,7 +42,7 @@ def update_transactions(request, trans_id):
 
     if trans_status not in available_status:
         return Response(
-            {'error': "Transaction Status Must Be Deposit Or Withdraw"},
+            {'error': "Transaction status must be either Deposit or Withdraw"},
             status=status.HTTP_400_BAD_REQUEST
         )
     
@@ -52,6 +53,21 @@ def update_transactions(request, trans_id):
         )
 
     transaction = get_object_or_404(Transactions, id=trans_id, user=user)
+
+    # Create a proper old transaction copy before modifying the original
+    class OldTransactionCopy:
+        def __init__(self, original_transaction):
+            self.date = original_transaction.date
+            self.amount = float(original_transaction.amount)
+            self.currency = original_transaction.currency
+            self.trans_status = original_transaction.trans_status
+            self.category = original_transaction.category
+            self.trans_details = original_transaction.trans_details
+            self.user = original_transaction.user
+            self.id = original_transaction.id
+
+    old_transaction_copy = OldTransactionCopy(transaction)
+    
     old_amount = float(transaction.amount)
     old_status = transaction.trans_status
     old_currency = transaction.currency
@@ -79,7 +95,7 @@ def update_transactions(request, trans_id):
 
     if new_total < 0:
         return Response(
-            {'error': "You don't have enough money from this currency!"},
+            {'error': "Insufficient balance for this withdrawal"},
             status=status.HTTP_400_BAD_REQUEST
         )
 
@@ -107,6 +123,17 @@ def update_transactions(request, trans_id):
             {'error': f'Error happened while updating netWorth'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+    # Update the reports using the proper old transaction copy
+    try:
+        success, error = save_user_report_with_transaction_update(
+            request, user, old_transaction_copy, transaction
+        )
+        
+        if not success:
+            print(f"Warning: Transaction updated but report update failed: {error}")
+    except Exception as e:
+        print(f"Report update error: {str(e)}")  # Log detailed error for debugging
 
     return Response({
         "success": True,

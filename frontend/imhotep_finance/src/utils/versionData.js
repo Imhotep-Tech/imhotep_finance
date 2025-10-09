@@ -1,11 +1,24 @@
 export const versionEntries = [
   {
+    version: '7.0.4',
+    date: 'October 9, 2025',
+    badge: { label: 'CURRENT', color: 'red' },
+    summary: 'Improvements and added reports history',
+    bullets: [
+      'Added reports history page to view past reports',
+      'Improved UI/UX across the app',
+      'Fixed minor bugs and',
+      'performance enhancements',
+      'Improved loading times for reports',
+      'Added recalculate Net Worth ,Reports button'
+    ]
+  },
+  {
     version: '7.0.3',
     date: 'October 7, 2025',
-    badge: { label: 'CURRENT', color: 'red' },
     summary: 'Added dark mode',
     bullets: [
-      'Added dark',
+      'Added dark mode toggle',
       'Improved UI/UX',
     ]
   },

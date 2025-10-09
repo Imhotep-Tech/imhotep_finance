@@ -12,7 +12,7 @@ const MonthlyReports = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [favoriteCurrency, setFavoriteCurrency] = useState(localStorage.getItem('favoriteCurrency') || 'USD'); // Load from localStorage
+  const [favoriteCurrency, setFavoriteCurrency] = useState(localStorage.getItem('favoriteCurrency') || 'USD');
 
   // Fetch monthly report data
   useEffect(() => {
@@ -20,6 +20,7 @@ const MonthlyReports = () => {
       setLoading(true);
       setError('');
       try {
+        // Call the monthly report endpoint directly (no date parameters needed)
         const res = await axios.get('/api/finance-management/get-monthly-report/');
         setData(res.data);
 
@@ -46,7 +47,7 @@ const MonthlyReports = () => {
     }
 
     fetchData();
-  }, [favoriteCurrency]); // Depend on favoriteCurrency to refetch if updated
+  }, [favoriteCurrency]);
 
   // Prepare chart data for expenses
   const expenseChartData = {
@@ -176,7 +177,7 @@ const MonthlyReports = () => {
           </div>
         </div>
 
-        {/* Detailed Lists (Optional: Expandable) */}
+        {/* Detailed Lists */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Expense Details */}
           <div className="chef-card rounded-xl p-6">
@@ -185,7 +186,7 @@ const MonthlyReports = () => {
               <div key={index} className="flex justify-between py-2 border-b border-[var(--border)]">
                 <span>{item.category}</span>
                 <span className="font-semibold">
-                  {item.converted_amount.toFixed(2)} {favoriteCurrency} ({data.withdraw_percentages[index]}%)
+                  {item.converted_amount.toFixed(2)} {favoriteCurrency} ({item.percentage}%)
                 </span>
               </div>
             )) || <p className="text-gray-500 dark:text-gray-400">No details available.</p>}
@@ -198,7 +199,7 @@ const MonthlyReports = () => {
               <div key={index} className="flex justify-between py-2 border-b border-[var(--border)]">
                 <span>{item.category}</span>
                 <span className="font-semibold">
-                  {item.converted_amount.toFixed(2)} {favoriteCurrency} ({data.deposit_percentages[index]}%)
+                  {item.converted_amount.toFixed(2)} {favoriteCurrency} ({item.percentage}%)
                 </span>
               </div>
             )) || <p className="text-gray-500 dark:text-gray-400">No details available.</p>}

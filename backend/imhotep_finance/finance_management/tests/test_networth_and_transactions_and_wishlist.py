@@ -56,7 +56,7 @@ class WishlistNetworthTransactionConnectionTests(TestCase):
         response = self.client.post(url)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("You don't have on your balance enough of this currency!", response.data['error'])
+        self.assertIn("You don't have enough of this currency", response.data['error'])
 
         # Refresh data from DB
         self.networth.refresh_from_db()
@@ -166,7 +166,8 @@ class WishlistNetworthTransactionConnectionTests(TestCase):
         )
         url = reverse('update_wish_status', args=[wish.id])
         response = self.client.post(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)  # changed from assertIn(...)
+        # Zero price should be rejected by the transaction creation logic
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_double_fulfill_wishlist(self):
         wish = Wishlist.objects.create(
@@ -218,7 +219,7 @@ class WishlistNetworthTransactionConnectionTests(TestCase):
         }
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("Transaction Status Must Be Deposit Or Withdraw", response.data.get("error", ""))
+        self.assertIn("Transaction status must be either Deposit or Withdraw", response.data.get("error", ""))
 
     def test_transaction_missing_fields(self):
         url = reverse('add_transactions')

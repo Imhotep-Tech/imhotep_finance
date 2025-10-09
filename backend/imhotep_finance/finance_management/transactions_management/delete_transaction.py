@@ -2,9 +2,10 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
-from ..utils.get_networth import get_networth
 from rest_framework.response import Response
 from ..models import Transactions, NetWorth, Wishlist
+from ..user_reports.utils.save_user_report import save_user_report_with_transaction
+from ..utils.get_networth import get_networth
 from datetime import datetime
 
 @api_view(['DELETE'])
@@ -49,6 +50,12 @@ def delete_transaction(request, trans_id):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
         
+    # Update the report before deleting the transaction
+    success, error = save_user_report_with_transaction(
+        request, user, trans_db.date, trans_db, parent_function="delete_transaction"
+    )
+    
+    # Delete the transaction
     try:
         trans_db.delete()
     except Exception as e:
@@ -67,7 +74,19 @@ def delete_transaction(request, trans_id):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
+    if not success:
+        return Response(
+            {'message': 'Transaction deleted but report update failed', 'error': error},
+            status=status.HTTP_200_OK
+        )
+    
+    try:
+        networth = get_networth(request)
+    except Exception as e:
+        print(f"Error getting networth: {str(e)}")  # Log detailed error for debugging
+        networth = 0.0
+    
     return Response({
         "success": True,
-        "networth": get_networth(request)
+        "networth": networth
     }, status=status.HTTP_200_OK)

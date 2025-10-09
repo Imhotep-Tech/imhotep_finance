@@ -1,16 +1,17 @@
 from django.urls import path
 from . import views
-from .transactions_management import add_transaction, get_tranaction, update_transaction, delete_transaction, export_transactions_csv
+from .transactions_management import add_transaction, get_tranaction, update_transaction, delete_transaction, export_transactions_csv, recalculate_networth_endpoint
 from .wishlist_management import add_wish, get_wishlist, update_wish, update_wish_status, delete_wish
 from .scheduled_trans_management import add_scheduled_trans, get_scheduled_trans, update_scheduled_trans, update_scheduled_trans_status, delete_scheduled_trans, apply_scheduled_trans
 from .target_management import get_score, get_target, manage_target, get_score_history
-from .user_reports import get_monthly_report, get_yearly_report
+from .user_reports import get_monthly_report, get_yearly_report, get_monthly_report_history, recalculate_user_reports
 
 urlpatterns = [
     #user data
     path('get-networth/', views.get_user_networth, name='get_networth'),
     path('get-networth-details/', views.get_user_netWorth_details, name='get_netWorth_details'),
     path('get-category/', views.get_user_category, name='get_category'),
+    path('recalculate-networth/', recalculate_networth_endpoint.recalculate_networth_endpoint, name='recalculate_networth'),
 
     #trans management
     path('transaction/add-transactions/', add_transaction.add_transactions, name='add_transactions'),
@@ -42,8 +43,12 @@ urlpatterns = [
 
     #monthly report
     path('get-monthly-report/', get_monthly_report.get_monthly_reports, name='get_monthly_reports'),
+    path('get-monthly-report-history/', get_monthly_report_history.get_monthly_report_history, name='get_monthly_report_history'),
+    path('get-report-history-months/', get_monthly_report_history.get_report_history_months, name='get_report_history_months'),
+    path('recalculate-reports/', recalculate_user_reports.recalculate_reports, name='recalculate_reports'),
     
     #yearly report
     path('get-yearly-report/', get_yearly_report.get_yearly_reports, name='get_yearly_reports'),
+    path('get-report-history-years/', get_yearly_report.get_report_history_years, name='get_report_history_years'),
 
 ]

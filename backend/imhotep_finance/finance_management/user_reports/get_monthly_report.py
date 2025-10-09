@@ -2,33 +2,43 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from datetime import datetime
+from datetime import datetime, date
 from .utils.calculate_user_report import calculate_user_report
+from .utils.save_user_report import save_user_report
 import calendar
+from ..models import Reports
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_monthly_reports(request):
-    """Return monthly reports for the logged-in user"""
+    """Return monthly report for the logged-in user"""
     try:
         user = request.user
+        now = datetime.now()
 
-        # Get current date
-        now = datetime.now() #get current datetime
+        # First, check if we have a saved report for the current month
+        user_report = Reports.objects.filter(user=user, month=now.month, year=now.year).first()
         
-        # Start date: first day of current month
-        start_date = now.replace(day=1).date() #set start date to first day of month
+        if user_report:
+            # Return the saved report data
+            return Response(user_report.data, status=status.HTTP_200_OK)
         
-        # End date: first day of next month
-        last_day = calendar.monthrange(now.year, now.month)[1]  # returns (weekday, number_of_days)
-        end_date = now.replace(day=last_day).date()
+        # If no saved report exists, calculate it in real-time
+        # Calculate first and last day of current month
+        first_day = date(now.year, now.month, 1)
+        last_day_of_month = calendar.monthrange(now.year, now.month)[1]
+        last_day = date(now.year, now.month, last_day_of_month)
+
+        # Calculate report data for current month
         (
             user_withdraw_on_range,
             user_deposit_on_range,
             total_withdraw,
             total_deposit,
-        ) = calculate_user_report(start_date, end_date, user, request) #calculate monthly report data
+        ) = calculate_user_report(first_day, last_day, user, request)
 
+        # Prepare response data
+        month_name = calendar.month_name[now.month]
         response_data = {
             "user_withdraw_on_range": [
                 {
@@ -48,13 +58,17 @@ def get_monthly_reports(request):
             ],
             "total_withdraw": float(total_withdraw) if total_withdraw is not None else 0.0,
             "total_deposit": float(total_deposit) if total_deposit is not None else 0.0,
-            "current_month": now.strftime("%B %Y"),
-            "favorite_currency": user.favorite_currency or 'USD'  # Add favorite currency
+            "current_month": f"{month_name} {now.year}",
+            "favorite_currency": user.favorite_currency or 'USD'
         }
+
+        # Save the report for this month (create or update)
+        save_user_report(user, first_day, response_data)
+            
         return Response(response_data, status=status.HTTP_200_OK)
     except Exception as e:
-        print(f"Monthly report error")  # Add detailed error logging
+        print(f"Monthly report error: {str(e)}")  # Log detailed error for debugging
         return Response(
-            {'error': f'Error in generating monthly report'},
+            {'error': 'Unable to generate monthly report'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )

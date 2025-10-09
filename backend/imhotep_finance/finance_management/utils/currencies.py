@@ -30,41 +30,55 @@ def set_currency_session(request, favorite_currency):
         return rate
     return None
 
-def convert_to_fav_currency(request, dictionary):
-    """Convert amounts in different currencies to user's favorite currency."""
-    favorite_currency = get_fav_currency(request.user)
-    today = str(datetime.datetime.now().date())
-    session = request.session
+def convert_to_fav_currency(request, amounts_not_fav_currency):
+    try:
+        """Convert amounts in different currencies to user's favorite currency."""
+        favorite_currency = get_fav_currency(request.user)
+        today = str(datetime.datetime.now().date())
+        session = request.session
 
-    if session.get('rate_date') != today:
-        session.pop('rate', None)
-        session.pop('rate_expire', None)
-        session.pop('favorite_currency', None)
-        rate = set_currency_session(request, favorite_currency)
-        if not rate:
-            return None, favorite_currency
-    elif session.get('favorite_currency') != favorite_currency:
-        session.pop('rate', None)
-        session.pop('rate_expire', None)
-        session.pop('favorite_currency', None)
-        rate = set_currency_session(request, favorite_currency)
-        if not rate:
-            return None, favorite_currency
-    else:
-        rate = session.get('rate')
-        if rate is None:
-            try:
-                rate = set_currency_session(request, favorite_currency)
-            except Exception:
-                return "Error", favorite_currency
-    
-    total_favorite_currency = 0
-    for currency, amount in dictionary.items():
-        if currency in rate and rate[currency]:
-            converted_amount = amount / rate[currency]
-            total_favorite_currency += converted_amount
+        if session.get('rate_date') != today:
+            session.pop('rate', None)
+            session.pop('rate_expire', None)
+            session.pop('favorite_currency', None)
+            rate = set_currency_session(request, favorite_currency)
+            if not rate:
+                return None, favorite_currency
+        elif session.get('favorite_currency') != favorite_currency:
+            session.pop('rate', None)
+            session.pop('rate_expire', None)
+            session.pop('favorite_currency', None)
+            rate = set_currency_session(request, favorite_currency)
+            if not rate:
+                return None, favorite_currency
+        else:
+            rate = session.get('rate')
+            if rate is None:
+                try:
+                    rate = set_currency_session(request, favorite_currency)
+                except Exception:
+                    return "Error", favorite_currency
+        
+        if not amounts_not_fav_currency:
+            return 0.0, favorite_currency
             
-    return total_favorite_currency, favorite_currency
+        total_favorite_currency = 0
+        for currency, amount in amounts_not_fav_currency.items():
+            if currency in rate and rate[currency]:
+                converted_amount = amount / rate[currency]
+                total_favorite_currency += converted_amount
+                
+        # Ensure we always return a valid number
+        if total_favorite_currency is None:
+            total_favorite_currency = 0.0
+            
+        return total_favorite_currency, favorite_currency
+        
+    except Exception as e:
+        print(f"Currency conversion error: {str(e)}")
+        # Return safe defaults
+        favorite_currency = getattr(request.user, 'favorite_currency', 'USD') if hasattr(request, 'user') else 'USD'
+        return 0.0, favorite_currency
 
 def select_currencies(user):
     """Get all currencies that the user has transactions in."""
