@@ -108,7 +108,7 @@ class TransactionManagementTests(TestCase):
         }
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("Transaction Status Must Be Deposit Or Withdraw", response.data.get("error", ""))
+        self.assertIn("Transaction status must be either Deposit or Withdraw", response.data.get("error", ""))
 
     def test_add_transaction_negative_amount(self):
         url = reverse('add_transactions')
@@ -180,7 +180,7 @@ class TransactionManagementTests(TestCase):
         }
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("Transaction Status Must Be Deposit Or Withdraw", response.data.get("error", ""))
+        self.assertIn("Transaction status must be either Deposit or Withdraw", response.data.get("error", ""))
 
     def test_update_transaction_insufficient_funds(self):
         trans = Transactions.objects.create(
@@ -198,7 +198,7 @@ class TransactionManagementTests(TestCase):
         }
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("You don't have enough money from this currency", response.data.get("error", ""))
+        self.assertIn("Insufficient balance for this withdrawal", response.data.get("error", ""))
 
     def test_update_transaction_nonexistent(self):
         url = reverse('update_transaction', args=[9999])
@@ -221,5 +221,7 @@ class TransactionManagementTests(TestCase):
     def test_get_transaction_invalid_date_range(self):
         url = reverse('get_transaction')
         response = self.client.get(url, {'start_date': 'invalid-date', 'end_date': 'invalid-date'})
+        self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+        self.assertIn('Error Happened', response.data.get('error', ''))
         self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
         self.assertIn('Error Happened', response.data.get('error', ''))

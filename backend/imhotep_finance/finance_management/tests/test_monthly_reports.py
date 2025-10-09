@@ -28,8 +28,6 @@ class GetMonthlyReportsViewTests(TestCase):
 
         self.assertEqual(data["user_withdraw_on_range"], [])
         self.assertEqual(data["user_deposit_on_range"], [])
-        self.assertEqual(data["withdraw_percentages"], [])
-        self.assertEqual(data["deposit_percentages"], [])
         self.assertEqual(data["total_withdraw"], 0.0)
         self.assertEqual(data["total_deposit"], 0.0)
         self.assertEqual(data["favorite_currency"], "EUR")
@@ -41,17 +39,17 @@ class GetMonthlyReportsViewTests(TestCase):
 
         # Withdraw transactions
         Transactions.objects.create(
-            user=self.user, date=today, amount=100.0, currency="USD",
+            user=self.user, date=today, amount=100.0, currency="EUR",  # Use EUR to match user's favorite currency
             trans_status="withdraw", category="Food"
         )
         Transactions.objects.create(
-            user=self.user, date=today, amount=50.0, currency="USD",
+            user=self.user, date=today, amount=50.0, currency="EUR",  # Use EUR to match user's favorite currency
             trans_status="withdraw", category="Transport"
         )
 
         # Deposit transactions
         Transactions.objects.create(
-            user=self.user, date=today, amount=200.0, currency="USD",
+            user=self.user, date=today, amount=200.0, currency="EUR",  # Use EUR to match user's favorite currency
             trans_status="deposit", category="Salary"
         )
 
@@ -61,14 +59,17 @@ class GetMonthlyReportsViewTests(TestCase):
 
         # Withdraw checks
         self.assertEqual(data["total_withdraw"], 150.0)
-        self.assertAlmostEqual(sum(data["withdraw_percentages"]), 100.0, places=1)
+        # Check that percentages exist and are reasonable
+        withdraw_percentages = [item["percentage"] for item in data["user_withdraw_on_range"]]
+        self.assertAlmostEqual(sum(withdraw_percentages), 100.0, places=1)
 
-        # Deposit checks
+        # Deposit checks  
         self.assertEqual(data["total_deposit"], 200.0)
-        self.assertAlmostEqual(sum(data["deposit_percentages"]), 100.0, places=1)
+        deposit_percentages = [item["percentage"] for item in data["user_deposit_on_range"]]
+        self.assertAlmostEqual(sum(deposit_percentages), 100.0, places=1)
 
         # Category grouping check
-        withdraw_categories = [item["effective_category"] for item in data["user_withdraw_on_range"]]
+        withdraw_categories = [item["category"] for item in data["user_withdraw_on_range"]]
         self.assertIn("Food", withdraw_categories)
         self.assertIn("Transport", withdraw_categories)
 

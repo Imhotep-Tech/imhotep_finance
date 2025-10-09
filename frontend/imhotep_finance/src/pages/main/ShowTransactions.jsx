@@ -15,6 +15,7 @@ const ShowTransactions = () => {
   const [dateRange, setDateRange] = useState({});
   const [showAddModal, setShowAddModal] = useState(false);
   const [editModal, setEditModal] = useState({ open: false, transaction: null });
+  const [recalculateNetworthLoading, setRecalculateNetworthLoading] = useState(false);
 
   // Fetch transactions
   useEffect(() => {
@@ -122,6 +123,39 @@ const ShowTransactions = () => {
     }
   };
 
+  // Recalculate networth
+  const handleRecalculateNetworth = async () => {
+    if (!window.confirm('This will recalculate your networth from all transactions. This may take a moment. Continue?')) {
+      return;
+    }
+    
+    setRecalculateNetworthLoading(true);
+    try {
+      const response = await axios.post('/api/finance-management/recalculate-networth/');
+      
+      // Show success message with details
+      const details = response.data.details;
+      let message = `Networth recalculated successfully!\n\n`;
+      message += `💰 Currencies processed: ${details.currencies_processed}\n`;
+      message += `📊 Networth records created: ${details.networth_records_created}\n`;
+      message += `💵 Updated total networth: ${response.data.updated_networth}\n\n`;
+      
+      if (details.currency_breakdown && Object.keys(details.currency_breakdown).length > 0) {
+        message += `Currency breakdown:\n`;
+        for (const [currency, amount] of Object.entries(details.currency_breakdown)) {
+          message += `• ${currency}: ${amount.toFixed(2)}\n`;
+        }
+      }
+      
+      alert(message);
+      
+    } catch (err) {
+      console.error('Recalculate networth failed:', err);
+      alert(`Failed to recalculate networth: ${err.response?.data?.error || err.message}`);
+    }
+    setRecalculateNetworthLoading(false);
+  };
+
   // Helper for type badge
   const TypeBadge = ({ type }) => (
     type === 'deposit' || type === 'Deposit' ? (
@@ -186,35 +220,69 @@ const ShowTransactions = () => {
       </div>
       <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         <div className="chef-card rounded-3xl p-8 shadow-2xl backdrop-blur-2xl mb-8">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold font-chef text-gray-800 dark:text-gray-100 mb-2">Transactions</h1>
-              <p className="text-lg text-gray-600 dark:text-gray-300 font-medium leading-relaxed mb-4">
-                View and filter your transaction history
-              </p>
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h1 className="text-3xl font-bold font-chef text-gray-800 dark:text-gray-100 mb-2">Transactions</h1>
+                <p className="text-lg text-gray-600 dark:text-gray-300 font-medium leading-relaxed mb-4">
+                  View and filter your transaction history
+                </p>
+              </div>
             </div>
-            <div className="flex gap-3">
+            
+            {/* Mobile-first button layout */}
+            <div className="flex flex-col sm:flex-row gap-3">
               <button
-                className="chef-button bg-gradient-to-r from-[#4a7c7a] to-[#366c6b] text-white px-6 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                className="chef-button bg-gradient-to-r from-[#4a7c7a] to-[#366c6b] text-white px-4 sm:px-6 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-sm sm:text-base"
                 onClick={handleExportCSV}
               >
-                <svg className="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                Export CSV
+                <span className="hidden sm:inline">Export CSV</span>
+                <span className="sm:hidden">Export</span>
               </button>
+              
               <button
-                className="chef-button bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white px-6 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                className={`chef-button px-4 sm:px-6 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-sm sm:text-base ${
+                  recalculateNetworthLoading
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-[#7c6a4a] to-[#5d4e37] text-white'
+                }`}
+                onClick={handleRecalculateNetworth}
+                disabled={recalculateNetworthLoading}
+              >
+                {recalculateNetworthLoading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin inline-block mr-2"></div>
+                    <span className="hidden sm:inline">Recalculating...</span>
+                    <span className="sm:hidden">Loading...</span>
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <span className="hidden sm:inline">Recalculate Networth</span>
+                    <span className="sm:hidden">Recalculate</span>
+                  </>
+                )}
+              </button>
+              
+              <button
+                className="chef-button bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white px-4 sm:px-6 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-sm sm:text-base"
                 onClick={() => setShowAddModal(true)}
               >
-                <svg className="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path d="M12 5v14m7-7H5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                Add Transaction
+                <span className="hidden sm:inline">Add Transaction</span>
+                <span className="sm:hidden">Add</span>
               </button>
             </div>
           </div>
-          <div className="flex flex-wrap gap-4 items-center mb-4">
+          
+          <div className="flex flex-wrap gap-4 items-center mt-6">
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">From</label>
               <input

@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from ..models import Transactions, NetWorth, Wishlist
 from datetime import date
 from ..transactions_management.utils.create_transaction import create_transaction
+from ..user_reports.utils.save_user_report import save_user_report_with_transaction
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -25,7 +26,7 @@ def update_wish_status(request, wish_id):
 
     if not wish_status:
         # Call the utility function to create the transaction and update networth
-        trans, error = create_transaction(user, current_date, amount, currency, wish_details, "Wishes", "Withdraw")
+        trans, error = create_transaction(request, user, current_date, amount, currency, wish_details, "Wishes", "Withdraw")
         if error:
             return Response(
                 {'error': error["message"]},
@@ -37,33 +38,49 @@ def update_wish_status(request, wish_id):
                 wish.save()
             except Exception:
                 return Response(
-                        {'error': f'Error happened while creating the transaction'},
+                        {'error': 'Error occurred while creating the transaction'},
                         status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
 
     else:
+        # Wish is being marked as not purchased - reverse the transaction
         netWorth = NetWorth.objects.filter(user=user, currency=currency).first()
         user_balance = netWorth.total if netWorth else 0
         new_total = float(user_balance) + float(amount)
 
-        # Update wish in database
+        # Update reports before deleting the transaction
         try:
             trans_wish = wish.transaction
             if trans_wish:
+                # Update the report to remove this transaction
+                success, error = save_user_report_with_transaction(
+                    request, user, trans_wish.date, trans_wish, parent_function="delete_transaction"
+                )
+                if not success:
+                    print(f"Warning: Failed to update report when reversing wish transaction: {error}")
+                
+                # Delete the transaction
                 trans_wish.delete()
                 wish.transaction = None
-        except Exception:
+        except Exception as e:
+            print(f"Error deleting wish transaction: {str(e)}")  # Log detailed error for debugging
             return Response(
-                    {'error': f'Error happened while Deleting the transaction'},
+                    {'error': 'Error occurred while processing the transaction'},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
         
+        # Update networth
         try:
-            netWorth.total = new_total
-            netWorth.save()
-        except Exception:
+            if netWorth:
+                netWorth.total = new_total
+                netWorth.save()
+            else:
+                # Create networth entry if it doesn't exist
+                NetWorth.objects.create(user=user, total=new_total, currency=currency)
+        except Exception as e:
+            print(f"Error updating networth in wish status: {str(e)}")  # Log detailed error for debugging
             return Response(
-                {'error': f'Error happened while updating netWorth'},
+                {'error': 'Error occurred while updating balance'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
     
@@ -71,13 +88,16 @@ def update_wish_status(request, wish_id):
     try:
         wish.status = new_status
         wish.save()
-    except Exception:
+    except Exception as e:
+        print(f"Error updating wish status: {str(e)}")  # Log detailed error for debugging
         return Response(
-                {'error': f'Error happened while updating wish'},
+                {'error': 'Error occurred while updating wish'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
     return Response({
         "success": True,
+        "message": f"Wish {'purchased' if new_status else 'marked as pending'}",
+        "wish_status": new_status,
         "networth": get_networth(request)
     }, status=status.HTTP_200_OK)

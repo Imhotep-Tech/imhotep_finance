@@ -20,15 +20,8 @@ const MonthlyReports = () => {
       setLoading(true);
       setError('');
       try {
-        // Get current month's first and last day
-        const now = new Date();
-        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-        const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-        
-        const startDate = firstDay.toISOString().split('T')[0];
-        const endDate = lastDay.toISOString().split('T')[0];
-        
-        const res = await axios.get(`/api/finance-management/get-monthly-report/?start_date=${startDate}&end_date=${endDate}`);
+        // Call the monthly report endpoint directly (no date parameters needed)
+        const res = await axios.get('/api/finance-management/get-monthly-report/');
         setData(res.data);
 
         // Update favorite currency from API if available and different

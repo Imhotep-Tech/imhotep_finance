@@ -23,7 +23,7 @@ def add_transactions(request):
         trans_status = request.data.get("trans_status")
 
         # Call the utility function to create the transaction and update networth
-        trans, error = create_transaction(user, date, amount, currency, trans_details, category, trans_status)
+        trans, error = create_transaction(request, user, date, amount, currency, trans_details, category, trans_status)
 
         if error:
             return Response(
@@ -32,14 +32,21 @@ def add_transactions(request):
             )
         
         if trans:
+            try:
+                networth = get_networth(request)
+            except Exception as e:
+                print(f"Error getting networth: {str(e)}")
+                networth = 0.0
+                
             return Response({
                 "success": True,
-                "networth": get_networth(request)
+                "networth": networth
             }, status=status.HTTP_200_OK)
 
-    except Exception:
+    except Exception as e:
+        print(f"Error in add_transactions: {str(e)}")  # Log detailed error for debugging
         return Response(
-            {'error': f'Error Happened'},
+            {'error': 'An error occurred while processing the transaction'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
