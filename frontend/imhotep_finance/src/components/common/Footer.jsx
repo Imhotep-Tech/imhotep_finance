@@ -63,7 +63,7 @@ function Footer() {
             Feedback & Bugs
           </a>
           <Link to="/version-history" className="hover:underline">
-            Version 7.0.3
+            Version 7.0.4
           </Link>
         </div>
 
