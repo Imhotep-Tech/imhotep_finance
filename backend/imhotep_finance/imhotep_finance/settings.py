@@ -55,7 +55,6 @@ else:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
 
-
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -69,6 +68,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
     'csp',
+    'drf_yasg',
     'accounts',
     'finance_management',
 ]
@@ -83,6 +83,22 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20
+}
+
+# drf-yasg / Swagger configuration
+SWAGGER_SETTINGS = {
+    'USE_SESSION_AUTH': False,
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header',
+            'description': 'JWT Authorization header using the Bearer scheme. Example: "Authorization: Bearer {token}"',
+        }
+    },
+    'SECURITY_REQUIREMENTS': [{
+        'Bearer': []
+    }],
 }
 
 # Simple JWT configuration

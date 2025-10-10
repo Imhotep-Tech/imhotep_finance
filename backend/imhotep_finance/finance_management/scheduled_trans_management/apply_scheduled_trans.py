@@ -2,7 +2,17 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from drf_yasg.utils import swagger_auto_schema
+from .schemas.scheduled_trans_schemas import apply_scheduled_trans_response
 
+@swagger_auto_schema(
+    method='post',
+    operation_description='Apply scheduled transactions for the user; idempotent once per day.',
+    responses={
+        200: apply_scheduled_trans_response,
+        500: 'Internal server error',
+    }
+)
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def apply_scheduled_trans(request):

@@ -7,7 +7,19 @@ from ..models import Transactions, NetWorth, Wishlist
 from ..user_reports.utils.save_user_report import save_user_report_with_transaction
 from ..utils.get_networth import get_networth
 from datetime import datetime
+from drf_yasg.utils import swagger_auto_schema
+from .schemas.transaction_schemas import delete_transaction_response
 
+@swagger_auto_schema(
+    method='delete',
+    operation_description='Delete a transaction and update balances and reports.',
+    responses={
+        200: delete_transaction_response,
+        400: 'Bad request',
+        404: 'Transaction not found',
+        500: 'Internal server error',
+    }
+)
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def delete_transaction(request, trans_id):

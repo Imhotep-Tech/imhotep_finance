@@ -6,7 +6,20 @@ from ..utils.get_networth import get_networth
 from rest_framework.response import Response
 from ..models import ScheduledTransaction
 from ..utils.currencies import get_allowed_currencies
+from drf_yasg.utils import swagger_auto_schema
+from .schemas.scheduled_trans_schemas import add_scheduled_trans_request, simple_success_response
 
+@swagger_auto_schema(
+    method='post',
+    operation_description='Update a scheduled transaction.',
+    request_body=add_scheduled_trans_request,
+    responses={
+        200: simple_success_response,
+        400: 'Validation error',
+        404: 'Scheduled transaction not found',
+        500: 'Internal server error',
+    }
+)
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def update_scheduled_transactions(request, scheduled_trans_id):

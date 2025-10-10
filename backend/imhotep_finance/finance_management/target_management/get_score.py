@@ -6,7 +6,18 @@ from rest_framework.response import Response
 from ..models import Transactions, Target
 from datetime import datetime
 from ..utils.currencies import convert_to_fav_currency
+from drf_yasg.utils import swagger_auto_schema
+from .schemas.target_schemas import get_score_response
 
+@swagger_auto_schema(
+    method='get',
+    operation_description='Get current month score relative to target.',
+    responses={
+        200: get_score_response,
+        404: 'Target not found',
+        500: 'Internal server error',
+    }
+)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_score(request):

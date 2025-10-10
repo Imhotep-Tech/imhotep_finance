@@ -5,7 +5,19 @@ from rest_framework.response import Response
 from ..models import Wishlist
 from ..utils.currencies import get_allowed_currencies
 from django.utils import timezone
+from drf_yasg.utils import swagger_auto_schema
+from .schemas.wishlist_schemas import add_wish_request, simple_success_response
 
+@swagger_auto_schema(
+    method='post',
+    operation_description='Create a wishlist item for the authenticated user.',
+    request_body=add_wish_request,
+    responses={
+        200: simple_success_response,
+        400: 'Validation error',
+        500: 'Internal server error',
+    }
+)
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def add_wish(request):

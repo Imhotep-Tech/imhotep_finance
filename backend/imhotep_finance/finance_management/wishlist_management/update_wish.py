@@ -6,7 +6,20 @@ from ..utils.get_networth import get_networth
 from rest_framework.response import Response
 from ..models import Wishlist
 from ..utils.currencies import get_allowed_currencies
+from drf_yasg.utils import swagger_auto_schema
+from .schemas.wishlist_schemas import update_wish_request, simple_success_response
 
+@swagger_auto_schema(
+    method='post',
+    operation_description='Update a wishlist item.',
+    request_body=update_wish_request,
+    responses={
+        200: simple_success_response,
+        400: 'Validation error',
+        404: 'Wishlist item not found',
+        500: 'Internal server error',
+    }
+)
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def update_wish(request, wish_id):

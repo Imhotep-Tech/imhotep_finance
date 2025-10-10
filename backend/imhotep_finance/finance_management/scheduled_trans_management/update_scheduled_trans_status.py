@@ -8,7 +8,18 @@ from rest_framework.response import Response
 from ..models import ScheduledTransaction
 from ..utils.currencies import get_allowed_currencies
 from datetime import date
+from drf_yasg.utils import swagger_auto_schema
+from .schemas.scheduled_trans_schemas import simple_success_response
 
+@swagger_auto_schema(
+    method='post',
+    operation_description='Toggle scheduled transaction active status.',
+    responses={
+        200: simple_success_response,
+        404: 'Scheduled transaction not found',
+        500: 'Internal server error',
+    }
+)
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def update_scheduled_trans_status(request, scheduled_trans_id):

@@ -9,7 +9,19 @@ from ..models import Transactions, NetWorth
 from datetime import datetime, date
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import calendar
+from drf_yasg.utils import swagger_auto_schema
+from .schemas.transaction_schemas import get_transactions_params, get_transactions_response
 
+@swagger_auto_schema(
+    method='get',
+    manual_parameters=get_transactions_params,
+    operation_description='List user transactions with pagination and optional date range filter.',
+    responses={
+        200: get_transactions_response,
+        400: 'Invalid query params',
+        500: 'Internal server error',
+    }
+)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_transaction(request):

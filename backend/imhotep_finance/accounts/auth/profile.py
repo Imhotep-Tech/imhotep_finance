@@ -12,7 +12,22 @@ from django.contrib.auth.tokens import default_token_generator
 from imhotep_finance.settings import SITE_DOMAIN, frontend_url
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from drf_yasg.utils import swagger_auto_schema
+from accounts.schemas.profile_schemas import (
+    get_profile_response,
+    update_profile_request,
+    update_profile_response,
+    change_password_request,
+    change_password_response,
+    verify_email_change_request,
+    verify_email_change_response,
+)
 
+@swagger_auto_schema(
+    method='get',
+    operation_description='Get current user profile information.',
+    responses={200: get_profile_response}
+)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_profile(request):
@@ -28,6 +43,12 @@ def get_profile(request):
         'date_joined': user.date_joined,
     })
 
+@swagger_auto_schema(
+    method='put',
+    operation_description='Update current user profile information and send email verification if email changed.',
+    request_body=update_profile_request,
+    responses={200: update_profile_response, 400: 'Validation error'}
+)
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
 def update_profile(request):
@@ -141,6 +162,12 @@ def update_profile(request):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
+@swagger_auto_schema(
+    method='post',
+    operation_description='Change password for current user.',
+    request_body=change_password_request,
+    responses={200: change_password_response, 400: 'Validation error'}
+)
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def change_password(request):
@@ -195,6 +222,12 @@ def change_password(request):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
+@swagger_auto_schema(
+    method='post',
+    operation_description='Verify email change using uid/token and new email.',
+    request_body=verify_email_change_request,
+    responses={200: verify_email_change_response, 400: 'Invalid link'}
+)
 @api_view(['POST'])
 @permission_classes([])
 def verify_email_change(request):

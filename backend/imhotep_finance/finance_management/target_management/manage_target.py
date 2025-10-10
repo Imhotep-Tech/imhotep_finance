@@ -4,7 +4,19 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from ..models import Target
 from datetime import datetime
+from drf_yasg.utils import swagger_auto_schema
+from .schemas.target_schemas import manage_target_request, simple_success_response
 
+@swagger_auto_schema(
+    method='post',
+    operation_description='Create or update current month target.',
+    request_body=manage_target_request,
+    responses={
+        200: simple_success_response,
+        400: 'Validation error',
+        500: 'Internal server error',
+    }
+)
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def manage_target(request):

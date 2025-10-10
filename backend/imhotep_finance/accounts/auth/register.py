@@ -9,8 +9,21 @@ from django.utils.encoding import force_bytes, force_str
 from django.template.loader import render_to_string
 from django.contrib.auth.tokens import default_token_generator
 from imhotep_finance.settings import SITE_DOMAIN, frontend_url
+from drf_yasg.utils import swagger_auto_schema
+from accounts.schemas.auth_schemas import (
+    register_request,
+    register_response,
+    verify_email_request,
+    verify_email_response,
+)
 
 #the register route
+@swagger_auto_schema(
+    method='post',
+    operation_description='Register a new user and send email verification.',
+    request_body=register_request,
+    responses={201: register_response, 400: 'Validation error'}
+)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register_view(request):
@@ -121,6 +134,12 @@ def register_view(request):
         )
 
 #the verify email API route
+@swagger_auto_schema(
+    method='post',
+    operation_description='Verify user email with uid and token.',
+    request_body=verify_email_request,
+    responses={200: verify_email_response, 400: 'Invalid link'}
+)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def verify_email(request):

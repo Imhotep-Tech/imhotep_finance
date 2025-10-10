@@ -5,7 +5,17 @@ from rest_framework.response import Response
 from ..utils.recalculate_networth import recalculate_networth
 from ..utils.get_networth import get_networth
 from ..models import Transactions, NetWorth
+from drf_yasg.utils import swagger_auto_schema
+from .schemas.transaction_schemas import recalculate_networth_response
 
+@swagger_auto_schema(
+    method='post',
+    operation_description='Recalculate user networth from all transactions.',
+    responses={
+        200: recalculate_networth_response,
+        500: 'Internal server error',
+    }
+)
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def recalculate_networth_endpoint(request):

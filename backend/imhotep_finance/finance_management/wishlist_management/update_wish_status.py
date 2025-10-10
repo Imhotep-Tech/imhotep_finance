@@ -9,7 +9,18 @@ from ..models import Transactions, NetWorth, Wishlist
 from datetime import date
 from ..transactions_management.utils.create_transaction import create_transaction
 from ..user_reports.utils.save_user_report import save_user_report_with_transaction
+from drf_yasg.utils import swagger_auto_schema
+from .schemas.wishlist_schemas import update_wish_status_response
 
+@swagger_auto_schema(
+    method='post',
+    operation_description='Toggle a wishlist item purchased status and reflect on transactions/networth.',
+    responses={
+        200: update_wish_status_response,
+        404: 'Wishlist item not found',
+        500: 'Internal server error',
+    }
+)
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def update_wish_status(request, wish_id):

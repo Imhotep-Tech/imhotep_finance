@@ -5,7 +5,19 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .models import User
 from finance_management.utils.currencies import get_fav_currency, get_allowed_currencies
+from drf_yasg.utils import swagger_auto_schema
+from .schemas.profile_schemas import (
+    user_view_response,
+    change_fav_currency_request,
+    change_fav_currency_response,
+    get_fav_currency_response,
+)
 
+@swagger_auto_schema(
+    method='get',
+    operation_description='Get current authenticated user details.',
+    responses={200: user_view_response}
+)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def user_view(request):
@@ -22,6 +34,12 @@ def user_view(request):
         'email_verify': getattr(user, 'email_verify', False),
     })
 
+@swagger_auto_schema(
+    method='post',
+    operation_description='Change user favorite currency.',
+    request_body=change_fav_currency_request,
+    responses={200: change_fav_currency_response, 400: 'Validation error'}
+)
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def change_favorite_currency(request):
@@ -50,6 +68,11 @@ def change_favorite_currency(request):
             "success": True
         }, status=status.HTTP_200_OK)
 
+@swagger_auto_schema(
+    method='get',
+    operation_description='Get user favorite currency.',
+    responses={200: get_fav_currency_response}
+)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_favorite_currency(request):

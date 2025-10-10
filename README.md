@@ -125,6 +125,21 @@ Take control of your finances with Imhotep Financial Manager – a powerful, ope
 4. **Environment Variables**
    Create `.env` files with necessary configurations (DATABASE_URL, SECRET_KEY, etc.).
 
+## 📘 API Docs (Swagger) and Testing
+
+- Swagger UI is available at: `/swagger/` (JSON at `/swagger.json`, ReDoc at `/redoc/`).
+- Authorization in Swagger:
+  - Click the "Authorize" button in the top-right.
+  - Enter your JWT in this format: `Bearer <your_access_token>`
+  - The header sent will be: `Authorization: Bearer <token>`.
+- Getting a token:
+  - Use `POST /api/auth/login/` with valid credentials to receive `access` and `refresh` tokens.
+  - Alternatively, Google OAuth: `POST /api/auth/google/authenticate/` with an authorization code.
+
+Recommended API testing client
+- While Swagger is great for discovery, it's recommended to use Postman (or Insomnia) for end-to-end flows, collections, and environment-driven testing.
+- In Postman, set Authorization type to "Bearer Token" and paste the `access` token, or add a default header `Authorization: Bearer <token>` to the collection.
+
 ## 👥 Contributing
 
 We welcome contributions to Imhotep Financial Manager! Here's how you can contribute:
