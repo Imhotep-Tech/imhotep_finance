@@ -14,6 +14,13 @@ from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from ..models import User
+from drf_yasg.utils import swagger_auto_schema
+from accounts.schemas.auth_schemas import (
+    password_reset_request_request,
+    password_reset_confirm_request,
+    password_reset_validate_request,
+    password_reset_generic_response,
+)
 
 class CustomPasswordResetView(PasswordResetView):
     template_name = 'password_reset.html'
@@ -90,6 +97,12 @@ class CustomPasswordResetConfirmView(PasswordResetConfirmView):
 class CustomPasswordResetCompleteView(PasswordResetCompleteView):
     template_name = 'password_reset_complete.html'
 
+@swagger_auto_schema(
+    method='post',
+    operation_description='Request a password reset email to be sent.',
+    request_body=password_reset_request_request,
+    responses={200: password_reset_generic_response, 400: 'Invalid email'}
+)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def password_reset_request(request):
@@ -157,6 +170,12 @@ def password_reset_request(request):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
+@swagger_auto_schema(
+    method='post',
+    operation_description='Confirm password reset with uid/token and new password.',
+    request_body=password_reset_confirm_request,
+    responses={200: password_reset_generic_response, 400: 'Validation error'}
+)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def password_reset_confirm(request):
@@ -222,6 +241,12 @@ def password_reset_confirm(request):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
+@swagger_auto_schema(
+    method='post',
+    operation_description='Validate password reset token without changing password.',
+    request_body=password_reset_validate_request,
+    responses={200: password_reset_generic_response, 400: 'Invalid token'}
+)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def password_reset_validate(request):

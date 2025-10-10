@@ -6,7 +6,18 @@ from ..utils.serializer import serialize_scheduled_trans
 from rest_framework.response import Response
 from ..models import ScheduledTransaction
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from drf_yasg.utils import swagger_auto_schema
+from .schemas.scheduled_trans_schemas import get_scheduled_trans_params, get_scheduled_trans_response
 
+@swagger_auto_schema(
+    method='get',
+    manual_parameters=get_scheduled_trans_params,
+    operation_description='List scheduled transactions with pagination.',
+    responses={
+        200: get_scheduled_trans_response,
+        500: 'Internal server error',
+    }
+)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_scheduled_transaction(request):

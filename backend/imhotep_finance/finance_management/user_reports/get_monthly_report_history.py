@@ -7,7 +7,22 @@ from .utils.calculate_user_report import calculate_user_report
 from .utils.save_user_report import save_user_report
 import calendar
 from ..models import Reports
+from drf_yasg.utils import swagger_auto_schema
+from .schemas.report_schemas import (
+    get_report_history_months_response,
+    get_monthly_report_history_params,
+    get_monthly_report_history_response,
+)
 
+@swagger_auto_schema(
+    method='get',
+    operation_description='List available month/year combinations for which reports exist.',
+    responses={
+        200: get_report_history_months_response,
+        404: 'No report history found',
+        500: 'Internal server error',
+    }
+)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_report_history_months(request):
@@ -36,6 +51,17 @@ def get_report_history_months(request):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
+@swagger_auto_schema(
+    method='get',
+    manual_parameters=get_monthly_report_history_params,
+    operation_description='Get a specific month report from history (stored snapshot).',
+    responses={
+        200: get_monthly_report_history_response,
+        404: 'No report for month/year',
+        400: 'Missing or invalid query params',
+        500: 'Internal server error',
+    }
+)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_monthly_report_history(request):

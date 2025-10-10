@@ -7,7 +7,20 @@ from ..utils.get_networth import get_networth
 from rest_framework.response import Response
 from ..models import Transactions, NetWorth
 from ..utils.currencies import get_allowed_currencies
+from drf_yasg.utils import swagger_auto_schema
+from .schemas.transaction_schemas import update_transaction_request, update_transaction_response
 
+@swagger_auto_schema(
+    method='post',
+    operation_description='Update an existing transaction and recalculate networth and reports accordingly.',
+    request_body=update_transaction_request,
+    responses={
+        200: update_transaction_response,
+        400: 'Validation error',
+        404: 'Transaction not found',
+        500: 'Internal server error',
+    }
+)
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def update_transactions(request, trans_id):

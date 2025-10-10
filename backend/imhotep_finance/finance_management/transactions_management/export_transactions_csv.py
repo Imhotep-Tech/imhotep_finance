@@ -5,7 +5,19 @@ from rest_framework.permissions import IsAuthenticated
 from ..models import Transactions
 from datetime import datetime, date
 import calendar
+from drf_yasg.utils import swagger_auto_schema
+from .schemas.transaction_schemas import export_csv_params
 
+@swagger_auto_schema(
+    method='get',
+    manual_parameters=export_csv_params,
+    operation_description='Export user transactions in CSV for an optional date range.',
+    responses={
+        200: 'CSV file',
+        400: 'Invalid query params',
+        500: 'Internal server error',
+    }
+)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def export_transactions_csv(request):

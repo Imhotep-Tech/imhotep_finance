@@ -7,7 +7,17 @@ from .utils.calculate_user_report import calculate_user_report
 from .utils.save_user_report import save_user_report
 import calendar
 from ..models import Reports
+from drf_yasg.utils import swagger_auto_schema
+from .schemas.report_schemas import get_monthly_report_response
 
+@swagger_auto_schema(
+    method='get',
+    operation_description='Get monthly report for current month (from cache if available).',
+    responses={
+        200: get_monthly_report_response,
+        500: 'Internal server error',
+    }
+)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_monthly_reports(request):

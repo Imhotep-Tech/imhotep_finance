@@ -7,7 +7,18 @@ from .utils.calculate_user_report import calculate_user_report
 from .utils.save_user_report import save_user_report
 import calendar
 from ..models import Transactions
+from drf_yasg.utils import swagger_auto_schema
+from .schemas.report_schemas import recalculate_reports_response
 
+@swagger_auto_schema(
+    method='post',
+    operation_description='Recalculate all monthly reports for the user across the full transaction date range.',
+    responses={
+        200: recalculate_reports_response,
+        200: 'No transactions found for this user',
+        500: 'Internal server error',
+    }
+)
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def recalculate_reports(request):

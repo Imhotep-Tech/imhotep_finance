@@ -6,8 +6,22 @@ from rest_framework.response import Response
 from accounts.models import User
 from .utils.get_networth import get_networth, get_netWorth_details
 from .utils.get_category import get_category
+from drf_yasg.utils import swagger_auto_schema
+from .schemas.root_schemas import (
+    get_networth_response,
+    get_networth_details_response,
+    get_category_params,
+    get_category_response,
+)
 
 # Create your views here.
+@swagger_auto_schema(
+    method='get',
+    operation_description='Get total networth for the authenticated user.',
+    responses={
+        200: get_networth_response,
+    }
+)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_user_networth(request):
@@ -20,6 +34,13 @@ def get_user_networth(request):
         'networth': get_networth(request),
     })
 
+@swagger_auto_schema(
+    method='get',
+    operation_description='Get networth details per currency for the authenticated user.',
+    responses={
+        200: get_networth_details_response,
+    }
+)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_user_netWorth_details(request):
@@ -32,6 +53,14 @@ def get_user_netWorth_details(request):
         'networth_details': get_netWorth_details(request),
     })
 
+@swagger_auto_schema(
+    method='get',
+    manual_parameters=get_category_params,
+    operation_description="Get user's most frequently used categories optionally filtered by status.",
+    responses={
+        200: get_category_response,
+    }
+)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_user_category(request):

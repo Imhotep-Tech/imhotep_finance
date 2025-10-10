@@ -4,8 +4,16 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
+from drf_yasg.utils import swagger_auto_schema
+from accounts.schemas.auth_schemas import logout_request, logout_response
 
 
+@swagger_auto_schema(
+    method='post',
+    operation_description='Logout by blacklisting the provided refresh token.',
+    request_body=logout_request,
+    responses={200: logout_response, 400: 'Invalid token'}
+)
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def logout_view(request):

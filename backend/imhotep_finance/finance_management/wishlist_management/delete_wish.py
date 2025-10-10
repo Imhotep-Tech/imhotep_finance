@@ -6,7 +6,19 @@ from ..utils.get_networth import get_networth
 from rest_framework.response import Response
 from ..models import Wishlist
 from datetime import datetime
+from drf_yasg.utils import swagger_auto_schema
+from .schemas.wishlist_schemas import simple_success_response
 
+@swagger_auto_schema(
+    method='delete',
+    operation_description='Delete a pending wishlist item.',
+    responses={
+        200: simple_success_response,
+        404: 'Wishlist item not found',
+        400: 'Cannot delete purchased wish',
+        500: 'Internal server error',
+    }
+)
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def delete_wish(request, wish_id):

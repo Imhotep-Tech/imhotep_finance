@@ -7,7 +7,19 @@ from ..models import Wishlist
 from datetime import date
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import calendar
+from drf_yasg.utils import swagger_auto_schema
+from .schemas.wishlist_schemas import get_wishlist_params, get_wishlist_response
 
+@swagger_auto_schema(
+    method='get',
+    manual_parameters=get_wishlist_params,
+    operation_description='Get paginated wishlist by year (default current year).',
+    responses={
+        200: get_wishlist_response,
+        400: 'Invalid query params',
+        500: 'Internal server error',
+    }
+)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_wishlist(request):

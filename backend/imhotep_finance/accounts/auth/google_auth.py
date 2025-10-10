@@ -12,7 +12,18 @@ from imhotep_finance.settings import SITE_DOMAIN, GOOGLE_OAUTH2_CLIENT_ID, GOOGL
 from decouple import config
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
+from drf_yasg.utils import swagger_auto_schema
+from accounts.schemas.auth_schemas import (
+    google_login_url_response,
+    google_auth_request,
+    google_auth_response,
+)
 
+@swagger_auto_schema(
+    method='get',
+    operation_description='Get Google OAuth2 login URL for frontend.',
+    responses={200: google_login_url_response}
+)
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def google_login_url(request):
@@ -28,6 +39,12 @@ def google_login_url(request):
     )
     return Response({'auth_url': oauth2_url})
 
+@swagger_auto_schema(
+    method='post',
+    operation_description='Authenticate with Google OAuth2 authorization code.',
+    request_body=google_auth_request,
+    responses={200: google_auth_response, 400: 'Invalid code'}
+)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def google_auth(request):
@@ -153,6 +170,11 @@ def google_auth(request):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
+@swagger_auto_schema(
+    method='get',
+    operation_description='Handle Google OAuth2 callback and redirect to frontend.',
+    responses={302: 'Redirect to frontend with code or error'}
+)
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def google_callback(request):

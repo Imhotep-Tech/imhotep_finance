@@ -6,7 +6,18 @@ from datetime import datetime, date
 from ..models import Reports
 from django.utils import timezone
 import calendar
+from drf_yasg.utils import swagger_auto_schema
+from .schemas.report_schemas import get_report_history_years_response, get_yearly_report_params, get_yearly_report_response
 
+@swagger_auto_schema(
+    method='get',
+    operation_description='List available years with reports.',
+    responses={
+        200: get_report_history_years_response,
+        404: 'No report history found',
+        500: 'Internal server error',
+    }
+)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_report_history_years(request):
@@ -35,6 +46,17 @@ def get_report_history_years(request):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
+@swagger_auto_schema(
+    method='get',
+    manual_parameters=get_yearly_report_params,
+    operation_description='Get yearly aggregated report across available monthly reports.',
+    responses={
+        200: get_yearly_report_response,
+        404: 'No reports for year',
+        400: 'Invalid year',
+        500: 'Internal server error',
+    }
+)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_yearly_reports(request):

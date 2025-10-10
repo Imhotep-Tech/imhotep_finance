@@ -4,7 +4,18 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from ..models import Target
 from rest_framework import status
+from drf_yasg.utils import swagger_auto_schema
+from .schemas.target_schemas import get_target_response
 
+@swagger_auto_schema(
+    method='get',
+    operation_description='Get latest target for authenticated user.',
+    responses={
+        200: get_target_response,
+        404: 'Target not found',
+        500: 'Internal server error',
+    }
+)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_target(request):

@@ -12,8 +12,16 @@ from django.template.loader import render_to_string
 from django.contrib.auth.tokens import default_token_generator
 from imhotep_finance.settings import SITE_DOMAIN, frontend_url
 from django.views.decorators.csrf import csrf_exempt
+from drf_yasg.utils import swagger_auto_schema
+from accounts.schemas.auth_schemas import login_request, login_response
 
 #the login route
+@swagger_auto_schema(
+    method='post',
+    operation_description='Authenticate using username or email and password.',
+    request_body=login_request,
+    responses={200: login_response, 400: 'Invalid input', 401: 'Unauthorized'}
+)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 @csrf_exempt

@@ -6,7 +6,17 @@ from ..utils.serializer import serialize_target
 from rest_framework.response import Response
 from ..models import Target
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from drf_yasg.utils import swagger_auto_schema
+from .schemas.target_schemas import get_score_history_response
 
+@swagger_auto_schema(
+    method='get',
+    operation_description='Get paginated score history items.',
+    responses={
+        200: get_score_history_response,
+        500: 'Internal server error',
+    }
+)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_score_history(request):
