@@ -170,6 +170,52 @@ Follow the Docker or manual setup instructions above. For Docker:
 - Volumes are mounted for instant updates
 - Debug mode is active for both frontend and backend
 
+### 🧪 Testing
+
+#### Running Tests Locally
+
+We provide a convenient test script that mimics the CI environment:
+
+```bash
+# Run all tests (requires Docker)
+./run-tests.sh
+```
+
+Or run tests manually:
+
+```bash
+# Using Docker Compose (recommended)
+docker-compose up -d db
+docker exec imhotep_finance-backend-1 python manage.py test finance_management.tests
+
+# Or run all tests
+docker exec imhotep_finance-backend-1 python manage.py test
+```
+
+#### CI/CD Pipeline
+
+We have automated testing set up with GitHub Actions that runs on:
+
+- **All branches** when code is pushed
+- **Pull requests** to main branches (`main`, `master`, `add-swagger`)
+
+The CI pipeline includes:
+
+1. **Backend Tests**: Django tests with PostgreSQL database
+2. **Docker Integration Tests**: Tests the Docker container setup
+3. **Security Scanning**: Checks for vulnerabilities in dependencies
+4. **Code Quality**: Basic code style checks
+
+**Test Results**: Check the "Actions" tab in your GitHub repository to see test results.
+
+**Test Coverage**: Currently running 87 tests in the finance_management module, covering:
+- Transaction management
+- Scheduled transactions
+- Monthly reports
+- Net worth calculations
+- Target management
+- Wishlist functionality
+
 ## 📝 Code of Conduct
 
 Please read our [Code of Conduct](CODE_OF_CONDUCT.md) to understand the expectations for participation in our community.

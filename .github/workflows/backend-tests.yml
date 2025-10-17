@@ -1,0 +1,154 @@
+name: Backend Tests
+
+on:
+  push:
+    branches: [ "*" ]  # Run on all branches
+  pull_request:
+    branches: [ "main", "master", "add-swagger" ]  # Run on PRs to main branches
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: imhotep_finance_db
+          POSTGRES_USER: imhotep_finance_user
+          POSTGRES_PASSWORD: imhotep_finance_password
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.13'
+
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y postgresql-client build-essential libpq-dev
+
+    - name: Install Python dependencies
+      run: |
+        cd backend/imhotep_finance
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Wait for PostgreSQL
+      run: |
+        until pg_isready -h localhost -p 5432 -U imhotep_finance_user -d imhotep_finance_db; do
+          echo "Waiting for PostgreSQL..."
+          sleep 2
+        done
+
+    - name: Run Django migrations
+      run: |
+        cd backend/imhotep_finance
+        python manage.py makemigrations accounts
+        python manage.py makemigrations finance_management
+        python manage.py makemigrations
+        python manage.py migrate
+
+    - name: Run finance_management tests
+      run: |
+        cd backend/imhotep_finance
+        python manage.py test finance_management.tests --verbosity=2 --settings=imhotep_finance.settings_test
+
+    - name: Run all Django tests
+      run: |
+        cd backend/imhotep_finance
+        python manage.py test --verbosity=2 --settings=imhotep_finance.settings_test
+
+    - name: Test results summary
+      if: always()
+      run: |
+        echo "Test run completed with result: ${{ job.status }}"
+        if [ "${{ job.status }}" == "success" ]; then
+          echo "✅ All tests passed successfully!"
+        else
+          echo "❌ Tests failed. Check the logs above."
+        fi
+
+  docker-integration-test:
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build backend Docker image
+      run: |
+        cd backend
+        docker build -t imhotep-finance-backend:test .
+
+    - name: Test Docker container with PostgreSQL
+      run: |
+        # Start PostgreSQL container
+        docker run -d --name test-postgres \
+          -e POSTGRES_DB=imhotep_finance_db \
+          -e POSTGRES_USER=imhotep_finance_user \
+          -e POSTGRES_PASSWORD=imhotep_finance_password \
+          -p 5432:5432 \
+          postgres:15
+
+        # Wait for PostgreSQL to be ready
+        echo "Waiting for PostgreSQL to be ready..."
+        sleep 15
+        
+        # Test connection
+        until pg_isready -h localhost -p 5432 -U imhotep_finance_user -d imhotep_finance_db; do
+          echo "Waiting for PostgreSQL..."
+          sleep 2
+        done
+
+        # Run backend container with test environment
+        docker run --rm --name test-backend \
+          --link test-postgres:db \
+          -e DATABASE_HOST=db \
+          -e DATABASE_NAME=imhotep_finance_db \
+          -e DATABASE_USER=imhotep_finance_user \
+          -e DATABASE_PASSWORD=imhotep_finance_password \
+          -e SECRET_KEY=django-insecure-test-key \
+          -e DEBUG=True \
+          -e MAIL_PASSWORD=test-password \
+          -e GOOGLE_CLIENT_ID=test-client-id \
+          -e GOOGLE_CLIENT_SECRET=test-client-secret \
+          imhotep-finance-backend:test \
+          python manage.py test finance_management.tests --verbosity=2
+
+        # Cleanup
+        docker stop test-postgres
+        docker rm test-postgres
+
+    - name: Docker test results
+      if: always()
+      run: |
+        echo "Docker integration test completed with result: ${{ job.status }}"
+        if [ "${{ job.status }}" == "success" ]; then
+          echo "✅ Docker integration tests passed!"
+        else
+          echo "❌ Docker integration tests failed."
+        fi
