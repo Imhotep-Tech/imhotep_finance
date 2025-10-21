@@ -1,5 +1,5 @@
 from django.db.models import Sum, Q
-from ..models import Transactions, NetWorth
+from transaction_management.models import Transactions, NetWorth
 
 def recalculate_networth(user):
     """Recalculate user's networth from all transactions."""

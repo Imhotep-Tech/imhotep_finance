@@ -4,13 +4,10 @@ from django.contrib.auth.hashers import make_password
 from django.utils import timezone
 
 from accounts.models import User
-from finance_management.models import (
-    Transactions,
-    NetWorth,
-    Wishlist,
-    ScheduledTransaction,
-    Target,
-)
+from transaction_management.models import Transactions, NetWorth
+from wishlist_management.models import Wishlist
+from scheduled_trans_management.models import ScheduledTransaction
+from target_management.models import Target
 
 
 class Command(BaseCommand):

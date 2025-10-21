@@ -3,11 +3,12 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework import status
 from accounts.models import User
-from finance_management.models import Transactions
+from transaction_management.models import Transactions
 from datetime import datetime, timedelta, date
+from .mock_utils import MockAPITestCase
 
 
-class GetMonthlyReportsViewTests(TestCase):
+class GetMonthlyReportsViewTests(MockAPITestCase):
 
     def setUp(self):
         self.client = APIClient()

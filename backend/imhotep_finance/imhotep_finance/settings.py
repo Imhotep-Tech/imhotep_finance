@@ -71,6 +71,11 @@ INSTALLED_APPS = [
     'drf_yasg',
     'accounts',
     'finance_management',
+    'scheduled_trans_management',
+    'target_management',
+    'transaction_management',
+    'user_reports',
+    'wishlist_management',
 ]
 
 # REST Framework configuration

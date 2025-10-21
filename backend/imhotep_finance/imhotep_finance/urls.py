@@ -40,6 +40,11 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('accounts.urls')),
     path('api/finance-management/', include('finance_management.urls')),
+    path('api/finance-management/', include('scheduled_trans_management.urls')),
+    path('api/finance-management/', include('target_management.urls')),
+    path('api/finance-management/', include('transaction_management.urls')),
+    path('api/finance-management/', include('user_reports.urls')),
+    path('api/finance-management/', include('wishlist_management.urls')),
     # Add Swagger UI and ReDoc URLs before the catch-all redirect
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),

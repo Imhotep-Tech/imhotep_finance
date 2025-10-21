@@ -3,7 +3,7 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework import status
 from accounts.models import User
-from finance_management.models import NetWorth, Transactions
+from transaction_management.models import NetWorth, Transactions
 from datetime import date
 
 class TransactionManagementTests(TestCase):
