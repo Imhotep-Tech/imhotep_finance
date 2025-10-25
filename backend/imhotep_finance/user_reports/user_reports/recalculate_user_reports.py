@@ -157,6 +157,6 @@ def recalculate_reports(request):
     except Exception as e:
         print(f"Recalculate reports error: {str(e)}")
         return Response(
-            {'error': f'Error in recalculating reports: {str(e)}'},
+            {'error': f'Error in recalculating reports'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )

@@ -89,7 +89,7 @@ def delete_transaction(request, trans_id):
 
     if not success:
         return Response(
-            {'message': 'Transaction deleted but report update failed', 'error': error},
+            {'message': 'Transaction deleted but report update failed'},
             status=status.HTTP_200_OK
         )
     
