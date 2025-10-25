@@ -237,28 +237,38 @@ const ShowWishlist = () => {
                           </button>
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap">
-                          <div className="flex gap-2">
-                            <button
-                              className="chef-button-secondary px-2 py-1 text-xs dark:text-gray-100 dark:bg-gray-800"
-                              onClick={() => handleEdit(w)}
-                              disabled={w.status === true}
-                            >
-                              Edit
-                            </button>
-                            <button
-                              className="chef-button-secondary px-2 py-1 text-xs text-red-600 dark:text-gray-100 dark:bg-gray-800"
-                              onClick={() => handleDelete(w)}
-                              disabled={!!deleteLoading[w.id] || w.status === true}
-                            >
-                              {deleteLoading[w.id] ? (
-                                <svg className="w-4 h-4 animate-spin text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <circle cx="12" cy="12" r="10" strokeWidth="4" stroke="currentColor" fill="none"/>
-                                </svg>
-                              ) : (
-                                'Delete'
-                              )}
-                            </button>
-                          </div>
+                          {w.status === true ? (
+                            <div className="flex flex-col gap-1">
+                              <span className="text-sm text-gray-600 dark:text-gray-400">
+                                Completed on:
+                              </span>
+                              <span className="text-sm font-medium text-green-700 dark:text-green-300">
+                                {w.transaction_date || 'N/A'}
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="flex gap-2">
+                              <button
+                                className="chef-button-secondary px-2 py-1 text-xs dark:text-gray-100 dark:bg-gray-800"
+                                onClick={() => handleEdit(w)}
+                              >
+                                Edit
+                              </button>
+                              <button
+                                className="chef-button-secondary px-2 py-1 text-xs text-red-600 dark:text-gray-100 dark:bg-gray-800"
+                                onClick={() => handleDelete(w)}
+                                disabled={!!deleteLoading[w.id]}
+                              >
+                                {deleteLoading[w.id] ? (
+                                  <svg className="w-4 h-4 animate-spin text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <circle cx="12" cy="12" r="10" strokeWidth="4" stroke="currentColor" fill="none"/>
+                                  </svg>
+                                ) : (
+                                  'Delete'
+                                )}
+                              </button>
+                            </div>
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -314,26 +324,38 @@ const ShowWishlist = () => {
                           </>
                         )}
                       </button>
-                      <button
-                        className="chef-button-secondary px-2 py-1 text-xs dark:text-gray-100 dark:bg-gray-800"
-                        onClick={() => handleEdit(w)}
-                        disabled={w.status === true}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        className="chef-button-secondary px-2 py-1 text-xs text-red-600 dark:text-gray-100 dark:bg-gray-800"
-                        onClick={() => handleDelete(w)}
-                        disabled={!!deleteLoading[w.id] || w.status === true}
-                      >
-                        {deleteLoading[w.id] ? (
-                          <svg className="w-4 h-4 animate-spin text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <circle cx="12" cy="12" r="10" strokeWidth="4" stroke="currentColor" fill="none"/>
-                          </svg>
-                        ) : (
-                          'Delete'
-                        )}
-                      </button>
+                      {w.status === true ? (
+                        <div className="flex flex-col gap-1 flex-1">
+                          <span className="text-xs text-gray-600 dark:text-gray-400">
+                            Completed on:
+                          </span>
+                          <span className="text-xs font-medium text-green-700 dark:text-green-300">
+                            {w.transaction_date || 'N/A'}
+                          </span>
+                        </div>
+                      ) : (
+                        <>
+                          <button
+                            className="chef-button-secondary px-2 py-1 text-xs dark:text-gray-100 dark:bg-gray-800"
+                            onClick={() => handleEdit(w)}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            className="chef-button-secondary px-2 py-1 text-xs text-red-600 dark:text-gray-100 dark:bg-gray-800"
+                            onClick={() => handleDelete(w)}
+                            disabled={!!deleteLoading[w.id]}
+                          >
+                            {deleteLoading[w.id] ? (
+                              <svg className="w-4 h-4 animate-spin text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="10" strokeWidth="4" stroke="currentColor" fill="none"/>
+                              </svg>
+                            ) : (
+                              'Delete'
+                            )}
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                 ))}

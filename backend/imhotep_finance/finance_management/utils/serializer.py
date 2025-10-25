@@ -13,11 +13,11 @@ def serialize_transaction(trans):
     }
 
 def serialize_wishlist(wish):
-
     return {
         "id": wish.id,
         "user_id": wish.user_id,
-        "transaction_id": getattr(wish.transaction, "id", None) if hasattr(wish, "transaction") and wish.transaction else None,
+        "transaction_id": wish.transaction.id if wish.transaction else None,
+        "transaction_date":  wish.transaction.date.isoformat() if wish.transaction and wish.transaction.date else None,
         "year": wish.year,
         "price": wish.price,
         "currency": wish.currency,
