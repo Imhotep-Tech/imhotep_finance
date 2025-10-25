@@ -16,7 +16,7 @@ def get_category(user, status="ANY"):
     categories = (
         qs.values('category') #group by category
         .annotate(frequency_of_category=Count('category')) #count frequency of each category
-        .order_by('-frequency_of_category')[:15] #order by frequency, limit to 15
+        .order_by('-frequency_of_category') #order by frequency
     )
 
     # Extract just the category names
