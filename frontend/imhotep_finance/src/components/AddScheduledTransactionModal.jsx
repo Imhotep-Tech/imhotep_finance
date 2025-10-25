@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import CurrencySelect from './CurrencySelect';
+import CategorySelect from './CategorySelect';
 
 const AddScheduledTransactionModal = ({
   onClose,
@@ -19,8 +20,6 @@ const AddScheduledTransactionModal = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [categoriesList, setCategoriesList] = useState([]);
-  const [categoriesLoading, setCategoriesLoading] = useState(false);
   const modalRef = useRef(null);
 
   // Close on Escape
@@ -33,20 +32,6 @@ const AddScheduledTransactionModal = ({
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      setCategoriesLoading(true);
-      try {
-        const res = await axios.get(`/api/finance-management/get-category/?status=${status}`);
-        setCategoriesList(res.data.category || []);
-      } catch {
-        setCategoriesList([]);
-      }
-      setCategoriesLoading(false);
-    };
-    fetchCategories();
-  }, [status]);
 
   useEffect(() => {
     if (editMode && initialValues) {
@@ -193,26 +178,11 @@ const AddScheduledTransactionModal = ({
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Category</label>
-              <div className="flex gap-2">
-                <select
-                  className="chef-input"
-                  value={category}
-                  onChange={e => setCategory(e.target.value)}
-                  disabled={categoriesLoading || categoriesList.length === 0}
-                >
-                  <option value="">Select category</option>
-                  {categoriesList.map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
-                </select>
-                <input
-                  type="text"
-                  value={category}
-                  onChange={e => setCategory(e.target.value)}
-                  className="chef-input"
-                  placeholder="Category (optional)"
-                />
-              </div>
+              <CategorySelect
+                value={category}
+                onChange={setCategory}
+                status={status}
+              />
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Description</label>
