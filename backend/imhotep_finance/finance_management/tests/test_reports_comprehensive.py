@@ -3,8 +3,11 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework import status
 from accounts.models import User
-from finance_management.models import Transactions, NetWorth, Reports, ScheduledTransaction, Wishlist
-from finance_management.user_reports.utils.save_user_report import save_user_report_with_transaction, save_user_report_with_transaction_update
+from transaction_management.models import Transactions, NetWorth
+from user_reports.models import Reports
+from scheduled_trans_management.models import ScheduledTransaction
+from wishlist_management.models import Wishlist
+from user_reports.user_reports.utils.save_user_report import save_user_report_with_transaction, save_user_report_with_transaction_update
 from datetime import date, datetime, timedelta
 import calendar
 import json

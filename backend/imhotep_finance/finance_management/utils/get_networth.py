@@ -1,5 +1,5 @@
 from .currencies import get_fav_currency, convert_to_fav_currency
-from ..models import NetWorth
+from transaction_management.models import NetWorth
 
 def get_networth(request):
     try:

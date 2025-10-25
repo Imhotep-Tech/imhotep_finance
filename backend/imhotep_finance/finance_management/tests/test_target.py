@@ -2,7 +2,8 @@ from django.urls import reverse
 from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
 from django.contrib.auth import get_user_model
-from finance_management.models import Target, Transactions
+from target_management.models import Target
+from transaction_management.models import Transactions
 from datetime import datetime, timedelta
 
 User = get_user_model()

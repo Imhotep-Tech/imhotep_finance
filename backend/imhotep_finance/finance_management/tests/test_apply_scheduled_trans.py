@@ -3,7 +3,8 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework import status
 from accounts.models import User
-from finance_management.models import ScheduledTransaction, NetWorth, Transactions
+from scheduled_trans_management.models import ScheduledTransaction
+from transaction_management.models import NetWorth, Transactions
 from unittest.mock import patch
 from datetime import date, timedelta
 from django.utils import timezone

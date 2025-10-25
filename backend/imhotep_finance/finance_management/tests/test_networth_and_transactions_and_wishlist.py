@@ -3,7 +3,8 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework import status
 from accounts.models import User
-from finance_management.models import NetWorth, Wishlist, Transactions
+from transaction_management.models import NetWorth, Transactions
+from wishlist_management.models import Wishlist
 from datetime import date
 
 class WishlistNetworthTransactionConnectionTests(TestCase):

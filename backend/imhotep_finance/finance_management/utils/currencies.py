@@ -3,7 +3,7 @@ import datetime
 import requests
 from django.contrib.auth import get_user_model
 from decouple import config
-from ..models import Transactions, NetWorth
+from transaction_management.models import Transactions, NetWorth
 
 def get_fav_currency(user):
     return getattr(user, 'favorite_currency', 'USD')

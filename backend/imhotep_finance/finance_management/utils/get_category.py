@@ -1,4 +1,4 @@
-from ..models import Transactions
+from transaction_management.models import Transactions
 from django.db.models import Count
 
 def get_category(user, status="ANY"):
