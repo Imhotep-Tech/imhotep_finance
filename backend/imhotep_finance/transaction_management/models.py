@@ -23,6 +23,7 @@ class Transactions(models.Model):
         return f"Transaction of {self.user.username} ({self.date.strftime('%Y-%m-%d')}) with amount {self.amount} and Status of {self.trans_status}"
     
     class Meta:
+        db_table = 'finance_management_transactions'
         verbose_name = "Transaction"
         verbose_name_plural = "Transactions"
         ordering = ['-created_at']
@@ -38,6 +39,7 @@ class NetWorth(models.Model):
         return f"NetWorth of {self.user.username} with currency {self.currency}"
     
     class Meta:
+        db_table = 'finance_management_networth'
         verbose_name = "NetWorth"
         verbose_name_plural = "NetWorth"
         ordering = ['-created_at']

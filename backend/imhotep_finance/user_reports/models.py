@@ -14,6 +14,7 @@ class Reports(models.Model):
         return f"Report of {self.user.username} - {self.month}/{self.year} ({self.created_at.strftime('%Y-%m-%d')})"
 
     class Meta:
+        db_table = 'finance_management_reports'
         verbose_name = "Report"
         verbose_name_plural = "Reports"
         ordering = ['-created_at']

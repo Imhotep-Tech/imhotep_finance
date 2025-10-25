@@ -36,6 +36,7 @@ class ScheduledTransaction(models.Model):
         return f"ScheduledTransaction of {self.user.username} ({self.date}) with amount {self.amount} and status {self.scheduled_trans_status}"
     
     class Meta:
+        db_table = 'finance_management_scheduledtransaction'
         verbose_name = "ScheduledTransaction"
         verbose_name_plural = "ScheduledTransactions"
         ordering = ['-created_at']

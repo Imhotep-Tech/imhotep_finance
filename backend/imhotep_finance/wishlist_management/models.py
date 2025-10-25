@@ -37,7 +37,7 @@ class Wishlist(models.Model):
         return f"Wishlist of {self.user.username} ({self.year}) with amount {self.price} and status {self.status} and currency {self.currency}"
     
     class Meta:
+        db_table = 'finance_management_wishlist'
         verbose_name = "Wishlist"
         verbose_name_plural = "Wishlists"
         ordering = ['-created_at']
-

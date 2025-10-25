@@ -14,6 +14,7 @@ class Target(models.Model):
         return f"Target of {self.user.username} - {self.month}/{self.year}: {self.score}/{self.target}"
 
     class Meta:
+        db_table = 'finance_management_targets'
         verbose_name = "Target"
         verbose_name_plural = "Targets"
         ordering = ['-created_at']
