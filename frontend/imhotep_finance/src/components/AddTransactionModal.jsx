@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import CurrencySelect from './CurrencySelect';
+import CategorySelect from './CategorySelect';
 
 const AddTransactionModal = ({
   onClose,
@@ -18,8 +19,6 @@ const AddTransactionModal = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [categoriesList, setCategoriesList] = useState([]);
-  const [categoriesLoading, setCategoriesLoading] = useState(false);
 
   // Fetch categories when status changes
   useEffect(() => {
@@ -167,26 +166,11 @@ const AddTransactionModal = ({
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Category</label>
-              <div className="flex gap-2">
-                <select
-                  className="chef-input"
-                  value={category}
-                  onChange={handleCategorySelect}
-                  disabled={categoriesLoading || categoriesList.length === 0}
-                >
-                  <option value="">Select category</option>
-                  {categoriesList.map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
-                </select>
-                <input
-                  type="text"
-                  value={category}
-                  onChange={e => setCategory(e.target.value)}
-                  className="chef-input"
-                  placeholder="Category (optional)"
-                />
-              </div>
+              <CategorySelect
+                value={category}
+                onChange={setCategory}
+                status={status}
+              />
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Description</label>
