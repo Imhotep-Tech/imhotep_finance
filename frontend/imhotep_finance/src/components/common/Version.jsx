@@ -79,11 +79,11 @@ const Version = () => {
             <div className="text-gray-700 dark:text-gray-300">Major Versions</div>
           </div>
           <div className="bg-white/90 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-6 text-center shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-shadow duration-200">
-            <div className="text-3xl font-bold text-teal-600 dark:text-teal-400 mb-2">60+</div>
+            <div className="text-3xl font-bold text-teal-600 dark:text-teal-400 mb-2">100+</div>
             <div className="text-gray-700 dark:text-gray-300">Features Added</div>
           </div>
           <div className="bg-white/90 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-6 text-center shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-shadow duration-200">
-            <div className="text-3xl font-bold text-teal-600 dark:text-teal-400 mb-2">14</div>
+            <div className="text-3xl font-bold text-teal-600 dark:text-teal-400 mb-2">17</div>
             <div className="text-gray-700 dark:text-gray-300">Months of Development</div>
           </div>
         </div>

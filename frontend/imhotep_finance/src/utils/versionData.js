@@ -1,8 +1,21 @@
 export const versionEntries = [
   {
+    version: '7.1.0',
+    date: 'October 25, 2025',
+    badge: { label: 'CURRENT', color: 'red' },
+    summary: 'Improvements Security and added new features',
+    bullets: [
+      'Added security enhancements',
+      'Fixed minor bugs and',
+      'Performance enhancements',
+      'Added filter transactions by category, transaction type, and search term',
+      'Added the date that the wishlist has been completed on',
+      'Improved the UI/UX of the reports page by combining the historical and monthly reports into one tab'
+    ]
+  },
+  {
     version: '7.0.4',
     date: 'October 9, 2025',
-    badge: { label: 'CURRENT', color: 'red' },
     summary: 'Improvements and added reports history',
     bullets: [
       'Added reports history page to view past reports',
@@ -44,6 +57,7 @@ export const versionEntries = [
     {
       version: '7.0.0',
       date: 'September 1, 2025',
+      badge: { label: 'MAJOR', color: 'yellow' },
       summary: 'Complete rebuild with Django backend and React + Tailwind frontend',
       bullets: [
         'API-first architecture for scalability & integrations',
@@ -69,6 +83,7 @@ export const versionEntries = [
     {
       version: '6.0.0',
       date: 'June 9, 2025',
+      badge: { label: 'MAJOR', color: 'yellow' },
       summary: 'Smart Features & Enhanced Analytics',
       bullets: [
         'Smart category suggestions based on your most frequent categories',
@@ -86,6 +101,7 @@ export const versionEntries = [
     {
       version: '5.0.0',
       date: 'January 28, 2025',
+      badge: { label: 'MAJOR', color: 'yellow' },
       summary: 'Speed & Security Revolution',
       bullets: [
         'Significantly improved application speed and performance',
@@ -189,6 +205,19 @@ export const versionEntries = [
         'Redesigned button styles and UI elements',
         'Comprehensive UI/UX bug fixes'
       ]
+    },
+    {
+      version: '1.0.0',
+      date: 'June 27, 2024',
+      badge: { label: 'LAUNCH', color: 'red' },
+      summary: 'Foundation Release',
+      bullets: [
+        'Personalized financial dashboard with net worth tracking',
+        'Wishlist management and goal prioritization',
+        'Comprehensive transaction tracking and categorization',
+        'Live currency conversion with real-time exchange rates',
+        'Secure user authentication and profile management',
+        'Responsive design for seamless cross-device experience'
+      ]
     }
   ];
-  
