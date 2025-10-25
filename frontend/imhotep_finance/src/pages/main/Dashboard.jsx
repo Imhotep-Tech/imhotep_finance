@@ -294,7 +294,7 @@ const Dashboard = () => {
                 </svg>
               </div>
               <h3 className="font-semibold text-gray-900 dark:text-gray-100">Reports</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">Charts & Totals</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">Monthly & Yearly</p>
             </div>
           </a>
           <a href="/profile"  className="metric-card rounded-xl p-6 hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">

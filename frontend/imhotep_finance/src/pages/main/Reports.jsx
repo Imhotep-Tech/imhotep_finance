@@ -8,17 +8,16 @@ import { Link } from 'react-router-dom';
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const Reports = () => {
-  const [reportType, setReportType] = useState('monthly'); // 'monthly', 'yearly', or 'historical'
-  const [data, setData] = useState(null);
+  const [reportType, setReportType] = useState('monthly'); // 'monthly' or 'yearly'
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [favoriteCurrency, setFavoriteCurrency] = useState(localStorage.getItem('favoriteCurrency') || 'USD');
   
-  // Historical reports state
+  // Monthly reports state
   const [historicalMonths, setHistoricalMonths] = useState([]);
-  const [selectedHistoricalMonth, setSelectedHistoricalMonth] = useState('');
-  const [historicalData, setHistoricalData] = useState(null);
-  const [historicalLoading, setHistoricalLoading] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState(''); // Will be set to current month
+  const [monthlyData, setMonthlyData] = useState(null);
+  const [monthlyLoading, setMonthlyLoading] = useState(false);
   const [recalculateLoading, setRecalculateLoading] = useState(false);
 
   // Yearly reports state
@@ -27,12 +26,29 @@ const Reports = () => {
   const [yearlyData, setYearlyData] = useState(null);
   const [yearlyLoading, setYearlyLoading] = useState(false);
 
-  // Fetch available historical months
+  // Fetch available historical months and set current month as default
   useEffect(() => {
     const fetchHistoricalMonths = async () => {
       try {
         const res = await axios.get('/api/finance-management/get-report-history-months/');
-        setHistoricalMonths(res.data.report_history_months || []);
+        const months = res.data.report_history_months || [];
+        setHistoricalMonths(months);
+        
+        // Set current month as default if available
+        const now = new Date();
+        const currentMonth = now.getMonth() + 1;
+        const currentYear = now.getFullYear();
+        const currentMonthKey = `${currentMonth}-${currentYear}`;
+        
+        // Check if current month exists in history
+        const currentExists = months.some(m => m.month === currentMonth && m.year === currentYear);
+        
+        if (currentExists) {
+          setSelectedMonth(currentMonthKey);
+        } else if (months.length > 0) {
+          // If current month doesn't exist, select the most recent one
+          setSelectedMonth(`${months[0].month}-${months[0].year}`);
+        }
       } catch (err) {
         console.warn('Failed to fetch historical months:', err);
       }
@@ -48,40 +64,51 @@ const Reports = () => {
         setAvailableYears(res.data.report_history_years || []);
       } catch (err) {
         console.warn('Failed to fetch available years:', err);
-        // Set current year as default if no years available
         setAvailableYears([new Date().getFullYear()]);
       }
     };
     fetchAvailableYears();
   }, []);
 
-  // Fetch historical report data when month is selected
+  // Fetch monthly report data when month is selected
   useEffect(() => {
-    if (selectedHistoricalMonth && reportType === 'historical') {
-      const fetchHistoricalData = async () => {
-        setHistoricalLoading(true);
+    if (selectedMonth && reportType === 'monthly') {
+      const fetchMonthlyData = async () => {
+        setMonthlyLoading(true);
+        setError('');
         try {
-          const [month, year] = selectedHistoricalMonth.split('-');
+          const [month, year] = selectedMonth.split('-');
           const res = await axios.get(`/api/finance-management/get-monthly-report-history/?month=${month}&year=${year}`);
-          setHistoricalData(res.data.report_data);
+          setMonthlyData(res.data.report_data);
+          
+          if (res.data.report_data?.favorite_currency && res.data.report_data.favorite_currency !== favoriteCurrency) {
+            setFavoriteCurrency(res.data.report_data.favorite_currency);
+            localStorage.setItem('favoriteCurrency', res.data.report_data.favorite_currency);
+          }
         } catch (err) {
-          setError(err.response?.data?.error || 'Failed to load historical report');
-          setHistoricalData(null);
+          setError(err.response?.data?.error || 'Failed to load monthly report');
+          setMonthlyData(null);
         }
-        setHistoricalLoading(false);
+        setMonthlyLoading(false);
       };
-      fetchHistoricalData();
+      fetchMonthlyData();
     }
-  }, [selectedHistoricalMonth, reportType]);
+  }, [selectedMonth, reportType, favoriteCurrency]);
 
   // Fetch yearly report data when year is selected
   useEffect(() => {
     if (selectedYear && reportType === 'yearly') {
       const fetchYearlyData = async () => {
         setYearlyLoading(true);
+        setError('');
         try {
           const res = await axios.get(`/api/finance-management/get-yearly-report/?year=${selectedYear}`);
           setYearlyData(res.data);
+          
+          if (res.data.favorite_currency && res.data.favorite_currency !== favoriteCurrency) {
+            setFavoriteCurrency(res.data.favorite_currency);
+            localStorage.setItem('favoriteCurrency', res.data.favorite_currency);
+          }
         } catch (err) {
           setError(err.response?.data?.error || 'Failed to load yearly report');
           setYearlyData(null);
@@ -90,33 +117,10 @@ const Reports = () => {
       };
       fetchYearlyData();
     }
-  }, [selectedYear, reportType]);
+  }, [selectedYear, reportType, favoriteCurrency]);
 
-  // Fetch report data based on type
+  // Fetch favorite currency if not in localStorage
   useEffect(() => {
-    const fetchData = async () => {
-      if (reportType === 'historical' || reportType === 'yearly') {
-        setLoading(false);
-        return;
-      }
-
-      setLoading(true);
-      setError('');
-      try {
-        const endpoint = '/api/finance-management/get-monthly-report/';
-        const res = await axios.get(endpoint);
-        setData(res.data);
-
-        if (res.data.favorite_currency && res.data.favorite_currency !== favoriteCurrency) {
-          setFavoriteCurrency(res.data.favorite_currency);
-          localStorage.setItem('favoriteCurrency', res.data.favorite_currency);
-        }
-      } catch (err) {
-        setError(err.response?.data?.error || `Failed to load ${reportType} reports`);
-      }
-      setLoading(false);
-    };
-
     if (!localStorage.getItem('favoriteCurrency')) {
       axios.get('/api/get-fav-currency/')
         .then(res => {
@@ -126,22 +130,21 @@ const Reports = () => {
         })
         .catch(err => console.warn('Failed to fetch favorite currency:', err));
     }
-
-    fetchData();
-  }, [reportType, favoriteCurrency]);
+    setLoading(false);
+  }, []);
 
   const getDisplayData = () => {
-    if (reportType === 'historical') {
-      return historicalData;
+    if (reportType === 'monthly') {
+      return monthlyData;
     } else if (reportType === 'yearly') {
       return yearlyData;
     }
-    return data;
+    return null;
   };
 
   const getCurrentLoading = () => {
-    if (reportType === 'historical') {
-      return historicalLoading;
+    if (reportType === 'monthly') {
+      return monthlyLoading;
     } else if (reportType === 'yearly') {
       return yearlyLoading;
     }
@@ -185,7 +188,6 @@ const Reports = () => {
     },
   };
 
-  // Recalculate all reports
   const handleRecalculateReports = async () => {
     if (!window.confirm('This will recalculate all monthly reports from your first to last transaction. This may take a moment. Continue?')) {
       return;
@@ -195,7 +197,6 @@ const Reports = () => {
     try {
       const response = await axios.post('/api/finance-management/recalculate-reports/');
       
-      // Show success message with details
       const summary = response.data.summary;
       let message = `Reports recalculated successfully!\n\n`;
       message += `📊 Total months processed: ${summary.total_months_processed}\n`;
@@ -210,10 +211,16 @@ const Reports = () => {
       
       alert(message);
       
-      // Refresh historical months after recalculation
       try {
         const res = await axios.get('/api/finance-management/get-report-history-months/');
-        setHistoricalMonths(res.data.report_history_months || []);
+        const months = res.data.report_history_months || [];
+        setHistoricalMonths(months);
+        
+        // Reset to current month after recalculation
+        const now = new Date();
+        const currentMonth = now.getMonth() + 1;
+        const currentYear = now.getFullYear();
+        setSelectedMonth(`${currentMonth}-${currentYear}`);
       } catch (err) {
         console.warn('Failed to refresh historical months:', err);
       }
@@ -229,7 +236,7 @@ const Reports = () => {
     setRecalculateLoading(false);
   };
 
-  if (getCurrentLoading()) {
+  if (getCurrentLoading() && !getDisplayData()) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[var(--bg)] text-[var(--text)] transition-colors">
         <div className="text-center">
@@ -240,7 +247,7 @@ const Reports = () => {
     );
   }
 
-  if (error) {
+  if (error && !getDisplayData()) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[var(--bg)] text-[var(--text)] transition-colors">
         <div className="text-center">
@@ -255,7 +262,13 @@ const Reports = () => {
 
   return (
     <div className="min-h-screen overflow-y-auto pb-8 bg-[var(--bg)] text-[var(--text)] transition-colors relative">
-      {/* ...existing decorative elements... */}
+      {/* Floating decorative elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-20 w-32 h-32 rounded-full filter blur-xl opacity-20 animate-float bg-[#366c6b] mix-blend-multiply dark:bg-emerald-600/40 dark:mix-blend-screen"></div>
+        <div className="absolute top-40 right-20 w-24 h-24 rounded-full filter blur-xl opacity-18 animate-float bg-[rgba(26,53,53,0.9)] dark:bg-teal-800/40" style={{animationDelay: '2s'}}></div>
+        <div className="absolute bottom-20 left-40 w-40 h-40 rounded-full filter blur-xl opacity-16 animate-float bg-[#2f7775] dark:bg-cyan-700/30 dark:mix-blend-screen" style={{animationDelay: '4s'}}></div>
+      </div>
+
       <div className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Header */}
         <div className="chef-card rounded-3xl p-8 shadow-2xl backdrop-blur-2xl">
@@ -264,9 +277,11 @@ const Reports = () => {
               <div>
                 <h1 className="text-3xl font-bold font-chef text-gray-800 dark:text-gray-100 mb-2">Financial Reports</h1>
                 <p className="text-lg text-gray-600 dark:text-gray-300 font-medium leading-relaxed mb-4">
-                  {reportType === 'historical' && selectedHistoricalMonth 
-                    ? `Breakdown for ${formatMonthYear(...selectedHistoricalMonth.split('-').map(Number))}`
-                    : `Breakdown for ${getDisplayData()?.current_month || 'Current Period'}`
+                  {reportType === 'monthly' && selectedMonth 
+                    ? `Breakdown for ${formatMonthYear(...selectedMonth.split('-').map(Number))}`
+                    : reportType === 'yearly' && selectedYear
+                    ? `Breakdown for ${selectedYear}`
+                    : 'Select a period to view reports'
                   }
                 </p>
               </div>
@@ -319,7 +334,7 @@ const Reports = () => {
                     : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'
                 }`}
               >
-                <span className="hidden sm:inline">📅 Current Monthly</span>
+                <span className="hidden sm:inline">📅 Monthly Reports</span>
                 <span className="sm:hidden">📅 Monthly</span>
               </button>
               
@@ -331,22 +346,31 @@ const Reports = () => {
                     : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'
                 }`}
               >
-                <span className="hidden sm:inline">📊 Current Yearly</span>
+                <span className="hidden sm:inline">📊 Yearly Reports</span>
                 <span className="sm:hidden">📊 Yearly</span>
               </button>
-              
-              <button
-                onClick={() => setReportType('historical')}
-                className={`flex-1 px-4 sm:px-6 py-3 rounded-xl font-semibold transition-all duration-300 text-sm sm:text-base ${
-                  reportType === 'historical'
-                    ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white shadow-lg'
-                    : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'
-                }`}
-              >
-                <span className="hidden sm:inline">📈 Historical</span>
-                <span className="sm:hidden">📈 History</span>
-              </button>
             </div>
+
+            {/* Monthly Month Selector */}
+            {reportType === 'monthly' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Select Month & Year
+                </label>
+                <select
+                  value={selectedMonth}
+                  onChange={(e) => setSelectedMonth(e.target.value)}
+                  className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-[#366c6b] focus:border-transparent text-gray-900 dark:text-gray-100"
+                >
+                  <option value="">Select a month...</option>
+                  {historicalMonths.map((item, index) => (
+                    <option key={index} value={`${item.month}-${item.year}`}>
+                      {formatMonthYear(item.month, item.year)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             {/* Yearly Year Selector */}
             {reportType === 'yearly' && (
@@ -367,50 +391,29 @@ const Reports = () => {
                 </select>
               </div>
             )}
-
-            {/* Historical Month Selector */}
-            {reportType === 'historical' && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Select Month & Year
-                </label>
-                <select
-                  value={selectedHistoricalMonth}
-                  onChange={(e) => setSelectedHistoricalMonth(e.target.value)}
-                  className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-[#366c6b] focus:border-transparent text-gray-900 dark:text-gray-100"
-                >
-                  <option value="">Select a month...</option>
-                  {historicalMonths.map((item, index) => (
-                    <option key={index} value={`${item.month}-${item.year}`}>
-                      {formatMonthYear(item.month, item.year)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
           </div>
         </div>
 
         {/* Content based on report type */}
-        {reportType === 'historical' && !selectedHistoricalMonth ? (
+        {reportType === 'monthly' && !selectedMonth ? (
           <div className="chef-card rounded-xl p-8 text-center">
             <div className="w-16 h-16 bg-[#eaf6f6] rounded-full flex items-center justify-center mx-auto mb-4">
               <svg className="w-8 h-8 text-[#366c6b]" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm0 16H5V8h14v11zm0-13H5V5h14v1z"/>
               </svg>
             </div>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Select a Historical Period</h2>
-            <p className="text-gray-600 dark:text-gray-300">Choose a month and year from the dropdown above to view historical reports.</p>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Select a Month</h2>
+            <p className="text-gray-600 dark:text-gray-300">Choose a month and year from the dropdown above to view monthly reports.</p>
           </div>
-        ) : reportType === 'yearly' && !selectedYear ? (
+        ) : !getDisplayData() ? (
           <div className="chef-card rounded-xl p-8 text-center">
             <div className="w-16 h-16 bg-[#eaf6f6] rounded-full flex items-center justify-center mx-auto mb-4">
               <svg className="w-8 h-8 text-[#366c6b]" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm0 16H5V8h14v11zm0-13H5V5h14v1z"/>
               </svg>
             </div>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Select a Year</h2>
-            <p className="text-gray-600 dark:text-gray-300">Choose a year from the dropdown above to view yearly reports.</p>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Loading Report</h2>
+            <p className="text-gray-600 dark:text-gray-300">Please wait while we fetch your report data...</p>
           </div>
         ) : (
           <>
