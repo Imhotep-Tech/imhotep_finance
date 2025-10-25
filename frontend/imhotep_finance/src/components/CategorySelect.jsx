@@ -32,9 +32,9 @@ const CategorySelect = ({ value, onChange, status, required = false, className =
   }, [search, filtered, value, onChange]);
 
   return (
-    <div className="flex gap-2">
+    <div className="flex flex-col sm:flex-row gap-2 w-full">
       <select
-        className={`chef-input ${className}`}
+        className={`chef-input flex-1 w-full ${className}`}
         value={filtered.includes(value) ? value : ''}
         onChange={e => {
           const selectedValue = e.target.value;
@@ -58,7 +58,7 @@ const CategorySelect = ({ value, onChange, status, required = false, className =
           setSearch(val);
           onChange?.(val);
         }}
-        className={`chef-input ${className}`}
+        className={`chef-input flex-1 w-full ${className}`}
         placeholder="Type to filter or add new"
         disabled={categoriesLoading}
       />

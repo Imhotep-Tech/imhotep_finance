@@ -30,7 +30,12 @@ def get_transaction(request):
         # Get date range from query params
         start_date = request.query_params.get('start_date')
         end_date = request.query_params.get('end_date')
-       
+
+        category = request.query_params.get('category', None)
+        trans_status = request.query_params.get('trans_status', None)
+
+        details_search = request.query_params.get('details_search', None)
+
         today = date.today()
         if not start_date:
             start_date = today.replace(day=1)
@@ -48,6 +53,16 @@ def get_transaction(request):
             date__gte=start_date,
             date__lte=end_date
         ).order_by('-date').all()
+
+        if category:
+            user_tans_qs = user_tans_qs.filter(category=category)
+
+        if trans_status:
+            if trans_status in ["Deposit","Withdraw", "deposit","withdraw"]:
+                user_tans_qs = user_tans_qs.filter(trans_status=trans_status)
+
+        if details_search:
+            user_tans_qs = user_tans_qs.filter(trans_details__icontains=details_search)
 
         paginator = Paginator(user_tans_qs, 20)
         page_num = request.GET.get('page', 1)

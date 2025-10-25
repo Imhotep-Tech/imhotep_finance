@@ -3,6 +3,7 @@ import axios from 'axios';
 import Footer from '../../components/common/Footer';
 import Pagination from '../../components/common/Pagination';
 import AddTransactionModal from '../../components/AddTransactionModal';
+import CategorySelect from '../../components/CategorySelect';
 
 const ShowTransactions = () => {
   const [transactions, setTransactions] = useState([]);
@@ -16,6 +17,11 @@ const ShowTransactions = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editModal, setEditModal] = useState({ open: false, transaction: null });
   const [recalculateNetworthLoading, setRecalculateNetworthLoading] = useState(false);
+  
+  // New filter states
+  const [categoryFilter, setCategoryFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [detailsSearch, setDetailsSearch] = useState('');
 
   // Fetch transactions
   useEffect(() => {
@@ -26,7 +32,11 @@ const ShowTransactions = () => {
         const params = {};
         if (startDate) params.start_date = startDate;
         if (endDate) params.end_date = endDate;
+        if (categoryFilter) params.category = categoryFilter;
+        if (statusFilter) params.trans_status = statusFilter;
+        if (detailsSearch) params.details_search = detailsSearch;
         params.page = page;
+        
         const res = await axios.get('/api/finance-management/transaction/get-transactions/', { params });
         setTransactions(res.data.transactions || []);
         setPagination(res.data.pagination || {});
@@ -39,15 +49,29 @@ const ShowTransactions = () => {
       setLoading(false);
     };
     fetchTransactions();
-  }, [startDate, endDate, page, showAddModal, editModal.open]);
+  }, [startDate, endDate, page, showAddModal, editModal.open, categoryFilter, statusFilter, detailsSearch]);
 
   const handleDateChange = (setter) => (e) => {
     setter(e.target.value);
     setPage(1);
   };
 
+  const handleFilterChange = (setter) => (value) => {
+    setter(value);
+    setPage(1);
+  };
+
   const handlePageChange = (newPage) => {
     setPage(newPage);
+  };
+
+  const handleClearFilters = () => {
+    setCategoryFilter('');
+    setStatusFilter('');
+    setDetailsSearch('');
+    setStartDate('');
+    setEndDate('');
+    setPage(1);
   };
 
   // Export transactions as CSV
@@ -282,32 +306,90 @@ const ShowTransactions = () => {
             </div>
           </div>
           
-          <div className="flex flex-wrap gap-4 items-center mt-6">
+          {/* Filters Section - Mobile First */}
+          <div className="space-y-4 mt-6">
+            {/* Date Range Filters */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">From Date</label>
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={handleDateChange(setStartDate)}
+                  className="chef-input w-full"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">To Date</label>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={handleDateChange(setEndDate)}
+                  className="chef-input w-full"
+                />
+              </div>
+            </div>
+
+            {/* Transaction Type Filter */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">From</label>
-              <input
-                type="date"
-                value={startDate}
-                onChange={handleDateChange(setStartDate)}
-                className="chef-input"
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Transaction Type</label>
+              <select
+                value={statusFilter}
+                onChange={(e) => handleFilterChange(setStatusFilter)(e.target.value)}
+                className="chef-input w-full"
+              >
+                <option value="">All Types</option>
+                <option value="deposit">Income</option>
+                <option value="withdraw">Expense</option>
+              </select>
+            </div>
+
+            {/* Category Filter */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Category</label>
+              <CategorySelect
+                value={categoryFilter}
+                onChange={handleFilterChange(setCategoryFilter)}
+                status={statusFilter || 'ANY'}
               />
             </div>
+
+            {/* Details Search */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">To</label>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Search Description</label>
               <input
-                type="date"
-                value={endDate}
-                onChange={handleDateChange(setEndDate)}
-                className="chef-input"
+                type="text"
+                value={detailsSearch}
+                onChange={(e) => handleFilterChange(setDetailsSearch)(e.target.value)}
+                className="chef-input w-full"
+                placeholder="Search in descriptions..."
               />
             </div>
-            <div className="text-sm text-gray-500 ml-2">
-              {dateRange.start_date && dateRange.end_date && (
-                <span>
-                  Showing: <b>{dateRange.start_date}</b> to <b>{dateRange.end_date}</b>
-                </span>
-              )}
-            </div>
+
+            {/* Clear Filters Button */}
+            {(categoryFilter || statusFilter || detailsSearch || startDate || endDate) && (
+              <div className="flex justify-end">
+                <button
+                  onClick={handleClearFilters}
+                  className="chef-button-secondary px-4 py-2 rounded-xl text-sm dark:text-gray-100 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <svg className="w-4 h-4 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  Clear Filters
+                </button>
+              </div>
+            )}
+
+            {/* Date Range Display */}
+            {dateRange.start_date && dateRange.end_date && (
+              <div className="text-sm text-gray-600 dark:text-gray-300 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <span className="font-medium">Showing: </span>
+                <span className="font-semibold">{dateRange.start_date}</span>
+                <span className="mx-2">to</span>
+                <span className="font-semibold">{dateRange.end_date}</span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -360,7 +442,7 @@ const ShowTransactions = () => {
                         <td className="px-4 py-2 whitespace-nowrap">
                           <div className="flex gap-2">
                             <button
-                              className="chef-button-secondary px-2 py-1 text-xs dark:text-gary-100 dark:bg-gray-800"
+                              className="chef-button-secondary px-2 py-1 text-xs dark:text-gray-100 dark:bg-gray-800"
                               onClick={() => handleEdit(tx)}
                             >
                               Edit
