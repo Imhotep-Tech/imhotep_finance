@@ -350,7 +350,7 @@ const ShowTransactions = () => {
               <CategorySelect
                 value={categoryFilter}
                 onChange={handleFilterChange(setCategoryFilter)}
-                status={statusFilter || 'deposit'}
+                status={statusFilter || 'ANY'}
               />
             </div>
 
