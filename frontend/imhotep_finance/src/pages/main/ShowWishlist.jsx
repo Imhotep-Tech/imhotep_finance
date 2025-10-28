@@ -82,6 +82,19 @@ const ShowWishlist = () => {
   // Status toggle handler (toggle both ways)
   const handleStatusToggle = async (wish) => {
     setActionError('');
+    
+    // Show warning when unmarking a completed wish
+    if (wish.status === true) {
+      const confirmMessage = 'Are you sure you want to mark this wish as not completed?\n\n' +
+        'This will:\n' +
+        '• Delete the associated transaction\n' +
+        '• Remove the transaction date\n' +
+        '• Update your networth\n\n' +
+        'Do you want to continue?';
+      
+      if (!window.confirm(confirmMessage)) return;
+    }
+    
     setStatusLoading(prev => ({ ...prev, [wish.id]: true }));
     try {
       await axios.post(`/api/finance-management/wishlist/update-wish-status/${wish.id}/`);
