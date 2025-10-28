@@ -5,14 +5,14 @@ from finance_management.utils.currencies import convert_to_fav_currency
 def calculate_user_report(start_date, end_date, user, request):
     """Calculate user spending report with category breakdowns, percentages, and totals."""
     if not user:
-        return [], [], [], [], 0.0, 0.0  # Return empty lists and zero totals if invalid
+        return [], [], 0.0, 0.0  # Return empty lists and zero totals if invalid
     
     try:
         # Get withdrawal transactions
         user_withdraw_on_range = list(
             Transactions.objects.filter(
                 user=user,
-                trans_status='withdraw',
+                trans_status__iexact='withdraw',
                 date__range=(start_date, end_date)
             ).values('amount', 'currency', 'category')
         )
@@ -21,7 +21,7 @@ def calculate_user_report(start_date, end_date, user, request):
         user_deposit_on_range = list(
             Transactions.objects.filter(
                 user=user,
-                trans_status='deposit',
+                trans_status__iexact='deposit',
                 date__range=(start_date, end_date)
             ).values('amount', 'currency', 'category')
         )
@@ -71,7 +71,7 @@ def calculate_user_report(start_date, end_date, user, request):
                 trans["converted_amount"] = 0
             total_deposit += trans["converted_amount"]
 
-        #concatenate Deposit transactions on the categories
+        # Concatenate Deposit transactions on the categories
         deposit_categories = {}
         for trans in user_deposit_on_range:
             category = trans["category"] or "Uncategorized"
@@ -98,6 +98,6 @@ def calculate_user_report(start_date, end_date, user, request):
 
         return user_withdraw_on_range, user_deposit_on_range, total_withdraw or 0.0, total_deposit or 0.0
         
-    except:
-        print(f"Error in calculate_user_report")  # Print error message for debugging
-        return [], [], [], [], 0.0, 0.0  # Return empty lists and zero totals on error
+    except Exception as e:
+        print(f"Error in calculate_user_report: {str(e)}")
+        return [], [], 0.0, 0.0  # Return empty lists and zero totals on error

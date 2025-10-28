@@ -90,22 +90,17 @@ def recalculate_reports(request):
                     "end_date": last_day.isoformat()
                 }
                 
-                # Save the report for this month
-                success, error = save_user_report(user, first_day, response_data)
+                # Save the report for this month and get status
+                success, result = save_user_report(user, first_day, response_data)
                 
                 if success:
-                    # Check if it was created or updated by checking if report existed
-                    from user_reports.models import Reports
-                    existing_report = Reports.objects.filter(
-                        user=user, 
-                        month=current_date.month, 
-                        year=current_date.year
-                    ).first()
-                    
-                    if existing_report:
-                        total_updated += 1
-                    else:
+                    # result now contains "created" or "updated"
+                    if result == "created":
                         total_created += 1
+                        status_text = 'created'
+                    else:
+                        total_updated += 1
+                        status_text = 'updated'
                     
                     processed_months.append({
                         'month': current_date.month,
@@ -114,16 +109,17 @@ def recalculate_reports(request):
                         'total_transactions': len(user_withdraw_on_range) + len(user_deposit_on_range),
                         'total_withdraw': float(total_withdraw) if total_withdraw else 0.0,
                         'total_deposit': float(total_deposit) if total_deposit else 0.0,
-                        'status': 'updated' if existing_report else 'created'
+                        'status': status_text
                     })
                     total_processed += 1
                 else:
                     errors.append({
                         'month': f"{month_name} {current_date.year}",
-                        'error': error
+                        'error': result
                     })
                 
             except Exception as month_error:
+                print(f"Error processing {calendar.month_name[current_date.month]} {current_date.year}: {str(month_error)}")
                 errors.append({
                     'month': f"{calendar.month_name[current_date.month]} {current_date.year}",
                     'error': str(month_error)
@@ -157,6 +153,6 @@ def recalculate_reports(request):
     except Exception as e:
         print(f"Recalculate reports error: {str(e)}")
         return Response(
-            {'error': f'Error in recalculating reports'},
+            {'error': f'Error in recalculating reports: {str(e)}'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
