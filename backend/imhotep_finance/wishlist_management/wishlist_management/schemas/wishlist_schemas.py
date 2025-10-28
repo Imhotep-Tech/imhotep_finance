@@ -47,6 +47,7 @@ wishlist_item_schema = openapi.Schema(
         "wish_details": openapi.Schema(type=openapi.TYPE_STRING),
         "link": openapi.Schema(type=openapi.TYPE_STRING),
         "status": openapi.Schema(type=openapi.TYPE_BOOLEAN),
+        "transaction_date": openapi.Schema(type=openapi.TYPE_STRING, format="date", description="Date when wish was fulfilled"),
         "created_at": openapi.Schema(type=openapi.TYPE_STRING, format="date-time"),
     },
 )

@@ -18,21 +18,19 @@ def save_user_report(user, start_date, response_data):
             # Always update the data to ensure it's current
             user_report.data = response_data
             user_report.save()
-            return True, None
+            return True, "updated"  # Changed to return status
+        else:
+            # Create and save a new report if it doesn't exist for this month and year
+            user_report = Reports.objects.create(
+                user=user,
+                month=start_date.month,
+                year=start_date.year,
+                data=response_data
+            )
+            user_report.save()
+            return True, "created"  # Changed to return status
     except Exception as e:
-        return False, str(e)
-    
-    # Create and save a new report if it doesn't exist for this month and year
-    try:
-        user_report = Reports.objects.create(
-            user=user,
-            month=start_date.month,
-            year=start_date.year,
-            data=response_data
-        )
-        user_report.save()
-        return True, None
-    except Exception as e:
+        print(f"Error in save_user_report: {str(e)}")
         return False, str(e)
 
 def save_user_report_with_transaction(request, user, start_date, transaction, parent_function=None):

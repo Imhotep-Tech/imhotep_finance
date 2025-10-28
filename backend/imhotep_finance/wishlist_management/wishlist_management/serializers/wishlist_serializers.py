@@ -47,6 +47,7 @@ class WishlistItemSerializer(serializers.Serializer):
     wish_details = serializers.CharField(allow_blank=True)
     link = serializers.CharField(allow_blank=True)
     status = serializers.BooleanField()
+    transaction_date = serializers.DateField(required=False, allow_null=True)
     created_at = serializers.DateTimeField()
 
 
