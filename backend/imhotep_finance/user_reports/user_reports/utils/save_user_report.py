@@ -51,7 +51,7 @@ def save_user_report_with_transaction(request, user, start_date, transaction, pa
         start_date = start_date.date()
     elif not isinstance(start_date, date):
         return False, "Invalid date type"
-    
+
     trans_status = transaction.trans_status.lower()
     amount = float(transaction.amount)
     category = transaction.category or "Uncategorized"

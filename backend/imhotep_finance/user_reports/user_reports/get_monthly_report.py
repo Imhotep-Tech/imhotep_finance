@@ -1,3 +1,5 @@
+#This file isn't used now but might be useful in the future
+#It was used in the past before adding the history saving mechanism
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated

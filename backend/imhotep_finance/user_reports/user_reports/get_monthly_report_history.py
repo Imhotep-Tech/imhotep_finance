@@ -95,10 +95,37 @@ def get_monthly_report_history(request):
                 {'error': 'No report found for the specified month and year'},
                 status=status.HTTP_404_NOT_FOUND
             )
-        
+
+        try:
+            if not user_report.data:
+                calculate_user_report(user, month, year)
+                save_user_report(user, month, year, user_report.data)
+        except Exception as e:
+            print(f"Error calculating/saving report: {str(e)}")
+            return Response(
+                {'error': 'Error in calculating or saving the report'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        # Sort the data by percentage in descending order
+        report_data = user_report.data
+        if isinstance(report_data, dict):
+            if 'user_deposit_on_range' in report_data and isinstance(report_data['user_deposit_on_range'], list):
+                report_data['user_deposit_on_range'] = sorted(
+                    report_data['user_deposit_on_range'],
+                    key=lambda x: x.get('percentage', 0),
+                    reverse=True
+                )
+            if 'user_withdraw_on_range' in report_data and isinstance(report_data['user_withdraw_on_range'], list):
+                report_data['user_withdraw_on_range'] = sorted(
+                    report_data['user_withdraw_on_range'],
+                    key=lambda x: x.get('percentage', 0),
+                    reverse=True
+                )
+
         # Return the stored report data
         response_data = {
-            "report_data": user_report.data,
+            "report_data": report_data,
             "month": user_report.month,
             "year": user_report.year,
             "created_at": user_report.created_at
