@@ -1,8 +1,28 @@
 from django.contrib import admin
+from django import forms
 from .models import Transactions, NetWorth
+
+class TransactionAdminForm(forms.ModelForm):
+    """Custom form to show both capitalized and lowercase options"""
+    trans_status = forms.ChoiceField(
+        choices=[
+            ('Deposit', '💰 Deposit'),
+            ('deposit', '💰 deposit'),
+            ('Withdraw', '💸 Withdraw'),
+            ('withdraw', '💸 withdraw'),
+        ],
+        required=True,
+        label='Transaction Status'
+    )
+    
+    class Meta:
+        model = Transactions
+        fields = '__all__'
 
 @admin.register(Transactions)
 class TransactionsAdmin(admin.ModelAdmin):
+    form = TransactionAdminForm  # Use custom form
+
     # Add search functionality
     search_fields = [
         'user__username', 

@@ -1,8 +1,28 @@
 from django.contrib import admin
+from django import forms
 from .models import ScheduledTransaction
+
+class ScheduledTransactionAdminForm(forms.ModelForm):
+    """Custom form to show both capitalized and lowercase options"""
+    scheduled_trans_status = forms.ChoiceField(
+        choices=[
+            ('Deposit', '💰 Deposit'),
+            ('deposit', '💰 deposit'),
+            ('Withdraw', '💸 Withdraw'),
+            ('withdraw', '💸 withdraw'),
+        ],
+        required=True,
+        label='Transaction Status'
+    )
+    
+    class Meta:
+        model = ScheduledTransaction
+        fields = '__all__'
 
 @admin.register(ScheduledTransaction)
 class ScheduledTransactionAdmin(admin.ModelAdmin):
+    form = ScheduledTransactionAdminForm  # Use custom form
+    
     search_fields = [
         'user__username', 
         'user__email', 
