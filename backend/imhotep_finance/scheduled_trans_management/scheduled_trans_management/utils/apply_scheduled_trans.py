@@ -2,8 +2,8 @@ import calendar
 from datetime import date, timedelta
 from django.db import transaction, models
 from django.db.models import F
-from ...models import ScheduledTransaction, Transactions, NetWorth
-from django.core.exceptions import ObjectDoesNotExist
+from ...models import ScheduledTransaction
+from transaction_management.transactions_management.utils.create_transaction import create_transaction
 
 def apply_scheduled_transactions_fn(user):
 	"""
@@ -13,8 +13,6 @@ def apply_scheduled_transactions_fn(user):
 	"""
 	now = date.today()
 	applied_count = 0
-	transactions_to_create = []
-	networth_updates = {}
 	errors_list = []
 
 	scheduled = ScheduledTransaction.objects.filter(user=user, status=True)
@@ -30,7 +28,9 @@ def apply_scheduled_transactions_fn(user):
 				if sched.scheduled_trans_status.lower() not in ["deposit", "withdraw"]:
 					errors_list.append(f"Invalid status '{sched.scheduled_trans_status}'")
 					continue
-
+				
+				#This part is vibe coded but it's working as expected
+				
 				# Determine the starting year/month:
 				# - If last_time_added exists, start from the month after it.
 				# - If no last_time_added, start from current month (but we'll skip if scheduled day is in the future).
@@ -56,39 +56,32 @@ def apply_scheduled_transactions_fn(user):
 					if trans_date > now:
 						break
 
-					# NetWorth check
-					try:
-						networth = NetWorth.objects.get(user=user, currency=sched.currency)
-					except ObjectDoesNotExist:
-						errors_list.append("No NetWorth")
-						break
-
-					if sched.scheduled_trans_status.lower() == "withdraw" and sched.amount > networth.total:
-						# Tests expect this exact phrase
-						errors_list.append("Insufficient funds")
-						break
-
-					# Queue transaction
-					transactions_to_create.append(
-						Transactions(
-							user=user,
-							date=trans_date,
-							amount=sched.amount,
-							currency=sched.currency,
-							trans_status=sched.scheduled_trans_status,
-							trans_details=sched.scheduled_trans_details,
-							category=sched.category,
-						)
+					# Use create_transaction to handle transaction creation and networth updates
+					result, error = create_transaction(
+						request=None,  # No request object needed for scheduled transactions
+						user=user,
+						date_param=trans_date,
+						amount=sched.amount,
+						currency=sched.currency,
+						trans_details=sched.scheduled_trans_details,
+						category=sched.category,
+						trans_status=sched.scheduled_trans_status
 					)
 
-					# NetWorth update
-					key = (user.id, sched.currency)
-					if key not in networth_updates:
-						networth_updates[key] = 0
-					if sched.scheduled_trans_status.lower() == "deposit":
-						networth_updates[key] += sched.amount
-					else:
-						networth_updates[key] -= sched.amount
+					# Handle errors from create_transaction
+					if error:
+						error_msg = error.get("message", "Unknown error")
+						# Map specific error messages to match test expectations
+						if "don't have enough" in error_msg.lower():
+							errors_list.append("Insufficient funds")
+						elif "networth" in error_msg.lower():
+							errors_list.append("No NetWorth")
+						else:
+							errors_list.append(error_msg)
+						break
+
+					# Successfully created transaction
+					applied_count += 1
 
 					# update last_time_added to this applied date
 					sched.last_time_added = trans_date
@@ -100,26 +93,15 @@ def apply_scheduled_transactions_fn(user):
 					else:
 						month += 1
 
-			# bulk create all transactions
-			if transactions_to_create:
-				applied_count = len(transactions_to_create)
-				Transactions.objects.bulk_create(transactions_to_create)
-
-			# update networth totals
-			for (user_id, currency), delta in networth_updates.items():
-				NetWorth.objects.filter(user_id=user_id, currency=currency).update(
-					total=F("total") + delta
-				)
-
 		return {
 			"success": True,
 			"applied_count": applied_count,
 			"errors": errors_list,
 		}
 
-	except Exception:
+	except Exception as e:
 		return {
 			"success": False,
 			"applied_count": 0,
-			"errors": [f"Unexpected server error"],
+			"errors": [f"Unexpected server error: {str(e)}"],
 		}
