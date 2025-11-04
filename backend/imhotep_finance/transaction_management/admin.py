@@ -33,7 +33,7 @@ class TransactionsAdmin(admin.ModelAdmin):
         'date', 
         'amount', 
         'currency', 
-        'trans_status', 
+        'get_trans_status_display_formatted',  # Changed from 'trans_status'
         'category', 
         'trans_details', 
         'created_at'
@@ -58,6 +58,18 @@ class TransactionsAdmin(admin.ModelAdmin):
         'category', 
         'trans_details'
     ]
+
+    def get_trans_status_display_formatted(self, obj):
+        """Format transaction status for display"""
+        status_map = {
+            'deposit': '💰 Deposit',
+            'withdraw': '💸 Withdraw',
+            'Deposit': '💰 Deposit',
+            'Withdraw': '💸 Withdraw',
+        }
+        return status_map.get(obj.trans_status, obj.trans_status.capitalize())
+    get_trans_status_display_formatted.short_description = 'Status'
+    get_trans_status_display_formatted.admin_order_field = 'trans_status'  # Allows column ordering
 
 @admin.register(NetWorth)
 class NetWorthAdmin(admin.ModelAdmin):

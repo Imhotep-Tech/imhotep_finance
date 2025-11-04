@@ -32,7 +32,7 @@ class ScheduledTransactionAdmin(admin.ModelAdmin):
         'date', 
         'amount', 
         'currency', 
-        'scheduled_trans_status', 
+        'get_scheduled_trans_status_display_formatted',  # Changed from 'scheduled_trans_status'
         'category', 
         'get_status_display',
         'last_time_added',
@@ -44,6 +44,18 @@ class ScheduledTransactionAdmin(admin.ModelAdmin):
     date_hierarchy = 'created_at'
     
     list_per_page = 50
+    
+    def get_scheduled_trans_status_display_formatted(self, obj):
+        """Format scheduled transaction status for display"""
+        status_map = {
+            'deposit': '💰 Deposit',
+            'withdraw': '💸 Withdraw',
+            'Deposit': '💰 Deposit',
+            'Withdraw': '💸 Withdraw',
+        }
+        return status_map.get(obj.scheduled_trans_status, obj.scheduled_trans_status.capitalize())
+    get_scheduled_trans_status_display_formatted.short_description = 'Type'
+    get_scheduled_trans_status_display_formatted.admin_order_field = 'scheduled_trans_status'
     
     def get_status_display(self, obj):
         return "✅ Active" if obj.status else "❌ Inactive"

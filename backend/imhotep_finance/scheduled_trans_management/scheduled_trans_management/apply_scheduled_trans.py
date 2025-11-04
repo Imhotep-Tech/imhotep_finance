@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from .schemas.scheduled_trans_schemas import apply_scheduled_trans_response
+from .utils import apply_scheduled_trans as apply_scheduled_fn
 
 @swagger_auto_schema(
     method='post',
@@ -22,14 +23,13 @@ def apply_scheduled_trans(request):
     """
     user = request.user
     try:
-        # import utils at call-time so tests can patch
-        from . import utils as _utils
 
-        result = _utils.apply_scheduled_transactions_fn(user)
+        result = apply_scheduled_fn.apply_scheduled_transactions_fn(user)
         return Response(result, status=status.HTTP_200_OK)
     
-    except Exception:
+    except Exception as e:
         # return exact error element expected by tests
+        print(f"Unexpected server error: {str(e)}")
         return Response(
             {
                 "success": False,

@@ -77,20 +77,21 @@ def get_score(request):
         user=user,
         date__gte=from_date,
         date__lt=to_date,
-        trans_status="deposit"
+        trans_status__in=['Deposit', 'deposit']
     ).values_list("amount", "currency")
 
     score_withdraw = Transactions.objects.filter(
         user=user,
         date__gte=from_date,
         date__lt=to_date,
-        trans_status="withdraw"
+        trans_status__in=['withdraw', 'Withdraw']
     ).values_list("amount", "currency")
 
     # Aggregate deposits
     currency_totals_deposit = {}
     for amount, currency in score_deposit:
         amount = float(amount)
+        
         currency_totals_deposit[currency] = currency_totals_deposit.get(currency, 0) + amount
     total_favorite_currency_deposit, _ = convert_to_fav_currency(request, currency_totals_deposit)
 
