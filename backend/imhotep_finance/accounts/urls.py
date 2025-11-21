@@ -39,4 +39,7 @@ urlpatterns = [
     #Favorite Currency
     path('get-fav-currency/', views.get_favorite_currency, name='get_fav_currency'),
     path('change-fav-currency/', views.change_favorite_currency, name='change_favorite_currency'),
+
+    #update Last Login
+    path('update-last-login/', views.update_user_last_login, name='update_last_login'),
 ]

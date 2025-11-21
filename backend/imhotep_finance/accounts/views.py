@@ -11,6 +11,7 @@ from .schemas.profile_schemas import (
     change_fav_currency_response,
     get_fav_currency_response,
 )
+from datetime import datetime
 
 @swagger_auto_schema(
     method='get',
@@ -82,4 +83,23 @@ def get_favorite_currency(request):
     return Response({
         'id': user.id,
         'favorite_currency': get_fav_currency(user)
+    })
+
+@swagger_auto_schema(
+    method='post',
+    operation_description='Update user last login time.',
+    responses={200: 'user last login updated successfully'}
+)
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def update_user_last_login(request):
+    """
+    Update current authenticated user's last login time
+    """
+    user = request.user
+    user.last_login = datetime.now()
+    user.save()
+    return Response({
+        'id': user.id,
+        'last_login': user.last_login
     })
