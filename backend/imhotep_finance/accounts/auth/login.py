@@ -103,3 +103,58 @@ def login_view(request):
             {'error': 'An error occurred during login. Please try again.'}, 
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+@swagger_auto_schema(
+    method='post',
+    operation_description='Login as a demo user (creates user if not exists).',
+    responses={200: login_response}
+)
+@api_view(['POST'])
+@permission_classes([AllowAny])
+@csrf_exempt
+def demo_login_view(request):
+    try:
+        username = 'demo'
+        email = 'demo@imhotep.tech'
+        password = 'demo_password_123!'
+
+        # Try to get the demo user
+        user = User.objects.filter(username=username).first()
+        
+        # If not exists, create it
+        if not user:
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=password,
+                email_verify=True,
+                first_name='Demo',
+                last_name='User'
+            )
+            user.save()
+        
+        # Ensure demo user is verified
+        if not user.email_verify:
+            user.email_verify = True
+            user.save()
+
+        # Generate tokens
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+            }
+        })
+
+    except Exception as e:
+        print(f"Demo login error: {str(e)}")
+        return Response(
+            {'error': 'An error occurred during demo login.'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

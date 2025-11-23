@@ -14,6 +14,7 @@ const Login = () => {
   const [info, setInfo] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [demoLoading, setDemoLoading] = useState(false);
   const [showPasswordState, setShowPasswordState] = useState(false);
   
   const { login } = useAuth();
@@ -107,6 +108,28 @@ const Login = () => {
     } catch (error) {
       setError('Failed to initiate Google login');
       setGoogleLoading(false);
+    }
+  };
+
+  const handleDemoLogin = async () => {
+    if (loading || googleLoading || demoLoading) return;
+    
+    try {
+      setDemoLoading(true);
+      setError('');
+      setInfo('');
+      
+      const response = await axios.post('/api/auth/login/demo/');
+      const { access, refresh, user: userData } = response.data;
+      
+      login({ access, refresh, user: userData });
+      navigate('/dashboard');
+      
+    } catch (error) {
+      console.error('Demo login failed:', error);
+      setError('Failed to login as demo user');
+    } finally {
+      setDemoLoading(false);
     }
   };
 
@@ -297,6 +320,21 @@ const Login = () => {
                 <path d="M21.35 11.1H12v2.8h5.35c-.25 1.45-1.62 4.1-5.35 4.1-3.23 0-5.86-2.67-5.86-5.99s2.63-5.99 5.86-5.99c1.84 0 3.08.78 3.79 1.45l1.96-1.88C16.3 3.99 14.35 3 12 3 6.98 3 2.94 7.03 2.94 12S6.98 21 12 21c6.69 0 7.86-5.86 7.86-8.39 0-.56-.05-.92-.11-1.51z" />
               </svg>
              {googleLoading ? 'Redirecting...' : 'Sign in with Google'}
+            </button>
+
+            {/* Demo Login */}
+            <button
+             onClick={handleDemoLogin}
+             disabled={loading || googleLoading || demoLoading}
+             className="chef-button flex items-center justify-center w-full mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
+             style={{ background: 'linear-gradient(90deg, #d97706 0%, #b45309 100%)' }}
+             type="button"
+           >
+             <svg className="w-5 h-5 mr-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+             {demoLoading ? 'Setting up Demo...' : 'Try Demo Account'}
             </button>
  
              {/* Footer */}

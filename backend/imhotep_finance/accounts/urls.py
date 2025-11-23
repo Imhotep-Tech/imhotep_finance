@@ -14,6 +14,7 @@ urlpatterns = [
 
     # Authentication endpoints
     path('auth/login/', login.login_view, name='login'),
+    path('auth/login/demo/', login.demo_login_view, name='demo_login'),
     path('auth/logout/', logout.logout_view, name='logout'),
     path('auth/register/', register.register_view, name='register'),
     path('auth/verify-email/', register.verify_email, name='verify_email'),
