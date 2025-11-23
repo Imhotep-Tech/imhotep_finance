@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { usePWA } from '../../hooks/usePWA';
 import Logo from '../../assets/Logo.jpeg';
+import TallyFeedbackLink from './TallyFeedbackLink';
 
 function Footer() {
   const { updateApp } = usePWA();
@@ -54,14 +55,7 @@ function Footer() {
           >
             Source
           </a>
-          <a
-            href="https://tally.so/r/nPKe1P"
-            className="hover:underline"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Feedback & Bugs
-          </a>
+          <TallyFeedbackLink />
           <Link to="/version-history" className="hover:underline">
             Version 7.1.0
           </Link>
