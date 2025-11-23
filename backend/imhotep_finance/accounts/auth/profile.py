@@ -55,6 +55,14 @@ def update_profile(request):
     """Update user profile information"""
     try:
         user = request.user
+
+        # Prevent demo user from updating profile
+        if user.username == 'demo':
+            return Response(
+                {'error': 'Demo user cannot update profile information.'}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+
         first_name = request.data.get('first_name', '').strip()
         last_name = request.data.get('last_name', '').strip()
         username = request.data.get('username', '').strip()
@@ -174,6 +182,14 @@ def change_password(request):
     """Change user password"""
     try:
         user = request.user
+
+        # Prevent demo user from changing password
+        if user.username == 'demo':
+            return Response(
+                {'error': 'Demo user cannot change password.'}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+
         current_password = request.data.get('current_password')
         new_password = request.data.get('new_password')
         confirm_password = request.data.get('confirm_password')

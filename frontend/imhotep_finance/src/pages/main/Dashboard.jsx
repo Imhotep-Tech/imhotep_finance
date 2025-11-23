@@ -19,78 +19,83 @@ const Dashboard = () => {
   const [initialType, setInitialType] = useState('deposit'); // new state
   const navigate = useNavigate();
 
-  // Fetch dashboard data
+  // Fetch networth data
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
+    const fetchNetworth = async () => {
       try {
-        // Handle each API call individually to prevent one failure from breaking everything
-        const apiCalls = [
-          axios.get('/api/finance-management/get-networth/').catch(err => {
-            if (err.response?.status === 404) {
-              return { data: { networth: '0', favorite_currency: '' } };
-            }
-            throw err;
-          }),
-          axios.get('/api/get-fav-currency/').catch(err => {
-            if (err.response?.status === 404) {
-              return { data: { favorite_currency: 'USD' } };
-            }
-            throw err;
-          }),
-          axios.get('/api/finance-management/target/get-score/').catch(err => {
-            if (err.response?.status === 404) {
-              return { data: { score_txt: null, score: null, target: null } };
-            }
-            throw err;
-          })
-        ];
-
-        const [networthRes, favRes, targetRes] = await Promise.allSettled(apiCalls);
-        
-        // Handle networth response
-        if (networthRes.status === 'fulfilled') {
-          setNetworth(networthRes.value.data.networth || '0');
-          setFavoriteCurrency(networthRes.value.data.favorite_currency || '');
+        const response = await axios.get('/api/finance-management/get-networth/');
+        setNetworth(response.data.networth || '0');
+        if (response.data.favorite_currency) {
+          setFavoriteCurrency(response.data.favorite_currency);
+        }
+      } catch (err) {
+        if (err.response?.status === 404) {
+          setNetworth('0');
         } else {
+          console.warn('Networth fetch error:', err);
           setNetworth('0');
         }
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchNetworth();
+  }, []);
 
-        // Handle favorite currency response (fallback if networth didn't provide it)
-        if (favRes.status === 'fulfilled' && !favoriteCurrency) {
-          setFavoriteCurrency(favRes.value.data.favorite_currency || 'USD');
-        }
-
-        // Handle target response
-        if (targetRes.status === 'fulfilled' && targetRes.value.data.score_txt) {
-          setScore(targetRes.value.data.score);
-          setScoreTxt(targetRes.value.data.score_txt);
-          setTarget(targetRes.value.data.target);
+  // Fetch favorite currency data
+  useEffect(() => {
+    const fetchFavoriteCurrency = async () => {
+      try {
+        const response = await axios.get('/api/get-fav-currency/');
+        setFavoriteCurrency(response.data.favorite_currency || 'USD');
+      } catch (err) {
+        if (err.response?.status === 404) {
+          setFavoriteCurrency('USD');
         } else {
+          console.warn('Favorite currency fetch error:', err);
+          setFavoriteCurrency('USD');
+        }
+      }
+    };
+    fetchFavoriteCurrency();
+  }, []);
+
+  // Fetch target score data
+  useEffect(() => {
+    const fetchTargetScore = async () => {
+      try {
+        const response = await axios.get('/api/finance-management/target/get-score/');
+        if (response.data.score_txt) {
+          setScore(response.data.score);
+          setScoreTxt(response.data.score_txt);
+          setTarget(response.data.target);
+        }
+      } catch (err) {
+        if (err.response?.status === 404) {
+          setScore(null);
+          setScoreTxt('');
+          setTarget('');
+        } else {
+          console.warn('Target score fetch error:', err);
           setScore(null);
           setScoreTxt('');
           setTarget('');
         }
-
-        // Set default currency if none was found
-        if (!favoriteCurrency && favRes.status === 'fulfilled') {
-          setFavoriteCurrency(favRes.value.data.favorite_currency || 'USD');
-        } else if (!favoriteCurrency) {
-          setFavoriteCurrency('USD');
-        }
-
-      } catch (err) {
-        console.warn('Dashboard data fetch error:', err);
-        // Set safe defaults if everything fails
-        setNetworth('0');
-        setFavoriteCurrency('USD');
-        setScore(null);
-        setScoreTxt('');
-        setTarget('');
       }
-      setLoading(false);
     };
-    fetchData();
+    fetchTargetScore();
+  }, []);
+
+  // Update last login timestamp when dashboard loads
+  useEffect(() => {
+    const updateLastLogin = async () => {
+      try {
+        await axios.post('/api/update-last-login/');
+      } catch (err) {
+        console.warn('Failed to update last login:', err);
+      }
+    };
+    updateLastLogin();
   }, []);
 
   // Call backend apply-scheduled-trans once per day (uses localStorage to avoid repeated calls)
