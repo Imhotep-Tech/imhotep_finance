@@ -9,3 +9,11 @@ def current_year():
 
 def current_day():
     return timezone.now().day
+
+class BaseExchangeRate(models.Model):
+    base_currency = models.CharField(max_length=10, default='USD', unique=True)
+    rates = models.JSONField(default=dict)  # {'EUR': 0.92, 'GBP': 0.73, ...}
+    last_updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Exchange rates for {self.base_currency} (updated: {self.last_updated})"
