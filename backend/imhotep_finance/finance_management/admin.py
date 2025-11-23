@@ -1,4 +1,11 @@
 from django.contrib import admin
+from .models import BaseExchangeRate
+
+@admin.register(BaseExchangeRate)
+class BaseExchangeRateAdmin(admin.ModelAdmin):
+    list_display = ('base_currency', 'last_updated')
+    readonly_fields = ('last_updated',)
+    fields = ('base_currency', 'rates', 'last_updated')
 
 # Register your models here.
 # Note: Models have been moved to their respective apps:
