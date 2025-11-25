@@ -52,7 +52,7 @@ def export_transactions_csv(request):
         
         # Write CSV data
         writer = csv.writer(response)
-        writer.writerow(['Date', 'Amount', 'Currency', 'Status', 'Category', 'Details'])  # CSV Header
+        writer.writerow(['date', 'amount', 'currency', 'trans_status', 'category', 'trans_details'])  # CSV Header
         for transaction in transactions:
             writer.writerow([
                 transaction.date,
