@@ -3,6 +3,7 @@ import axios from 'axios';
 import Footer from '../../components/common/Footer';
 import Pagination from '../../components/common/Pagination';
 import AddTransactionModal from '../../components/AddTransactionModal';
+import ImportTransactionsModal from '../../components/ImportTransactionsModal';
 import CategorySelect from '../../components/CategorySelect';
 
 const ShowTransactions = () => {
@@ -15,6 +16,7 @@ const ShowTransactions = () => {
   const [error, setError] = useState('');
   const [dateRange, setDateRange] = useState({});
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [editModal, setEditModal] = useState({ open: false, transaction: null });
   const [recalculateNetworthLoading, setRecalculateNetworthLoading] = useState(false);
   
@@ -49,7 +51,7 @@ const ShowTransactions = () => {
       setLoading(false);
     };
     fetchTransactions();
-  }, [startDate, endDate, page, showAddModal, editModal.open, categoryFilter, statusFilter, detailsSearch]);
+  }, [startDate, endDate, page, showAddModal, showImportModal, editModal.open, categoryFilter, statusFilter, detailsSearch]);
 
   const handleDateChange = (setter) => (e) => {
     setter(e.target.value);
@@ -254,8 +256,8 @@ const ShowTransactions = () => {
               </div>
             </div>
             
-            {/* Mobile-first button layout */}
-            <div className="flex flex-col sm:flex-row gap-3">
+            {/* Mobile-first button layout - Updated with Import button */}
+            <div className="flex flex-col sm:flex-row gap-3 flex-wrap">
               <button
                 className="chef-button bg-gradient-to-r from-[#4a7c7a] to-[#366c6b] text-white px-4 sm:px-6 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-sm sm:text-base"
                 onClick={handleExportCSV}
@@ -265,6 +267,17 @@ const ShowTransactions = () => {
                 </svg>
                 <span className="hidden sm:inline">Export CSV</span>
                 <span className="sm:hidden">Export</span>
+              </button>
+
+              <button
+                className="chef-button bg-gradient-to-r from-[#5a6c7a] to-[#3a4c5a] text-white px-4 sm:px-6 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-sm sm:text-base"
+                onClick={() => setShowImportModal(true)}
+              >
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span className="hidden sm:inline">Import CSV</span>
+                <span className="sm:hidden">Import</span>
               </button>
               
               <button
@@ -546,6 +559,15 @@ const ShowTransactions = () => {
           onSuccess={() => setShowAddModal(false)}
         />
       )}
+      
+      {/* Import Transactions Modal */}
+      {showImportModal && (
+        <ImportTransactionsModal
+          onClose={() => setShowImportModal(false)}
+          onSuccess={() => setShowImportModal(false)}
+        />
+      )}
+      
       {/* Edit Transaction Modal */}
       {editModal.open && (
         <AddTransactionModal
