@@ -134,3 +134,20 @@ recalculate_networth_response = openapi.Schema(
         "error": openapi.Schema(type=openapi.TYPE_STRING),
     },
 )
+
+# Import CSV response
+import_csv_response = openapi.Schema(
+    type=openapi.TYPE_OBJECT,
+    properties={
+        "success": openapi.Schema(type=openapi.TYPE_BOOLEAN, example=True),
+        "created_count": openapi.Schema(type=openapi.TYPE_INTEGER, example=15),
+        "total_rows": openapi.Schema(type=openapi.TYPE_INTEGER, example=20),
+        "message": openapi.Schema(type=openapi.TYPE_STRING, example="Successfully imported 15 transaction(s)."),
+        "errors": openapi.Schema(
+            type=openapi.TYPE_ARRAY,
+            items=openapi.Schema(type=openapi.TYPE_STRING),
+            example=["Row 5: Missing date.", "Row 12: Invalid amount 'abc'."]
+        ),
+        "error": openapi.Schema(type=openapi.TYPE_STRING, example="Invalid file format."),
+    },
+)
