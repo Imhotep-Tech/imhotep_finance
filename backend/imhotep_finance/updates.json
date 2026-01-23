@@ -1,0 +1,50 @@
+{
+  "version": "7.2.0",
+  "title": "🎉 Exciting New Features Just Landed!",
+  "subject": "🚀 Imhotep Finance v7.2.0 - Enhanced Security & Powerful New Tools!",
+  "updates": [
+    {
+      "icon": "📊",
+      "title": "Enhanced Monthly Reports",
+      "description": "Experience smarter report calculations with improved sorting logic. Your financial insights are now more accurate and easier to understand than ever!"
+    },
+    {
+      "icon": "⚡",
+      "title": "Quick Demo Access",
+      "description": "Try Imhotep Finance instantly with our new demo login feature. No signup needed to explore all the amazing features!"
+    },
+    {
+      "icon": "📁",
+      "title": "CSV Import Power",
+      "description": "Bulk import your transactions with our new CSV upload feature. Complete with smart validation and detailed error handling to ensure your data is perfect!"
+    },
+    {
+      "icon": "💡",
+      "title": "Smart Wishlist Management",
+      "description": "Added confirmation prompts when unmarking completed wishes. Never accidentally lose track of your achieved goals!"
+    },
+    {
+      "icon": "💱",
+      "title": "Optimized Currency Exchange",
+      "description": "Lightning-fast currency conversions with our enhanced caching system. Get real-time exchange rates without the wait!"
+    },
+    {
+      "icon": "🔔",
+      "title": "Better Notifications",
+      "description": "Improved error handling and user notifications throughout the app. Stay informed with clearer, more helpful messages!"
+    },
+    {
+      "icon": "💬",
+      "title": "Feedback Made Easy",
+      "description": "New Tally feedback integration lets you share your thoughts and help us make Imhotep Finance even better!"
+    },
+    {
+      "icon": "🔒",
+      "title": "Security Enhancements",
+      "description": "Your financial data is more secure than ever with our latest security improvements and optimizations!"
+    }
+  ],
+  "cta_text": "🎯 Explore New Features Now",
+  "cta_url": "https://imhotep-finance.vercel.app/dashboard",
+  "footer_note": "We've been working hard to make your financial management easier and more powerful. Thank you for being part of the Imhotep Finance community! 💚"
+}

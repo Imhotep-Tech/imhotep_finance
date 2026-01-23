@@ -2,7 +2,7 @@ from django.db.models import Sum, Count, Case, When, Value, TextField  # Added T
 from transaction_management.models import Transactions
 from finance_management.utils.currencies import convert_to_fav_currency
 
-def calculate_user_report(start_date, end_date, user, request):
+def calculate_user_report(start_date, end_date, user):
     """Calculate user spending report with category breakdowns, percentages, and totals."""
     if not user:
         return [], [], 0.0, 0.0  # Return empty lists and zero totals if invalid
@@ -33,7 +33,7 @@ def calculate_user_report(start_date, end_date, user, request):
             currency = trans["currency"]
             amount = float(trans["amount"])
             withdraw_totals[currency] = withdraw_totals.get(currency, 0) + amount
-            total_withdraw_trans, _ = convert_to_fav_currency(request, withdraw_totals) if withdraw_totals else (0.0, user.favorite_currency or 'USD')
+            total_withdraw_trans, _ = convert_to_fav_currency(user, withdraw_totals) if withdraw_totals else (0.0, user.favorite_currency or 'USD')
     
             if withdraw_totals.get(currency, 0) > 0:
                 ratio = amount / withdraw_totals[currency]
@@ -62,7 +62,7 @@ def calculate_user_report(start_date, end_date, user, request):
             currency = trans["currency"]
             amount = float(trans["amount"])
             deposit_totals[currency] = deposit_totals.get(currency, 0) + amount
-            total_deposit_trans, _ = convert_to_fav_currency(request, deposit_totals) if deposit_totals else (0.0, user.favorite_currency or 'USD')
+            total_deposit_trans, _ = convert_to_fav_currency(user, deposit_totals) if deposit_totals else (0.0, user.favorite_currency or 'USD')
 
             if deposit_totals.get(currency, 0) > 0:
                 ratio = amount / deposit_totals[currency]

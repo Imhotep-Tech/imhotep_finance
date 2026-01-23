@@ -33,7 +33,7 @@ def save_user_report(user, start_date, response_data):
         print(f"Error in save_user_report: {str(e)}")
         return False, str(e)
 
-def save_user_report_with_transaction(request, user, start_date, transaction, parent_function=None):
+def save_user_report_with_transaction(user, start_date, transaction, parent_function=None):
     '''This will be used for updating the report when a new transaction is created or deleted
         This function will be called when created only one new transaction
     '''
@@ -59,7 +59,7 @@ def save_user_report_with_transaction(request, user, start_date, transaction, pa
     try:
         if user.favorite_currency and user.favorite_currency != transaction.currency:
             amount_not_fav_currency = {currency: amount}
-            converted_amount, _ = convert_to_fav_currency(request, amount_not_fav_currency)
+            converted_amount, _ = convert_to_fav_currency(user, amount_not_fav_currency)
             if converted_amount is not None:
                 amount = converted_amount
     except Exception as e:
@@ -184,7 +184,7 @@ def save_user_report_with_transaction(request, user, start_date, transaction, pa
     
     return True, None
 
-def save_user_report_with_transaction_update(request, user, old_transaction, new_transaction):
+def save_user_report_with_transaction_update(user, old_transaction, new_transaction):
     '''This will be used for updating the report when a transaction is edited 
         This function handles changes in date, category, amount, and currency
     '''
@@ -213,14 +213,14 @@ def save_user_report_with_transaction_update(request, user, old_transaction, new
     
     # Always remove the old transaction first
     success, error = save_user_report_with_transaction(
-        request, user, old_date, old_transaction, parent_function="delete_transaction"
+        user, old_date, old_transaction, parent_function="delete_transaction"
     )
     if not success:
         return False, f"Failed to remove old transaction: {error}"
     
     # Then add the new transaction
     success, error = save_user_report_with_transaction(
-        request, user, new_date, new_transaction
+        user, new_date, new_transaction
     )
     if not success:
         return False, f"Failed to add new transaction: {error}"

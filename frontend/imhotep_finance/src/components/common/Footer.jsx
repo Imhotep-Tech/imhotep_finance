@@ -57,7 +57,7 @@ function Footer() {
           </a>
           <TallyFeedbackLink />
           <Link to="/version-history" className="hover:underline">
-            Version 7.1.0
+            Version 7.2.0
           </Link>
         </div>
 
@@ -71,7 +71,7 @@ function Footer() {
           </button>
         </div>
 
-        <p className="text-white/60 text-xs mt-4">&copy; 2025 Imhotep Finance</p>
+        <p className="text-white/60 text-xs mt-4">&copy; 2026 Imhotep Finance</p>
       </div>
     </footer>
   );

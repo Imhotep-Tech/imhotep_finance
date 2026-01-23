@@ -18,7 +18,7 @@ def get_networth(request):
         if not amounts_not_fav_currency:
             return 0.0
             
-        total_favorite_currency, _ = convert_to_fav_currency(request, amounts_not_fav_currency)
+        total_favorite_currency, _ = convert_to_fav_currency(request.user, amounts_not_fav_currency)
         
         # Handle None return from convert_to_fav_currency
         if total_favorite_currency is None:

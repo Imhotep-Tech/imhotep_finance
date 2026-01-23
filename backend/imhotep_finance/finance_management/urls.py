@@ -1,25 +1,16 @@
 from django.urls import path, include
-from django.shortcuts import redirect
-from . import views
+from .apis import GetNetworthApi, GetNetworthDetailsApi, GetCategoryApi
 
 urlpatterns = [
-    # Core finance management endpoints (still in this app)
-    path('get-networth/', views.get_user_networth, name='get_networth'),
-    path('get-networth-details/', views.get_user_netWorth_details, name='get_netWorth_details'),
-    path('get-category/', views.get_user_category, name='get_category'),
+    # Core finance management endpoints - New DDD class-based APIs
+    path('get-networth/', GetNetworthApi.as_view(), name='get_networth'),
+    path('get-networth-details/', GetNetworthDetailsApi.as_view(), name='get_netWorth_details'),
+    path('get-category/', GetCategoryApi.as_view(), name='get_category'),
     
-    # Redirect old transaction endpoints to new app
+    # Sub-app endpoints
     path('transaction/', include('transaction_management.urls')),
-    
-    # Redirect old scheduled transaction endpoints to new app
-    path('scheduled-trans/', include('scheduled_trans_management.urls')),
-    
-    # Redirect old target endpoints to new app
-    path('target/', include('target_management.urls')),
-    
-    # Redirect old report endpoints to new app
+    path('', include('scheduled_trans_management.urls')),
+    path('', include('target_management.urls')),
     path('reports/', include('user_reports.urls')),
-    
-    # Redirect old wishlist endpoints to new app
-    path('wishlist/', include('wishlist_management.urls')),
+    path('', include('wishlist_management.urls')),
 ]

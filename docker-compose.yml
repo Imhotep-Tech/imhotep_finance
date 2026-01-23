@@ -1,18 +1,16 @@
-version: '3.8'
-
 services:
   db:
     image: postgres:15
     environment:
-      POSTGRES_DB: imhotep_finance_db
-      POSTGRES_USER: imhotep_finance_user
-      POSTGRES_PASSWORD: imhotep_finance_password
+      POSTGRES_DB: ${POSTGRES_DB:-imhotep_finance_db}
+      POSTGRES_USER: ${POSTGRES_USER:-imhotep_finance_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-imhotep_finance_password}
     volumes:
       - postgres_data:/var/lib/postgresql/data:Z
     ports:
       - "5433:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U imhotep_finance_user -d imhotep_finance_db"]
+      test: ["CMD-SHELL", "pg_isready || exit 1"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -34,6 +32,12 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 8000 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
     security_opt:
       - seccomp=unconfined
       - label=disable

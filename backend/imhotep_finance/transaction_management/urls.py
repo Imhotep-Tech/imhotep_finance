@@ -1,13 +1,20 @@
 from django.urls import path
-from .transactions_management import add_transaction, get_tranaction, update_transaction, delete_transaction, export_transactions_csv, recalculate_networth_endpoint, import_csv
+from .apis import (
+    TransactionCreateApi,
+    TransactionListApi,
+    TransactionUpdateApi,
+    TransactionDeleteApi,
+    TransactionExportCSVApi,
+    TransactionImportCSVApi,
+    RecalculateNetworthApi
+)
 
 urlpatterns = [
-     #trans management
-    path('transaction/add-transactions/', add_transaction.add_transactions, name='add_transactions'),
-    path('transaction/get-transactions/', get_tranaction.get_transaction, name='get_transaction'),
-    path('transaction/update-transactions/<int:trans_id>/', update_transaction.update_transactions, name='update_transaction'),
-    path('transaction/delete-transactions/<int:trans_id>/', delete_transaction.delete_transaction, name='delete_transaction'),
-    path('transaction/export-csv/', export_transactions_csv.export_transactions_csv, name='export_transactions_csv'),
-    path('transaction/import-csv/', import_csv.import_transactions_csv, name='import_transactions_csv'),
-    path('recalculate-networth/', recalculate_networth_endpoint.recalculate_networth_endpoint, name='recalculate_networth'),
+    path('transaction/add-transactions/', TransactionCreateApi.as_view(), name='add_transactions'),
+    path('transaction/get-transactions/', TransactionListApi.as_view(), name='get_transaction'),
+    path('transaction/update-transactions/<int:transaction_id>/', TransactionUpdateApi.as_view(), name='update_transaction'),
+    path('transaction/delete-transactions/<int:transaction_id>/', TransactionDeleteApi.as_view(), name='delete_transaction'),
+    path('transaction/export-csv/', TransactionExportCSVApi.as_view(), name='export_transactions_csv'),
+    path('transaction/import-csv/', TransactionImportCSVApi.as_view(), name='import_transactions_csv'),
+    path('recalculate-networth/', RecalculateNetworthApi.as_view(), name='recalculate_networth'),
 ]

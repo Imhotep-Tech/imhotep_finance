@@ -2,6 +2,7 @@
 
 [![Project Status: Active](https://img.shields.io/badge/Project%20Status-Active-green.svg)](https://github.com/Imhotep-Tech/imhotep_finance)
 [![License](https://img.shields.io/badge/License-Dual-blue.svg)](LICENSE)
+[![Django CI/CD](https://github.com/Imhotep-Tech/imhotep_finance/actions/workflows/django-ci.yml/badge.svg)](https://github.com/Imhotep-Tech/imhotep_finance/actions/workflows/django-ci.yml)
 
 Take control of your finances with Imhotep Financial Manager – a powerful, open-source personal finance app built with Django and React. Track transactions, manage budgets, create wishlists, set savings goals, and automate recurring expenses effortlessly. Perfect for individuals seeking a secure, user-friendly way to monitor spending, analyze patterns, and achieve financial freedom.
 
