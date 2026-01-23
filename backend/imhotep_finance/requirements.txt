@@ -8,4 +8,4 @@ psycopg[binary]==3.2.9
 requests==2.32.4
 setuptools
 wheel
-drf_yasg==1.21.11
+drf_spectacular
