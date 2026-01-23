@@ -113,3 +113,62 @@ class TransactionUpdateResponseSerializer(serializers.Serializer):
         decimal_places=2,
         help_text="Updated total networth across all currencies"
     )
+
+class TransactionFilterSerializer(serializers.Serializer):
+    start_date = serializers.DateField(
+        required=False,
+        allow_null=True,
+        help_text="Start date for filtering (YYYY-MM-DD). Defaults to first day of current month."
+    )
+    end_date = serializers.DateField(
+        required=False,
+        allow_null=True,
+        help_text="End date for filtering (YYYY-MM-DD). Defaults to last day of current month."
+    )
+    category = serializers.CharField(
+        required=False,
+        allow_null=True,
+        allow_blank=True,
+        help_text="Filter by category"
+    )
+    trans_status = serializers.ChoiceField(
+        choices=[
+            ('Deposit', 'Deposit'),
+            ('Withdraw', 'Withdraw'),
+            ('deposit', 'deposit'),
+            ('withdraw', 'withdraw'),
+        ],
+        required=False,
+        allow_null=True,
+        help_text="Filter by transaction status"
+    )
+    details_search = serializers.CharField(
+        required=False,
+        allow_null=True,
+        allow_blank=True,
+        help_text="Search in transaction details"
+    )
+    page = serializers.IntegerField(
+        required=False,
+        default=1,
+        min_value=1,
+        help_text="Page number for pagination"
+    )
+
+
+class TransactionOutputSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    user_id = serializers.IntegerField()
+    date = serializers.DateField()
+    amount = serializers.DecimalField(max_digits=10, decimal_places=2)
+    currency = serializers.CharField()
+    trans_status = serializers.CharField()
+    trans_details = serializers.CharField(allow_null=True)
+    category = serializers.CharField(allow_null=True)
+    created_at = serializers.DateTimeField()
+
+
+class TransactionListResponseSerializer(serializers.Serializer):
+    transactions = TransactionOutputSerializer(many=True)
+    pagination = serializers.DictField()
+    date_range = serializers.DictField()
