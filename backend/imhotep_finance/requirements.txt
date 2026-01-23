@@ -9,3 +9,4 @@ requests==2.32.4
 setuptools
 wheel
 drf_spectacular
+drf_yasg

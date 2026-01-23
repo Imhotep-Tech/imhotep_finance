@@ -4,7 +4,7 @@ from transaction_management.services import (
     delete_transaction, 
     update_transaction, 
     bulk_import_transactions,
-    parse_csv_transactions
+    parse_csv_transactions,
 )
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -24,11 +24,11 @@ from .serializers import (
 from transaction_management.selectors import get_transactions_for_user
 from finance_management.utils.serializer import serialize_transaction
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 import csv
 from finance_management.utils.get_networth import get_networth
 from rest_framework.parsers import MultiPartParser, FormParser
-from io import TextIOWrapper
+from finance_management.utils.recalculate_networth import recalculate_networth
 
 class TransactionCreateApi(APIView):
     permission_classes = [IsAuthenticated]
@@ -44,7 +44,6 @@ class TransactionCreateApi(APIView):
             
             transaction = create_transaction(
                 user=request.user,
-                request=request,
                 amount=data['amount'],
                 currency=data['currency'],
                 trans_status=data['trans_status'],
@@ -82,7 +81,6 @@ class TransactionDeleteApi(APIView):
             delete_transaction(
                 user=request.user,
                 transaction_id=transaction_id,
-                request=request
             )
             
             # Get updated networth
@@ -97,7 +95,12 @@ class TransactionDeleteApi(APIView):
                 "message": "Transaction deleted successfully",
                 "networth": networth
             }, status=status.HTTP_200_OK)
-            
+        
+        except Http404:
+            return Response(
+                {"error": "Transaction not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
         except ValidationError as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
@@ -149,7 +152,12 @@ class TransactionUpdateApi(APIView):
                 "success": True,
                 "networth": networth
             }, status=status.HTTP_200_OK)
-            
+        
+        except Http404:
+            return Response(
+                {"error": "Transaction not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
         except ValidationError as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
@@ -333,5 +341,49 @@ class TransactionImportCSVApi(APIView):
             print(f"Error importing transactions: {str(e)}")
             return Response(
                 {'error': 'An error occurred while importing transactions'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        
+class RecalculateNetworthApi(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    @extend_schema(
+        responses={
+            200: 'Networth recalculated successfully',
+            500: 'Internal server error',
+        }
+    )
+    def post(self, request):
+        """Recalculate user's networth from all transactions."""
+        try:
+            user = request.user
+            
+            # Call the service function to recalculate networth
+            success, result = recalculate_networth(user)
+            
+            if not success:
+                return Response(
+                    {'error': result},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+            
+            # Get the updated networth
+            try:
+                updated_networth = get_networth(request)
+            except Exception as e:
+                print(f"Error getting updated networth: {str(e)}")
+                updated_networth = 0.0
+            
+            return Response({
+                "success": True,
+                "message": "Networth recalculated successfully",
+                "details": result,
+                "updated_networth": updated_networth
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            print(f"Error recalculating networth: {str(e)}")
+            return Response(
+                {'error': 'An error occurred while recalculating networth'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

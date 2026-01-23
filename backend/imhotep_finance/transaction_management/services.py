@@ -153,15 +153,30 @@ def update_transaction(*, user, transaction_id, amount, currency, trans_details,
     old_status = trans_obj.trans_status
     old_currency = trans_obj.currency
 
-    # Get networth for the currency
-    net_worth_obj = get_object_or_404(NetWorth, user=user, currency=currency)
+    # Get or create networth for the currency
+    net_worth_obj, created = NetWorth.objects.get_or_create(
+        user=user,
+        currency=currency,
+        defaults={'total': 0}
+    )
     current_total = float(net_worth_obj.total)
 
-    # Reverse old transaction effect
-    if old_status.lower() == "withdraw":
-        current_total += old_amount
-    elif old_status.lower() == "deposit":
-        current_total -= old_amount
+    # If currency changed, need to handle old currency networth
+    if old_currency != currency:
+        old_net_worth = NetWorth.objects.filter(user=user, currency=old_currency).first()
+        if old_net_worth:
+            # Reverse old transaction from old currency
+            if old_status.lower() == "withdraw":
+                old_net_worth.total += old_amount
+            elif old_status.lower() == "deposit":
+                old_net_worth.total -= old_amount
+            old_net_worth.save()
+    else:
+        # Same currency - reverse old transaction effect
+        if old_status.lower() == "withdraw":
+            current_total += old_amount
+        elif old_status.lower() == "deposit":
+            current_total -= old_amount
 
     # Apply new transaction effect
     if trans_status.lower() == "withdraw":
@@ -202,7 +217,16 @@ def parse_csv_transactions(file) -> Tuple[List[Dict], List[str]]:
     MAX_ROWS = 1000
     
     try:
-        file_wrapper = TextIOWrapper(file.file, encoding='utf-8')
+        # Reset file pointer
+        file.seek(0)
+        
+        # Read file content and decode
+        file_content = file.read()
+        decoded_content = file_content.decode('utf-8')
+        
+        # Create StringIO from decoded content
+        from io import StringIO
+        file_wrapper = StringIO(decoded_content)
         csv_reader = csv.DictReader(file_wrapper)
         
         row_count = 0

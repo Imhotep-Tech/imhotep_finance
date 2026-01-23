@@ -184,7 +184,7 @@ def save_user_report_with_transaction(user, start_date, transaction, parent_func
     
     return True, None
 
-def save_user_report_with_transaction_update(request, user, old_transaction, new_transaction):
+def save_user_report_with_transaction_update(user, old_transaction, new_transaction):
     '''This will be used for updating the report when a transaction is edited 
         This function handles changes in date, category, amount, and currency
     '''
@@ -213,14 +213,14 @@ def save_user_report_with_transaction_update(request, user, old_transaction, new
     
     # Always remove the old transaction first
     success, error = save_user_report_with_transaction(
-        request, user, old_date, old_transaction, parent_function="delete_transaction"
+        user, old_date, old_transaction, parent_function="delete_transaction"
     )
     if not success:
         return False, f"Failed to remove old transaction: {error}"
     
     # Then add the new transaction
     success, error = save_user_report_with_transaction(
-        request, user, new_date, new_transaction
+        user, new_date, new_transaction
     )
     if not success:
         return False, f"Failed to add new transaction: {error}"

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from finance_management.utils.currencies import get_allowed_currencies
 import csv
-from io import TextIOWrapper
+from io import TextIOWrapper, StringIO
 
 class TransactionInputSerializer(serializers.Serializer):
     date_param = serializers.DateField(
@@ -199,7 +199,18 @@ class CSVFileUploadSerializer(serializers.Serializer):
         
         # Validate file can be read as CSV
         try:
-            file_wrapper = TextIOWrapper(file.file, encoding='utf-8')
+            # Read the file content
+            file.seek(0)  # Ensure we're at the start
+            file_content = file.read()
+            
+            # Decode and create file wrapper
+            try:
+                decoded_content = file_content.decode('utf-8')
+            except UnicodeDecodeError:
+                raise serializers.ValidationError("Unable to read file. Please ensure the file is UTF-8 encoded.")
+            
+            # Parse as CSV
+            file_wrapper = StringIO(decoded_content)
             csv_reader = csv.DictReader(file_wrapper)
             
             # Validate headers
@@ -219,10 +230,8 @@ class CSVFileUploadSerializer(serializers.Serializer):
             # Reset file pointer for later processing
             file.seek(0)
             
-        except UnicodeDecodeError:
-            raise serializers.ValidationError("Unable to read file. Please ensure the file is UTF-8 encoded.")
-        except csv.Error:
-            raise serializers.ValidationError("Invalid CSV file format.")
+        except csv.Error as e:
+            raise serializers.ValidationError(f"Invalid CSV file format: {str(e)}")
         
         return file
 

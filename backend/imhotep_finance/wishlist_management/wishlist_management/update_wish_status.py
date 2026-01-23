@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from transaction_management.models import Transactions, NetWorth
 from wishlist_management.models import Wishlist
 from datetime import date
-from transaction_management.transactions_management.utils.create_transaction import create_transaction
+from transaction_management.services import create_transaction
 from user_reports.user_reports.utils.save_user_report import save_user_report_with_transaction
 from drf_yasg.utils import swagger_auto_schema
 from .schemas.wishlist_schemas import update_wish_status_response

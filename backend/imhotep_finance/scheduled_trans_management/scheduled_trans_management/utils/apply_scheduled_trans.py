@@ -3,7 +3,7 @@ from datetime import date, timedelta
 from django.db import transaction, models
 from django.db.models import F
 from ...models import ScheduledTransaction
-from transaction_management.transactions_management.utils.create_transaction import create_transaction
+from transaction_management.services import create_transaction
 
 def apply_scheduled_transactions_fn(user):
 	"""
