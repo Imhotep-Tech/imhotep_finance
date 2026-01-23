@@ -81,13 +81,46 @@ jobs:
           echo "=== Database Logs (last 50 lines) ==="
           docker compose logs --tail=50 db || true
           
-      - name: Verify backend is running
+      - name: Wait for backend to be ready
         run: |
-          if ! docker compose ps backend | grep -q "healthy\|running"; then
-            echo "❌ Backend service is not running or healthy"
+          echo "Waiting for backend service to be ready..."
+          max_attempts=60
+          attempt=0
+          while [ $attempt -lt $max_attempts ]; do
+            # Check if container is running
+            if ! docker compose ps backend | grep -q "backend"; then
+              echo "Backend container not found, waiting... ($attempt/$max_attempts)"
+              attempt=$((attempt + 1))
+              sleep 2
+              continue
+            fi
+            
+            # Check container status
+            container_status=$(docker compose ps backend --format "{{.Status}}" 2>/dev/null || echo "")
+            if echo "$container_status" | grep -qE "(healthy|running)"; then
+              echo "✅ Backend service is running (status: $container_status)"
+              break
+            fi
+            
+            attempt=$((attempt + 1))
+            if [ $attempt -lt $max_attempts ]; then
+              echo "Waiting for backend... ($attempt/$max_attempts) - Current status: $container_status"
+              sleep 2
+            fi
+          done
+          
+          # Final verification
+          container_status=$(docker compose ps backend --format "{{.Status}}" 2>/dev/null || echo "")
+          if ! echo "$container_status" | grep -qE "(healthy|running)"; then
+            echo "❌ Backend service failed to start"
+            echo "Backend status: $container_status"
+            echo ""
+            echo "=== Full Backend Logs ==="
+            docker compose logs --tail=200 backend
             exit 1
           fi
-          echo "✅ Backend service is running"
+          
+          echo "✅ Backend service is ready"
 
       - name: Wait for database to be ready
         run: |
