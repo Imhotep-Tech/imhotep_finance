@@ -1,25 +1,16 @@
 from django.urls import path, include
-from django.shortcuts import redirect
-from . import views
+from .apis import GetNetworthApi, GetNetworthDetailsApi, GetCategoryApi
 
 urlpatterns = [
-    # Core finance management endpoints (still in this app)
-    path('get-networth/', views.get_user_networth, name='get_networth'),
-    path('get-networth-details/', views.get_user_netWorth_details, name='get_netWorth_details'),
-    path('get-category/', views.get_user_category, name='get_category'),
+    # Core finance management endpoints - New DDD class-based APIs
+    path('get-networth/', GetNetworthApi.as_view(), name='get_networth'),
+    path('get-networth-details/', GetNetworthDetailsApi.as_view(), name='get_netWorth_details'),
+    path('get-category/', GetCategoryApi.as_view(), name='get_category'),
     
-    # Redirect old transaction endpoints to new app
+    # Sub-app endpoints
     path('transaction/', include('transaction_management.urls')),
-    
-    # Redirect old scheduled transaction endpoints to new app
     path('', include('scheduled_trans_management.urls')),
-    
-    # Target Management
     path('', include('target_management.urls')),
-    
-    # Redirect old report endpoints to new app
     path('reports/', include('user_reports.urls')),
-    
-    # Wishlist Management
     path('', include('wishlist_management.urls')),
 ]

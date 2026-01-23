@@ -1,7 +1,5 @@
 from django.urls import path
-from .auth import login, register, logout, google_auth, forget_password, profile
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
+from .auth.google_auth import google_callback
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
     TokenVerifyView,
@@ -28,6 +26,7 @@ from .apis import (
 )
 
 urlpatterns = [
+    # User data
     path('user-data/', UserViewApi.as_view(), name='user_data'),
 
     # Favorite Currency
@@ -54,7 +53,7 @@ urlpatterns = [
     # Google OAuth endpoints
     path('auth/google/url/', GoogleLoginUrlApi.as_view(), name='google_login_url'),
     path('auth/google/authenticate/', GoogleAuthApi.as_view(), name='google_auth'),
-    path('auth/google/callback/', google_auth.google_callback, name='google_callback'),
+    path('auth/google/callback/', google_callback, name='google_callback'),  # Keep this as function view (redirect)
 
     # Profile endpoints
     path('profile/', GetProfileApi.as_view(), name='get_profile'),

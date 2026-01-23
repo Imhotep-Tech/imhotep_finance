@@ -91,7 +91,7 @@ def convert_to_fav_currency(user, amounts_not_fav_currency):
         
     except Exception as e:
         print(f"Currency conversion error: {str(e)}")
-        favorite_currency = getattr(request.user, 'favorite_currency', 'USD') if hasattr(request, 'user') else 'USD'
+        favorite_currency = getattr(user, 'favorite_currency', 'USD') if hasattr(user, 'favorite_currency') else 'USD'
         return False, favorite_currency
 
 def select_currencies(user):
