@@ -23,6 +23,11 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Create .env file for backend
+        env:
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD || 'dummy-password-for-ci' }}
+          EXCHANGE_API_KEY_PRIMARY: ${{ secrets.EXCHANGE_API_KEY_PRIMARY || 'dummy-exchange-api-key-for-ci' }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID || 'dummy-client-id-for-ci' }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET || 'dummy-client-secret-for-ci' }}
         run: |
           mkdir -p backend/imhotep_finance
           cat > backend/imhotep_finance/.env << EOF
@@ -45,23 +50,24 @@ jobs:
           # CORS Configuration
           CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
           
-          # Email Configuration (dummy for CI)
+          # Email Configuration (uses console backend for CI, but MAIL_PASSWORD is still required)
           EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
           EMAIL_HOST=smtp.gmail.com
           EMAIL_PORT=587
           EMAIL_USE_TLS=True
           EMAIL_HOST_USER=ci-test@example.com
-          EMAIL_HOST_PASSWORD=dummy-password-for-ci
+          MAIL_PASSWORD=${MAIL_PASSWORD}
           
-          # Google OAuth2 (dummy for CI)
-          GOOGLE_OAUTH2_CLIENT_ID=dummy-client-id-for-ci
-          GOOGLE_OAUTH2_CLIENT_SECRET=dummy-client-secret-for-ci
+          # Google OAuth2 (from secrets or dummy for CI)
+          GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+          GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
           GOOGLE_REDIRECT_URI=http://localhost:8000/api/auth/google/callback/
           
           # JWT Configuration
           JWT_SECRET=ci-test-jwt-secret-for-github-actions
 
-          EXCHANGE_API_KEY_PRIMARY=f76c656a-7c48-4ac6-b091-ab167d4ca5d3
+          # Exchange API Key (from secrets or dummy for CI)
+          EXCHANGE_API_KEY_PRIMARY=${EXCHANGE_API_KEY_PRIMARY}
           EOF
 
       - name: Build and start services (wait for healthchecks)
@@ -87,36 +93,39 @@ jobs:
           max_attempts=60
           attempt=0
           while [ $attempt -lt $max_attempts ]; do
-            # Check if container is running
-            if ! docker compose ps backend | grep -q "backend"; then
-              echo "Backend container not found, waiting... ($attempt/$max_attempts)"
-              attempt=$((attempt + 1))
-              sleep 2
-              continue
-            fi
+            # Check container status - use docker compose ps with service name
+            container_status=$(docker compose ps backend --format "{{.Status}}" 2>/dev/null || echo "not-found")
             
-            # Check container status
-            container_status=$(docker compose ps backend --format "{{.Status}}" 2>/dev/null || echo "")
-            if echo "$container_status" | grep -qE "(healthy|running)"; then
+            # If container exists and is healthy/running, we're good
+            if [ "$container_status" != "not-found" ] && echo "$container_status" | grep -qE "(healthy|running)"; then
               echo "✅ Backend service is running (status: $container_status)"
               break
             fi
             
+            # If container exists but is not healthy yet, wait
+            if [ "$container_status" != "not-found" ]; then
+              echo "Waiting for backend to become healthy... ($attempt/$max_attempts) - Current status: $container_status"
+            else
+              echo "Waiting for backend container to start... ($attempt/$max_attempts)"
+            fi
+            
             attempt=$((attempt + 1))
             if [ $attempt -lt $max_attempts ]; then
-              echo "Waiting for backend... ($attempt/$max_attempts) - Current status: $container_status"
               sleep 2
             fi
           done
           
           # Final verification
-          container_status=$(docker compose ps backend --format "{{.Status}}" 2>/dev/null || echo "")
-          if ! echo "$container_status" | grep -qE "(healthy|running)"; then
+          container_status=$(docker compose ps backend --format "{{.Status}}" 2>/dev/null || echo "not-found")
+          if [ "$container_status" = "not-found" ] || ! echo "$container_status" | grep -qE "(healthy|running)"; then
             echo "❌ Backend service failed to start"
             echo "Backend status: $container_status"
             echo ""
             echo "=== Full Backend Logs ==="
-            docker compose logs --tail=200 backend
+            docker compose logs --tail=200 backend || echo "Could not retrieve backend logs"
+            echo ""
+            echo "=== All Container Status ==="
+            docker compose ps -a
             exit 1
           fi
           
