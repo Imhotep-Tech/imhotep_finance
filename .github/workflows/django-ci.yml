@@ -1,0 +1,177 @@
+name: Django CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Create .env file for backend
+        run: |
+          mkdir -p backend/imhotep_finance
+          cat > backend/imhotep_finance/.env << EOF
+          # Database Configuration
+          DATABASE_HOST=db
+          DATABASE_PORT=5432
+          DATABASE_NAME=imhotep_finance_test_db
+          DATABASE_USER=imhotep_finance_test_user
+          DATABASE_PASSWORD=test_password_for_ci
+          
+          # Django Configuration
+          SECRET_KEY=ci-test-secret-key-for-github-actions-only
+          DEBUG=1
+          ALLOWED_HOSTS=localhost,127.0.0.1,backend
+          
+          # Site Configuration
+          SITE_DOMAIN=http://localhost:8000
+          FRONTEND_URL=http://localhost:3000
+          
+          # CORS Configuration
+          CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+          
+          # Email Configuration (dummy for CI)
+          EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
+          EMAIL_HOST=smtp.gmail.com
+          EMAIL_PORT=587
+          EMAIL_USE_TLS=True
+          EMAIL_HOST_USER=ci-test@example.com
+          EMAIL_HOST_PASSWORD=dummy-password-for-ci
+          
+          # Google OAuth2 (dummy for CI)
+          GOOGLE_OAUTH2_CLIENT_ID=dummy-client-id-for-ci
+          GOOGLE_OAUTH2_CLIENT_SECRET=dummy-client-secret-for-ci
+          GOOGLE_REDIRECT_URI=http://localhost:8000/api/auth/google/callback/
+          
+          # JWT Configuration
+          JWT_SECRET=ci-test-jwt-secret-for-github-actions
+
+          EXCHANGE_API_KEY_PRIMARY=f76c656a-7c48-4ac6-b091-ab167d4ca5d3
+          EOF
+
+      - name: Build and start services (wait for healthchecks)
+        id: start_services
+        run: |
+          docker compose up -d --build --wait db backend || true
+
+      - name: Show service status and logs
+        if: always()
+        run: |
+          echo "=== Service Status ==="
+          docker compose ps -a
+          echo ""
+          echo "=== Backend Logs (last 100 lines) ==="
+          docker compose logs --tail=100 backend || true
+          echo ""
+          echo "=== Database Logs (last 50 lines) ==="
+          docker compose logs --tail=50 db || true
+          
+      - name: Verify backend is running
+        run: |
+          if ! docker compose ps backend | grep -q "healthy\|running"; then
+            echo "❌ Backend service is not running or healthy"
+            exit 1
+          fi
+          echo "✅ Backend service is running"
+
+      - name: Wait for database to be ready
+        run: |
+          echo "Waiting for database to be ready..."
+          for i in {1..30}; do
+            if docker compose exec -T db pg_isready -U imhotep_finance_test_user -d imhotep_finance_test_db > /dev/null 2>&1; then
+              echo "✅ Database is ready"
+              break
+            fi
+            echo "Waiting for database... ($i/30)"
+            sleep 2
+          done
+
+      - name: Run Django migrations
+        run: |
+          docker compose exec -T backend python manage.py migrate --noinput
+
+      - name: Run Django tests for accounts module
+        run: |
+          echo "=== Running Accounts Tests ==="
+          docker compose exec -T backend python manage.py test accounts.tests --verbosity=2
+
+      - name: Run Django tests for finance_management module
+        run: |
+          echo "=== Running Finance Management Tests ==="
+          docker compose exec -T backend python manage.py test finance_management --verbosity=2 || echo "⚠️ No tests found for finance_management"
+
+      - name: Run all Django tests
+        run: |
+          echo "=== Running All Tests ==="
+          docker compose exec -T backend python manage.py test --verbosity=2
+
+      - name: Check test coverage (optional)
+        continue-on-error: true
+        run: |
+          docker compose exec -T backend pip install coverage
+          docker compose exec -T backend coverage run --source='.' manage.py test
+          docker compose exec -T backend coverage report
+          docker compose exec -T backend coverage html
+          echo "✅ Coverage report generated"
+
+      - name: Run Django checks
+        run: |
+          echo "=== Running Django System Checks ==="
+          docker compose exec -T backend python manage.py check --deploy
+
+      - name: Check for missing migrations
+        run: |
+          echo "=== Checking for Missing Migrations ==="
+          docker compose exec -T backend python manage.py makemigrations --check --dry-run --noinput
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker compose down -v
+
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 black isort
+
+      - name: Run Black (code formatter check)
+        continue-on-error: true
+        run: |
+          black --check backend/imhotep_finance || echo "⚠️ Black formatting issues found"
+
+      - name: Run isort (import sorting check)
+        continue-on-error: true
+        run: |
+          isort --check-only backend/imhotep_finance || echo "⚠️ Import sorting issues found"
+
+      - name: Run flake8 (code style check)
+        continue-on-error: true
+        run: |
+          flake8 backend/imhotep_finance --max-line-length=120 --exclude=migrations,__pycache__,settings.py || echo "⚠️ Flake8 issues found"
