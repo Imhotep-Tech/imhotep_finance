@@ -20,6 +20,6 @@ urlpatterns = [
     # Redirect old report endpoints to new app
     path('reports/', include('user_reports.urls')),
     
-    # Redirect old wishlist endpoints to new app
-    path('wishlist/', include('wishlist_management.urls')),
+    # Wishlist Management
+    path('', include('wishlist_management.urls')),
 ]
