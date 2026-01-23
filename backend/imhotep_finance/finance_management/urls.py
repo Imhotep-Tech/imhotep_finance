@@ -12,7 +12,7 @@ urlpatterns = [
     path('transaction/', include('transaction_management.urls')),
     
     # Redirect old scheduled transaction endpoints to new app
-    path('scheduled-trans/', include('scheduled_trans_management.urls')),
+    path('', include('scheduled_trans_management.urls')),
     
     # Target Management
     path('', include('target_management.urls')),
