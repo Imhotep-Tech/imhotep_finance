@@ -4,9 +4,12 @@ from django.core.exceptions import ValidationError
 from finance_management.utils.currencies import get_allowed_currencies
 from transaction_management.models import Transactions, NetWorth
 from user_reports.user_reports.utils.save_user_report import save_user_report_with_transaction, save_user_report_with_transaction_update
-from datetime import date
+from datetime import date, datetime
+from typing import List, Dict, Tuple
 from django.db import transaction
 from wishlist_management.models import Wishlist
+import csv
+from io import TextIOWrapper
 
 def create_transaction(*,user, amount, currency, trans_details, category, trans_status, transaction_date: date=None):
     """Create a transaction and update networth."""
@@ -191,3 +194,131 @@ def update_transaction(*, user, transaction_id, amount, currency, trans_details,
         )
     
     return trans_obj
+
+def parse_csv_transactions(file) -> Tuple[List[Dict], List[str]]:
+    """Parse CSV file and return transaction data and validation errors."""
+    transactions_data = []
+    errors = []
+    MAX_ROWS = 1000
+    
+    try:
+        file_wrapper = TextIOWrapper(file.file, encoding='utf-8')
+        csv_reader = csv.DictReader(file_wrapper)
+        
+        row_count = 0
+        for row_num, row in enumerate(csv_reader, start=2):
+            row_count += 1
+            
+            # Check row limit
+            if row_count > MAX_ROWS:
+                errors.append(f"Row limit exceeded. Only the first {MAX_ROWS} rows were processed.")
+                break
+            
+            # Normalize row keys
+            normalized_row = {k.strip().lower(): v.strip() if v else '' for k, v in row.items() if k}
+            
+            # Extract and validate required fields
+            date_val = normalized_row.get('date', '')
+            amount_str = normalized_row.get('amount', '')
+            currency_val = normalized_row.get('currency', '')
+            trans_status_val = normalized_row.get('trans_status', '')
+            
+            # Validate required fields
+            if not date_val:
+                errors.append(f"Row {row_num}: Missing required field 'date'.")
+                continue
+            
+            if not amount_str:
+                errors.append(f"Row {row_num}: Missing required field 'amount'.")
+                continue
+            
+            if not currency_val:
+                errors.append(f"Row {row_num}: Missing required field 'currency'.")
+                continue
+            
+            if not trans_status_val:
+                errors.append(f"Row {row_num}: Missing required field 'trans_status'.")
+                continue
+            
+            # Validate amount
+            try:
+                amount = float(amount_str)
+                if amount <= 0:
+                    errors.append(f"Row {row_num}: Amount must be a positive number.")
+                    continue
+            except ValueError:
+                errors.append(f"Row {row_num}: Invalid amount '{amount_str}'. Must be a number.")
+                continue
+            
+            # Validate trans_status
+            trans_status_lower = trans_status_val.lower()
+            if trans_status_lower not in ['deposit', 'withdraw']:
+                errors.append(f"Row {row_num}: Invalid trans_status '{trans_status_val}'. Must be 'deposit' or 'withdraw'.")
+                continue
+            
+            # Add to transactions data
+            transactions_data.append({
+                'date': date_val,
+                'amount': amount,
+                'currency': currency_val,
+                'trans_status': trans_status_lower,
+                'trans_details': normalized_row.get('trans_details', ''),
+                'category': normalized_row.get('category', ''),
+            })
+    
+    except Exception as e:
+        errors.append(f"Error reading CSV file: {str(e)}")
+    
+    return transactions_data, errors
+
+
+def bulk_import_transactions(*, user, transactions_data: List[Dict]) -> Tuple[int, List[str]]:
+    """
+    Bulk import transactions from a list of transaction data.
+    Returns (created_count, errors_list)
+    """
+    created_count = 0
+    errors = []
+    
+    for row_num, transaction_data in enumerate(transactions_data, start=2):
+        try:
+            # Extract values
+            date_val = transaction_data.get('date', '')
+            amount_val = transaction_data.get('amount')
+            currency_val = transaction_data.get('currency', '')
+            trans_status_val = transaction_data.get('trans_status', '')
+            trans_details = transaction_data.get('trans_details', '')
+            category = transaction_data.get('category', '')
+            
+            # Parse date
+            try:
+                if isinstance(date_val, str):
+                    transaction_date = datetime.strptime(date_val, '%Y-%m-%d').date()
+                elif isinstance(date_val, date):
+                    transaction_date = date_val
+                else:
+                    errors.append(f"Row {row_num}: Invalid date format")
+                    continue
+            except ValueError:
+                errors.append(f"Row {row_num}: Invalid date format. Use YYYY-MM-DD")
+                continue
+            
+            # Create transaction using existing service
+            create_transaction(
+                user=user,
+                amount=amount_val,
+                currency=currency_val,
+                trans_status=trans_status_val.lower(),
+                category=category,
+                trans_details=trans_details,
+                transaction_date=transaction_date
+            )
+            
+            created_count += 1
+            
+        except ValidationError as e:
+            errors.append(f"Row {row_num}: {str(e)}")
+        except Exception as e:
+            errors.append(f"Row {row_num}: Error processing row - {str(e)}")
+    
+    return created_count, errors

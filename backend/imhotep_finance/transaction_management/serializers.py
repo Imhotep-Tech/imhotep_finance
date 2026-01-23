@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from finance_management.utils.currencies import get_allowed_currencies
+import csv
+from io import TextIOWrapper
 
 class TransactionInputSerializer(serializers.Serializer):
     date_param = serializers.DateField(
@@ -172,3 +174,65 @@ class TransactionListResponseSerializer(serializers.Serializer):
     transactions = TransactionOutputSerializer(many=True)
     pagination = serializers.DictField()
     date_range = serializers.DictField()
+
+class CSVFileUploadSerializer(serializers.Serializer):
+    file = serializers.FileField(
+        required=True,
+        help_text="CSV file with columns: date, amount, currency, trans_status, trans_details (optional), category (optional)"
+    )
+    
+    def validate_file(self, file):
+        """Validate the uploaded CSV file."""
+        MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
+        
+        # Validate file extension
+        if not file.name.endswith('.csv'):
+            raise serializers.ValidationError("Invalid file format. Please upload a CSV file.")
+        
+        # Validate file size
+        if file.size > MAX_FILE_SIZE:
+            raise serializers.ValidationError("File size exceeds the maximum limit of 5MB.")
+        
+        # Validate file is not empty
+        if file.size == 0:
+            raise serializers.ValidationError("The uploaded file is empty.")
+        
+        # Validate file can be read as CSV
+        try:
+            file_wrapper = TextIOWrapper(file.file, encoding='utf-8')
+            csv_reader = csv.DictReader(file_wrapper)
+            
+            # Validate headers
+            required_columns = {'date', 'amount', 'currency', 'trans_status'}
+            if csv_reader.fieldnames is None:
+                raise serializers.ValidationError("CSV file appears to be empty or has no headers.")
+            
+            normalized_headers = {h.strip().lower() for h in csv_reader.fieldnames if h}
+            missing_columns = required_columns - normalized_headers
+            
+            if missing_columns:
+                raise serializers.ValidationError(
+                    f"Missing required columns: {', '.join(missing_columns)}. "
+                    "Required columns are: date, amount, currency, trans_status."
+                )
+            
+            # Reset file pointer for later processing
+            file.seek(0)
+            
+        except UnicodeDecodeError:
+            raise serializers.ValidationError("Unable to read file. Please ensure the file is UTF-8 encoded.")
+        except csv.Error:
+            raise serializers.ValidationError("Invalid CSV file format.")
+        
+        return file
+
+
+class TransactionImportResponseSerializer(serializers.Serializer):
+    success = serializers.BooleanField(help_text="Whether any transactions were imported")
+    message = serializers.CharField(help_text="Summary message")
+    imported_count = serializers.IntegerField(help_text="Number of transactions successfully imported")
+    errors = serializers.ListField(
+        child=serializers.CharField(),
+        required=False,
+        help_text="List of errors encountered during import"
+    )
