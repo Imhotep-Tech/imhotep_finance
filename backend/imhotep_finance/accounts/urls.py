@@ -6,11 +6,23 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
     TokenVerifyView,
 )
-from . import views
+from .apis import (
+    UserViewApi,
+    GetFavCurrencyApi,
+    ChangeFavCurrencyApi,
+    UpdateUserLastLoginApi,
+)
 
 urlpatterns = [
 
-    path('user-data/', views.user_view, name='user_data'),
+    path('user-data/', UserViewApi.as_view(), name='user_data'),
+
+        #Favorite Currency
+    path('get-fav-currency/', GetFavCurrencyApi.as_view(), name='get_fav_currency'),
+    path('change-fav-currency/', ChangeFavCurrencyApi.as_view(), name='change_favorite_currency'),
+
+    #update Last Login
+    path('update-last-login/', UpdateUserLastLoginApi.as_view(), name='update_last_login'),
 
     # Authentication endpoints
     path('auth/login/', login.login_view, name='login'),
@@ -37,10 +49,5 @@ urlpatterns = [
     path('profile/change-password/', profile.change_password, name='change_password'),
     path('profile/verify-email-change/', profile.verify_email_change, name='verify_email_change'),
 
-    #Favorite Currency
-    path('get-fav-currency/', views.get_favorite_currency, name='get_fav_currency'),
-    path('change-fav-currency/', views.change_favorite_currency, name='change_favorite_currency'),
 
-    #update Last Login
-    path('update-last-login/', views.update_user_last_login, name='update_last_login'),
 ]
