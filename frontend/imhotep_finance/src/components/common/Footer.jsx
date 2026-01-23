@@ -71,7 +71,7 @@ function Footer() {
           </button>
         </div>
 
-        <p className="text-white/60 text-xs mt-4">&copy; 2025 Imhotep Finance</p>
+        <p className="text-white/60 text-xs mt-4">&copy; 2026 Imhotep Finance</p>
       </div>
     </footer>
   );

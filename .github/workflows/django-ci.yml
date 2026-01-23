@@ -72,6 +72,10 @@ jobs:
 
       - name: Build and start services (wait for healthchecks)
         id: start_services
+        env:
+          POSTGRES_DB: imhotep_finance_test_db
+          POSTGRES_USER: imhotep_finance_test_user
+          POSTGRES_PASSWORD: test_password_for_ci
         run: |
           docker compose up -d --build --wait db backend || true
 
@@ -132,10 +136,14 @@ jobs:
           echo "✅ Backend service is ready"
 
       - name: Wait for database to be ready
+        env:
+          POSTGRES_DB: imhotep_finance_test_db
+          POSTGRES_USER: imhotep_finance_test_user
+          POSTGRES_PASSWORD: test_password_for_ci
         run: |
           echo "Waiting for database to be ready..."
           for i in {1..30}; do
-            if docker compose exec -T db pg_isready -U imhotep_finance_test_user -d imhotep_finance_test_db > /dev/null 2>&1; then
+            if docker compose exec -T db pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB" > /dev/null 2>&1; then
               echo "✅ Database is ready"
               break
             fi
