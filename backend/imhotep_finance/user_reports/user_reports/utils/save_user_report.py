@@ -33,7 +33,7 @@ def save_user_report(user, start_date, response_data):
         print(f"Error in save_user_report: {str(e)}")
         return False, str(e)
 
-def save_user_report_with_transaction(request, user, start_date, transaction, parent_function=None):
+def save_user_report_with_transaction(user, start_date, transaction, parent_function=None):
     '''This will be used for updating the report when a new transaction is created or deleted
         This function will be called when created only one new transaction
     '''
@@ -59,7 +59,7 @@ def save_user_report_with_transaction(request, user, start_date, transaction, pa
     try:
         if user.favorite_currency and user.favorite_currency != transaction.currency:
             amount_not_fav_currency = {currency: amount}
-            converted_amount, _ = convert_to_fav_currency(request, amount_not_fav_currency)
+            converted_amount, _ = convert_to_fav_currency(user, amount_not_fav_currency)
             if converted_amount is not None:
                 amount = converted_amount
     except Exception as e:

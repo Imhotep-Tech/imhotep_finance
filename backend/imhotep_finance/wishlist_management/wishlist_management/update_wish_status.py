@@ -66,7 +66,7 @@ def update_wish_status(request, wish_id):
             if trans_wish:
                 # Update the report to remove this transaction
                 success, error = save_user_report_with_transaction(
-                    request, user, trans_wish.date, trans_wish, parent_function="delete_transaction"
+                    user, trans_wish.date, trans_wish, parent_function="delete_transaction"
                 )
                 if not success:
                     print(f"Warning: Failed to update report when reversing wish transaction: {error}")

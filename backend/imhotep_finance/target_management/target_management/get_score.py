@@ -93,14 +93,14 @@ def get_score(request):
         amount = float(amount)
         
         currency_totals_deposit[currency] = currency_totals_deposit.get(currency, 0) + amount
-    total_favorite_currency_deposit, _ = convert_to_fav_currency(request, currency_totals_deposit)
+    total_favorite_currency_deposit, _ = convert_to_fav_currency(request.user, currency_totals_deposit)
 
     # Aggregate withdrawals
     currency_totals_withdraw = {}
     for amount, currency in score_withdraw:
         amount = float(amount)
         currency_totals_withdraw[currency] = currency_totals_withdraw.get(currency, 0) + amount
-    total_favorite_currency_withdraw, _ = convert_to_fav_currency(request, currency_totals_withdraw)
+    total_favorite_currency_withdraw, _ = convert_to_fav_currency(request.user, currency_totals_withdraw)
 
     # Calculate score
     score = (total_favorite_currency_deposit - target_obj.target ) - total_favorite_currency_withdraw

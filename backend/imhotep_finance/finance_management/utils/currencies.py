@@ -50,14 +50,14 @@ def get_or_update_rates(base_currency=BASE_CURRENCY):
         print(f"Error getting/updating rates: {e}")
         return False
 
-def convert_to_fav_currency(request, amounts_not_fav_currency):
+def convert_to_fav_currency(user, amounts_not_fav_currency):
     """
     Convert amounts in different currencies to user's favorite currency.
     Uses USD as base currency. Conversion: (amount / rate_from_usd) * rate_to_usd
     Returns: (converted_amount, favorite_currency) or (False, favorite_currency) on error
     """
     try:
-        favorite_currency = get_fav_currency(request.user)
+        favorite_currency = get_fav_currency(user)
         
         if not amounts_not_fav_currency:
             return 0.0, favorite_currency
