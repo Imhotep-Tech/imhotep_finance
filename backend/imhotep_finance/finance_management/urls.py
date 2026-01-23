@@ -14,8 +14,8 @@ urlpatterns = [
     # Redirect old scheduled transaction endpoints to new app
     path('scheduled-trans/', include('scheduled_trans_management.urls')),
     
-    # Redirect old target endpoints to new app
-    path('target/', include('target_management.urls')),
+    # Target Management
+    path('', include('target_management.urls')),
     
     # Redirect old report endpoints to new app
     path('reports/', include('user_reports.urls')),
