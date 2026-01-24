@@ -11,3 +11,4 @@ wheel
 drf_spectacular
 drf_yasg
 django-encrypted-model-fields
+django-oauth-toolkit==1.7.1
