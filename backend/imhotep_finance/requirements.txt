@@ -10,3 +10,4 @@ setuptools
 wheel
 drf_spectacular
 drf_yasg
+django-encrypted-model-fields

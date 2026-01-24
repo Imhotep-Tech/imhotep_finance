@@ -364,3 +364,5 @@ SPECTACULAR_SETTINGS = {
     # Include all endpoints automatically
     'DISABLE_ERRORS_AND_WARNINGS': False,
 }
+
+FIELD_ENCRYPTION_KEY = config('FIELD_ENCRYPTION_KEY')

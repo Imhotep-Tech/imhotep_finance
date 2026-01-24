@@ -1,5 +1,6 @@
 from django.db import models
 from accounts.models import User
+from encrypted_model_fields.fields import EncryptedTextField
 
 # Create your models here.
 class Reports(models.Model):
@@ -7,7 +8,7 @@ class Reports(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reports_user')
     month = models.IntegerField()
     year = models.IntegerField()
-    data = models.JSONField()
+    data = EncryptedTextField()
     created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):

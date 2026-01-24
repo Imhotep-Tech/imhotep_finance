@@ -1,6 +1,7 @@
 from django.db import models
 from accounts.models import User
 from django.utils import timezone
+from encrypted_model_fields.fields import EncryptedCharField
 
 def current_year():
     return timezone.now().year
@@ -26,8 +27,8 @@ class ScheduledTransaction(models.Model):
     amount = models.FloatField()
     currency = models.CharField(max_length=4)
     scheduled_trans_status = models.CharField(max_length=8, choices=TRANSACTIONS_STATUS)
-    scheduled_trans_details = models.TextField(blank=True, null=True)
-    category = models.TextField(blank=True, null=True)
+    scheduled_trans_details = EncryptedCharField(max_length=255, blank=True, null=True)
+    category = EncryptedCharField(max_length=100, blank=True, null=True)
     last_time_added = models.DateTimeField(blank=True, null=True)
     status =  models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
