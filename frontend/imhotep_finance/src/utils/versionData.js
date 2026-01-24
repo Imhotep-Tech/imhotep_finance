@@ -3,15 +3,15 @@ export const versionEntries = [
     version: '7.3.0',
     date: 'January 24, 2026',
     badge: { label: 'CURRENT', color: 'red' },
-    summary: 'Improvements Security and added new features',
+    summary: 'Major Architecture Improvements, Security Enhancements, and Developer Experience',
     bullets: [
-      'Enhance monthly report calculation and sorting logic',
-      'Add confirmation prompt for unmarking completed wishes in Show Wishlist',
-      'Add demo login functionality for quick access to demo account',
-      'Add Tally feedback link component and integrate it into the footer',
-      'Optimize currency exchange rate fetching and caching mechanism',
-      'Improve error handling and user notifications across the app',
-      'Add CSV import functionality for transactions with validation and error handling'
+      'Added encryption for enhanced data security and privacy',
+      'Added public API for integrations and third-party access',
+      'Significant speed improvements and performance optimizations',
+      'Reimplemented Django backend using Domain-Driven Design (DDD) architecture for better code organization and maintainability',
+      'Made the app easily self-hostable with improved deployment documentation and setup',
+      'Improved documentation with comprehensive guides and API references',
+      'Added automated testing on GitHub Actions for continuous integration and quality assurance'
     ]
   },
   {

@@ -1,47 +1,42 @@
 {
-  "version": "7.2.0",
-  "title": "🎉 Exciting New Features Just Landed!",
-  "subject": "🚀 Imhotep Finance v7.2.0 - Enhanced Security & Powerful New Tools!",
+  "version": "7.3.0",
+  "title": "🎉 Major Architecture Upgrade & New Capabilities!",
+  "subject": "🚀 Imhotep Finance v7.3.0 - Enhanced Security, Public API & Developer Experience!",
   "updates": [
     {
-      "icon": "📊",
-      "title": "Enhanced Monthly Reports",
-      "description": "Experience smarter report calculations with improved sorting logic. Your financial insights are now more accurate and easier to understand than ever!"
+      "icon": "🔐",
+      "title": "Advanced Encryption",
+      "description": "Your financial data is now protected with enhanced encryption. We've implemented robust security measures to ensure your sensitive information stays safe and private!"
+    },
+    {
+      "icon": "🔌",
+      "title": "Public API Released",
+      "description": "Integrate Imhotep Finance with your favorite tools! Our new public API opens up endless possibilities for automation, integrations, and custom workflows."
     },
     {
       "icon": "⚡",
-      "title": "Quick Demo Access",
-      "description": "Try Imhotep Finance instantly with our new demo login feature. No signup needed to explore all the amazing features!"
+      "title": "Lightning-Fast Performance",
+      "description": "Experience blazing speed with our latest performance optimizations. Everything loads faster, responds quicker, and feels more responsive than ever before!"
     },
     {
-      "icon": "📁",
-      "title": "CSV Import Power",
-      "description": "Bulk import your transactions with our new CSV upload feature. Complete with smart validation and detailed error handling to ensure your data is perfect!"
+      "icon": "🏗️",
+      "title": "Domain-Driven Design Architecture",
+      "description": "We've completely reimplemented the Django backend using Domain-Driven Design (DDD) principles. This means better code organization, improved maintainability, and a more scalable foundation for future growth!"
     },
     {
-      "icon": "💡",
-      "title": "Smart Wishlist Management",
-      "description": "Added confirmation prompts when unmarking completed wishes. Never accidentally lose track of your achieved goals!"
+      "icon": "🏠",
+      "title": "Easy Self-Hosting",
+      "description": "Want to host Imhotep Finance on your own server? We've made it incredibly easy with improved deployment documentation and streamlined setup processes!"
     },
     {
-      "icon": "💱",
-      "title": "Optimized Currency Exchange",
-      "description": "Lightning-fast currency conversions with our enhanced caching system. Get real-time exchange rates without the wait!"
+      "icon": "📚",
+      "title": "Comprehensive Documentation",
+      "description": "New and improved documentation makes it easier than ever to understand, use, and extend Imhotep Finance. From user guides to API references, we've got you covered!"
     },
     {
-      "icon": "🔔",
-      "title": "Better Notifications",
-      "description": "Improved error handling and user notifications throughout the app. Stay informed with clearer, more helpful messages!"
-    },
-    {
-      "icon": "💬",
-      "title": "Feedback Made Easy",
-      "description": "New Tally feedback integration lets you share your thoughts and help us make Imhotep Finance even better!"
-    },
-    {
-      "icon": "🔒",
-      "title": "Security Enhancements",
-      "description": "Your financial data is more secure than ever with our latest security improvements and optimizations!"
+      "icon": "✅",
+      "title": "Automated Testing",
+      "description": "Quality assurance just got a major upgrade! Our new automated testing on GitHub Actions ensures every release is thoroughly tested and reliable."
     }
   ],
   "cta_text": "🎯 Explore New Features Now",
