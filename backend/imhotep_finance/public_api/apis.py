@@ -88,7 +88,7 @@ class ExternalTransactionCreateApi(APIView):
             )
         except Exception as e:
             return Response(
-                {'error': f'An error occurred while creating the transaction: {str(e)}'},
+                {'error': f'An error occurred while creating the transaction'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
@@ -153,7 +153,7 @@ class ExternalTransactionDeleteApi(APIView):
             )
         except Exception as e:
             return Response(
-                {'error': f'An error occurred while deleting the transaction: {str(e)}'},
+                {'error': f'An error occurred while deleting the transaction'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
@@ -245,6 +245,6 @@ class ExternalTransactionListApi(APIView):
             )
         except Exception as e:
             return Response(
-                {'error': f'An error occurred while retrieving transactions: {str(e)}'},
+                {'error': f'An error occurred while retrieving transactions'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
