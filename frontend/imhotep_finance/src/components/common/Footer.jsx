@@ -55,6 +55,14 @@ function Footer() {
           >
             Source
           </a>
+          <a
+            href="https://github.com/Imhotep-Tech/imhotep_finance#-documentation"
+            className="hover:underline"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Documentation
+          </a>
           <TallyFeedbackLink />
           <Link to="/version-history" className="hover:underline">
             Version 7.3.0

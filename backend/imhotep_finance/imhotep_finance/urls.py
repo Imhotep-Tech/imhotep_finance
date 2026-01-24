@@ -23,6 +23,8 @@ from drf_spectacular.views import (
     SpectacularRedocView,
     SpectacularSwaggerView,
 )
+from developer_portal.oauth_views import CustomAuthorizationView
+from developer_portal.swagger_views import SwaggerOAuth2RedirectView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -33,11 +35,24 @@ urlpatterns = [
     path('api/finance-management/', include('transaction_management.urls')),
     path('api/finance-management/', include('user_reports.urls')),
     path('api/finance-management/wishlist/', include('wishlist_management.urls')),
+    # Developer Portal endpoints
+    path('api/developer/', include('developer_portal.urls')),
+    # Public API endpoints for third-party apps (OAuth2 protected)
+    path('api/v1/external/', include('public_api.urls')),
+    # OAuth2 Provider endpoints (django-oauth-toolkit) - MUST be before catch-all
+    # Override the authorization view to handle JWT-based authentication
+    path('o/authorize/', CustomAuthorizationView.as_view(), name='oauth2_provider:authorize'),
+    path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
     # OpenAPI 3.0 schema endpoints (automatically generated from code)
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     # Swagger UI - Interactive API documentation
     path('swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    # Swagger OAuth2 redirect handler (required for OAuth2 flow in Swagger UI)
+    path('swagger/oauth2-redirect.html', SwaggerOAuth2RedirectView.as_view(), name='swagger-oauth2-redirect'),
     # ReDoc - Alternative API documentation
     path('redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
-    re_path(r'^.*$', lambda request: redirect(f'{frontend_url}', permanent=False)),
+    # Catch-all: Redirect to frontend ONLY for non-API, non-OAuth2, non-admin, non-docs paths
+    # Exclude: /o/, /api/, /admin/, /swagger/, /redoc/, /static/, /media/
+    re_path(r'^(?!o/|api/|admin/|swagger/|redoc/|static/|media/).*$', 
+            lambda request: redirect(f'{frontend_url}', permanent=False)),
 ]

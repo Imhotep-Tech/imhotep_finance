@@ -1,184 +1,309 @@
-# Imhotep Financial Manager
+<div align="center">
 
-[![Project Status: Active](https://img.shields.io/badge/Project%20Status-Active-green.svg)](https://github.com/Imhotep-Tech/imhotep_finance)
-[![License](https://img.shields.io/badge/License-Dual-blue.svg)](LICENSE)
+# 💰 Imhotep Finance
+
+### Smart Personal Finance Management Platform
+
+[![Project Status](https://img.shields.io/badge/Status-Active%20Development-brightgreen?style=for-the-badge)](https://github.com/Imhotep-Tech/imhotep_finance)
+[![License](https://img.shields.io/badge/License-Dual%20License-blue?style=for-the-badge)](LICENSE)
+[![Django](https://img.shields.io/badge/Django-5.2-092E20?style=for-the-badge&logo=django)](https://www.djangoproject.com/)
+[![React](https://img.shields.io/badge/React-19.x-61DAFB?style=for-the-badge&logo=react)](https://reactjs.org/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker)](https://www.docker.com/)
 [![Django CI/CD](https://github.com/Imhotep-Tech/imhotep_finance/actions/workflows/django-ci.yml/badge.svg)](https://github.com/Imhotep-Tech/imhotep_finance/actions/workflows/django-ci.yml)
 
-Take control of your finances with Imhotep Financial Manager – a powerful, open-source personal finance app built with Django and React. Track transactions, manage budgets, create wishlists, set savings goals, and automate recurring expenses effortlessly. Perfect for individuals seeking a secure, user-friendly way to monitor spending, analyze patterns, and achieve financial freedom.
+**Take control of your finances. Track spending. Achieve your goals.**
 
+[Features](#-features) •
+[Quick Start](#-quick-start) •
+[Documentation](#-documentation) •
+[Tech Stack](#-tech-stack)
 
-## 💰 Features
+</div>
 
-### Core Financial Management
-- **Financial Tracking**: Easily deposit and withdraw funds with detailed transaction history (powered by Django models for robust data handling)
-- **Smart Categories**: Enhanced transaction categorization with intelligent suggestions based on your most frequent categories
-- **Transaction Analysis**: View and analyze your spending patterns with detailed pie charts for expenses and income categories
+---
 
-### Automation & Intelligence
-- **Scheduled Transactions**: Set up automated monthly recurring transactions for bills, income, and regular expenses (managed via Django's ScheduledTransaction model)
-- **Smart Suggestions**: Category recommendations based on your transaction history and patterns
-- **Error Handling**: Comprehensive error management system with user-friendly custom error pages
+## 📖 About
 
-### Goal Setting & Planning
-- **Wishlist Management**: Create and prioritize items you want to purchase with detailed tracking (fully integrated with Django's Wishlist model and status updates)
-- **Goal Setting**: Set monthly savings targets to help achieve your financial objectives (using Django's Target model)
-- **Financial Analytics**: Advanced charts and visualizations to understand your spending habits
+**Imhotep Finance** is an open-source personal finance management application built with Django and React. It helps you track transactions, manage budgets, set savings goals, and automate recurring expenses. Perfect for individuals seeking a secure, user-friendly way to monitor spending, analyze patterns, and achieve financial freedom.
 
-### User Experience
-- **Multi-Currency Support**: Support for multiple currencies with real-time exchange rates
-- **Responsive Design**: Optimized experience across desktop, tablet, and mobile devices
-- **Enhanced Navigation**: Improved mobile navigation with better responsiveness
-- **Modern UI/UX**: Clean, intuitive interface with modern design patterns
+> *"Your finances, simplified. Your goals, achieved."*
 
-### Security & Performance
-- **Advanced Security**: CSRF protection, JWT authentication, and enhanced security measures in Django
-- **Performance Optimized**: Fast loading times with React's efficient rendering and Django's robust backend
-- **Google OAuth**: Secure login with Google account integration via Django
-- **Data Backup**: Automated database backup system for data protection
-- **Docker Support**: Containerized deployment for easy setup and scalability
-- **Data Migration**: Includes a Django management command to migrate data from the old version (see `migrate_old_data.py`)
+### 🏠 Self-Hostable - Deploy Anywhere
+
+Imhotep Finance is designed to be **completely self-hostable** with no external dependencies or vendor lock-in. You have full control:
+
+- **Deploy anywhere**: Your own server, cloud provider (AWS, Azure, GCP), or your infrastructure
+- **Complete data ownership**: All data stays on your servers - no third-party services required
+- **Privacy first**: No tracking, no analytics sent to external services
+- **Free to use**: Use it for free for any purpose (personal or commercial within your organization)
+- **Easy setup**: One-command Docker deployment or manual installation
+
+See the [Setup Guide](.docs/SETUP.md) for detailed deployment instructions.
+
+---
+
+## ✨ Features
+
+<table>
+<tr>
+<td width="50%">
+
+### 💳 Financial Tracking
+- Deposit and withdraw funds
+- Detailed transaction history
+- Smart category suggestions
+- Multi-currency support
+- CSV import/export
+
+</td>
+<td width="50%">
+
+### 📊 Analytics & Insights
+- Spending pattern analysis
+- Income/expense pie charts
+- Monthly and yearly reports
+- Net worth tracking
+- Financial trends visualization
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### 🎯 Goal Setting
+- Monthly savings targets
+- Wishlist management
+- Progress tracking
+- Goal scoring system
+- Achievement milestones
+
+</td>
+<td width="50%">
+
+### ⚡ Automation
+- Scheduled transactions
+- Recurring bills automation
+- Monthly income automation
+- Smart category detection
+- Automated net worth calculation
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### 🔐 Security & Privacy
+- JWT authentication
+- Google OAuth integration
+- Encrypted sensitive data
+- Secure API endpoints
+- User data isolation
+
+</td>
+<td width="50%">
+
+### 🔌 Public API
+- OAuth2 Authorization Code Flow
+- Developer Portal for app management
+- Scope-based permissions
+- Third-party integrations
+- Complete API documentation
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### 🎨 Modern UI/UX
+- Dark/Light theme toggle
+- Fully responsive design
+- Interactive charts
+- Accessible components
+- PWA support
+
+</td>
+<td width="50%">
+
+### 🛠️ Developer Friendly
+- Swagger API documentation
+- Docker one-command setup
+- Comprehensive test suite
+- Modular architecture
+- **100% self-hostable**
+
+</td>
+</tr>
+</table>
+
+---
+
+## 🚀 Quick Start
+
+```bash
+# Clone the repository
+git clone https://github.com/Imhotep-Tech/imhotep_finance.git
+cd imhotep_finance
+
+# Copy environment file
+cp backend/imhotep_finance/.env.example backend/imhotep_finance/.env
+
+# Generate encryption key (required)
+python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+# Add the generated key to backend/imhotep_finance/.env as FIELD_ENCRYPTION_KEY
+
+# Start with Docker
+docker compose up --build
+```
+
+| Service | URL |
+|---------|-----|
+| 🖥️ Frontend | http://localhost:3000 |
+| ⚙️ Backend API | http://localhost:8000 |
+| 📚 API Docs (Swagger) | http://localhost:8000/swagger/ |
+| 🔧 Developer Portal | http://localhost:3000/developer |
+| 👤 Django Admin | http://localhost:8000/admin/ |
+
+> 📘 For detailed setup instructions, see **[Setup Guide](.docs/SETUP.md)**
+
+---
+
+## 📚 Documentation
+
+Comprehensive documentation is available in the `.docs/` folder:
+
+| Document | Description |
+|----------|-------------|
+| [🚀 Setup Guide](.docs/SETUP.md) | Prerequisites, Docker & manual installation, initial configuration |
+| [📘 API Documentation](.docs/API_DOCUMENTATION.md) | Swagger/OpenAPI docs, JWT authorization, endpoint reference |
+| [🔌 OAuth2 Public API](.docs/oauth2-public-api.md) | Complete guide for third-party developers, OAuth2 integration |
+| [⚙️ Environment Variables](.docs/ENVIRONMENT_VARIABLES.md) | Backend & frontend configuration, production setup |
+| [🧩 Folder Structure](.docs/FOLDER_STRUCTURE.md) | Project organization and architecture |
+| [🧪 Testing Guide](.docs/TESTING.md) | Running & writing tests, test structure |
+| [👥 Contributing](.docs/CONTRIBUTING.md) | How to contribute, code style, PR guidelines |
+| [🧱 Development Workflow](.docs/DEVELOPMENT_WORKFLOW.md) | Development practices, CI/CD, best practices |
+
+---
+
+## 🏗️ Tech Stack
+
+<div align="center">
+
+| Frontend | Backend | Database | DevOps |
+|:--------:|:-------:|:--------:|:------:|
+| React 19 | Django 5.2 | PostgreSQL | Docker |
+| Vite | Django REST Framework | | Docker Compose |
+| Tailwind CSS | JWT Auth | | |
+| React Router | OAuth2 Provider | | |
+| Axios | drf-spectacular | | |
+
+</div>
+
+---
 
 ## 🖼️ Screenshots
 
 <div align="center">
-  <!--Main Page-->
-  <img width="1730" height="889" alt="Screenshot from 2025-08-31 12-07-04" src="https://github.com/user-attachments/assets/c2055670-8cbd-44fc-a349-372ab5be0f8a" />
+  <img width="1730" height="889" alt="Landing Page" src="https://github.com/user-attachments/assets/c2055670-8cbd-44fc-a349-372ab5be0f8a" />
   <p><em>Landing Page</em></p>
 
-  <!--Login-->
-  <img width="1727" height="969" alt="Screenshot from 2025-08-31 12-07-18" src="https://github.com/user-attachments/assets/5b60f4f1-d90d-4842-9739-8dad34be524f" />
-  <p><em>Login Page</em></p>
-
-  <!--Dashboard-->
-  <img width="1727" height="969" alt="Screenshot from 2025-08-31 12-28-37" src="https://github.com/user-attachments/assets/235f3c77-73af-4b56-9162-032740b1ccb0" />
+  <img width="1727" height="969" alt="Dashboard" src="https://github.com/user-attachments/assets/235f3c77-73af-4b56-9162-032740b1ccb0" />
   <p><em>Dashboard with transaction overview</em></p>
 
-  <!--Transactions -->
-  <img width="1727" height="969" alt="Screenshot from 2025-08-31 12-30-19" src="https://github.com/user-attachments/assets/5ce73361-c498-4c85-b9fe-5776e208e2c3" />
+  <img width="1727" height="969" alt="Transactions" src="https://github.com/user-attachments/assets/5ce73361-c498-4c85-b9fe-5776e208e2c3" />
   <p><em>Transaction history</em></p>
   
-  <!--Monthly Reports -->
-  <img width="1727" height="969" alt="Screenshot from 2025-08-31 12-30-25" src="https://github.com/user-attachments/assets/97ca7695-2554-40fa-8327-25bc8f3e89b7" />
+  <img width="1727" height="969" alt="Monthly Reports" src="https://github.com/user-attachments/assets/97ca7695-2554-40fa-8327-25bc8f3e89b7" />
   <p><em>Monthly Reports</em></p>
-  
 </div>
 
-## 🔧 Technology Stack
+---
 
-- **Frontend**: React, Vite, Tailwind CSS
-- **Backend**: Django REST Framework (with models for Transactions, NetWorth, Wishlist, etc.)
-- **Database**: PostgreSQL
-- **Deployment**: Docker, Docker Compose
-- **Authentication**: JWT, Google OAuth
+## 🔌 Public API for Developers
 
-## 🚀 Quick Start
+Imhotep Finance provides a **Public API** for third-party developers to integrate with the platform. External applications can securely manage user transactions using OAuth2 authentication.
 
-### Prerequisites
-- **Docker & Docker Compose** - [Install Docker](https://docs.docker.com/get-docker/)
-- **Git** - [Install Git](https://git-scm.com/downloads)
+**Key Features:**
+- ✅ OAuth2 Authorization Code Flow (RFC 6749 compliant)
+- ✅ Scope-based permissions for granular access control
+- ✅ Developer Portal for easy application management
+- ✅ Complete transaction management (Create, Read, Delete)
+- ✅ Comprehensive API documentation
 
-### Setup with Docker (Recommended)
+**📖 [View Full OAuth2 Public API Documentation →](.docs/oauth2-public-api.md)**
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/Imhotep-Tech/imhotep_finance.git
-   cd imhotep_finance
-   ```
+**Quick Start for Developers:**
+1. Register your application at `/developer`
+2. Get Client ID and Secret
+3. Implement OAuth2 flow in your app
+4. Use access tokens to call `/api/v1/external/transaction/` endpoints
 
-2. **Set up environment variables**
-   Create `.env` files for backend and frontend as needed (adapt from your project structure).
-
-3. **Launch the application**
-   ```bash
-   docker compose up --build
-   ```
-
-   This will:
-   - Set up PostgreSQL database
-   - Build and run the Django backend API
-   - Build and run the React frontend
-   - Enable hot reloading for development
-
-4. **Access the application**
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:8000
-   - Django Admin: http://localhost:8000/admin/
-
-### Manual Setup (Alternative)
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/Imhotep-Tech/imhotep_finance.git
-   cd imhotep_finance
-   ```
-
-2. **Backend Setup (Django)**
-   - Install Python 3.11+
-   - Create virtual environment and install dependencies
-   - Set up PostgreSQL database
-   - Run migrations and start server
-
-3. **Frontend Setup (React)**
-   - Install Node.js 20+
-   - Install dependencies with `npm install`
-   - Start development server with `npm run dev`
-
-4. **Environment Variables**
-   Create `.env` files with necessary configurations (DATABASE_URL, SECRET_KEY, etc.).
-
-## 📘 API Docs (Swagger) and Testing
-
-- Swagger UI is available at: `/swagger/` (JSON at `/swagger.json`, ReDoc at `/redoc/`).
-- Authorization in Swagger:
-  - Click the "Authorize" button in the top-right.
-  - Enter your JWT in this format: `Bearer <your_access_token>`
-  - The header sent will be: `Authorization: Bearer <token>`.
-- Getting a token:
-  - Use `POST /api/auth/login/` with valid credentials to receive `access` and `refresh` tokens.
-  - Alternatively, Google OAuth: `POST /api/auth/google/authenticate/` with an authorization code.
-
-Recommended API testing client
-- While Swagger is great for discovery, it's recommended to use Postman (or Insomnia) for end-to-end flows, collections, and environment-driven testing.
-- In Postman, set Authorization type to "Bearer Token" and paste the `access` token, or add a default header `Authorization: Bearer <token>` to the collection.
+---
 
 ## 👥 Contributing
 
-We welcome contributions to Imhotep Financial Manager! Here's how you can contribute:
+We welcome contributions to Imhotep Finance! Here's how you can contribute:
 
 1. **Fork the repository** and create your feature branch
-   ```
-   git checkout -b feature/amazing-feature
-   ```
-
 2. **Make your changes** and test them thoroughly
+3. **Commit your changes** with clear messages
+4. **Push to your branch** and open a Pull Request
 
-3. **Commit your changes**
-   ```
-   git commit -m 'Add some amazing feature'
-   ```
+See [Contributing Guide](.docs/CONTRIBUTING.md) for detailed guidelines.
 
-4. **Push to your branch**
-   ```
-   git push origin feature/amazing-feature
-   ```
+---
 
-5. **Open a Pull Request** describing your changes and their benefits
+## 🧪 Testing
 
-### Development Setup
+Imhotep Finance includes **~240+ tests** covering models, views, serializers, and services.
 
-Follow the Docker or manual setup instructions above. For Docker:
-- Hot reloading is enabled for live code changes
-- Volumes are mounted for instant updates
-- Debug mode is active for both frontend and backend
+```bash
+# Run all backend tests
+docker exec imhotep_finance-backend-1 python manage.py test
+
+# Run specific app tests
+docker exec imhotep_finance-backend-1 python manage.py test accounts
+```
+
+See [Testing Guide](.docs/TESTING.md) for comprehensive testing documentation.
+
+---
 
 ## 📝 Code of Conduct
 
 Please read our [Code of Conduct](CODE_OF_CONDUCT.md) to understand the expectations for participation in our community.
 
+---
+
+## 🔒 Security
+
+We take security seriously. If you discover a security vulnerability, please report it responsibly:
+
+- Email: imhoteptech@outlook.com
+- Include detailed description and steps to reproduce
+- We will acknowledge within 1-3 business days
+
+See [Security Policy](SECURITY.md) for more details.
+
+---
+
 ## 📄 License
 
 This project uses a dual-licensing approach:
-- GNU Affero General Public License v3.0 (AGPL-3.0) for non-commercial use and contributions
-- Commercial License for commercial use, redistribution, or use in commercial products/services
+- **GNU Affero General Public License v3.0 (AGPL-3.0)** for non-commercial use and contributions
+- **Commercial License** for commercial use, redistribution, or use in commercial products/services
 
-For commercial licensing inquiries, please contact imhoteptech@outlook.com.
+For commercial licensing inquiries, please contact **imhoteptech@outlook.com**.
+
+---
+
+<div align="center">
+
+### ⭐ Star this repo if you find it helpful!
+
+**Built with ❤️ by Imhotep Tech**
+
+*"Take control of your finances. Achieve your goals."*
+
+[Documentation](.docs/) • [API Docs](http://localhost:8000/swagger/) • [Developer Portal](http://localhost:3000/developer)
+
+</div>

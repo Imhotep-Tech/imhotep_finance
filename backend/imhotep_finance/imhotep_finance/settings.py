@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
+    'oauth2_provider',  # django-oauth-toolkit
     'corsheaders',
     'csp',
     'drf_spectacular',
@@ -75,12 +76,15 @@ INSTALLED_APPS = [
     'transaction_management',
     'user_reports',
     'wishlist_management',
+    'developer_portal',
+    'public_api',
 ]
 
 # REST Framework configuration
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',  # OAuth2 support
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
@@ -337,7 +341,7 @@ SPECTACULAR_SETTINGS = {
     'SCHEMA_PATH_PREFIX': '/api/',
     'COMPONENT_SPLIT_REQUEST': True,
     'COMPONENT_NO_READ_ONLY_REQUIRED': True,
-    # Security scheme for JWT Bearer tokens
+    # Security scheme for JWT Bearer tokens and OAuth2
     'APPEND_COMPONENTS': {
         'securitySchemes': {
             'Bearer': {
@@ -345,10 +349,25 @@ SPECTACULAR_SETTINGS = {
                 'scheme': 'bearer',
                 'bearerFormat': 'JWT',
                 'description': 'JWT Authorization header using the Bearer scheme. Example: "Authorization: Bearer {token}"',
+            },
+            'OAuth2': {
+                'type': 'oauth2',
+                'flows': {
+                    'authorizationCode': {
+                        'authorizationUrl': f'{SITE_DOMAIN}/o/authorize/',
+                        'tokenUrl': f'{SITE_DOMAIN}/o/token/',
+                        'scopes': {
+                            'read': 'Read access to your financial data',
+                            'write': 'Write access to create/delete transactions',
+                            'transactions:read': 'Read transaction data',
+                            'transactions:write': 'Create and delete transactions',
+                        }
+                    }
+                }
             }
         }
     },
-    'SECURITY': [{'Bearer': []}],
+    'SECURITY': [{'Bearer': []}, {'OAuth2': []}],
     # Automatic tagging based on URL patterns
     'TAGS': [
         {'name': 'Authentication', 'description': 'User authentication and authorization endpoints'},
@@ -359,6 +378,8 @@ SPECTACULAR_SETTINGS = {
         {'name': 'Targets', 'description': 'Financial target management and scoring'},
         {'name': 'Reports', 'description': 'User financial reports (monthly, yearly, history)'},
         {'name': 'Wishlist', 'description': 'Wishlist management'},
+        {'name': 'Developer Portal', 'description': 'OAuth2 application management for third-party developers'},
+        {'name': 'Public API', 'description': 'Public API endpoints for third-party applications (OAuth2 protected)'},
     ],
     # Enable automatic schema generation
     'SERVE_URLCONF': 'imhotep_finance.urls',
@@ -370,3 +391,31 @@ SPECTACULAR_SETTINGS = {
 }
 
 FIELD_ENCRYPTION_KEY = config('FIELD_ENCRYPTION_KEY')
+
+# OAuth2 Provider Configuration (django-oauth-toolkit)
+OAUTH2_PROVIDER = {
+    # This is the list of available scopes for your application
+    'SCOPES': {
+        'read': 'Read access to your financial data',
+        'write': 'Write access to create/delete transactions',
+        'transactions:read': 'Read transaction data',
+        'transactions:write': 'Create and delete transactions',
+    },
+    # Default scopes to request if none are specified
+    'DEFAULT_SCOPES': ['read'],
+    # Access token expiration time (default: 1 hour)
+    'ACCESS_TOKEN_EXPIRE_SECONDS': 3600,
+    # Authorization code expiration time (default: 10 minutes)
+    'AUTHORIZATION_CODE_EXPIRE_SECONDS': 600,
+    # Application model to use
+    'APPLICATION_MODEL': 'oauth2_provider.Application',
+    # Access token model to use
+    'ACCESS_TOKEN_MODEL': 'oauth2_provider.AccessToken',
+    # Refresh token model to use
+    'REFRESH_TOKEN_MODEL': 'oauth2_provider.RefreshToken',
+    # Grant model to use
+    'GRANT_MODEL': 'oauth2_provider.Grant',
+}
+
+# Login URL for OAuth2 authorization flow
+LOGIN_URL = '/api/auth/login/'

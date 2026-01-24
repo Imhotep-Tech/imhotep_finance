@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import Footer from '../../components/common/Footer';
 import Logo from '../../assets/Logo.jpeg';
@@ -19,6 +19,8 @@ const Login = () => {
   
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const nextUrl = searchParams.get('next'); // For OAuth2 redirect back
 
   const handleChange = (e) => {
     setFormData({
@@ -77,7 +79,13 @@ const Login = () => {
     
     if (result.success) {
       login(result.data);
-      navigate('/dashboard');
+      // If there's a next URL (from OAuth2 flow), redirect there, otherwise go to dashboard
+      if (nextUrl) {
+        // Redirect to the OAuth2 authorization URL
+        window.location.href = nextUrl;
+      } else {
+        navigate('/dashboard');
+      }
     } else {
       setError(result.error);
       if (result.info) {
