@@ -57,6 +57,7 @@ jobs:
           EMAIL_PORT=587
           EMAIL_USE_TLS=True
           EMAIL_HOST_USER=ci-test@example.com
+          MAIL_USER=ci-test@example.com
           MAIL_PASSWORD=${MAIL_PASSWORD}
           
           # Google OAuth2 (from secrets or dummy for CI)
