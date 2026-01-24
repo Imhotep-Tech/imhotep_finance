@@ -45,11 +45,35 @@ def get_monthly_report_for_user(*, user, month, year):
     if not user_report:
         raise ValidationError("No report found for the specified month and year")
     
-    # Calculate and save report data if it doesn't exist
-    if not user_report.data:
+    # Calculate and save report data if it doesn't exist or is empty
+    if not user_report.data or user_report.data.strip() in ['{}', '']:
         try:
-            calculate_user_report(user, month, year)
-            save_user_report(user, month, year, user_report.data)
+            # Create date objects for the first and last day of the month
+            start_date = date(year, month, 1)
+            last_day = calendar.monthrange(year, month)[1]
+            end_date = date(year, month, last_day)
+            
+            # Calculate report data
+            user_withdraw_on_range, user_deposit_on_range, total_withdraw, total_deposit = calculate_user_report(start_date, end_date, user)
+            
+            # Format the response data
+            month_name = calendar.month_name[month]
+            response_data = {
+                "user_withdraw_on_range": user_withdraw_on_range,
+                "user_deposit_on_range": user_deposit_on_range,
+                "total_withdraw": float(total_withdraw) if total_withdraw is not None else 0.0,
+                "total_deposit": float(total_deposit) if total_deposit is not None else 0.0,
+                "current_month": f"{month_name} {year}",
+                "favorite_currency": user.favorite_currency or 'USD'
+            }
+            
+            # Save the report
+            success, result = save_user_report(user, start_date, response_data)
+            if not success:
+                raise ValidationError(f"Error saving report: {result}")
+            
+            # Refresh the report from database
+            user_report.refresh_from_db()
         except Exception as e:
             raise ValidationError(f"Error calculating report: {str(e)}")
     
@@ -75,7 +99,7 @@ def get_monthly_report_for_user(*, user, month, year):
                 key=lambda x: x.get('percentage', 0),
                 reverse=True
             )
-    
+
     return {
         "report_data": report_data,
         "month": user_report.month,
