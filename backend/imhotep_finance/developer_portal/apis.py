@@ -79,7 +79,7 @@ class CreateOAuth2ApplicationApi(APIView):
 
         except Exception as e:
             return Response(
-                {'error': f'An error occurred while creating the application: {str(e)}'},
+                {'error': f'An error occurred while creating the application'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
@@ -114,7 +114,7 @@ class CreateOAuth2ApplicationApi(APIView):
 
         except Exception as e:
             return Response(
-                {'error': f'An error occurred while retrieving applications: {str(e)}'},
+                {'error': f'An error occurred while retrieving applications'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
@@ -160,7 +160,7 @@ class GetOAuth2ApplicationApi(APIView):
 
         except Exception as e:
             return Response(
-                {'error': f'An error occurred while retrieving the application: {str(e)}'},
+                {'error': f'An error occurred while retrieving the application'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
@@ -195,7 +195,7 @@ class GetOAuth2ApplicationApi(APIView):
 
         except Exception as e:
             return Response(
-                {'error': f'An error occurred while deleting the application: {str(e)}'},
+                {'error': f'An error occurred while deleting the application'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
@@ -248,7 +248,7 @@ class RegenerateClientSecretApi(APIView):
 
         except Exception as e:
             return Response(
-                {'error': f'An error occurred while regenerating the client secret: {str(e)}'},
+                {'error': f'An error occurred while regenerating the client secret'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
@@ -291,6 +291,6 @@ class AddSwaggerRedirectUriApi(APIView):
 
         except Exception as e:
             return Response(
-                {'error': f'An error occurred: {str(e)}'},
+                {'error': f'An error occurred'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
