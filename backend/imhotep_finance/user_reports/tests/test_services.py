@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from datetime import date
+import json
 from user_reports.services import (
     get_report_history_months_for_user,
     get_monthly_report_for_user,
@@ -23,8 +24,8 @@ class GetReportHistoryMonthsTest(TestCase):
     def test_get_report_history_months_success(self):
         """Test getting report history months"""
         # Create reports for different months
-        Reports.objects.create(user=self.user, month=1, year=2024, data={})
-        Reports.objects.create(user=self.user, month=2, year=2024, data={})
+        Reports.objects.create(user=self.user, month=1, year=2024, data=json.dumps({}))
+        Reports.objects.create(user=self.user, month=2, year=2024, data=json.dumps({}))
         
         result = get_report_history_months_for_user(user=self.user)
         
@@ -44,14 +45,14 @@ class GetMonthlyReportTest(TestCase):
             user=self.user,
             month=1,
             year=2024,
-            data={
+            data=json.dumps({
                 'user_deposit_on_range': [
                     {'category': 'Salary', 'converted_amount': 1000, 'percentage': 100}
                 ],
                 'user_withdraw_on_range': [],
                 'total_deposit': 1000,
                 'total_withdraw': 0
-            }
+            })
         )
     
     def test_get_monthly_report_success(self):
@@ -77,8 +78,8 @@ class GetReportHistoryYearsTest(TestCase):
     
     def test_get_report_history_years_success(self):
         """Test getting report history years"""
-        Reports.objects.create(user=self.user, month=1, year=2023, data={})
-        Reports.objects.create(user=self.user, month=1, year=2024, data={})
+        Reports.objects.create(user=self.user, month=1, year=2023, data=json.dumps({}))
+        Reports.objects.create(user=self.user, month=1, year=2024, data=json.dumps({}))
         
         result = get_report_history_years_for_user(user=self.user)
         
@@ -97,7 +98,7 @@ class GetYearlyReportTest(TestCase):
                 user=self.user,
                 month=month,
                 year=2024,
-                data={
+                data=json.dumps({
                     'user_deposit_on_range': [
                         {'category': 'Salary', 'converted_amount': 1000, 'percentage': 100}
                     ],
@@ -106,7 +107,7 @@ class GetYearlyReportTest(TestCase):
                     ],
                     'total_deposit': 1000,
                     'total_withdraw': 500
-                }
+                })
             )
     
     def test_get_yearly_report_success(self):

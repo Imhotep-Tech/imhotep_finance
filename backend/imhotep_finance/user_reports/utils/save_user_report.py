@@ -1,7 +1,8 @@
 from unicodedata import category
-from ...models import Reports
+from ..models import Reports
 from finance_management.utils.currencies import convert_to_fav_currency
 import calendar
+import json
 from datetime import datetime, date
 
 def save_user_report(user, start_date, response_data):
@@ -11,12 +12,26 @@ def save_user_report(user, start_date, response_data):
     if not user or not start_date or not response_data:
         return False, "Invalid parameters"
     
+    # Ensure response_data is a dict, and convert to JSON string for EncryptedTextField
+    if isinstance(response_data, str):
+        try:
+            # If it's already a JSON string, parse and re-serialize to ensure it's valid
+            response_data = json.loads(response_data)
+        except json.JSONDecodeError:
+            return False, "Invalid JSON data format"
+    
+    if not isinstance(response_data, dict):
+        return False, "Response data must be a dictionary"
+    
+    # Convert dict to JSON string for EncryptedTextField
+    data_json = json.dumps(response_data)
+    
     # Check if a report for the same month and year already exists
     try:
         user_report = Reports.objects.filter(user=user, month=start_date.month, year=start_date.year).first()
         if user_report:
             # Always update the data to ensure it's current
-            user_report.data = response_data
+            user_report.data = data_json
             user_report.save()
             return True, "updated"  # Changed to return status
         else:
@@ -25,7 +40,7 @@ def save_user_report(user, start_date, response_data):
                 user=user,
                 month=start_date.month,
                 year=start_date.year,
-                data=response_data
+                data=data_json
             )
             user_report.save()
             return True, "created"  # Changed to return status
@@ -74,75 +89,106 @@ def save_user_report_with_transaction(user, start_date, transaction, parent_func
     user_report = Reports.objects.filter(user=user, month=start_date.month, year=start_date.year).first()
     
     if user_report:
+        # Parse encrypted data if it's a string (EncryptedTextField returns decrypted string)
+        report_data = user_report.data
+        if isinstance(report_data, str):
+            try:
+                report_data = json.loads(report_data)
+            except json.JSONDecodeError:
+                # If parsing fails, initialize with empty structure
+                report_data = {
+                    "total_deposit": 0.0,
+                    "total_withdraw": 0.0,
+                    "user_deposit_on_range": [],
+                    "user_withdraw_on_range": [],
+                    "favorite_currency": user.favorite_currency or 'USD'
+                }
+        elif not isinstance(report_data, dict):
+            # If it's neither string nor dict, initialize with empty structure
+            report_data = {
+                "total_deposit": 0.0,
+                "total_withdraw": 0.0,
+                "user_deposit_on_range": [],
+                "user_withdraw_on_range": [],
+                "favorite_currency": user.favorite_currency or 'USD'
+            }
+        
         # Update existing report
         if trans_status == "deposit":
-            user_report.data["total_deposit"] = user_report.data.get("total_deposit", 0) + amount
+            report_data["total_deposit"] = report_data.get("total_deposit", 0) + amount
             
             # Update or add category breakdown
             found = False
-            for item in user_report.data.get("user_deposit_on_range", []):
+            for item in report_data.get("user_deposit_on_range", []):
                 if item["category"] == category:
                     item["converted_amount"] = item.get("converted_amount", 0) + amount
                     found = True
                     break
             
             if not found and amount > 0:  # Only add new category if amount is positive
-                if "user_deposit_on_range" not in user_report.data:
-                    user_report.data["user_deposit_on_range"] = []
-                user_report.data["user_deposit_on_range"].append({
+                if "user_deposit_on_range" not in report_data:
+                    report_data["user_deposit_on_range"] = []
+                report_data["user_deposit_on_range"].append({
                     "category": category,
                     "converted_amount": amount,
                     "percentage": 0
                 })
             
             # Remove categories with zero or negative amounts
-            user_report.data["user_deposit_on_range"] = [
-                item for item in user_report.data.get("user_deposit_on_range", [])
+            report_data["user_deposit_on_range"] = [
+                item for item in report_data.get("user_deposit_on_range", [])
                 if item.get("converted_amount", 0) > 0
             ]
             
             # Recalculate percentages
-            total = user_report.data.get("total_deposit", 0)
+            total = report_data.get("total_deposit", 0)
             if total > 0:
-                for item in user_report.data.get("user_deposit_on_range", []):
+                for item in report_data.get("user_deposit_on_range", []):
                     item["percentage"] = round((item.get("converted_amount", 0) / total) * 100, 1)
         
         elif trans_status == "withdraw":
-            user_report.data["total_withdraw"] = user_report.data.get("total_withdraw", 0) + amount
+            report_data["total_withdraw"] = report_data.get("total_withdraw", 0) + amount
             
             # Update or add category breakdown
             found = False
-            for item in user_report.data.get("user_withdraw_on_range", []):
+            for item in report_data.get("user_withdraw_on_range", []):
                 if item["category"] == category:
                     item["converted_amount"] = item.get("converted_amount", 0) + amount
                     found = True
                     break
             
             if not found and amount > 0:  # Only add new category if amount is positive
-                if "user_withdraw_on_range" not in user_report.data:
-                    user_report.data["user_withdraw_on_range"] = []
-                user_report.data["user_withdraw_on_range"].append({
+                if "user_withdraw_on_range" not in report_data:
+                    report_data["user_withdraw_on_range"] = []
+                report_data["user_withdraw_on_range"].append({
                     "category": category,
                     "converted_amount": amount,
                     "percentage": 0
                 })
             
             # Remove categories with zero or negative amounts
-            user_report.data["user_withdraw_on_range"] = [
-                item for item in user_report.data.get("user_withdraw_on_range", [])
+            report_data["user_withdraw_on_range"] = [
+                item for item in report_data.get("user_withdraw_on_range", [])
                 if item.get("converted_amount", 0) > 0
             ]
             
             # Recalculate percentages
-            total = user_report.data.get("total_withdraw", 0)
+            total = report_data.get("total_withdraw", 0)
             if total > 0:
-                for item in user_report.data.get("user_withdraw_on_range", []):
+                for item in report_data.get("user_withdraw_on_range", []):
                     item["percentage"] = round((item.get("converted_amount", 0) / total) * 100, 1)
         
         # Ensure totals don't go negative
-        user_report.data["total_deposit"] = max(0, user_report.data.get("total_deposit", 0))
-        user_report.data["total_withdraw"] = max(0, user_report.data.get("total_withdraw", 0))
+        report_data["total_deposit"] = max(0, report_data.get("total_deposit", 0))
+        report_data["total_withdraw"] = max(0, report_data.get("total_withdraw", 0))
         
+        # Ensure current_month is set if not present
+        if "current_month" not in report_data:
+            month_name = calendar.month_name[start_date.month]
+            report_data["current_month"] = f"{month_name} {start_date.year}"
+        
+        # Save the updated data back (EncryptedTextField will handle serialization)
+        user_report.data = json.dumps(report_data)
         user_report.save()
         return True, None
     

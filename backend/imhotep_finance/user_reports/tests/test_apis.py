@@ -3,6 +3,7 @@ from django.urls import reverse
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 from rest_framework import status
+import json
 from user_reports.models import Reports
 from transaction_management.services import create_transaction
 from transaction_management.models import NetWorth
@@ -20,8 +21,8 @@ class ReportHistoryMonthsApiTest(TestCase):
     
     def test_get_report_history_months_success(self):
         """Test getting report history months via API"""
-        Reports.objects.create(user=self.user, month=1, year=2024, data={})
-        Reports.objects.create(user=self.user, month=2, year=2024, data={})
+        Reports.objects.create(user=self.user, month=1, year=2024, data=json.dumps({}))
+        Reports.objects.create(user=self.user, month=2, year=2024, data=json.dumps({}))
         
         response = self.client.get(self.url)
         
@@ -46,12 +47,12 @@ class MonthlyReportHistoryApiTest(TestCase):
             user=self.user,
             month=1,
             year=2024,
-            data={
+            data=json.dumps({
                 'user_deposit_on_range': [],
                 'user_withdraw_on_range': [],
                 'total_deposit': 0,
                 'total_withdraw': 0
-            }
+            })
         )
     
     def test_get_monthly_report_success(self):
@@ -86,8 +87,8 @@ class ReportHistoryYearsApiTest(TestCase):
     
     def test_get_report_history_years_success(self):
         """Test getting report history years via API"""
-        Reports.objects.create(user=self.user, month=1, year=2023, data={})
-        Reports.objects.create(user=self.user, month=1, year=2024, data={})
+        Reports.objects.create(user=self.user, month=1, year=2023, data=json.dumps({}))
+        Reports.objects.create(user=self.user, month=1, year=2024, data=json.dumps({}))
         
         response = self.client.get(self.url)
         
@@ -109,14 +110,14 @@ class YearlyReportApiTest(TestCase):
                 user=self.user,
                 month=month,
                 year=2024,
-                data={
+                data=json.dumps({
                     'user_deposit_on_range': [
                         {'category': 'Salary', 'converted_amount': 1000, 'percentage': 100}
                     ],
                     'user_withdraw_on_range': [],
                     'total_deposit': 1000,
                     'total_withdraw': 0
-                }
+                })
             )
     
     def test_get_yearly_report_success(self):
