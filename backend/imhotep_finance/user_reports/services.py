@@ -2,8 +2,10 @@ from django.core.exceptions import ValidationError
 from user_reports.models import Reports
 from datetime import date
 import calendar
+import json
 from transaction_management.models import Transactions
-
+from .utils.calculate_user_report import calculate_user_report
+from .utils.save_user_report import save_user_report
 
 def get_report_history_months_for_user(*, user):
     """Get available report months/years for a user."""
@@ -21,8 +23,6 @@ def get_report_history_months_for_user(*, user):
 
 def get_monthly_report_for_user(*, user, month, year):
     """Get a specific monthly report for a user."""
-    from user_reports.user_reports.utils.calculate_user_report import calculate_user_report
-    from user_reports.user_reports.utils.save_user_report import save_user_report
     
     if not user:
         raise ValidationError("User must be authenticated!")
@@ -45,16 +45,47 @@ def get_monthly_report_for_user(*, user, month, year):
     if not user_report:
         raise ValidationError("No report found for the specified month and year")
     
-    # Calculate and save report data if it doesn't exist
-    if not user_report.data:
+    # Calculate and save report data if it doesn't exist or is empty
+    if not user_report.data or user_report.data.strip() in ['{}', '']:
         try:
-            calculate_user_report(user, month, year)
-            save_user_report(user, month, year, user_report.data)
+            # Create date objects for the first and last day of the month
+            start_date = date(year, month, 1)
+            last_day = calendar.monthrange(year, month)[1]
+            end_date = date(year, month, last_day)
+            
+            # Calculate report data
+            user_withdraw_on_range, user_deposit_on_range, total_withdraw, total_deposit = calculate_user_report(start_date, end_date, user)
+            
+            # Format the response data
+            month_name = calendar.month_name[month]
+            response_data = {
+                "user_withdraw_on_range": user_withdraw_on_range,
+                "user_deposit_on_range": user_deposit_on_range,
+                "total_withdraw": float(total_withdraw) if total_withdraw is not None else 0.0,
+                "total_deposit": float(total_deposit) if total_deposit is not None else 0.0,
+                "current_month": f"{month_name} {year}",
+                "favorite_currency": user.favorite_currency or 'USD'
+            }
+            
+            # Save the report
+            success, result = save_user_report(user, start_date, response_data)
+            if not success:
+                raise ValidationError(f"Error saving report: {result}")
+            
+            # Refresh the report from database
+            user_report.refresh_from_db()
         except Exception as e:
             raise ValidationError(f"Error calculating report: {str(e)}")
     
-    # Sort the data by percentage in descending order
+    # Parse encrypted data if it's a string (EncryptedTextField returns decrypted string)
     report_data = user_report.data
+    if isinstance(report_data, str):
+        try:
+            report_data = json.loads(report_data)
+        except json.JSONDecodeError:
+            raise ValidationError("Error parsing report data")
+    
+    # Sort the data by percentage in descending order
     if isinstance(report_data, dict):
         if 'user_deposit_on_range' in report_data and isinstance(report_data['user_deposit_on_range'], list):
             report_data['user_deposit_on_range'] = sorted(
@@ -68,7 +99,7 @@ def get_monthly_report_for_user(*, user, month, year):
                 key=lambda x: x.get('percentage', 0),
                 reverse=True
             )
-    
+
     return {
         "report_data": report_data,
         "month": user_report.month,
@@ -123,6 +154,13 @@ def get_yearly_report_for_user(*, user, year=None):
     for monthly_report in monthly_reports:
         data = monthly_report.data
         
+        # Parse encrypted data if it's a string (EncryptedTextField returns decrypted string)
+        if isinstance(data, str):
+            try:
+                data = json.loads(data)
+            except json.JSONDecodeError:
+                continue  # Skip this report if data can't be parsed
+        
         # Add to yearly totals
         total_withdraw += data.get('total_withdraw', 0)
         total_deposit += data.get('total_deposit', 0)
@@ -176,8 +214,6 @@ def get_yearly_report_for_user(*, user, year=None):
 
 def recalculate_all_reports_for_user(*, user):
     """Recalculate all monthly reports for a user from first to last transaction."""
-    from user_reports.user_reports.utils.calculate_user_report import calculate_user_report
-    from user_reports.user_reports.utils.save_user_report import save_user_report
     
     if not user:
         raise ValidationError("User must be authenticated!")

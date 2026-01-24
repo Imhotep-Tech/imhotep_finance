@@ -46,22 +46,54 @@ class ReportsAdmin(admin.ModelAdmin):
     get_month_year.short_description = 'Period'
     
     def get_total_deposit(self, obj):
-        total = obj.data.get('total_deposit', 0)
-        currency = obj.data.get('favorite_currency', 'USD')
-        return f"{total:.2f} {currency}"
+        """Display total deposit from report data"""
+        if obj.data:
+            # If data is encrypted string, parse it as JSON
+            if isinstance(obj.data, str):
+                import json
+                try:
+                    data = json.loads(obj.data)
+                except json.JSONDecodeError:
+                    return "Error parsing data"
+            else:
+                data = obj.data
+            return data.get('total_deposit', 0)
+        return 0
     get_total_deposit.short_description = 'Total Income'
     
     def get_total_withdraw(self, obj):
-        total = obj.data.get('total_withdraw', 0)
-        currency = obj.data.get('favorite_currency', 'USD')
-        return f"{total:.2f} {currency}"
+        """Display total withdraw from report data"""
+        if obj.data:
+            # If data is encrypted string, parse it as JSON
+            if isinstance(obj.data, str):
+                import json
+                try:
+                    data = json.loads(obj.data)
+                except json.JSONDecodeError:
+                    return "Error parsing data"
+            else:
+                data = obj.data
+            return data.get('total_withdraw', 0)
+        return 0
     get_total_withdraw.short_description = 'Total Expenses'
     
     def get_net_difference(self, obj):
-        deposit = obj.data.get('total_deposit', 0)
-        withdraw = obj.data.get('total_withdraw', 0)
-        difference = deposit - withdraw
-        currency = obj.data.get('favorite_currency', 'USD')
-        symbol = "+" if difference >= 0 else "-"
-        return f"{symbol}{abs(difference):.2f} {currency}"
+        if obj.data:
+            # If data is encrypted string, parse it as JSON
+            if isinstance(obj.data, str):
+                import json
+                try:
+                    data = json.loads(obj.data)
+                except json.JSONDecodeError:
+                    return "Error parsing data"
+            else:
+                data = obj.data
+            
+            deposit = data.get('total_deposit', 0)
+            withdraw = data.get('total_withdraw', 0)
+            difference = deposit - withdraw
+            currency = data.get('favorite_currency', 'USD')
+            symbol = "+" if difference >= 0 else "-"
+            return f"{symbol}{abs(difference):.2f} {currency}"
+        return "0.00"
     get_net_difference.short_description = 'Net Difference'

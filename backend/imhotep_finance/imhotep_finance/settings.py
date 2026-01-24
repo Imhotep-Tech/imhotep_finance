@@ -181,6 +181,10 @@ elif database_type == 'postgresql':
             'PASSWORD': config('DATABASE_PASSWORD', default='imhotep_finance_password'),
             'HOST': config('DATABASE_HOST', default='localhost'), 
             'PORT': '5432',
+        },
+        'backup_source': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'old_data/database_2026-01-24.db',
         }
     }
 
@@ -364,3 +368,5 @@ SPECTACULAR_SETTINGS = {
     # Include all endpoints automatically
     'DISABLE_ERRORS_AND_WARNINGS': False,
 }
+
+FIELD_ENCRYPTION_KEY = config('FIELD_ENCRYPTION_KEY')
