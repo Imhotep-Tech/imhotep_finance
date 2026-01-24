@@ -327,7 +327,7 @@ const DeveloperDashboard = () => {
             </div>
             <div className="mt-4">
               <a
-                href="/swagger/"
+                href="https://github.com/Imhotep-Tech/imhotep_finance/blob/main/.docs/oauth2-public-api.md"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-600 dark:text-blue-400 hover:underline"
