@@ -1,6 +1,7 @@
 from django.db import models
 from accounts.models import User
 from django.utils import timezone
+from encrypted_model_fields.fields import EncryptedCharField
 
 # Create your models here.
 class Transactions(models.Model):
@@ -15,8 +16,8 @@ class Transactions(models.Model):
     amount = models.FloatField()
     currency = models.CharField(max_length=4)
     trans_status = models.CharField(max_length=8, choices=TRANSACTIONS_STATUS)
-    trans_details = models.TextField(blank=True, null=True)
-    category = models.TextField(blank=True, null=True)
+    trans_details = EncryptedCharField(max_length=255, blank=True, null=True)
+    category = EncryptedCharField(max_length=100, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):

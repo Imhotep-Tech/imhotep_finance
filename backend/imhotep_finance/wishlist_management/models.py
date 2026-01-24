@@ -1,6 +1,7 @@
 from django.db import models
 from accounts.models import User
 from django.utils import timezone
+from encrypted_model_fields.fields import EncryptedCharField
 
 def current_year():
     return timezone.now().year
@@ -29,8 +30,8 @@ class Wishlist(models.Model):
     price = models.FloatField()
     currency = models.CharField(max_length=4)
     status = models.BooleanField(choices=STATUS_CHOICES, default=False)
-    link = models.TextField(blank=True, null=True)
-    wish_details = models.TextField(blank=True, null=True)
+    link = EncryptedCharField(max_length=255, blank=True, null=True)
+    wish_details = EncryptedCharField(max_length=255, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
