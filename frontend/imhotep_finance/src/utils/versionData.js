@@ -1,8 +1,22 @@
 export const versionEntries = [
   {
+    version: '7.3.0',
+    date: 'January 24, 2026',
+    badge: { label: 'CURRENT', color: 'red' },
+    summary: 'Improvements Security and added new features',
+    bullets: [
+      'Enhance monthly report calculation and sorting logic',
+      'Add confirmation prompt for unmarking completed wishes in Show Wishlist',
+      'Add demo login functionality for quick access to demo account',
+      'Add Tally feedback link component and integrate it into the footer',
+      'Optimize currency exchange rate fetching and caching mechanism',
+      'Improve error handling and user notifications across the app',
+      'Add CSV import functionality for transactions with validation and error handling'
+    ]
+  },
+  {
     version: '7.2.0',
     date: 'November 26, 2025',
-    badge: { label: 'CURRENT', color: 'red' },
     summary: 'Improvements Security and added new features',
     bullets: [
       'Enhance monthly report calculation and sorting logic',
