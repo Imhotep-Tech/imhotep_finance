@@ -3,7 +3,7 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 from finance_management.utils.currencies import get_allowed_currencies
 from transaction_management.models import Transactions, NetWorth
-from user_reports.user_reports.utils.save_user_report import save_user_report_with_transaction, save_user_report_with_transaction_update
+from user_reports.utils.save_user_report import save_user_report_with_transaction, save_user_report_with_transaction_update
 from datetime import date, datetime
 from typing import List, Dict, Tuple
 from django.db import transaction

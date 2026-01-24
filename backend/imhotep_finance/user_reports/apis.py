@@ -26,7 +26,6 @@ from user_reports.serializers import (
 )
 from rest_framework.exceptions import ValidationError as DRFValidationError
 
-
 @method_decorator(csrf_exempt, name='dispatch')
 class ReportHistoryMonthsApi(APIView):
     permission_classes = [IsAuthenticated]

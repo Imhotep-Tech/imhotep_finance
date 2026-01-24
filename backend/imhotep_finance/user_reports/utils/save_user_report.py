@@ -1,5 +1,5 @@
 from unicodedata import category
-from ...models import Reports
+from ..models import Reports
 from finance_management.utils.currencies import convert_to_fav_currency
 import calendar
 from datetime import datetime, date
