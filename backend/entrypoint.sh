@@ -10,10 +10,16 @@ DB_PASS="${DATABASE_PASSWORD:-imhotep_finance_password}"
 export PGPASSWORD="$DB_PASS"
 
 echo "Waiting for Postgres at $DB_HOST:$DB_PORT (db=$DB_NAME, user=$DB_USER)..."
-until pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" >/dev/null 2>&1; do
+until pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" >/dev/null 2>&1; do
   sleep 1
 done
-echo "Database is ready!"
+echo "PostgreSQL is ready!"
+
+# Ensure the database exists
+echo "Ensuring database $DB_NAME exists..."
+psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d postgres -tc "SELECT 1 FROM pg_database WHERE datname = '$DB_NAME'" | grep -q 1 || \
+  psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d postgres -c "CREATE DATABASE $DB_NAME;"
+echo "Database $DB_NAME is ready!"
 
 echo "Checking for migration conflicts..."
 if python manage.py migrate --check 2>&1 | grep -q "InconsistentMigrationHistory"; then

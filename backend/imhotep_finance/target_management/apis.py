@@ -26,9 +26,11 @@ class TargetManagementApi(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
+        tags=['Targets'],
         request=TargetCreateSerializer,
         responses={200: 'Done', 400: 'Bad Request'},
-        description="Create or update target for authenticated user."
+        description="Create or update target for authenticated user.",
+        operation_id='create_target'
     )
     def post(self, request):
         """Create or update target for authenticated user."""
@@ -61,8 +63,10 @@ class GetTargetApi(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
+        tags=['Targets'],
         responses={200: TargetResponseSerializer, 404: 'Not Found'},
-        description="Get latest target for authenticated user."
+        description="Get latest target for authenticated user.",
+        operation_id='get_target'
     )
     def get(self, request):
         """Get latest target for authenticated user."""
@@ -98,8 +102,10 @@ class GetScoreApi(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
+        tags=['Targets'],
         responses={200: GetScoreResponseSerializer, 404: 'Not Found'},
-        description="Get current month score relative to target."
+        description="Get current month score relative to target.",
+        operation_id='get_score'
     )
     def get(self, request):
         """Get current month score relative to target."""
@@ -140,8 +146,10 @@ class GetScoreHistoryApi(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
+        tags=['Targets'],
         responses={200: TargetHistoryResponseSerializer},
-        description="Get paginated target history for authenticated user."
+        description="Get paginated target history for authenticated user.",
+        operation_id='get_target_history'
     )
     def get(self, request):
         """Get paginated target history for authenticated user."""

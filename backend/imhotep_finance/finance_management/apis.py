@@ -20,8 +20,10 @@ class GetNetworthApi(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
+        tags=['Finance Management'],
         description="Get total networth for the authenticated user.",
-        responses={200: NetworthResponseSerializer}
+        responses={200: NetworthResponseSerializer},
+        operation_id='get_networth'
     )
     def get(self, request):
         """Get current authenticated user total netWorth"""
@@ -38,8 +40,10 @@ class GetNetworthDetailsApi(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
+        tags=['Finance Management'],
         description="Get networth details per currency for the authenticated user.",
-        responses={200: NetworthDetailsResponseSerializer}
+        responses={200: NetworthDetailsResponseSerializer},
+        operation_id='get_networth_details'
     )
     def get(self, request):
         """Get current authenticated user netWorth details"""
@@ -56,9 +60,11 @@ class GetCategoryApi(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
+        tags=['Finance Management'],
         description="Get user's most frequently used categories optionally filtered by status.",
         parameters=[CategoryRequestSerializer],
-        responses={200: CategoryResponseSerializer}
+        responses={200: CategoryResponseSerializer},
+        operation_id='get_categories'
     )
     def get(self, request):
         """Get current authenticated user's most frequently used categories.

@@ -27,22 +27,21 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-1ogqe*_xg$2$kfkdp582m
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
+SITE_DOMAIN = config('SITE_DOMAIN', default='http://localhost:8000')
+frontend_url = config('frontend_url', default='http://localhost:3000')
+
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     '0.0.0.0',
     'backend',
-    'imhotepf.pythonanywhere.com',
+    SITE_DOMAIN.replace('http://', '').replace('https://', ''),
     ]
 
 if DEBUG:
     # Add this to your settings
-    SITE_DOMAIN = 'http://127.0.0.1:8000'
-    frontend_url = "http://localhost:3000"
     CORS_ALLOW_ALL_ORIGINS = True
 else:
-    SITE_DOMAIN = 'https://imhotepf.pythonanywhere.com' 
-    frontend_url = "https://imhotep-finance.vercel.app"
     # Security settings - keep these as they are
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
@@ -68,7 +67,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
     'csp',
-    'drf_yasg',
+    'drf_spectacular',
     'accounts',
     'finance_management',
     'scheduled_trans_management',
@@ -87,23 +86,9 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 20
-}
-
-# drf-yasg / Swagger configuration
-SWAGGER_SETTINGS = {
-    'USE_SESSION_AUTH': False,
-    'SECURITY_DEFINITIONS': {
-        'Bearer': {
-            'type': 'apiKey',
-            'name': 'Authorization',
-            'in': 'header',
-            'description': 'JWT Authorization header using the Bearer scheme. Example: "Authorization: Bearer {token}"',
-        }
-    },
-    'SECURITY_REQUIREMENTS': [{
-        'Bearer': []
-    }],
+    'PAGE_SIZE': 20,
+    # drf-spectacular configuration for automatic OpenAPI schema generation
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 # Simple JWT configuration
@@ -115,7 +100,6 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
 }
-
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -151,7 +135,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'imhoteptech1@gmail.com'
+EMAIL_HOST_USER = config('MAIL_USER')
 EMAIL_HOST_PASSWORD = config('MAIL_PASSWORD')
 
 WSGI_APPLICATION = 'imhotep_finance.wsgi.application'
@@ -161,38 +145,44 @@ AUTH_USER_MODEL = 'accounts.User'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
+database_type = config('database_type', default='sqlite3')
 
-#Mysql database for production
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': config('DATABASE_NAME'),
-#         'USER': config('DATABASE_USER'),
-#         'PASSWORD': config('DATABASE_PASSWORD'),
-#         'HOST': config('DATABASE_HOST'),
-#         'PORT': '3306',
-#         'OPTIONS': {
-#             'charset': 'utf8mb4',  # Optional: Set the character set
-#         },
-#     }
-# }
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DATABASE_NAME'),
-        'USER': config('DATABASE_USER'),
-        'PASSWORD': config('DATABASE_PASSWORD'),
-        'HOST': config('DATABASE_HOST'), 
-        'PORT': '5432',
+if database_type == 'sqlite3':
+    #SQLite database for development and testing
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+elif database_type == 'mysql':
+    #Mysql database for production
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': config('DATABASE_NAME', default='imhotep_finance_db'),
+            'USER': config('DATABASE_USER', default='imhotep_finance_user'),
+            'PASSWORD': config('DATABASE_PASSWORD', default='imhotep_finance_password'),
+            'HOST': config('DATABASE_HOST', default='localhost'),
+            'PORT': '3306',
+            'OPTIONS': {
+                'charset': 'utf8mb4',  # Optional: Set the character set
+            },
+        }
+    }
+
+elif database_type == 'postgresql':
+    #Postgresql database for production
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': config('DATABASE_NAME', default='imhotep_finance_db'),
+            'USER': config('DATABASE_USER', default='imhotep_finance_user'),
+            'PASSWORD': config('DATABASE_PASSWORD', default='imhotep_finance_password'),
+            'HOST': config('DATABASE_HOST', default='localhost'), 
+            'PORT': '5432',
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -239,16 +229,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://imhotep-finance.vercel.app",
-    "https://imhotepf.pythonanywhere.com",
+    frontend_url,
+    SITE_DOMAIN
 ]
 
 # CORS settings for development
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://imhotep-finance.vercel.app",
-    "https://imhotepf.pythonanywhere.com",
+    frontend_url,
+    SITE_DOMAIN
 ]
 
 # Add logging configuration
@@ -333,3 +323,44 @@ if DEBUG:
     CONTENT_SECURITY_POLICY_REPORT_ONLY = CONTENT_SECURITY_POLICY
 else:
     CONTENT_SECURITY_POLICY_REPORT_ONLY = None
+
+# drf-spectacular / OpenAPI 3.0 configuration
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Imhotep Finance API',
+    'DESCRIPTION': 'API documentation for Imhotep Finance - a personal finance management app. All endpoints are automatically documented from code.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SCHEMA_PATH_PREFIX': '/api/',
+    'COMPONENT_SPLIT_REQUEST': True,
+    'COMPONENT_NO_READ_ONLY_REQUIRED': True,
+    # Security scheme for JWT Bearer tokens
+    'APPEND_COMPONENTS': {
+        'securitySchemes': {
+            'Bearer': {
+                'type': 'http',
+                'scheme': 'bearer',
+                'bearerFormat': 'JWT',
+                'description': 'JWT Authorization header using the Bearer scheme. Example: "Authorization: Bearer {token}"',
+            }
+        }
+    },
+    'SECURITY': [{'Bearer': []}],
+    # Automatic tagging based on URL patterns
+    'TAGS': [
+        {'name': 'Authentication', 'description': 'User authentication and authorization endpoints'},
+        {'name': 'User Profile', 'description': 'User profile and preferences management'},
+        {'name': 'Finance Management', 'description': 'Core finance management endpoints (networth, categories)'},
+        {'name': 'Transactions', 'description': 'Transaction management (create, update, delete, list, import, export)'},
+        {'name': 'Scheduled Transactions', 'description': 'Scheduled/recurring transaction management'},
+        {'name': 'Targets', 'description': 'Financial target management and scoring'},
+        {'name': 'Reports', 'description': 'User financial reports (monthly, yearly, history)'},
+        {'name': 'Wishlist', 'description': 'Wishlist management'},
+    ],
+    # Enable automatic schema generation
+    'SERVE_URLCONF': 'imhotep_finance.urls',
+    # Better organization
+    'SORT_OPERATIONS': False,
+    'SORT_TAGS': True,
+    # Include all endpoints automatically
+    'DISABLE_ERRORS_AND_WARNINGS': False,
+}

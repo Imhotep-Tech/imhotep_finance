@@ -26,7 +26,16 @@ from django.utils.decorators import method_decorator
 class WishCreateApi(APIView):
     permission_classes = [IsAuthenticated]
     
-    @extend_schema(request=WishlistInputSerializer)
+    @extend_schema(
+        tags=['Wishlist'],
+        request=WishlistInputSerializer,
+        responses={
+            201: {'description': 'Wish created successfully'},
+            400: 'Validation error',
+            500: 'Internal server error'
+        },
+        operation_id='create_wish'
+    )
     def post(self, request):
         serializer = WishlistInputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -61,12 +70,14 @@ class WishDeleteApi(APIView):
     permission_classes = [IsAuthenticated]
     
     @extend_schema(
+        tags=['Wishlist'],
         responses={
             200: 'Wish deleted successfully',
             400: 'Bad request - Cannot delete wish',
             404: 'Wish not found',
             500: 'Internal server error',
-        }
+        },
+        operation_id='delete_wish'
     )
     def delete(self, request, wish_id):
         try:
@@ -100,13 +111,15 @@ class WishUpdateApi(APIView):
     permission_classes = [IsAuthenticated]
     
     @extend_schema(
+        tags=['Wishlist'],
         request=WishlistInputSerializer,
         responses={
             200: 'Wish updated successfully',
             400: 'Bad request - Validation error',
             404: 'Wish not found',
             500: 'Internal server error',
-        }
+        },
+        operation_id='update_wish'
     )
     def post(self, request, wish_id):
         serializer = WishlistInputSerializer(data=request.data)
@@ -151,8 +164,10 @@ class GetWishlistApi(APIView):
     permission_classes = [IsAuthenticated]
     
     @extend_schema(
+        tags=['Wishlist'],
         parameters=[GetWishlistInputSerializer],
-        responses={200: GetWishlistResponseSerializer}
+        responses={200: GetWishlistResponseSerializer},
+        operation_id='get_wishlist'
     )
     def get(self, request):
         """Return paginated transactions for the logged-in user, filtered by date range."""
@@ -204,10 +219,12 @@ class UpdateWishlistStatusApi(APIView):
     permission_classes = [IsAuthenticated]
     
     @extend_schema(
+        tags=['Wishlist'],
         responses={
             200: 'Wish status updated successfully',
             500: 'Internal server error',
-        }
+        },
+        operation_id='update_wish_status'
     )
     def post(self, request, wish_id):
         """Update the status of a wish."""
