@@ -39,6 +39,8 @@ jobs:
           DATABASE_USER=imhotep_finance_test_user
           DATABASE_PASSWORD=test_password_for_ci
           
+          FIELD_ENCRYPTION_KEY='n92mf1YPKUSezl_LUII9EJWWVy3TnI3JuxlgFuakv_0='
+
           # Django Configuration
           SECRET_KEY=ci-test-secret-key-for-github-actions-only
           DEBUG=1
