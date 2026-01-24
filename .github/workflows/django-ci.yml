@@ -32,6 +32,7 @@ jobs:
           mkdir -p backend/imhotep_finance
           cat > backend/imhotep_finance/.env << EOF
           # Database Configuration
+          database_type=postgresql
           DATABASE_HOST=db
           DATABASE_PORT=5432
           DATABASE_NAME=imhotep_finance_test_db
@@ -45,7 +46,7 @@ jobs:
           
           # Site Configuration
           SITE_DOMAIN=http://localhost:8000
-          FRONTEND_URL=http://localhost:3000
+          frontend_url=http://localhost:3000
           
           # CORS Configuration
           CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000

@@ -18,22 +18,10 @@ from django.contrib import admin
 from django.urls import path, include, re_path
 from django.shortcuts import redirect
 from imhotep_finance.settings import frontend_url
-from drf_yasg import openapi
-from drf_yasg.views import get_schema_view
-from rest_framework import permissions
-
-# Define the schema view for Swagger
-schema_view = get_schema_view(
-    openapi.Info(
-        title="Imhotep Finance API",
-        default_version='v1',
-        description="API documentation for Imhotep Finance - a personal finance management app",
-        terms_of_service="https://www.google.com/policies/terms/",
-        contact=openapi.Contact(email="imhoteptech@outlook.com"),
-        license=openapi.License(name="Dual License: AGPL-3.0 / Commercial"),
-    ),
-    public=True,
-    permission_classes=[permissions.AllowAny],
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularRedocView,
+    SpectacularSwaggerView,
 )
 
 urlpatterns = [
@@ -45,9 +33,11 @@ urlpatterns = [
     path('api/finance-management/', include('transaction_management.urls')),
     path('api/finance-management/', include('user_reports.urls')),
     path('api/finance-management/wishlist/', include('wishlist_management.urls')),
-    # Add Swagger UI and ReDoc URLs before the catch-all redirect
-    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
-    path('swagger.json', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    # OpenAPI 3.0 schema endpoints (automatically generated from code)
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    # Swagger UI - Interactive API documentation
+    path('swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    # ReDoc - Alternative API documentation
+    path('redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
     re_path(r'^.*$', lambda request: redirect(f'{frontend_url}', permanent=False)),
 ]

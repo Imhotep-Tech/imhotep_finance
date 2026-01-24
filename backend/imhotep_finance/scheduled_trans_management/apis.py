@@ -30,12 +30,14 @@ class ScheduledTransactionCreateApi(APIView):
     permission_classes = [IsAuthenticated]
     
     @extend_schema(
+        tags=['Scheduled Transactions'],
         request=ScheduledTransactionInputSerializer,
         responses={
             201: 'Scheduled transaction created successfully',
             400: 'Bad request - Validation error',
             500: 'Internal server error'
-        }
+        },
+        operation_id='create_scheduled_transaction'
     )
     def post(self, request):
         """Create a scheduled transaction."""
@@ -76,11 +78,13 @@ class ScheduledTransactionDeleteApi(APIView):
     permission_classes = [IsAuthenticated]
     
     @extend_schema(
+        tags=['Scheduled Transactions'],
         responses={
             200: 'Scheduled transaction deleted successfully',
             404: 'Scheduled transaction not found',
             500: 'Internal server error'
-        }
+        },
+        operation_id='delete_scheduled_transaction'
     )
     def delete(self, request, scheduled_trans_id):
         """Delete a scheduled transaction."""
@@ -115,13 +119,15 @@ class ScheduledTransactionUpdateApi(APIView):
     permission_classes = [IsAuthenticated]
     
     @extend_schema(
+        tags=['Scheduled Transactions'],
         request=ScheduledTransactionInputSerializer,
         responses={
             200: 'Scheduled transaction updated successfully',
             400: 'Bad request - Validation error',
             404: 'Scheduled transaction not found',
             500: 'Internal server error'
-        }
+        },
+        operation_id='update_scheduled_transaction'
     )
     def post(self, request, scheduled_trans_id):
         """Update a scheduled transaction."""
@@ -167,8 +173,10 @@ class ScheduledTransactionListApi(APIView):
     permission_classes = [IsAuthenticated]
     
     @extend_schema(
+        tags=['Scheduled Transactions'],
         parameters=[ScheduledTransactionFilterSerializer],
-        responses={200: ScheduledTransactionListResponseSerializer}
+        responses={200: ScheduledTransactionListResponseSerializer},
+        operation_id='list_scheduled_transactions'
     )
     def get(self, request):
         """Get paginated scheduled transactions for the logged-in user."""
@@ -222,11 +230,13 @@ class ToggleScheduledTransactionStatusApi(APIView):
     permission_classes = [IsAuthenticated]
     
     @extend_schema(
+        tags=['Scheduled Transactions'],
         responses={
             200: 'Status toggled successfully',
             404: 'Scheduled transaction not found',
             500: 'Internal server error'
-        }
+        },
+        operation_id='toggle_scheduled_transaction_status'
     )
     def post(self, request, scheduled_trans_id):
         """Toggle the active status of a scheduled transaction."""
@@ -262,6 +272,7 @@ class ApplyScheduledTransactionsApi(APIView):
     permission_classes = [IsAuthenticated]
     
     @extend_schema(
+        tags=['Scheduled Transactions'],
         responses={
             200: {
                 'description': 'Scheduled transactions applied',
@@ -273,7 +284,8 @@ class ApplyScheduledTransactionsApi(APIView):
             },
             500: 'Internal server error'
         },
-        description='Apply scheduled transactions for the user; idempotent once per day.'
+        description='Apply scheduled transactions for the user; idempotent once per day.',
+        operation_id='apply_scheduled_transactions'
     )
     def post(self, request):
         """

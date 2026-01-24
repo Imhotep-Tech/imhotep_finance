@@ -5,7 +5,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from finance_management.utils.currencies import get_fav_currency, get_allowed_currencies
 from datetime import datetime
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.types import OpenApiTypes
 from accounts.services import (
     login_user,
     demo_login,
@@ -47,8 +48,10 @@ class UserViewApi(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
+        tags=['User Profile'],
         responses={200: UserViewResponseSerializer},
-        description="Get current authenticated user details."
+        description="Get current authenticated user details.",
+        operation_id='get_user_data'
     )
     def get(self, request):
         """Get current authenticated user details."""
@@ -66,9 +69,11 @@ class ChangeFavCurrencyApi(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
+        tags=['User Profile'],
         request=ChangeFavCurrencyRequestSerializer,
         responses={200: 'Change favorite currency successful', 400: 'Validation error'},
-        description="Change user favorite currency."
+        description="Change user favorite currency.",
+        operation_id='change_favorite_currency'
     )
     def post(self, request):
         """Change Users Favorite currency"""
@@ -93,8 +98,10 @@ class GetFavCurrencyApi(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
+        tags=['User Profile'],
         responses={200: 'Get favorite currency successful'},
-        description="Get user favorite currency."
+        description="Get user favorite currency.",
+        operation_id='get_favorite_currency'
     )
     def get(self, request):
         """Get current authenticated user favorite_currency"""
@@ -108,8 +115,10 @@ class UpdateUserLastLoginApi(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
+        tags=['User Profile'],
         responses={200: 'user last login updated successfully'},
-        description="Update user last login time."
+        description="Update user last login time.",
+        operation_id='update_last_login'
     )
     def post(self, request):
         """Update current authenticated user's last login time"""
@@ -125,9 +134,11 @@ class LoginApi(APIView):
     permission_classes = [AllowAny]
 
     @extend_schema(
+        tags=['Authentication'],
         description="Authenticate using username or email and password.",
         request=LoginRequestSerializer,
-        responses={200: LoginResponseSerializer, 400: 'Invalid credentials'}
+        responses={200: LoginResponseSerializer, 400: 'Invalid credentials', 401: 'Unauthorized'},
+        operation_id='login'
     )
     def post(self, request):
         """Login user and return tokens"""
@@ -173,8 +184,10 @@ class DemoLoginApi(APIView):
     permission_classes = [AllowAny]
 
     @extend_schema(
+        tags=['Authentication'],
         description="Login as a demo user (creates user if not exists).",
-        responses={200: LoginResponseSerializer}
+        responses={200: LoginResponseSerializer},
+        operation_id='demo_login'
     )
     def post(self, request):
         """Login as demo user, create if not exists"""
@@ -210,9 +223,11 @@ class RegisterApi(APIView):
     permission_classes = [AllowAny]
     
     @extend_schema(
+        tags=['Authentication'],
         description="Register a new user.",
         request=RegisterRequestSerializer,
-        responses={201: 'User created successfully', 400: 'Validation error'}
+        responses={201: 'User created successfully', 400: 'Validation error'},
+        operation_id='register'
     )
     def post(self, request):
         """Register a new user and send verification email"""
@@ -246,8 +261,26 @@ class VerifyEmailApi(APIView):
     permission_classes = [AllowAny]
 
     @extend_schema(
-        description="Verify user email using uid and token.",
-        responses={200: 'Email verified successfully', 400: 'Invalid or expired token'}
+        tags=['Authentication'],
+        description="Verify user email using uid and token from query parameters.",
+        parameters=[
+            OpenApiParameter(
+                name='uid',
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                required=True,
+                description='Base64 encoded user ID'
+            ),
+            OpenApiParameter(
+                name='token',
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                required=True,
+                description='Email verification token'
+            ),
+        ],
+        responses={200: 'Email verified successfully', 400: 'Invalid or expired token'},
+        operation_id='verify_email'
     )
     def get(self, request):
         """Verify user email using uid and token"""
@@ -273,9 +306,11 @@ class LogoutApi(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
+        tags=['Authentication'],
         description="Logout by blacklisting the provided refresh token.",
         request={'application/json': {'type': 'object', 'properties': {'refresh': {'type': 'string'}}}},
-        responses={200: {'description': 'Logout successful'}, 400: {'description': 'Invalid token'}}
+        responses={200: {'description': 'Logout successful'}, 400: {'description': 'Invalid token'}},
+        operation_id='logout'
     )
     def post(self, request):
         """Logout view that blacklists the refresh token"""
@@ -308,9 +343,11 @@ class PasswordResetRequestApi(APIView):
     permission_classes = [AllowAny]
 
     @extend_schema(
+        tags=['Authentication'],
         description="Request a password reset email to be sent.",
         request=PasswordResetRequestSerializer,
-        responses={200: {'description': 'Password reset email sent'}, 400: {'description': 'Invalid email'}}
+        responses={200: {'description': 'Password reset email sent'}, 400: {'description': 'Invalid email'}},
+        operation_id='password_reset_request'
     )
     def post(self, request):
         """Request a password reset email"""
@@ -335,9 +372,11 @@ class PasswordResetConfirmApi(APIView):
     permission_classes = [AllowAny]
 
     @extend_schema(
+        tags=['Authentication'],
         description="Confirm password reset with uid/token and new password.",
         request=PasswordResetConfirmSerializer,
-        responses={200: {'description': 'Password reset successful'}, 400: {'description': 'Validation error'}}
+        responses={200: {'description': 'Password reset successful'}, 400: {'description': 'Validation error'}},
+        operation_id='password_reset_confirm'
     )
     def post(self, request):
         """Confirm password reset with new password"""
@@ -365,9 +404,11 @@ class PasswordResetValidateApi(APIView):
     permission_classes = [AllowAny]
 
     @extend_schema(
+        tags=['Authentication'],
         description="Validate password reset token without changing password.",
         request=PasswordResetValidateSerializer,
-        responses={200: {'description': 'Token is valid'}, 400: {'description': 'Invalid token'}}
+        responses={200: {'description': 'Token is valid'}, 400: {'description': 'Invalid token'}},
+        operation_id='password_reset_validate'
     )
     def post(self, request):
         """Validate password reset token"""
@@ -394,8 +435,10 @@ class GoogleLoginUrlApi(APIView):
     permission_classes = [AllowAny]
 
     @extend_schema(
+        tags=['Authentication'],
         description="Get Google OAuth2 login URL for frontend.",
-        responses={200: {'type': 'object', 'properties': {'auth_url': {'type': 'string'}}}}
+        responses={200: {'type': 'object', 'properties': {'auth_url': {'type': 'string'}}}},
+        operation_id='get_google_login_url'
     )
     def get(self, request):
         """Returns the Google OAuth2 login URL for frontend"""
@@ -406,9 +449,11 @@ class GoogleAuthApi(APIView):
     permission_classes = [AllowAny]
 
     @extend_schema(
+        tags=['Authentication'],
         description="Authenticate with Google OAuth2 authorization code.",
         request=GoogleAuthRequestSerializer,
-        responses={200: GoogleAuthResponseSerializer, 400: {'description': 'Invalid code'}}
+        responses={200: GoogleAuthResponseSerializer, 400: {'description': 'Invalid code'}},
+        operation_id='google_authenticate'
     )
     def post(self, request):
         """Handle Google OAuth2 authentication with authorization code"""
@@ -447,8 +492,10 @@ class GetProfileApi(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
+        tags=['User Profile'],
         description="Get current user profile information.",
-        responses={200: UserViewResponseSerializer}
+        responses={200: UserViewResponseSerializer},
+        operation_id='get_profile'
     )
     def get(self, request):
         """Get current user profile information"""
@@ -467,9 +514,11 @@ class UpdateProfileApi(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
+        tags=['User Profile'],
         description="Update current user profile information.",
         request=UpdateProfileRequestSerializer,
-        responses={200: UserViewResponseSerializer, 400: {'description': 'Validation error'}}
+        responses={200: UserViewResponseSerializer, 400: {'description': 'Validation error'}},
+        operation_id='update_profile'
     )
     def put(self, request):
         """Update user profile information"""
@@ -506,9 +555,11 @@ class ChangePasswordApi(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
+        tags=['User Profile'],
         description="Change password for current user.",
         request=ChangePasswordRequestSerializer,
-        responses={200: {'description': 'Password changed successfully'}, 400: {'description': 'Validation error'}}
+        responses={200: {'description': 'Password changed successfully'}, 400: {'description': 'Validation error'}},
+        operation_id='change_password'
     )
     def post(self, request):
         """Change user password"""
@@ -536,9 +587,11 @@ class VerifyEmailChangeApi(APIView):
     permission_classes = [AllowAny]
 
     @extend_schema(
+        tags=['User Profile'],
         description="Verify email change using uid/token and new email.",
         request=VerifyEmailChangeRequestSerializer,
-        responses={200: {'description': 'Email updated successfully'}, 400: {'description': 'Invalid link'}}
+        responses={200: {'description': 'Email updated successfully'}, 400: {'description': 'Invalid link'}},
+        operation_id='verify_email_change'
     )
     def post(self, request):
         """Verify email change using token"""

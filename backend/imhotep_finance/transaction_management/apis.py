@@ -33,7 +33,16 @@ from finance_management.utils.recalculate_networth import recalculate_networth
 class TransactionCreateApi(APIView):
     permission_classes = [IsAuthenticated]
     
-    @extend_schema(request=TransactionInputSerializer)
+    @extend_schema(
+        tags=['Transactions'],
+        request=TransactionInputSerializer,
+        responses={
+            201: {'description': 'Transaction created successfully'},
+            400: 'Validation error',
+            500: 'Internal server error'
+        },
+        operation_id='create_transaction'
+    )
     def post(self, request):
         serializer = TransactionInputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -68,12 +77,14 @@ class TransactionDeleteApi(APIView):
     permission_classes = [IsAuthenticated]
     
     @extend_schema(
+        tags=['Transactions'],
         responses={
             200: TransactionDeleteResponseSerializer,
             400: 'Bad request - Cannot delete transaction',
             404: 'Transaction not found',
             500: 'Internal server error',
-        }
+        },
+        operation_id='delete_transaction'
     )
     def delete(self, request, transaction_id):
         try:
@@ -114,13 +125,15 @@ class TransactionUpdateApi(APIView):
     permission_classes = [IsAuthenticated]
     
     @extend_schema(
+        tags=['Transactions'],
         request=TransactionUpdateSerializer,
         responses={
             200: TransactionUpdateResponseSerializer,
             400: 'Bad request - Validation error',
             404: 'Transaction not found',
             500: 'Internal server error',
-        }
+        },
+        operation_id='update_transaction'
     )
     def post(self, request, transaction_id):
         serializer = TransactionUpdateSerializer(data=request.data)
@@ -171,8 +184,10 @@ class TransactionListApi(APIView):
     permission_classes = [IsAuthenticated]
     
     @extend_schema(
+        tags=['Transactions'],
         parameters=[TransactionFilterSerializer],
-        responses={200: TransactionListResponseSerializer}
+        responses={200: TransactionListResponseSerializer},
+        operation_id='list_transactions'
     )
     def get(self, request):
         """Return paginated transactions for the logged-in user, filtered by date range."""
@@ -233,8 +248,10 @@ class TransactionExportCSVApi(APIView):
     permission_classes = [IsAuthenticated]
     
     @extend_schema(
+        tags=['Transactions'],
         parameters=[TransactionFilterSerializer],
-        responses={200: 'CSV file'}
+        responses={200: 'CSV file'},
+        operation_id='export_transactions_csv'
     )
     def get(self, request):
         """Export transactions as a CSV file for the logged-in user."""
@@ -290,12 +307,14 @@ class TransactionImportCSVApi(APIView):
     parser_classes = [MultiPartParser, FormParser]
     
     @extend_schema(
+        tags=['Transactions'],
         request=CSVFileUploadSerializer,
         responses={
             200: TransactionImportResponseSerializer,
             400: 'Bad request - Invalid file or format',
             500: 'Internal server error',
-        }
+        },
+        operation_id='import_transactions_csv'
     )
     def post(self, request):
         """Import transactions from a CSV file for the logged-in user."""
@@ -348,10 +367,12 @@ class RecalculateNetworthApi(APIView):
     permission_classes = [IsAuthenticated]
     
     @extend_schema(
+        tags=['Transactions'],
         responses={
             200: 'Networth recalculated successfully',
             500: 'Internal server error',
-        }
+        },
+        operation_id='recalculate_networth'
     )
     def post(self, request):
         """Recalculate user's networth from all transactions."""
