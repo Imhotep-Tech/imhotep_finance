@@ -1,8 +1,9 @@
 from django.contrib import admin
 from .models import Wishlist
+from unfold.admin import ModelAdmin
 
 @admin.register(Wishlist)
-class WishlistAdmin(admin.ModelAdmin):
+class WishlistAdmin(ModelAdmin):
     search_fields = [
         'user__username', 
         'user__email', 

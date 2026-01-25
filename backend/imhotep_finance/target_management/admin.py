@@ -1,8 +1,9 @@
 from django.contrib import admin
 from .models import Target
+from unfold.admin import ModelAdmin
 
 @admin.register(Target)
-class TargetAdmin(admin.ModelAdmin):
+class TargetAdmin(ModelAdmin):
     search_fields = [
         'user__username', 
         'user__email', 

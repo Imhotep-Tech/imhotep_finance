@@ -56,6 +56,8 @@ else:
 
 # Application definition
 INSTALLED_APPS = [
+    "unfold",
+    "unfold.contrib.filters",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -287,51 +289,6 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
-CONTENT_SECURITY_POLICY = {
-    "DIRECTIVES": {
-        "default-src": ("'self'",),
-        "script-src": (
-            "'self'",
-            "'unsafe-inline'",  # Remove if you want to block inline scripts
-            "https://cdnjs.cloudflare.com",
-            "https://cdn.jsdelivr.net",
-            "https://unpkg.com",
-        ),
-        "style-src": (
-            "'self'",
-            "'unsafe-inline'",
-            "https://fonts.googleapis.com",
-            "https://cdnjs.cloudflare.com",
-            "https://cdn.jsdelivr.net",
-        ),
-        "font-src": (
-            "'self'",
-            "https://fonts.gstatic.com",
-            "https://cdnjs.cloudflare.com",
-        ),
-        "img-src": (
-            "'self'",
-            "data:",
-            "blob:",
-            "https:",
-        ),
-        "connect-src": (
-            "'self'",
-            frontend_url,
-            "https://api.github.com",
-        ),
-        "frame-ancestors": ("'none'",),
-        "base-uri": ("'self'",),
-        "object-src": ("'none'",),
-    }
-}
-
-# Use report-only mode in development
-if DEBUG:
-    CONTENT_SECURITY_POLICY_REPORT_ONLY = CONTENT_SECURITY_POLICY
-else:
-    CONTENT_SECURITY_POLICY_REPORT_ONLY = None
-
 # drf-spectacular / OpenAPI 3.0 configuration
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Imhotep Finance API',
@@ -419,3 +376,9 @@ OAUTH2_PROVIDER = {
 
 # Login URL for OAuth2 authorization flow
 LOGIN_URL = '/api/auth/login/'
+
+UNFOLD = {
+    "COMMAND_PALETTE": {
+        "items": [], 
+    },
+}

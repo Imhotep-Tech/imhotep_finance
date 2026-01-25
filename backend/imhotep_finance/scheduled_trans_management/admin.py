@@ -1,5 +1,6 @@
-from django.contrib import admin
+from unfold.admin import ModelAdmin
 from django import forms
+from django.contrib import admin
 from .models import ScheduledTransaction
 
 class ScheduledTransactionAdminForm(forms.ModelForm):
@@ -20,7 +21,7 @@ class ScheduledTransactionAdminForm(forms.ModelForm):
         fields = '__all__'
 
 @admin.register(ScheduledTransaction)
-class ScheduledTransactionAdmin(admin.ModelAdmin):
+class ScheduledTransactionAdmin(ModelAdmin):
     form = ScheduledTransactionAdminForm  # Use custom form
     
     search_fields = [
