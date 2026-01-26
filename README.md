@@ -10,6 +10,7 @@
 [![React](https://img.shields.io/badge/React-19.x-61DAFB?style=for-the-badge&logo=react)](https://reactjs.org/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker)](https://www.docker.com/)
 [![Django CI/CD](https://github.com/Imhotep-Tech/imhotep_finance/actions/workflows/django-ci.yml/badge.svg)](https://github.com/Imhotep-Tech/imhotep_finance/actions/workflows/django-ci.yml)
+[![codecov](https://codecov.io/gh/Imhotep-Tech/imhotep_finance/branch/main/graph/badge.svg)](https://codecov.io/gh/Imhotep-Tech/imhotep_finance)
 
 **Take control of your finances. Track spending. Achieve your goals.**
 

@@ -174,14 +174,22 @@ jobs:
           echo "=== Running All Tests ==="
           docker compose exec -T backend python manage.py test --verbosity=2
 
-      - name: Check test coverage (optional)
-        continue-on-error: true
+      - name: Generate test coverage report
         run: |
           docker compose exec -T backend pip install coverage
           docker compose exec -T backend coverage run --source='.' manage.py test
           docker compose exec -T backend coverage report
+          docker compose exec -T backend coverage xml
           docker compose exec -T backend coverage html
           echo "✅ Coverage report generated"
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./backend/imhotep_finance/coverage.xml
+          flags: backend
+          name: backend-coverage
+          fail_ci_if_error: false
 
       - name: Run Django checks
         run: |
