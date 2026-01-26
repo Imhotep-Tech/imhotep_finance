@@ -58,7 +58,7 @@ class TransactionCreateApi(APIView):
                 trans_status=data['trans_status'],
                 category=data.get('category'),
                 trans_details=data.get('trans_details'),
-                transaction_date=data.get('date_param')
+                transaction_date=data.get('date')
             )
             return Response(
                 {"message": "Transaction created successfully", "id": transaction.id},
