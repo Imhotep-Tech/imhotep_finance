@@ -11,7 +11,7 @@ from wishlist_management.models import Wishlist
 import csv
 from io import TextIOWrapper
 
-def create_transaction(*,user, amount, currency, trans_details, category, trans_status, transaction_date: date=None):
+def create_transaction(*,user, amount, currency, trans_details, category, trans_status, transaction_date):
     """Create a transaction and update networth."""
 
     #Just in case more security for inner calls
@@ -29,6 +29,12 @@ def create_transaction(*,user, amount, currency, trans_details, category, trans_
     #if date not provided, use today
     if transaction_date is None:
         transaction_date = date.today()
+
+    if not isinstance(transaction_date, date):
+        try:
+            transaction_date = datetime.strptime(transaction_date, '%Y-%m-%d').date()
+        except ValueError:
+            raise ValidationError("Invalid date format. Use YYYY-MM-DD")
 
     #Validate currency for inner calls
     if currency not in get_allowed_currencies():
