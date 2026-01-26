@@ -1,5 +1,7 @@
 # 🧪 Testing Guide
 
+[![codecov](https://codecov.io/gh/Imhotep-Tech/imhotep_finance/branch/main/graph/badge.svg)](https://codecov.io/gh/Imhotep-Tech/imhotep_finance)
+
 Complete guide to testing Imhotep Finance, including backend tests, frontend tests, and integration testing.
 
 ## Backend Testing
