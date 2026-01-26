@@ -4,7 +4,7 @@ import csv
 from io import TextIOWrapper, StringIO
 
 class TransactionInputSerializer(serializers.Serializer):
-    date_param = serializers.DateField(
+    date = serializers.DateField(
         required=False,
         allow_null=True,
         help_text="Transaction date in YYYY-MM-DD format. Defaults to today if not provided."

@@ -1,23 +1,18 @@
+from collections import Counter
 from transaction_management.models import Transactions
-from django.db.models import Count
+
 
 def get_category(user, status="ANY"):
     """Get user's most frequently used categories."""
-    if not user or not status: #validate input parameters
-        return [] #return empty list if invalid
+    if not user or status is None:  # validate input parameters
+        return []
 
-    qs = Transactions.objects.filter(user=user) #queryset for transactions of the user
-    if status != "ANY": #check if specific status is requested
-        qs = qs.filter(trans_status__iexact=status) #filter by transaction status
+    qs = Transactions.objects.filter(user=user)
+    if status != "ANY":
+        qs = qs.filter(trans_status__iexact=status)
 
-    qs = qs.exclude(category__isnull=True).exclude(category__exact="") #exclude null or empty categories
+    qs = qs.exclude(category__isnull=True).exclude(category__exact="")
 
-    # Annotate and order by frequency
-    categories = (
-        qs.values('category') #group by category
-        .annotate(frequency_of_category=Count('category')) #count frequency of each category
-        .order_by('-frequency_of_category') #order by frequency
-    )
-
-    # Extract just the category names
-    return [row['category'] for row in categories] #return list of category names
+    # Grouping on an encrypted column is non-deterministic, so count in Python after decryption
+    category_list = [c for c in (tx.category for tx in qs.only("category")) if c and c.strip()]
+    return [category for category, _ in Counter(category_list).most_common()]
