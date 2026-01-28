@@ -93,7 +93,7 @@ class TransactionsAdmin(ModelAdmin):
     get_trans_status_display_formatted.admin_order_field = 'trans_status'  # Allows column ordering
 
 @admin.register(NetWorth)
-class NetWorthAdmin(admin.ModelAdmin):
+class NetWorthAdmin(ModelAdmin):
     search_fields = [
         'user__username', 
         'user__email', 
