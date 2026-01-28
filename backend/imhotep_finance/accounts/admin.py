@@ -19,10 +19,10 @@ class UserAdmin(ModelAdmin, BaseUserAdmin):
         (_('Permissions'), {
             'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions'),
         }),
-        (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
+        (_('Important dates'), {'fields': ('last_login_display', 'date_joined')}),
     )
     
-    readonly_fields = ('password_reset_link', 'last_login', 'date_joined')
+    readonly_fields = ('password_reset_link', 'last_login_display', 'date_joined')
     
     def password_reset_link(self, obj):
         """Display password info and reset button on detail page"""
@@ -39,6 +39,16 @@ class UserAdmin(ModelAdmin, BaseUserAdmin):
             )
         return "Set password after creating user"
     password_reset_link.short_description = "Password"
+    
+    def last_login_display(self, obj):
+        """Display last login date and time"""
+        if obj.last_login:
+            return format_html(
+                '<strong>{}</strong>',
+                obj.last_login.strftime('%Y-%m-%d %H:%M:%S')
+            )
+        return "Never logged in"
+    last_login_display.short_description = "Last Login"
     
     def reset_password_button(self, obj):
         """Display a reset password button for each user in list view"""
