@@ -1,8 +1,10 @@
+
 from django.contrib import admin
 from .models import Reports
+from unfold.admin import ModelAdmin
 
 @admin.register(Reports)
-class ReportsAdmin(admin.ModelAdmin):
+class ReportsAdmin(ModelAdmin):
     search_fields = [
         'user__username', 
         'user__email', 

@@ -56,6 +56,8 @@ else:
 
 # Application definition
 INSTALLED_APPS = [
+    "unfold",
+    "unfold.contrib.filters",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -195,20 +197,18 @@ elif database_type == 'postgresql':
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
+# Simplified password validators - only minimum length requirement
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        'OPTIONS': {
+            'min_length': 4,  # Reduced minimum length for easier password changes
+        }
     },
 ]
+
+# For no password validation at all, use empty list:
+# AUTH_PASSWORD_VALIDATORS = []
 
 
 # Internationalization
@@ -286,51 +286,6 @@ SOCIALACCOUNT_PROVIDERS = {
         'SCOPE': ['profile', 'email'],
     }
 }
-
-CONTENT_SECURITY_POLICY = {
-    "DIRECTIVES": {
-        "default-src": ("'self'",),
-        "script-src": (
-            "'self'",
-            "'unsafe-inline'",  # Remove if you want to block inline scripts
-            "https://cdnjs.cloudflare.com",
-            "https://cdn.jsdelivr.net",
-            "https://unpkg.com",
-        ),
-        "style-src": (
-            "'self'",
-            "'unsafe-inline'",
-            "https://fonts.googleapis.com",
-            "https://cdnjs.cloudflare.com",
-            "https://cdn.jsdelivr.net",
-        ),
-        "font-src": (
-            "'self'",
-            "https://fonts.gstatic.com",
-            "https://cdnjs.cloudflare.com",
-        ),
-        "img-src": (
-            "'self'",
-            "data:",
-            "blob:",
-            "https:",
-        ),
-        "connect-src": (
-            "'self'",
-            frontend_url,
-            "https://api.github.com",
-        ),
-        "frame-ancestors": ("'none'",),
-        "base-uri": ("'self'",),
-        "object-src": ("'none'",),
-    }
-}
-
-# Use report-only mode in development
-if DEBUG:
-    CONTENT_SECURITY_POLICY_REPORT_ONLY = CONTENT_SECURITY_POLICY
-else:
-    CONTENT_SECURITY_POLICY_REPORT_ONLY = None
 
 # drf-spectacular / OpenAPI 3.0 configuration
 SPECTACULAR_SETTINGS = {
@@ -419,3 +374,9 @@ OAUTH2_PROVIDER = {
 
 # Login URL for OAuth2 authorization flow
 LOGIN_URL = '/api/auth/login/'
+
+UNFOLD = {
+    "COMMAND_PALETTE": {
+        "items": [], 
+    },
+}

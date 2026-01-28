@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django import forms
 from .models import Transactions, NetWorth
+from unfold.admin import ModelAdmin
 
 class TransactionAdminForm(forms.ModelForm):
     """Custom form to show both capitalized and lowercase options"""
@@ -20,7 +21,7 @@ class TransactionAdminForm(forms.ModelForm):
         fields = '__all__'
 
 @admin.register(Transactions)
-class TransactionsAdmin(admin.ModelAdmin):
+class TransactionsAdmin(ModelAdmin):
     form = TransactionAdminForm  # Use custom form
 
     # Add search functionality
@@ -92,7 +93,7 @@ class TransactionsAdmin(admin.ModelAdmin):
     get_trans_status_display_formatted.admin_order_field = 'trans_status'  # Allows column ordering
 
 @admin.register(NetWorth)
-class NetWorthAdmin(admin.ModelAdmin):
+class NetWorthAdmin(ModelAdmin):
     search_fields = [
         'user__username', 
         'user__email', 
