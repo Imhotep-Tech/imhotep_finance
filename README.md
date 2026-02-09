@@ -8,6 +8,8 @@
 [![License](https://img.shields.io/badge/License-Dual%20License-blue?style=for-the-badge)](LICENSE)
 [![Django](https://img.shields.io/badge/Django-5.2-092E20?style=for-the-badge&logo=django)](https://www.djangoproject.com/)
 [![React](https://img.shields.io/badge/React-19.x-61DAFB?style=for-the-badge&logo=react)](https://reactjs.org/)
+[![React Native](https://img.shields.io/badge/React_Native-0.81-61DAFB?style=for-the-badge&logo=react)](https://reactnative.dev/)
+[![Expo](https://img.shields.io/badge/Expo-54.x-000020?style=for-the-badge&logo=expo)](https://expo.dev/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker)](https://www.docker.com/)
 [![Django CI/CD](https://github.com/Imhotep-Tech/imhotep_finance/actions/workflows/django-ci.yml/badge.svg)](https://github.com/Imhotep-Tech/imhotep_finance/actions/workflows/django-ci.yml)
 [![codecov](https://codecov.io/gh/Imhotep-Tech/imhotep_finance/branch/main/graph/badge.svg)](https://codecov.io/gh/Imhotep-Tech/imhotep_finance)
@@ -25,7 +27,7 @@
 
 ## 📖 About
 
-**Imhotep Finance** is an open-source personal finance management application built with Django and React. It helps you track transactions, manage budgets, set savings goals, and automate recurring expenses. Perfect for individuals seeking a secure, user-friendly way to monitor spending, analyze patterns, and achieve financial freedom.
+**Imhotep Finance** is an open-source personal finance management platform built with Django, React, and React Native. It provides both a powerful web application and a native mobile app to help you track transactions, manage budgets, set savings goals, and automate recurring expenses. Perfect for individuals seeking a secure, user-friendly way to monitor spending, analyze patterns, and achieve financial freedom—anytime, anywhere.
 
 > *"Your finances, simplified. Your goals, achieved."*
 
@@ -130,6 +132,8 @@ See the [Setup Guide](.docs/SETUP.md) for detailed deployment instructions.
 
 ## 🚀 Quick Start
 
+### Web Application
+
 ```bash
 # Clone the repository
 git clone https://github.com/Imhotep-Tech/imhotep_finance.git
@@ -154,7 +158,26 @@ docker compose up --build
 | 🔧 Developer Portal | http://localhost:3000/developer |
 | 👤 Django Admin | http://localhost:8000/admin/ |
 
-> 📘 For detailed setup instructions, see **[Setup Guide](.docs/SETUP.md)**
+### 📱 Mobile App
+
+```bash
+# Navigate to mobile app directory
+cd frontend/imhotep_finance_mobile
+
+# Install dependencies
+npm install
+
+# Start Expo development server
+npx expo start
+```
+
+**Run on your device:**
+- 📱 **Expo Go**: Scan QR code with Expo Go app ([iOS](https://apps.apple.com/app/expo-go/id982107779) | [Android](https://play.google.com/store/apps/details?id=host.exp.exponent))
+- 🤖 **Android Emulator**: Press `a` in terminal
+- 🍎 **iOS Simulator**: Press `i` in terminal (macOS only)
+- 🌐 **Web Browser**: Press `w` in terminal
+
+> 📘 For detailed setup instructions, see **[Setup Guide](.docs/SETUP.md)** and **[Mobile App Guide](.docs/MOBILE_APP.md)**
 
 ---
 
@@ -165,6 +188,7 @@ Comprehensive documentation is available in the `.docs/` folder:
 | Document | Description |
 |----------|-------------|
 | [🚀 Setup Guide](.docs/SETUP.md) | Prerequisites, Docker & manual installation, initial configuration |
+| [📱 Mobile App Guide](.docs/MOBILE_APP.md) | React Native app setup, development, and deployment |
 | [📘 API Documentation](.docs/API_DOCUMENTATION.md) | Swagger/OpenAPI docs, JWT authorization, endpoint reference |
 | [⚙️ Environment Variables](.docs/ENVIRONMENT_VARIABLES.md) | Backend & frontend configuration, production setup |
 | [🧩 Folder Structure](.docs/FOLDER_STRUCTURE.md) | Project organization and architecture |
@@ -178,13 +202,13 @@ Comprehensive documentation is available in the `.docs/` folder:
 
 <div align="center">
 
-| Frontend | Backend | Database | DevOps |
-|:--------:|:-------:|:--------:|:------:|
-| React 19 | Django 5.2 | PostgreSQL | Docker |
-| Vite | Django REST Framework | | Docker Compose |
-| Tailwind CSS | JWT Auth | | |
-| React Router | drf-spectacular | | |
-| Axios |  | | |
+| Web Frontend | Mobile App | Backend | Database | DevOps |
+|:------------:|:----------:|:-------:|:--------:|:------:|
+| React 19 | React Native 0.81 | Django 5.2 | PostgreSQL | Docker |
+| Vite | Expo 54.x | Django REST Framework | | Docker Compose |
+| Tailwind CSS | TypeScript | JWT Auth | | |
+| React Router | Expo Router | drf-spectacular | | |
+| Axios | Axios | | | |
 
 </div>
 

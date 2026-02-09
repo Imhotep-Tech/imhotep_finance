@@ -87,8 +87,45 @@ imhotep_finance/
 │   │   ├── tailwind.config.js
 │   │   └── Dockerfile
 │   │
+│   ├── imhotep_finance_mobile/   # React Native app (Expo)
+│   │   ├── app/                  # File-based routing (Expo Router)
+│   │   │   ├── (auth)/          # Authentication screens
+│   │   │   │   ├── login.tsx
+│   │   │   │   ├── register.tsx
+│   │   │   │   ├── forgot-password.tsx
+│   │   │   │   └── verify-email.tsx
+│   │   │   ├── (tabs)/          # Main app tabs
+│   │   │   │   ├── index.tsx    # Dashboard
+│   │   │   │   ├── transactions.tsx
+│   │   │   │   ├── reports.tsx
+│   │   │   │   ├── wishlist.tsx
+│   │   │   │   ├── scheduled.tsx
+│   │   │   │   └── profile.tsx
+│   │   │   ├── _layout.tsx      # Root layout
+│   │   │   └── +not-found.tsx   # 404 page
+│   │   ├── components/          # Reusable components
+│   │   │   ├── common/         # Common UI components
+│   │   │   ├── forms/          # Form components
+│   │   │   └── transactions/   # Transaction components
+│   │   ├── constants/          # App constants
+│   │   │   ├── api.ts         # API configuration
+│   │   │   ├── Colors.ts      # Color palette
+│   │   │   └── types.ts       # TypeScript types
+│   │   ├── contexts/          # React Context providers
+│   │   │   └── AuthContext.tsx
+│   │   ├── hooks/             # Custom React hooks
+│   │   │   ├── useAuth.ts
+│   │   │   ├── useColorScheme.ts
+│   │   │   └── useTransactions.ts
+│   │   ├── assets/            # Images, fonts, icons
+│   │   ├── app.json           # Expo configuration
+│   │   ├── eas.json           # EAS Build configuration
+│   │   ├── package.json
+│   │   └── tsconfig.json
+│   │
 ├── .docs/                        # Documentation
 │   ├── SETUP.md                  # Setup guide
+│   ├── MOBILE_APP.md             # Mobile app guide
 │   ├── API_DOCUMENTATION.md      # API docs
 │   ├── ENVIRONMENT_VARIABLES.md  # Environment config
 │   ├── FOLDER_STRUCTURE.md       # This file
@@ -118,11 +155,22 @@ imhotep_finance/
 
 ### Frontend Structure
 
+**Web Application (`imhotep_finance/`):**
 - **`components/`**: Reusable React components
 - **`pages/`**: Page-level components (routes)
 - **`contexts/`**: React Context providers (Auth, Theme)
 - **`config/`**: Configuration files (API client)
 - **`utils/`**: Utility functions and helpers
+
+**Mobile App (`imhotep_finance_mobile/`):**
+- **`app/`**: File-based routing with Expo Router
+  - **`(auth)/`**: Authentication screens (login, register, verify email)
+  - **`(tabs)/`**: Main app tabs (dashboard, transactions, reports, etc.)
+- **`components/`**: Reusable React Native components
+- **`constants/`**: API configuration, colors, TypeScript types
+- **`contexts/`**: React Context for state management (AuthContext)
+- **`hooks/`**: Custom React hooks (useAuth, useColorScheme, etc.)
+- **`assets/`**: Images, fonts, and icons
 
 ## Testing Structure
 

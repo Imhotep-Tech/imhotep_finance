@@ -213,7 +213,84 @@ If ports 3000 or 8000 are already in use:
 
 ---
 
+## 📱 Mobile App Setup
+
+The Imhotep Finance mobile app is built with React Native and Expo, providing native iOS and Android experiences.
+
+### Prerequisites
+
+- **Node.js 20+** – [Download](https://nodejs.org/)
+- **npm** or **yarn** – Comes with Node.js
+- **Expo Go app** (for testing):
+  - [iOS App Store](https://apps.apple.com/app/expo-go/id982107779)
+  - [Google Play Store](https://play.google.com/store/apps/details?id=host.exp.exponent)
+
+**Optional (for native development):**
+- **Android Studio** – For Android emulator
+- **Xcode** – For iOS simulator (macOS only)
+
+### Installation
+
+```bash
+# Navigate to mobile app directory
+cd frontend/imhotep_finance_mobile
+
+# Install dependencies
+npm install
+```
+
+### Environment Configuration
+
+The mobile app automatically selects the backend API URL:
+
+1. **Development mode**: Uses local IP (e.g., `http://10.218.226.170:8000`)
+2. **Production mode**: Uses production URL (e.g., `https://imhotepf.pythonanywhere.com`)
+
+To override, create a `.env` file in `frontend/imhotep_finance_mobile/`:
+
+```env
+EXPO_PUBLIC_API_URL=http://your-backend-url:8000
+```
+
+> 💡 **Tip**: For local development on physical devices, update `constants/api.ts` with your machine's local IP address (not `localhost`).
+
+### Running the Mobile App
+
+```bash
+# Start Expo development server
+npx expo start
+```
+
+**Run on your device:**
+- 📱 **Expo Go**: Scan QR code with Expo Go app
+- 🤖 **Android Emulator**: Press `a` in terminal
+- 🍎 **iOS Simulator**: Press `i` in terminal (macOS only)
+- 🌐 **Web Browser**: Press `w` in terminal
+
+### Mobile App Troubleshooting
+
+**Metro Bundler Issues:**
+```bash
+npx expo start --clear
+```
+
+**Module Not Found:**
+```bash
+rm -rf node_modules
+npm install
+```
+
+**API Connection Issues:**
+- Verify backend is running at the configured URL
+- For physical devices, ensure device is on same network as backend
+- Use local network IP instead of `localhost`
+
+> 📘 **For detailed mobile app documentation**, see **[Mobile App Guide](MOBILE_APP.md)**
+
+---
+
 For more detailed information, see:
+- [Mobile App Guide](MOBILE_APP.md) - Complete mobile app documentation
 - [Environment Variables](ENVIRONMENT_VARIABLES.md) - Complete configuration guide
 - [Folder Structure](FOLDER_STRUCTURE.md) - Project organization
 - [Testing Guide](TESTING.md) - Running and writing tests

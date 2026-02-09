@@ -65,7 +65,7 @@ function Footer() {
           </a>
           <TallyFeedbackLink />
           <Link to="/version-history" className="hover:underline">
-            Version 7.3.0
+            Version 7.4.0
           </Link>
         </div>
 

@@ -11,6 +11,7 @@ Complete documentation is available in the `.docs/` folder:
 | Document | Description |
 |----------|-------------|
 | [🚀 Setup Guide](.docs/SETUP.md) | Prerequisites, Docker & manual installation, initial configuration |
+| [📱 Mobile App Guide](.docs/MOBILE_APP.md) | React Native app setup, development, and deployment |
 | [📘 API Documentation](.docs/API_DOCUMENTATION.md) | Swagger/OpenAPI docs, JWT authorization, endpoint reference |
 | [🔌 OAuth2 Public API](.docs/oauth2-public-api.md) | Complete guide for third-party developers, OAuth2 integration |
 | [⚙️ Environment Variables](.docs/ENVIRONMENT_VARIABLES.md) | Backend & frontend configuration, production setup |
@@ -24,7 +25,8 @@ Complete documentation is available in the `.docs/` folder:
 ## 🚀 Quick Start
 
 ### Prerequisites
-- [Docker & Docker Compose](https://docs.docker.com/get-docker/)
+- [Docker & Docker Compose](https://docs.docker.com/get-docker/) (for web application)
+- [Node.js 20+](https://nodejs.org/) (for mobile app)
 - [Git](https://git-scm.com/downloads)
 
 ### Setup
@@ -59,6 +61,7 @@ docker compose up --build
 
 ### Access Points
 
+**Web Application:**
 | Service | URL |
 |---------|-----|
 | Frontend | http://localhost:3000 |
@@ -66,6 +69,20 @@ docker compose up --build
 | Swagger Docs | http://localhost:8000/swagger/ |
 | Developer Portal | http://localhost:3000/developer |
 | Django Admin | http://localhost:8000/admin/ |
+
+**Mobile App:**
+```bash
+cd frontend/imhotep_finance_mobile
+npm install
+npx expo start
+```
+
+- 📱 Scan QR code with Expo Go app
+- 🤖 Press `a` for Android emulator
+- 🍎 Press `i` for iOS simulator (macOS only)
+- 🌐 Press `w` for web browser
+
+See [Mobile App Guide](.docs/MOBILE_APP.md) for detailed mobile setup instructions.
 
 ---
 

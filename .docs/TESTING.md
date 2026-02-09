@@ -293,6 +293,182 @@ GitHub Actions runs the test suite automatically on:
 
 See `.github/workflows/` for CI configuration.
 
+---
+
+## 📱 Mobile App Testing
+
+The React Native mobile app uses manual testing and Expo's testing capabilities.
+
+### Running the Mobile App for Testing
+
+```bash
+# Navigate to mobile app directory
+cd frontend/imhotep_finance_mobile
+
+# Start Expo development server
+npx expo start
+```
+
+### Testing Platforms
+
+**1. Expo Go (Recommended for Quick Testing):**
+- Install Expo Go on your physical device
+- Scan QR code from terminal
+- Test on real device without building
+
+**2. Android Emulator:**
+```bash
+# Start Android emulator
+npx expo start --android
+```
+
+**3. iOS Simulator (macOS only):**
+```bash
+# Start iOS simulator
+npx expo start --ios
+```
+
+**4. Web Browser:**
+```bash
+# Test web version
+npx expo start --web
+```
+
+### Mobile App Testing Checklist
+
+**Authentication Flow:**
+- [ ] User registration with email/password
+- [ ] Email verification via deep link
+- [ ] Login with valid credentials
+- [ ] Login with invalid credentials (error handling)
+- [ ] Logout functionality
+- [ ] Password reset flow
+- [ ] Session persistence (token storage)
+
+**Dashboard:**
+- [ ] Balance display
+- [ ] Recent transactions list
+- [ ] Quick actions (Add Income/Expense)
+- [ ] Navigation to other screens
+
+**Transactions:**
+- [ ] Add new transaction (income/expense)
+- [ ] Edit existing transaction
+- [ ] Delete transaction
+- [ ] Transaction list pagination
+- [ ] Filter transactions by category
+- [ ] Search transactions
+- [ ] CSV export functionality
+
+**Reports:**
+- [ ] Monthly report generation
+- [ ] Yearly report generation
+- [ ] Chart rendering (pie charts, bar charts)
+- [ ] Month/year selector
+- [ ] Report data accuracy
+
+**Wishlist:**
+- [ ] Add wishlist item
+- [ ] Edit wishlist item
+- [ ] Delete wishlist item
+- [ ] Progress tracking
+- [ ] Goal completion
+
+**Scheduled Transactions:**
+- [ ] View scheduled transactions
+- [ ] Add new scheduled transaction
+- [ ] Edit scheduled transaction
+- [ ] Delete scheduled transaction
+
+**Profile:**
+- [ ] View user profile
+- [ ] Update profile information
+- [ ] Change password
+- [ ] Update financial settings (monthly target, currency)
+- [ ] Theme switching (dark/light mode)
+
+**Cross-Platform Testing:**
+- [ ] Test on iOS device/simulator
+- [ ] Test on Android device/emulator
+- [ ] Test on different screen sizes
+- [ ] Test landscape orientation
+- [ ] Test web version
+
+**Network & Error Handling:**
+- [ ] API connection success
+- [ ] API connection failure (offline mode)
+- [ ] Invalid API responses
+- [ ] Timeout handling
+- [ ] Error messages display correctly
+
+**Deep Linking:**
+- [ ] Email verification link opens app
+- [ ] Email change verification link opens app
+- [ ] Deep link parameter validation
+
+**Performance:**
+- [ ] App startup time
+- [ ] Screen navigation smoothness
+- [ ] List scrolling performance
+- [ ] Image loading
+- [ ] API response time
+
+### Common Testing Scenarios
+
+**Test API Connection:**
+1. Ensure backend is running
+2. Verify `EXPO_PUBLIC_API_URL` is correct
+3. Test login to verify connection
+4. Check console logs for API calls
+
+**Test Deep Links:**
+```bash
+# iOS
+npx uri-scheme open imhotep-finance://verify-email?token=test --ios
+
+# Android
+npx uri-scheme open imhotep-finance://verify-email?token=test --android
+```
+
+**Test Offline Behavior:**
+1. Turn off backend server
+2. Attempt API operations
+3. Verify error messages display
+4. Turn backend back on
+5. Verify app recovers
+
+**Test Different Environments:**
+1. Development (local backend)
+2. Production (deployed backend)
+3. Verify environment switching works
+
+### Debugging Mobile App
+
+**View Console Logs:**
+- Logs appear in terminal where `npx expo start` is running
+- Use `console.log()` for debugging
+
+**React Native Debugger:**
+1. Shake device or press `Cmd+D` (iOS) / `Cmd+M` (Android)
+2. Select "Debug Remote JS"
+3. Open Chrome DevTools
+
+**Expo Dev Tools:**
+- Press `m` in terminal to open developer menu
+- View network requests
+- Inspect component tree
+
+### Mobile App Test Best Practices
+
+1. **Test on Real Devices**: Emulators don't always reflect real device behavior
+2. **Test Different Network Conditions**: WiFi, cellular, offline
+3. **Test Different OS Versions**: iOS and Android versions
+4. **Test Screen Sizes**: Small phones, tablets, different aspect ratios
+5. **Test User Flows**: Complete end-to-end user journeys
+6. **Test Error States**: Network errors, validation errors, API errors
+
+> 📘 **For detailed mobile app documentation**, see **[Mobile App Guide](MOBILE_APP.md)**
+
 ## Additional Resources
 
 - [Development Workflow](DEVELOPMENT_WORKFLOW.md) - Development practices

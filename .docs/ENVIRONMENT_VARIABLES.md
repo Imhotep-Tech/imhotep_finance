@@ -64,6 +64,22 @@ VITE_APP_URL=http://localhost:3000
 VITE_GOOGLE_CLIENT_ID=your-google-client-id
 ```
 
+## Mobile App Environment Variables
+
+Create `frontend/imhotep_finance_mobile/.env` file (optional):
+
+```env
+# Backend API URL (optional - auto-detected if not set)
+EXPO_PUBLIC_API_URL=http://your-backend-url:8000
+```
+
+> 💡 **Note**: The mobile app automatically selects the API URL:
+> - **Development mode** (`__DEV__`): Uses local IP (e.g., `http://10.218.226.170:8000`)
+> - **Production mode**: Uses production URL (e.g., `https://imhotepf.pythonanywhere.com`)
+> - **Override**: Set `EXPO_PUBLIC_API_URL` in `.env` to override automatic selection
+
+For local development on physical devices, update `constants/api.ts` with your machine's local IP address instead of `localhost`.
+
 ## Required Variables
 
 ### Backend
@@ -81,12 +97,18 @@ VITE_GOOGLE_CLIENT_ID=your-google-client-id
 | `EMAIL_*` | ❌ Optional | For email notifications |
 | `GOOGLE_OAUTH2_*` | ❌ Optional | For Google login integration |
 
-### Frontend
+### Frontend (Web)
 
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `VITE_API_URL` | ✅ Yes | Backend API URL |
 | `VITE_APP_URL` | ⚠️ Recommended | Frontend URL (for SEO) |
+
+### Mobile App
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `EXPO_PUBLIC_API_URL` | ❌ Optional | Backend API URL (auto-detected if not set) |
 
 ## Generating Required Keys
 

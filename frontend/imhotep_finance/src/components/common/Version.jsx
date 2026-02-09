@@ -83,7 +83,7 @@ const Version = () => {
             <div className="text-gray-700 dark:text-gray-300">Features Added</div>
           </div>
           <div className="bg-white/90 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-6 text-center shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-shadow duration-200">
-            <div className="text-3xl font-bold text-teal-600 dark:text-teal-400 mb-2">18</div>
+            <div className="text-3xl font-bold text-teal-600 dark:text-teal-400 mb-2">19</div>
             <div className="text-gray-700 dark:text-gray-300">Months of Development</div>
           </div>
         </div>
@@ -102,11 +102,10 @@ const Version = () => {
                   <div>
                     <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">Version {entry.version}</h3>
                     {entry.badge && (
-                      <span className={`inline-block mt-1 px-2 py-1 text-xs font-semibold rounded-full ${
-                        entry.badge.color === 'red' 
-                        ? 'bg-red-100 text-red-700' 
-                        : 'bg-yellow-100 text-yellow-700'
-                      }`}>
+                      <span className={`inline-block mt-1 px-2 py-1 text-xs font-semibold rounded-full ${entry.badge.color === 'red'
+                          ? 'bg-red-100 text-red-700'
+                          : 'bg-yellow-100 text-yellow-700'
+                        }`}>
                         {entry.badge.label}
                       </span>
                     )}
