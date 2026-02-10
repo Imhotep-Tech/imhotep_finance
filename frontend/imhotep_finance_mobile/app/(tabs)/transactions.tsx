@@ -93,15 +93,31 @@ export default function TransactionsScreen() {
             const res = await api.get('/api/finance-management/transaction/get-transactions/', { params });
 
             const newTransactions = res.data.transactions || [];
+            let actuallyAddedCount = 0;
 
             if (refresh) {
                 setTransactions(newTransactions);
+                actuallyAddedCount = newTransactions.length;
             } else {
-                setTransactions(prev => [...prev, ...newTransactions]);
+                // Filter out duplicates by checking existing transaction IDs
+                setTransactions(prev => {
+                    const existingIds = new Set(prev.map(t => t.id));
+                    const uniqueNewTransactions = newTransactions.filter((t: any) => !existingIds.has(t.id));
+                    actuallyAddedCount = uniqueNewTransactions.length;
+                    return [...prev, ...uniqueNewTransactions];
+                });
             }
 
-            // Check if we have more pages from API response or based on count
-            const hasMoreFromAPI = res.data.has_more !== undefined ? res.data.has_more : (newTransactions.length >= 10);
+            // Determine if there are more pages
+            // If API provides has_more, use it. Otherwise, check if we got a full page of results
+            // Also check if we actually added any new unique transactions
+            let hasMoreFromAPI;
+            if (res.data.has_more !== undefined) {
+                hasMoreFromAPI = res.data.has_more;
+            } else {
+                // If we got fewer than 10 transactions, or all were duplicates, no more pages
+                hasMoreFromAPI = newTransactions.length >= 10 && actuallyAddedCount > 0;
+            }
             setHasMore(hasMoreFromAPI);
 
         } catch (err) {
@@ -122,6 +138,7 @@ export default function TransactionsScreen() {
     // Apply filters triggers reload
     const applyFilters = () => {
         setPage(1);
+        setHasMore(true); // Reset hasMore when applying new filters
         setShowFilterModal(false);
         fetchTransactions(1, true);
     };
@@ -133,6 +150,7 @@ export default function TransactionsScreen() {
         setCategoryFilter('');
         setDetailsSearch('');
         setPage(1);
+        setHasMore(true); // Reset hasMore when clearing filters
         setShowFilterModal(false);
         setTimeout(() => fetchTransactions(1, true), 200);
     };
@@ -149,6 +167,7 @@ export default function TransactionsScreen() {
     const onRefresh = () => {
         setRefreshing(true);
         setPage(1);
+        setHasMore(true); // Reset hasMore when refreshing
         fetchTransactions(1, true);
     };
 
@@ -187,12 +206,15 @@ export default function TransactionsScreen() {
         <View style={[styles.container, themeStyles.container]}>
             {/* Header */}
             <View style={[styles.header, themeStyles.header]}>
-                <Text style={[styles.headerTitle, themeStyles.text]}>Transactions</Text>
+                <View>
+                    <Text style={[styles.headerTitle, themeStyles.text]}>Transactions</Text>
+                    <Text style={[styles.headerSubtitle, themeStyles.subText]}>Manage your financial activity</Text>
+                </View>
                 <TouchableOpacity
                     style={[styles.filterButton, themeStyles.filterButton]}
                     onPress={() => setShowFilterModal(true)}
                 >
-                    <Ionicons name="options" size={20} color={isDark ? '#cbd5e1' : '#475569'} />
+                    <Ionicons name="options" size={24} color={isDark ? '#cbd5e1' : '#475569'} />
                 </TouchableOpacity>
             </View>
 
@@ -220,10 +242,40 @@ export default function TransactionsScreen() {
                     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={isDark ? "#fff" : "#366c6b"} />
                 }
                 onEndReached={loadMore}
-                onEndReachedThreshold={0.5}
-                ListFooterComponent={loading && !refreshing ? <ActivityIndicator size="small" color="#366c6b" style={{ margin: 20 }} /> : null}
-                ListEmptyComponent={!loading ? <Text style={[styles.emptyText, themeStyles.subText]}>No transactions found.</Text> : null}
-                contentContainerStyle={{ paddingBottom: 100 }}
+                onEndReachedThreshold={0.3}
+                ListFooterComponent={() => {
+                    if (loading && !refreshing && transactions.length > 0) {
+                        return (
+                            <View style={styles.footerLoading}>
+                                <ActivityIndicator size="small" color="#366c6b" />
+                                <Text style={[styles.footerText, themeStyles.subText]}>Loading more...</Text>
+                            </View>
+                        );
+                    }
+                    if (!loading && !hasMore && transactions.length > 0) {
+                        return (
+                            <View style={styles.footerEnd}>
+                                <Ionicons name="checkmark-circle" size={20} color={isDark ? '#475569' : '#94a3b8'} />
+                                <Text style={[styles.footerText, themeStyles.subText]}>No more transactions</Text>
+                            </View>
+                        );
+                    }
+                    return null;
+                }}
+                ListEmptyComponent={
+                    !loading ? (
+                        <View style={styles.emptyContainer}>
+                            <Ionicons name="receipt-outline" size={64} color={isDark ? '#475569' : '#cbd5e1'} />
+                            <Text style={[styles.emptyText, themeStyles.text]}>No transactions found</Text>
+                            <Text style={[styles.emptySubtext, themeStyles.subText]}>
+                                {startDate || endDate || categoryFilter || detailsSearch
+                                    ? 'Try adjusting your filters'
+                                    : 'Add your first transaction to get started'}
+                            </Text>
+                        </View>
+                    ) : null
+                }
+                contentContainerStyle={transactions.length === 0 ? styles.emptyListContent : { paddingBottom: 100 }}
             />
 
             {/* Add Button (Floating) */}
@@ -350,12 +402,13 @@ export default function TransactionsScreen() {
     );
 }
 
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
     header: {
-        paddingTop: 60, // Status bar
+        paddingTop: 60,
         paddingBottom: 20,
         paddingHorizontal: 20,
         flexDirection: 'row',
@@ -364,11 +417,16 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
     },
     headerTitle: {
-        fontSize: 24,
+        fontSize: 32,
         fontWeight: 'bold',
+        marginBottom: 4,
+    },
+    headerSubtitle: {
+        fontSize: 14,
+        marginTop: 2,
     },
     filterButton: {
-        padding: 10,
+        padding: 8,
         borderRadius: 12,
     },
     actionsContainer: {
@@ -382,36 +440,64 @@ const styles = StyleSheet.create({
     actionChip: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 12,
-        paddingVertical: 8,
+        paddingHorizontal: 14,
+        paddingVertical: 10,
         borderRadius: 20,
         borderWidth: 1,
         gap: 6,
     },
     actionText: {
         fontSize: 14,
-        fontWeight: '500',
+        fontWeight: '600',
+    },
+    footerLoading: {
+        paddingVertical: 20,
+        alignItems: 'center',
+        gap: 8,
+    },
+    footerEnd: {
+        paddingVertical: 20,
+        alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        gap: 8,
+    },
+    footerText: {
+        fontSize: 14,
+    },
+    emptyContainer: {
+        paddingVertical: 80,
+        paddingHorizontal: 40,
+        alignItems: 'center',
+        gap: 16,
+    },
+    emptyListContent: {
+        flexGrow: 1,
     },
     emptyText: {
         textAlign: 'center',
-        marginTop: 50,
-        fontSize: 16,
+        fontSize: 18,
+        fontWeight: '600',
+    },
+    emptySubtext: {
+        textAlign: 'center',
+        fontSize: 14,
     },
     fab: {
         position: 'absolute',
         bottom: 30,
         right: 30,
-        width: 56,
-        height: 56,
-        borderRadius: 28,
+        width: 60,
+        height: 60,
+        borderRadius: 30,
         backgroundColor: '#366c6b',
         justifyContent: 'center',
         alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
-        elevation: 8,
+        shadowColor: '#366c6b',
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.4,
+        shadowRadius: 8,
+        elevation: 10,
     },
     modalOverlay: {
         flex: 1,
@@ -422,7 +508,7 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 24,
         borderTopRightRadius: 24,
         padding: 24,
-        maxHeight: '90%', // Limit height
+        maxHeight: '90%',
     },
     modalHeader: {
         flexDirection: 'row',
@@ -431,7 +517,7 @@ const styles = StyleSheet.create({
         marginBottom: 24,
     },
     modalTitle: {
-        fontSize: 20,
+        fontSize: 22,
         fontWeight: 'bold',
     },
     label: {
@@ -442,7 +528,7 @@ const styles = StyleSheet.create({
     },
     input: {
         borderRadius: 12,
-        padding: 12,
+        padding: 14,
         borderWidth: 1,
         fontSize: 16,
     },
@@ -483,14 +569,14 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: 12,
+        padding: 14,
         borderRadius: 12,
         borderWidth: 1,
     },
     modalActions: {
         flexDirection: 'row',
         gap: 16,
-        marginTop: 20,
+        marginTop: 24,
     },
     modalButton: {
         flex: 1,
@@ -500,18 +586,26 @@ const styles = StyleSheet.create({
     },
     clearButton: {
         backgroundColor: 'transparent',
-        borderWidth: 1,
+        borderWidth: 2,
         borderColor: '#ef4444',
     },
     applyButton: {
         backgroundColor: '#366c6b',
+        shadowColor: '#366c6b',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 6,
+        elevation: 4,
     },
     clearButtonText: {
         color: '#ef4444',
         fontWeight: 'bold',
+        fontSize: 16,
     },
     applyButtonText: {
         color: 'white',
         fontWeight: 'bold',
+        fontSize: 16,
     }
 });
+

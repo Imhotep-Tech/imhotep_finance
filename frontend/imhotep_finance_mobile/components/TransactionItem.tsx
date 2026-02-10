@@ -24,7 +24,7 @@ const TransactionItem: React.FC<TransactionItemProps> = ({ transaction, onPress 
     const themeStyles = {
         container: {
             backgroundColor: isDark ? '#1e293b' : 'white',
-            borderBottomColor: isDark ? '#334155' : '#f0f0f0',
+            borderBottomColor: isDark ? '#334155' : '#f1f5f9',
         },
         text: {
             color: isDark ? '#f1f5f9' : '#1e293b',
@@ -37,8 +37,8 @@ const TransactionItem: React.FC<TransactionItemProps> = ({ transaction, onPress 
         },
         iconBg: {
             backgroundColor: isDeposit
-                ? (isDark ? 'rgba(16, 185, 129, 0.2)' : '#d1fae5')
-                : (isDark ? 'rgba(239, 68, 68, 0.2)' : '#fee2e2'),
+                ? (isDark ? 'rgba(16, 185, 129, 0.15)' : '#d1fae5')
+                : (isDark ? 'rgba(239, 68, 68, 0.15)' : '#fee2e2'),
         },
         iconColor: isDeposit ? '#059669' : '#dc2626'
     };
@@ -51,8 +51,8 @@ const TransactionItem: React.FC<TransactionItemProps> = ({ transaction, onPress 
         >
             <View style={[styles.iconContainer, themeStyles.iconBg]}>
                 <Ionicons
-                    name={isDeposit ? "arrow-up" : "arrow-down"}
-                    size={20}
+                    name={isDeposit ? "arrow-down" : "arrow-up"}
+                    size={24}
                     color={themeStyles.iconColor}
                 />
             </View>
@@ -83,21 +83,21 @@ const TransactionItem: React.FC<TransactionItemProps> = ({ transaction, onPress 
 const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
-        padding: 16,
+        padding: 18,
         borderBottomWidth: 1,
         alignItems: 'center',
     },
     iconContainer: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
+        width: 48,
+        height: 48,
+        borderRadius: 24,
         justifyContent: 'center',
         alignItems: 'center',
-        marginRight: 12,
+        marginRight: 14,
     },
     contentContainer: {
         flex: 1,
-        gap: 4,
+        gap: 6,
     },
     topRow: {
         flexDirection: 'row',
@@ -110,22 +110,22 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     category: {
-        fontSize: 16,
+        fontSize: 17,
         fontWeight: '600',
         flex: 1,
-        marginRight: 8,
+        marginRight: 12,
     },
     amount: {
-        fontSize: 16,
+        fontSize: 17,
         fontWeight: 'bold',
     },
     details: {
         fontSize: 14,
         flex: 1,
-        marginRight: 8,
+        marginRight: 12,
     },
     date: {
-        fontSize: 12,
+        fontSize: 13,
     },
 });
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -7,63 +7,68 @@ import {
     TouchableOpacity,
     ActivityIndicator,
     Alert,
-    RefreshControl
+    RefreshControl,
+    Modal,
+    Animated
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import api from '@/constants/api';
-// Check if I can use a simple modal or if I should assume standard components.
-// The user's package.json doesn't show @react-native-picker/picker.
-// Use a simple custom dropdown or standard React Native Modal for selection to be safe.
-// Actually, I'll use a simple custom selector modal to avoid dependencies.
 
-const CustomSelector = ({ visible, options, onSelect, onClose, title, selectedValue }: any) => {
+const FilterModal = ({ visible, options, onSelect, onClose, title, selectedValue }: any) => {
     const colorScheme = useColorScheme();
     const isDark = colorScheme === 'dark';
 
-    if (!visible) return null;
-
     return (
-        <View style={styles.modalOverlay}>
-            <View style={[styles.modalContent, { backgroundColor: isDark ? '#1e293b' : 'white' }]}>
-                <View style={styles.modalHeader}>
-                    <Text style={[styles.modalTitle, { color: isDark ? '#f1f5f9' : '#1e293b' }]}>{title}</Text>
-                    <TouchableOpacity onPress={onClose}>
-                        <Ionicons name="close" size={24} color={isDark ? '#94a3b8' : '#64748b'} />
-                    </TouchableOpacity>
-                </View>
-                <ScrollView style={{ maxHeight: 400 }} showsVerticalScrollIndicator={true}>
-                    {options.map((opt: any) => (
-                        <TouchableOpacity
-                            key={opt.value}
-                            style={[
-                                styles.optionItem,
-                                {
-                                    borderBottomColor: isDark ? '#334155' : '#f1f5f9',
-                                    backgroundColor: selectedValue === opt.value ? (isDark ? '#334155' : '#f8fafc') : 'transparent'
-                                }
-                            ]}
-                            onPress={() => onSelect(opt.value)}
-                        >
-                            <Text style={[
-                                styles.optionText,
-                                {
-                                    color: selectedValue === opt.value ? '#366c6b' : (isDark ? '#f1f5f9' : '#1e293b'),
-                                    fontWeight: selectedValue === opt.value ? 'bold' : 'normal'
-                                }
-                            ]}>
-                                {opt.label}
-                            </Text>
-                            {selectedValue === opt.value && (
-                                <Ionicons name="checkmark" size={20} color="#366c6b" />
-                            )}
+        <Modal
+            visible={visible}
+            animationType="slide"
+            transparent={true}
+            onRequestClose={onClose}
+        >
+            <View style={styles.modalOverlay}>
+                <View style={[styles.modalContent, { backgroundColor: isDark ? '#1e293b' : 'white' }]}>
+                    <View style={styles.modalHeader}>
+                        <Text style={[styles.modalTitle, { color: isDark ? '#f1f5f9' : '#1e293b' }]}>{title}</Text>
+                        <TouchableOpacity onPress={onClose}>
+                            <Ionicons name="close" size={24} color={isDark ? '#94a3b8' : '#64748b'} />
                         </TouchableOpacity>
-                    ))}
-                </ScrollView>
+                    </View>
+                    <ScrollView style={{ maxHeight: 400 }} showsVerticalScrollIndicator={true}>
+                        {options.map((opt: any) => (
+                            <TouchableOpacity
+                                key={opt.value}
+                                style={[
+                                    styles.optionItem,
+                                    {
+                                        borderBottomColor: isDark ? '#334155' : '#f1f5f9',
+                                        backgroundColor: selectedValue === opt.value ? (isDark ? '#334155' : '#f0f9ff') : 'transparent'
+                                    }
+                                ]}
+                                onPress={() => onSelect(opt.value)}
+                            >
+                                <Text style={[
+                                    styles.optionText,
+                                    {
+                                        color: selectedValue === opt.value ? '#366c6b' : (isDark ? '#f1f5f9' : '#1e293b'),
+                                        fontWeight: selectedValue === opt.value ? '600' : 'normal'
+                                    }
+                                ]}>
+                                    {opt.label}
+                                </Text>
+                                {selectedValue === opt.value && (
+                                    <Ionicons name="checkmark-circle" size={22} color="#366c6b" />
+                                )}
+                            </TouchableOpacity>
+                        ))}
+                    </ScrollView>
+                </View>
             </View>
-        </View>
+        </Modal>
     );
 };
+
 
 export default function ReportsScreen() {
     const colorScheme = useColorScheme();
@@ -229,7 +234,12 @@ export default function ReportsScreen() {
     // Visualization Components
     const ProgressBar = ({ percentage, color }: { percentage: number, color: string }) => (
         <View style={styles.progressContainer}>
-            <View style={[styles.progressBar, { width: `${Math.max(percentage, 2)}%`, backgroundColor: color }]} />
+            <LinearGradient
+                colors={[color, `${color}99`]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={[styles.progressBar, { width: `${Math.max(percentage, 2)}%` }]}
+            />
         </View>
     );
 
@@ -253,7 +263,6 @@ export default function ReportsScreen() {
         },
         activeTab: {
             backgroundColor: '#366c6b',
-            borderColor: '#366c6b',
         },
         inactiveTab: {
             backgroundColor: isDark ? '#1e293b' : 'white',
@@ -281,136 +290,218 @@ export default function ReportsScreen() {
     }
 
     return (
-        <ScrollView
-            style={[styles.container, themeStyles.container]}
-            contentContainerStyle={{ paddingBottom: 40 }}
-            refreshControl={<RefreshControl refreshing={dataLoading} onRefresh={fetchReportData} />}
-        >
-            <View style={styles.header}>
-                <Text style={[styles.title, themeStyles.text]}>Financial Reports</Text>
-                <TouchableOpacity onPress={handleRecalculate} disabled={recalculateLoading}>
-                    <Ionicons name="refresh-circle" size={32} color={recalculateLoading ? 'gray' : '#366c6b'} />
-                </TouchableOpacity>
-            </View>
-
-            {/* Toggles */}
-            <View style={styles.tabContainer}>
-                <TouchableOpacity
-                    style={[styles.tab, reportType === 'monthly' ? themeStyles.activeTab : themeStyles.inactiveTab]}
-                    onPress={() => setReportType('monthly')}
-                >
-                    <Text style={[styles.tabText, reportType === 'monthly' ? themeStyles.activeTabText : themeStyles.inactiveTabText]}>
-                        Monthly
-                    </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={[styles.tab, reportType === 'yearly' ? themeStyles.activeTab : themeStyles.inactiveTab]}
-                    onPress={() => setReportType('yearly')}
-                >
-                    <Text style={[styles.tabText, reportType === 'yearly' ? themeStyles.activeTabText : themeStyles.inactiveTabText]}>
-                        Yearly
-                    </Text>
-                </TouchableOpacity>
-            </View>
-
-            {/* Selectors */}
-            <View style={styles.selectorContainer}>
-                {reportType === 'monthly' ? (
+        <View style={[styles.container, themeStyles.container]}>
+            <ScrollView
+                contentContainerStyle={{ paddingBottom: 40 }}
+                refreshControl={<RefreshControl refreshing={dataLoading} onRefresh={fetchReportData} tintColor="#366c6b" />}
+            >
+                {/* Header */}
+                <View style={styles.header}>
+                    <View>
+                        <Text style={[styles.title, themeStyles.text]}>Financial Reports</Text>
+                        <Text style={[styles.subtitle, themeStyles.subText]}>Track your financial performance</Text>
+                    </View>
                     <TouchableOpacity
-                        style={[styles.selector, themeStyles.selector]}
-                        onPress={() => setShowMonthSelector(true)}
+                        onPress={handleRecalculate}
+                        disabled={recalculateLoading}
+                        style={styles.refreshButton}
                     >
-                        <Text style={[styles.selectorText, themeStyles.text]}>
-                            {selectedMonth ? monthOptions.find(o => o.value === selectedMonth)?.label : 'Select Month'}
-                        </Text>
-                        <Ionicons name="chevron-down" size={20} color={isDark ? '#cbd5e1' : '#475569'} />
+                        <Ionicons name="refresh-circle" size={32} color={recalculateLoading ? '#94a3b8' : '#366c6b'} />
                     </TouchableOpacity>
+                </View>
+
+                {/* Toggles */}
+                <View style={styles.tabContainer}>
+                    <TouchableOpacity
+                        style={[
+                            styles.tab,
+                            reportType === 'monthly' ? themeStyles.activeTab : themeStyles.inactiveTab,
+                            reportType === 'monthly' && styles.activeTabShadow
+                        ]}
+                        onPress={() => setReportType('monthly')}
+                    >
+                        <Ionicons
+                            name="calendar"
+                            size={18}
+                            color={reportType === 'monthly' ? 'white' : (isDark ? '#cbd5e1' : '#475569')}
+                        />
+                        <Text style={[styles.tabText, reportType === 'monthly' ? themeStyles.activeTabText : themeStyles.inactiveTabText]}>
+                            Monthly
+                        </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[
+                            styles.tab,
+                            reportType === 'yearly' ? themeStyles.activeTab : themeStyles.inactiveTab,
+                            reportType === 'yearly' && styles.activeTabShadow
+                        ]}
+                        onPress={() => setReportType('yearly')}
+                    >
+                        <Ionicons
+                            name="stats-chart"
+                            size={18}
+                            color={reportType === 'yearly' ? 'white' : (isDark ? '#cbd5e1' : '#475569')}
+                        />
+                        <Text style={[styles.tabText, reportType === 'yearly' ? themeStyles.activeTabText : themeStyles.inactiveTabText]}>
+                            Yearly
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+
+                {/* Selector */}
+                <TouchableOpacity
+                    style={[styles.selector, themeStyles.selector]}
+                    onPress={() => reportType === 'monthly' ? setShowMonthSelector(true) : setShowYearSelector(true)}
+                >
+                    <View style={styles.selectorLeft}>
+                        <Ionicons
+                            name={reportType === 'monthly' ? "calendar-outline" : "time-outline"}
+                            size={20}
+                            color="#366c6b"
+                        />
+                        <Text style={[styles.selectorText, themeStyles.text]}>
+                            {reportType === 'monthly'
+                                ? (selectedMonth ? monthOptions.find(o => o.value === selectedMonth)?.label : 'Select Month')
+                                : (selectedYear || 'Select Year')
+                            }
+                        </Text>
+                    </View>
+                    <Ionicons name="chevron-down" size={20} color={isDark ? '#cbd5e1' : '#475569'} />
+                </TouchableOpacity>
+
+                {/* Content */}
+                {dataLoading ? (
+                    <View style={{ padding: 60, alignItems: 'center' }}>
+                        <ActivityIndicator size="large" color="#366c6b" />
+                        <Text style={[styles.loadingText, themeStyles.subText]}>Loading data...</Text>
+                    </View>
+                ) : error ? (
+                    <View style={styles.errorContainer}>
+                        <Ionicons name="alert-circle" size={48} color="#ef4444" />
+                        <Text style={styles.errorText}>{error}</Text>
+                    </View>
+                ) : !reportData ? (
+                    <View style={styles.emptyContainer}>
+                        <Ionicons name="document-text-outline" size={64} color={isDark ? '#475569' : '#cbd5e1'} />
+                        <Text style={[styles.emptyText, themeStyles.subText]}>Select a period to view reports</Text>
+                    </View>
                 ) : (
-                    <TouchableOpacity
-                        style={[styles.selector, themeStyles.selector]}
-                        onPress={() => setShowYearSelector(true)}
-                    >
-                        <Text style={[styles.selectorText, themeStyles.text]}>
-                            {selectedYear || 'Select Year'}
-                        </Text>
-                        <Ionicons name="chevron-down" size={20} color={isDark ? '#cbd5e1' : '#475569'} />
-                    </TouchableOpacity>
+                    <View style={styles.content}>
+                        {/* Summary Cards */}
+                        <View style={styles.summaryRow}>
+                            <View style={[styles.summaryCard, themeStyles.card]}>
+                                <LinearGradient
+                                    colors={['#ef4444', '#dc2626']}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 1, y: 1 }}
+                                    style={styles.summaryGradient}
+                                >
+                                    <Ionicons name="trending-down" size={24} color="white" />
+                                    <View style={styles.summaryContent}>
+                                        <Text style={styles.summaryLabel}>Total Expenses</Text>
+                                        <Text style={styles.summaryValue}>
+                                            {formatCurrency(reportData.total_withdraw || 0)}
+                                        </Text>
+                                    </View>
+                                </LinearGradient>
+                            </View>
+                            <View style={[styles.summaryCard, themeStyles.card]}>
+                                <LinearGradient
+                                    colors={['#22c55e', '#16a34a']}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 1, y: 1 }}
+                                    style={styles.summaryGradient}
+                                >
+                                    <Ionicons name="trending-up" size={24} color="white" />
+                                    <View style={styles.summaryContent}>
+                                        <Text style={styles.summaryLabel}>Total Income</Text>
+                                        <Text style={styles.summaryValue}>
+                                            {formatCurrency(reportData.total_deposit || 0)}
+                                        </Text>
+                                    </View>
+                                </LinearGradient>
+                            </View>
+                        </View>
+
+                        {/* Net Balance Card */}
+                        <View style={[styles.netBalanceCard, themeStyles.card]}>
+                            <LinearGradient
+                                colors={isDark ? ['#1e3a8a', '#1e40af'] : ['#3b82f6', '#2563eb']}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 1 }}
+                                style={styles.netBalanceGradient}
+                            >
+                                <Text style={styles.netBalanceLabel}>Net Balance</Text>
+                                <Text style={styles.netBalanceValue}>
+                                    {formatCurrency((reportData.total_deposit || 0) - (reportData.total_withdraw || 0))}
+                                </Text>
+                            </LinearGradient>
+                        </View>
+
+                        {/* Breakdown Sections */}
+                        <View style={[styles.section, themeStyles.card]}>
+                            <View style={styles.sectionHeader}>
+                                <Ionicons name="wallet" size={22} color="#ef4444" />
+                                <Text style={[styles.sectionTitle, themeStyles.text]}>Expense Breakdown</Text>
+                            </View>
+                            {(!reportData.user_withdraw_on_range || reportData.user_withdraw_on_range.length === 0) ? (
+                                <View style={styles.noDataContainer}>
+                                    <Ionicons name="information-circle-outline" size={32} color={isDark ? '#475569' : '#cbd5e1'} />
+                                    <Text style={[styles.noDataText, themeStyles.subText]}>No expense data available</Text>
+                                </View>
+                            ) : (
+                                reportData.user_withdraw_on_range.map((item: any, idx: number) => (
+                                    <View key={idx} style={styles.breakdownItem}>
+                                        <View style={styles.breakdownHeader}>
+                                            <Text style={[styles.categoryName, themeStyles.text]}>{item.category}</Text>
+                                            <Text style={[styles.categoryValue, { color: '#ef4444' }]}>{item.percentage}%</Text>
+                                        </View>
+                                        <ProgressBar
+                                            percentage={parseFloat(item.percentage)}
+                                            color={`hsl(${0 + (idx * 25)}, 70%, 50%)`}
+                                        />
+                                        <Text style={[styles.categoryAmount, themeStyles.subText]}>
+                                            {formatCurrency(item.converted_amount)}
+                                        </Text>
+                                    </View>
+                                ))
+                            )}
+                        </View>
+
+                        <View style={[styles.section, themeStyles.card]}>
+                            <View style={styles.sectionHeader}>
+                                <Ionicons name="cash" size={22} color="#22c55e" />
+                                <Text style={[styles.sectionTitle, themeStyles.text]}>Income Breakdown</Text>
+                            </View>
+                            {(!reportData.user_deposit_on_range || reportData.user_deposit_on_range.length === 0) ? (
+                                <View style={styles.noDataContainer}>
+                                    <Ionicons name="information-circle-outline" size={32} color={isDark ? '#475569' : '#cbd5e1'} />
+                                    <Text style={[styles.noDataText, themeStyles.subText]}>No income data available</Text>
+                                </View>
+                            ) : (
+                                reportData.user_deposit_on_range.map((item: any, idx: number) => (
+                                    <View key={idx} style={styles.breakdownItem}>
+                                        <View style={styles.breakdownHeader}>
+                                            <Text style={[styles.categoryName, themeStyles.text]}>{item.category}</Text>
+                                            <Text style={[styles.categoryValue, { color: '#22c55e' }]}>{item.percentage}%</Text>
+                                        </View>
+                                        <ProgressBar
+                                            percentage={parseFloat(item.percentage)}
+                                            color={`hsl(${120 + (idx * 25)}, 65%, 45%)`}
+                                        />
+                                        <Text style={[styles.categoryAmount, themeStyles.subText]}>
+                                            {formatCurrency(item.converted_amount)}
+                                        </Text>
+                                    </View>
+                                ))
+                            )}
+                        </View>
+                    </View>
                 )}
-            </View>
-
-            {/* Content */}
-            {dataLoading ? (
-                <View style={{ padding: 40, alignItems: 'center' }}>
-                    <ActivityIndicator size="small" color="#366c6b" />
-                </View>
-            ) : error ? (
-                <Text style={styles.errorText}>{error}</Text>
-            ) : !reportData ? (
-                <Text style={[styles.emptyText, themeStyles.subText]}>Select a period to view reports.</Text>
-            ) : (
-                <View style={styles.content}>
-                    {/* Summary Cards */}
-                    <View style={styles.summaryRow}>
-                        <View style={[styles.summaryCard, themeStyles.card, { borderLeftColor: '#ef4444' }]}>
-                            <Text style={[styles.summaryLabel, themeStyles.subText]}>Total Expenses</Text>
-                            <Text style={styles.expenseValue}>
-                                {formatCurrency(reportData.total_withdraw || 0)}
-                            </Text>
-                        </View>
-                        <View style={[styles.summaryCard, themeStyles.card, { borderLeftColor: '#22c55e' }]}>
-                            <Text style={[styles.summaryLabel, themeStyles.subText]}>Total Income</Text>
-                            <Text style={styles.incomeValue}>
-                                {formatCurrency(reportData.total_deposit || 0)}
-                            </Text>
-                        </View>
-                    </View>
-
-                    {/* Breakdown Sections */}
-                    <View style={styles.section}>
-                        <Text style={[styles.sectionTitle, themeStyles.text]}>Expense Breakdown</Text>
-                        {(!reportData.user_withdraw_on_range || reportData.user_withdraw_on_range.length === 0) ? (
-                            <Text style={[styles.noDataText, themeStyles.subText]}>No expense data available.</Text>
-                        ) : (
-                            reportData.user_withdraw_on_range.map((item: any, idx: number) => (
-                                <View key={idx} style={styles.breakdownItem}>
-                                    <View style={styles.breakdownHeader}>
-                                        <Text style={[styles.categoryName, themeStyles.text]}>{item.category}</Text>
-                                        <Text style={[styles.categoryValue, themeStyles.text]}>{item.percentage}%</Text>
-                                    </View>
-                                    <ProgressBar percentage={parseFloat(item.percentage)} color={`hsl(${0 + (idx * 20)}, 70%, 50%)`} />
-                                    <Text style={[styles.categoryAmount, themeStyles.subText]}>
-                                        {formatCurrency(item.converted_amount)}
-                                    </Text>
-                                </View>
-                            ))
-                        )}
-                    </View>
-
-                    <View style={styles.section}>
-                        <Text style={[styles.sectionTitle, themeStyles.text]}>Income Breakdown</Text>
-                        {(!reportData.user_deposit_on_range || reportData.user_deposit_on_range.length === 0) ? (
-                            <Text style={[styles.noDataText, themeStyles.subText]}>No income data available.</Text>
-                        ) : (
-                            reportData.user_deposit_on_range.map((item: any, idx: number) => (
-                                <View key={idx} style={styles.breakdownItem}>
-                                    <View style={styles.breakdownHeader}>
-                                        <Text style={[styles.categoryName, themeStyles.text]}>{item.category}</Text>
-                                        <Text style={[styles.categoryValue, themeStyles.text]}>{item.percentage}%</Text>
-                                    </View>
-                                    <ProgressBar percentage={parseFloat(item.percentage)} color={`hsl(${120 + (idx * 20)}, 70%, 40%)`} />
-                                    <Text style={[styles.categoryAmount, themeStyles.subText]}>
-                                        {formatCurrency(item.converted_amount)}
-                                    </Text>
-                                </View>
-                            ))
-                        )}
-                    </View>
-
-                </View>
-            )}
+            </ScrollView>
 
             {/* Modals */}
-            <CustomSelector
+            <FilterModal
                 visible={showMonthSelector}
                 options={monthOptions}
                 onSelect={(val: string) => {
@@ -421,7 +512,7 @@ export default function ReportsScreen() {
                 title="Select Month"
                 selectedValue={selectedMonth}
             />
-            <CustomSelector
+            <FilterModal
                 visible={showYearSelector}
                 options={yearOptions}
                 onSelect={(val: string) => {
@@ -432,14 +523,14 @@ export default function ReportsScreen() {
                 title="Select Year"
                 selectedValue={selectedYear}
             />
-        </ScrollView>
+        </View>
     );
 }
+
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 16,
     },
     centerContainer: {
         flex: 1,
@@ -450,174 +541,254 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginTop: 40,
-        marginBottom: 20,
+        paddingTop: 60,
+        paddingHorizontal: 20,
+        paddingBottom: 20,
     },
     title: {
-        fontSize: 28,
+        fontSize: 32,
         fontWeight: 'bold',
+        marginBottom: 4,
+    },
+    subtitle: {
+        fontSize: 14,
+        marginTop: 2,
+    },
+    refreshButton: {
+        padding: 4,
     },
     loadingText: {
-        marginTop: 10,
+        marginTop: 12,
+        fontSize: 14,
     },
     tabContainer: {
         flexDirection: 'row',
-        marginBottom: 16,
+        marginHorizontal: 20,
+        marginBottom: 20,
         gap: 12,
     },
     tab: {
         flex: 1,
-        paddingVertical: 12,
+        flexDirection: 'row',
+        paddingVertical: 14,
         alignItems: 'center',
-        borderRadius: 12,
+        justifyContent: 'center',
+        borderRadius: 16,
         borderWidth: 1,
+        gap: 8,
+    },
+    activeTabShadow: {
+        shadowColor: '#366c6b',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 6,
     },
     tabText: {
         fontWeight: '600',
-        fontSize: 16,
-    },
-    selectorContainer: {
-        marginBottom: 20,
+        fontSize: 15,
     },
     selector: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: 16,
-        borderRadius: 12,
+        padding: 18,
+        marginHorizontal: 20,
+        marginBottom: 24,
+        borderRadius: 16,
         borderWidth: 1,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 2,
+    },
+    selectorLeft: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
     },
     selectorText: {
         fontSize: 16,
-        fontWeight: '500',
+        fontWeight: '600',
     },
     content: {
-        gap: 24,
+        paddingHorizontal: 20,
+        gap: 20,
     },
     summaryRow: {
         flexDirection: 'row',
-        gap: 16,
+        gap: 12,
     },
     summaryCard: {
         flex: 1,
-        padding: 16,
-        borderRadius: 12,
-        borderLeftWidth: 4,
-        borderWidth: 1,
-        borderTopColor: 'transparent',
-        borderRightColor: 'transparent',
-        borderBottomColor: 'transparent',
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 3.84,
-        elevation: 2,
+        borderRadius: 20,
+        overflow: 'hidden',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 4,
+    },
+    summaryGradient: {
+        padding: 20,
+        gap: 12,
+    },
+    summaryContent: {
+        gap: 4,
     },
     summaryLabel: {
+        fontSize: 13,
+        color: 'rgba(255, 255, 255, 0.9)',
+        fontWeight: '500',
+    },
+    summaryValue: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: 'white',
+    },
+    netBalanceCard: {
+        borderRadius: 20,
+        overflow: 'hidden',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 12,
+        elevation: 6,
+    },
+    netBalanceGradient: {
+        padding: 24,
+        alignItems: 'center',
+        gap: 8,
+    },
+    netBalanceLabel: {
         fontSize: 14,
-        marginBottom: 8,
+        color: 'rgba(255, 255, 255, 0.9)',
+        fontWeight: '500',
+        textTransform: 'uppercase',
+        letterSpacing: 1,
     },
-    expenseValue: {
-        fontSize: 18,
+    netBalanceValue: {
+        fontSize: 28,
         fontWeight: 'bold',
-        color: '#ef4444',
-    },
-    incomeValue: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#22c55e',
+        color: 'white',
     },
     section: {
-        gap: 12,
+        padding: 20,
+        borderRadius: 20,
+        borderWidth: 1,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 6,
+        elevation: 2,
+    },
+    sectionHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+        marginBottom: 16,
     },
     sectionTitle: {
         fontSize: 20,
         fontWeight: 'bold',
-        marginBottom: 8,
     },
     breakdownItem: {
-        marginBottom: 12,
+        marginBottom: 16,
     },
     breakdownHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: 4,
+        marginBottom: 8,
+        alignItems: 'center',
     },
     categoryName: {
         fontSize: 16,
-        fontWeight: '500',
+        fontWeight: '600',
         flex: 1,
     },
     categoryValue: {
-        fontSize: 14,
+        fontSize: 15,
         fontWeight: 'bold',
     },
     progressContainer: {
-        height: 8,
+        height: 10,
         backgroundColor: '#e2e8f0',
-        borderRadius: 4,
+        borderRadius: 10,
         overflow: 'hidden',
-        marginBottom: 4,
+        marginBottom: 6,
     },
     progressBar: {
         height: '100%',
-        borderRadius: 4,
+        borderRadius: 10,
     },
     categoryAmount: {
-        fontSize: 12,
+        fontSize: 13,
         textAlign: 'right',
+    },
+    errorContainer: {
+        padding: 40,
+        alignItems: 'center',
+        gap: 16,
     },
     errorText: {
         color: '#ef4444',
         textAlign: 'center',
-        marginTop: 20,
+        fontSize: 16,
+        fontWeight: '500',
+    },
+    emptyContainer: {
+        padding: 60,
+        alignItems: 'center',
+        gap: 16,
     },
     emptyText: {
         textAlign: 'center',
-        marginTop: 20,
         fontSize: 16,
+    },
+    noDataContainer: {
+        paddingVertical: 24,
+        alignItems: 'center',
+        gap: 12,
     },
     noDataText: {
         fontStyle: 'italic',
+        fontSize: 14,
     },
     // Modal Styles
     modalOverlay: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
+        flex: 1,
         backgroundColor: 'rgba(0,0,0,0.5)',
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 1000,
-        padding: 20,
+        justifyContent: 'flex-end',
     },
     modalContent: {
-        width: '100%',
-        borderRadius: 16,
-        padding: 20,
-        maxHeight: 400,
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+        padding: 24,
+        maxHeight: '70%',
     },
     modalHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 16,
+        marginBottom: 20,
     },
     modalTitle: {
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: 'bold',
     },
     optionItem: {
-        paddingVertical: 12,
-        paddingHorizontal: 8,
+        paddingVertical: 16,
+        paddingHorizontal: 12,
         borderBottomWidth: 1,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
+        borderRadius: 8,
+        marginBottom: 4,
     },
     optionText: {
         fontSize: 16,
     }
 });
+
