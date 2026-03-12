@@ -200,13 +200,6 @@ export default function LoginScreen() {
             Sign in to continue managing your finances
           </Text>
 
-          {/* Divider */}
-          <View style={styles.divider}>
-            <View style={[styles.dividerLine, { backgroundColor: colors.divider }]} />
-            <Text style={[styles.dividerText, { color: colors.textSecondary }]}>Or sign in with email</Text>
-            <View style={[styles.dividerLine, { backgroundColor: colors.divider }]} />
-          </View>
-
           {/* Error Message */}
           {error ? (
             <View style={[styles.errorBox, { backgroundColor: colors.errorBg, borderColor: colors.errorBorder }]}>
