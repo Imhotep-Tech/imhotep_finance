@@ -12,7 +12,7 @@ type NetWorthWidgetProps = {
   isRefreshing: boolean;
 };
 
-const getScoreColor = (score: number | null): string => {
+const getScoreColor = (score: number | null): any => {
   if (score === null) return '#f59e0b'; // Neutral/unknown
   if (score > 0) return '#10b981'; // Positive
   if (score < 0) return '#ef4444'; // Negative
@@ -50,12 +50,11 @@ export function NetWorthWidget(props: NetWorthWidgetProps) {
         width: 'match_parent',
         flexDirection: 'column',
         justifyContent: 'space-between',
-        alignItems: 'stretch',
+        alignItems: 'center',
         padding: 12,
         backgroundColor: '#0f172a',
         borderRadius: 16,
       }}
-      accessibilityLabel="Imhotep Finance Net Worth"
       clickAction="OPEN_URI"
       clickActionData={{ uri: 'imhotep-finance://show-networth-details' }}
     >
@@ -93,7 +92,7 @@ export function NetWorthWidget(props: NetWorthWidgetProps) {
         />
       </FlexWidget>
 
-      <OverlapWidget
+      <FlexWidget
         style={{
           flexDirection: 'row',
           alignItems: 'center',
@@ -138,7 +137,6 @@ export function NetWorthWidget(props: NetWorthWidgetProps) {
             borderRadius: 999,
             backgroundColor: '#366c6b',
           }}
-          accessibilityLabel="Reload net worth"
           clickAction="REFRESH_NETWORTH"
         >
           <TextWidget
@@ -154,8 +152,6 @@ export function NetWorthWidget(props: NetWorthWidgetProps) {
         <FlexWidget
           style={{
             flexDirection: 'column',
-            alignItems: 'stretch',
-            gap: 6,
             width: 'match_parent',
           }}
         >
@@ -167,8 +163,8 @@ export function NetWorthWidget(props: NetWorthWidgetProps) {
               backgroundColor: 'rgba(16, 185, 129, 0.15)',
               justifyContent: 'center',
               width: 'match_parent',
+              marginBottom: 6,
             }}
-            accessibilityLabel="Add deposit transaction"
             clickAction="OPEN_URI"
             clickActionData={{ uri: 'imhotep-finance://add-transaction?type=deposit' }}
           >
@@ -183,7 +179,7 @@ export function NetWorthWidget(props: NetWorthWidgetProps) {
             />
           </FlexWidget>
 
-          <FlexWidget
+            <FlexWidget
             style={{
               paddingVertical: 6,
               paddingHorizontal: 10,
@@ -192,7 +188,6 @@ export function NetWorthWidget(props: NetWorthWidgetProps) {
               justifyContent: 'center',
               width: 'match_parent',
             }}
-            accessibilityLabel="Add withdraw transaction"
             clickAction="OPEN_URI"
             clickActionData={{ uri: 'imhotep-finance://add-transaction?type=withdraw' }}
           >
@@ -207,7 +202,7 @@ export function NetWorthWidget(props: NetWorthWidgetProps) {
             />
           </FlexWidget>
         </FlexWidget>
-      </OverlapWidget>
+      </FlexWidget>
     </FlexWidget>
   );
 }
