@@ -1,50 +1,77 @@
-# Welcome to your Expo app 👋
+## Imhotep Finance Mobile – Developer Guide
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+This is the mobile app for Imhotep Finance, built with [Expo](https://expo.dev) and [Expo Router](https://docs.expo.dev/router/introduction/).
 
-## Get started
+### Running locally
 
-1. Install dependencies
+1. **Install dependencies**
 
    ```bash
    npm install
    ```
 
-2. Start the app
+2. **Start the app (Expo Router entry)**
 
    ```bash
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+   You can open it in:
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+   - A development build
+   - Android emulator
+   - iOS simulator
+   - Expo Go (for JS-only testing; native widgets require a dev client)
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+### Android Net Worth Home Widget
 
-## Get a fresh project
+The Android app includes a home-screen widget that surfaces the user's net worth and key actions.
 
-When you're ready, run:
+- **Files**
+  - Widget UI: `widgets/NetWorthWidget.tsx`
+  - Widget task handler: `widget-task-handler.tsx`
+  - Expo config: `app.json` (`react-native-android-widget` plugin and `NetWorthWidget` registration)
+  - Entry point wiring: `index.ts` (registers the widget task handler and loads `expo-router/entry`)
 
-```bash
-npm run reset-project
-```
+- **Behavior**
+  - **Root tap**: tapping anywhere on the widget background opens the Net Worth Details screen (`app/show-networth-details.tsx`).
+  - **Net worth display**:
+    - Shows total net worth in the **favorite currency**.
+    - Handles loading and error states gracefully.
+  - **Score chip**:
+    - Shows the monthly target score value and colors:
+      - Green for positive
+      - Red for negative
+      - Amber/neutral when no score
+  - **Reload button**:
+    - Calls the backend to refresh net worth and score data.
+  - **Deposit / Withdraw buttons**:
+    - `+ Deposit` opens the app via deep link: `imhotep-finance://add-transaction?type=deposit`
+    - `- Withdraw` opens the app via deep link: `imhotep-finance://add-transaction?type=withdraw`
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+- **APIs used**
+  - `GET /api/finance-management/get-networth/` – net worth and favorite currency
+  - `GET /api/finance-management/target/get-score/` – monthly target score (optional)
 
-## Learn more
+- **Deep links**
+  - `imhotep-finance://show-networth-details` → `app/show-networth-details.tsx`
+  - `imhotep-finance://add-transaction?type=deposit` → Add Transaction (deposit)
+  - `imhotep-finance://add-transaction?type=withdraw` → Add Transaction (withdraw)
 
-To learn more about developing your project with Expo, look at the following resources:
+### Widget Testing in Development
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+For development and QA, there is a **hidden test screen** that mimics the widget using normal React Native views:
 
-## Join the community
+- Screen: `app/networth-widget-test.tsx`
+- Purpose:
+  - Preview the widget layout in Expo Go.
+  - Trigger the same API calls as the real widget.
+  - Open `AddTransactionModal` directly with `initialType="deposit"` or `"withdraw"`.
+  - Open the Net Worth Details screen by tapping anywhere else on the card.
 
-Join our community of developers creating universal apps.
+This screen is **not linked from the dashboard in production**. You can still reach it manually during development by navigating to the `/networth-widget-test` route with Expo Router.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+### Notes
+
+- Any changes to `app.json` widget config or native dependencies require a new Android build (EAS build) for users to receive updates.
+- JS-only changes can be shipped via EAS Update as long as they don't modify native config or require new native modules.

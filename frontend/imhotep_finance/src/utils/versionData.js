@@ -1,8 +1,20 @@
 export const versionEntries = [
   {
+    version: '7.4.1',
+    date: 'March 12, 2026',
+    badge: { label: 'CURRENT', color: 'red' },
+    summary: 'React Native Mobile App Get widget support and bug fixes',
+    bullets: [
+      'Added widget support for iOS and Android with Expo WidgetKit',
+      'Added Net Worth and Monthly Report widgets for quick financial insights',
+      'Improved widget performance and loading times',
+      'Fixed bugs and improved stability in the mobile app',
+      'Updated mobile app documentation with widget setup and usage guides'
+    ]
+  },
+  {
     version: '7.4.0',
     date: 'February 9, 2026',
-    badge: { label: 'CURRENT', color: 'red' },
     summary: 'React Native Mobile App Launch and Documentation Overhaul',
     bullets: [
       'Launched native mobile app for iOS and Android built with React Native and Expo',
