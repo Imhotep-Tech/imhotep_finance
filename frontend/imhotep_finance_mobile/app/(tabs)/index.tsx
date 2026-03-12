@@ -265,6 +265,7 @@ export default function Dashboard() {
           <QuickLink icon="pie-chart" title="Net Worth" subtitle="Details" color="purple" href="/show_networth_details" isDark={isDark} />
           <QuickLink icon="bar-chart" title="Reports" subtitle="Analysis" color="emerald" href="/reports" isDark={isDark} />
           <QuickLink icon="person" title="Manage Target" subtitle="Goals" color="green" href="/profile" isDark={isDark} />
+          <QuickLink icon="apps" title="Widget Test" subtitle="Preview Net Worth widget" color="indigo" href="/networth_widget_test" isDark={isDark} />
         </View>
 
         <View style={{ height: 100 }} />
@@ -308,7 +309,8 @@ const QuickLink = ({ icon, title, subtitle, color, href, isDark }: any) => {
       '/show_scheduled_trans': '/(tabs)/scheduled',
       '/show_networth_details': '/show-networth-details',
       '/reports': '/(tabs)/reports',
-      '/profile': '/(tabs)/profile'
+      '/profile': '/(tabs)/profile',
+      '/networth_widget_test': '/networth-widget-test',
     };
 
     const route = routeMap[href];
