@@ -41,7 +41,17 @@ const CurrencySelect: React.FC<CurrencySelectProps> = ({ value, onChange, requir
             }
         })();
         return () => { mounted = false; };
+        // We intentionally run this only once on mount to avoid repeated network calls.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    // Whenever the parent clears the value (e.g. when reopening a modal),
+    // reapply the favorite currency if we already know it.
+    useEffect(() => {
+        if (favoriteCurrency && (!value || value === '')) {
+            onChange(favoriteCurrency);
+        }
+    }, [favoriteCurrency, value, onChange]);
 
     const colorScheme = useColorScheme();
     const isDark = colorScheme === 'dark';
