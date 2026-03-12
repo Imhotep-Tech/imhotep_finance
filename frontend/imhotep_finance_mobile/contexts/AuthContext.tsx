@@ -159,8 +159,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           const isAuthEndpoint =
             url.includes('/api/auth/token/refresh/') ||
             url.includes('/api/auth/login/') ||
-            url.includes('/api/auth/logout/') ||
-            url.includes('/api/auth/google/');
+            url.includes('/api/auth/logout/')
 
           // Use ref to get current refresh token value
           const currentRefreshToken = refreshTokenRef.current;
