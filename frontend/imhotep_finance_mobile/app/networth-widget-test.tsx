@@ -41,12 +41,20 @@ export default function NetworthWidgetTestScreen() {
     setState((prev) => ({ ...prev, isLoading: true, hasError: false }));
 
     try {
-      // 1. Networth + favorite currency
+      // 1. Networth
       const networthRes = await api.get('/api/finance-management/get-networth/');
       const networth = String(networthRes.data.networth || '0');
-      const favoriteCurrency = networthRes.data.favorite_currency || 'USD';
 
-      // 2. Score (optional)
+      // 2. Favorite currency (same source as the rest of the app)
+      let favoriteCurrency = 'USD';
+      try {
+        const favRes = await api.get('/api/get-fav-currency/');
+        favoriteCurrency = favRes.data.favorite_currency || favoriteCurrency;
+      } catch {
+        // keep default
+      }
+
+      // 3. Score (optional)
       let score: number | null = null;
       try {
         const scoreRes = await api.get('/api/finance-management/target/get-score/');

@@ -15,7 +15,7 @@ type WidgetState = {
 
 const DEFAULT_STATE: WidgetState = {
   isLoggedIn: false,
-  favoriteCurrency: 'USD',
+  favoriteCurrency: '',
   networth: '0',
   score: null,
   hasError: false,
@@ -44,10 +44,20 @@ async function fetchNetworthData(): Promise<WidgetState> {
   try {
     const headers = { Authorization: `Bearer ${token}` };
 
-    // 1. Net worth & favorite currency
+    // 1. Net worth
     const networthRes = await api.get('/api/finance-management/get-networth/', { headers });
     const networth = String(networthRes.data.networth || '0');
-    const favoriteCurrency = networthRes.data.favorite_currency || 'USD';
+
+    // 2. Favorite currency: always resolve from /api/get-fav-currency/
+    //    (networth endpoint does not return it)
+    let favoriteCurrency: string = '';
+    try {
+      const favRes = await api.get('/api/get-fav-currency/', { headers });
+      favoriteCurrency = favRes.data.favorite_currency || '';
+    } catch {
+      // If this fails, fallback to a safe default
+      favoriteCurrency = 'USD';
+    }
 
     // 2. Score
     let score: number | null = null;

@@ -167,13 +167,13 @@ export function NetWorthWidget(props: NetWorthWidgetProps) {
           alignItems: 'center',
           justifyContent: 'space-between',
           width: 'match_parent',
-          marginTop: 4,
+          marginTop: 8,
         }}
       >
         <FlexWidget
           style={{
             flex: 1,
-            paddingVertical: 6,
+            paddingVertical: 10,
             paddingHorizontal: 10,
             borderRadius: 999,
             backgroundColor: 'rgba(16, 185, 129, 0.15)',
@@ -186,7 +186,7 @@ export function NetWorthWidget(props: NetWorthWidgetProps) {
           <TextWidget
             text="+ Deposit"
             style={{
-              fontSize: 12,
+              fontSize: 13,
               fontWeight: '700',
               color: '#10b981',
               textAlign: 'center',
@@ -197,7 +197,7 @@ export function NetWorthWidget(props: NetWorthWidgetProps) {
         <FlexWidget
           style={{
             flex: 1,
-            paddingVertical: 6,
+            paddingVertical: 10,
             paddingHorizontal: 10,
             borderRadius: 999,
             backgroundColor: 'rgba(239, 68, 68, 0.15)',
@@ -210,7 +210,7 @@ export function NetWorthWidget(props: NetWorthWidgetProps) {
           <TextWidget
             text="- Withdraw"
             style={{
-              fontSize: 12,
+              fontSize: 13,
               fontWeight: '700',
               color: '#ef4444',
               textAlign: 'center',

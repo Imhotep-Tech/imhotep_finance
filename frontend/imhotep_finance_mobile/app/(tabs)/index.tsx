@@ -24,6 +24,7 @@ const { width } = Dimensions.get('window');
 
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -56,7 +57,7 @@ export default function Dashboard() {
 
     try {
       // 2. Fetch Favorite Currency (redundant but good backup)
-      const favRes = await api.get('/api/get-fav-currency/');
+      const favRes = await axios.get('/api/get-fav-currency/');
       setFavoriteCurrency(favRes.data.favorite_currency || favoriteCurrency || 'USD');
     } catch (err: any) {
       if (err.response?.status !== 404) {
@@ -281,14 +282,14 @@ export default function Dashboard() {
           <QuickLink icon="bar-chart" title="Reports" subtitle="Analysis" color="emerald" href="/reports" isDark={isDark} />
           <QuickLink icon="person" title="Manage Target" subtitle="Goals" color="green" href="/profile" isDark={isDark} />
           {/* TEMP: Widget test entry (comment out before production release) */}
-          {/* <QuickLink
+          <QuickLink
             icon="bug"
             title="Widget Test"
             subtitle="Networth layout"
             color="indigo"
             href="/networth-widget-test"
             isDark={isDark}
-          /> */}
+          />
         </View>
 
         <View style={{ height: 100 }} />
