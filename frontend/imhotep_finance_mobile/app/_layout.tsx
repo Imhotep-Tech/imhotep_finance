@@ -16,6 +16,11 @@ function RootLayoutNav() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(auth)" />
       <Stack.Screen name="(tabs)" />
+      {/* Deep link targets used by the Android home widget */}
+      <Stack.Screen name="show-networth-details" />
+      <Stack.Screen name="add-transaction" />
+      {/* Optional dev/testing route */}
+      <Stack.Screen name="networth-widget-test" />
     </Stack>
   );
 }
