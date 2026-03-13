@@ -189,6 +189,7 @@ export default function Dashboard() {
           networth={networth}
           favoriteCurrency={favoriteCurrency}
           loading={loading && !refreshing && networth === '0'}
+          onPress={() => router.push('/show-networth-details')}
         />
 
         {/* Quick Actions */}
@@ -196,7 +197,7 @@ export default function Dashboard() {
           <TouchableOpacity
             style={[styles.actionButton, themeStyles.card]}
             onPress={() => {
-              setInitialType('withdraw');
+              setInitialType('deposit');
               setShowAddModal(true);
             }}
           >
@@ -204,8 +205,22 @@ export default function Dashboard() {
               <Ionicons name="add-circle" size={32} color="#366c6b" />
             </View>
             <View>
-              <Text style={[styles.actionTitle, themeStyles.text]}>Add Transaction</Text>
-              <Text style={[styles.actionSubtitle, themeStyles.subText]}>Record income or expense</Text>
+              <Text style={[styles.actionTitle, themeStyles.text]}>Deposit</Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.actionButton, themeStyles.card]}
+            onPress={() => {
+              setInitialType('withdraw');
+              setShowAddModal(true);
+            }}
+          >
+            <View style={[styles.iconCircle, { backgroundColor: isDark ? 'rgba(239, 68, 68, 0.2)' : '#fee2e2' }]}>
+              <Ionicons name="remove-circle" size={32} color="#dc2626" />
+            </View>
+            <View>
+              <Text style={[styles.actionTitle, themeStyles.text]}>Withdraw</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -265,6 +280,15 @@ export default function Dashboard() {
           <QuickLink icon="pie-chart" title="Net Worth" subtitle="Details" color="purple" href="/show_networth_details" isDark={isDark} />
           <QuickLink icon="bar-chart" title="Reports" subtitle="Analysis" color="emerald" href="/reports" isDark={isDark} />
           <QuickLink icon="person" title="Manage Target" subtitle="Goals" color="green" href="/profile" isDark={isDark} />
+          {/* TEMP: Widget test entry (comment out before production release) */}
+          {/* <QuickLink
+            icon="bug"
+            title="Widget Test"
+            subtitle="Networth layout"
+            color="indigo"
+            href="/networth-widget-test"
+            isDark={isDark}
+          /> */}
         </View>
 
         <View style={{ height: 100 }} />
@@ -309,6 +333,8 @@ const QuickLink = ({ icon, title, subtitle, color, href, isDark }: any) => {
       '/show_networth_details': '/show-networth-details',
       '/reports': '/(tabs)/reports',
       '/profile': '/(tabs)/profile',
+      // TEMP: direct route for widget test. Comment out when deploying.
+      '/networth-widget-test': '/networth-widget-test',
     };
 
     const route = routeMap[href];

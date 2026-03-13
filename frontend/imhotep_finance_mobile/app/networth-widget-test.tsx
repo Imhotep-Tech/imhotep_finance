@@ -108,27 +108,31 @@ export default function NetworthWidgetTestScreen() {
             style={styles.widgetContainer}
             onPress={() => router.push('/show-networth-details')}
           >
-            <View style={styles.widgetHeader}>
-              <Text style={styles.widgetTitle}>Total Net Worth</Text>
-              {isLoading && <ActivityIndicator size="small" color="#cbd5f5" />}
-            </View>
+            <View style={styles.widgetTopRow}>
+              <View style={styles.widgetLeftColumn}>
+                <View style={styles.widgetHeader}>
+                  <Text style={styles.widgetTitle}>Total Net Worth</Text>
+                  {isLoading && <ActivityIndicator size="small" color="#cbd5f5" />}
+                </View>
 
-            <Text style={styles.widgetMain}>{mainText}</Text>
-            <Text style={styles.widgetSubtitle}>{subtitle}</Text>
-
-            <View style={styles.widgetFooter}>
-              <View style={styles.scorePill}>
-                <Text style={styles.scoreLabel}>Score</Text>
-                <Text style={[styles.scoreValue, { color: scoreColor }]}>{scoreLabel}</Text>
+                <Text style={styles.widgetMain}>{mainText}</Text>
+                <Text style={styles.widgetSubtitle}>{subtitle}</Text>
               </View>
 
-              <TouchableOpacity style={styles.reloadBtn} onPress={fetchData}>
-                <Ionicons name="refresh" size={16} color="#f9fafb" />
-                <Text style={styles.reloadText}>Reload</Text>
-              </TouchableOpacity>
+              <View style={styles.widgetRightColumn}>
+                <TouchableOpacity style={styles.reloadBtn} onPress={fetchData}>
+                  <Ionicons name="refresh" size={16} color="#f9fafb" />
+                  <Text style={styles.reloadText}>Reload</Text>
+                </TouchableOpacity>
+
+                <View style={styles.scorePill}>
+                  <Text style={styles.scoreLabel}>Score</Text>
+                  <Text style={[styles.scoreValue, { color: scoreColor }]}>{scoreLabel}</Text>
+                </View>
+              </View>
             </View>
 
-            <View style={styles.widgetActionsColumn}>
+            <View style={styles.widgetActionsRow}>
               <TouchableOpacity
                 style={[styles.widgetActionBigBtn, styles.depositBigBtn]}
                 onPress={() => {
@@ -194,6 +198,20 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 6,
   },
+  widgetTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  widgetLeftColumn: {
+    flex: 1,
+    marginRight: 8,
+  },
+  widgetRightColumn: {
+    alignItems: 'flex-end',
+    justifyContent: 'flex-start',
+    gap: 6,
+  },
   widgetHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -216,15 +234,9 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: 'rgba(148, 163, 184, 0.9)',
   },
-  widgetFooter: {
-    marginTop: 10,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  widgetActionsColumn: {
+  widgetActionsRow: {
     marginTop: 12,
-    flexDirection: 'column',
+    flexDirection: 'row',
     gap: 8,
   },
   widgetActionBigBtn: {
@@ -234,7 +246,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 12,
     borderRadius: 999,
-    width: '100%',
+    flex: 1,
     gap: 6,
   },
   depositBigBtn: {
