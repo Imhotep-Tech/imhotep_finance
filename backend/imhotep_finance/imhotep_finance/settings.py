@@ -39,6 +39,16 @@ ALLOWED_HOSTS = [
     SITE_DOMAIN.replace('http://', '').replace('https://', ''),
     ]
 
+env_allowed_host = os.environ.get('ALLOWED_HOSTS')
+if env_allowed_host:
+    ALLOWED_HOSTS.append(env_allowed_host)
+
+site_domain_env = os.environ.get('SITE_DOMAIN') or config('SITE_DOMAIN', default='')
+if site_domain_env:
+    clean_host = site_domain_env.replace('http://', '').replace('https://', '').split('/')
+    if clean_host not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(clean_host)
+
 # This is the magic line that stops the "Too Many Redirects" loop
 # It tells Django: "If the proxy (Cloudflare) says this was HTTPS, believe it!"
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
