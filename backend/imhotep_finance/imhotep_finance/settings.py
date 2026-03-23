@@ -39,6 +39,14 @@ ALLOWED_HOSTS = [
     SITE_DOMAIN.replace('http://', '').replace('https://', ''),
     ]
 
+# This is the magic line that stops the "Too Many Redirects" loop
+# It tells Django: "If the proxy (Cloudflare) says this was HTTPS, believe it!"
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# These help Django build the correct absolute URLs when behind the tunnel
+USE_X_FORWARDED_HOST = True
+USE_X_FORWARDED_PORT = True
+
 if DEBUG:
     # Add this to your settings
     CORS_ALLOW_ALL_ORIGINS = True
