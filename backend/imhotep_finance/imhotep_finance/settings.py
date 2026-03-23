@@ -269,7 +269,8 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     frontend_url,
-    SITE_DOMAIN
+    SITE_DOMAIN,
+    os.environ.get('SITE_DOMAIN', 'http://localhost:8000')
 ]
 
 # CORS settings for development
@@ -277,7 +278,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     frontend_url,
-    SITE_DOMAIN
+    SITE_DOMAIN,
+    os.environ.get('SITE_DOMAIN', 'http://localhost:8000')
 ]
 
 # Add logging configuration
