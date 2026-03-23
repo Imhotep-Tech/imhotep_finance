@@ -30,18 +30,11 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 SITE_DOMAIN = config('SITE_DOMAIN', default='http://localhost:8000')
 frontend_url = config('frontend_url', default='http://localhost:3000')
 
-ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    '0.0.0.0',
-    'backend',
-    SITE_DOMAIN.replace('http://', '').replace('https://', ''),
+ALLOWED_HOSTS = ['*',] if DEBUG else [
+    'localhost', '127.0.0.1', 'backend',
+    os.environ.get('ALLOWED_HOSTS', '').strip('/'),
+    config('SITE_DOMAIN', default='').replace('https://', '').replace('http://', '').strip('/')
 ]
-extra_allowed_hosts = config('ALLOWED_HOSTS', default='').strip()
-if extra_allowed_hosts:
-    ALLOWED_HOSTS.extend(
-        [host.strip() for host in extra_allowed_hosts.split(',') if host.strip()]
-    )
 
 # This is the magic line that stops the "Too Many Redirects" loop
 # It tells Django: "If the proxy (Cloudflare) says this was HTTPS, believe it!"
