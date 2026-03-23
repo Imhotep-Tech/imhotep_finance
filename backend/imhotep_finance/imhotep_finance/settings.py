@@ -374,8 +374,3 @@ SPECTACULAR_SETTINGS = {
 
 FIELD_ENCRYPTION_KEY = config('FIELD_ENCRYPTION_KEY')
 
-UNFOLD = {
-    "COMMAND_PALETTE": {
-        "items": [], 
-    },
-}
