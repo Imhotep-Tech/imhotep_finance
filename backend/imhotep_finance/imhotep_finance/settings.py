@@ -36,20 +36,7 @@ ALLOWED_HOSTS = [
     '0.0.0.0',
     'backend',
     SITE_DOMAIN.replace('http://', '').replace('https://', ''),
-]
-extra_allowed_hosts = config('ALLOWED_HOSTS', default='').strip()
-if extra_allowed_hosts:
-    ALLOWED_HOSTS.extend(
-        [host.strip() for host in extra_allowed_hosts.split(',') if host.strip()]
-    )
-
-# This is the magic line that stops the "Too Many Redirects" loop
-# It tells Django: "If the proxy (Cloudflare) says this was HTTPS, believe it!"
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
-# These help Django build the correct absolute URLs when behind the tunnel
-USE_X_FORWARDED_HOST = True
-USE_X_FORWARDED_PORT = True
+    ]
 
 if DEBUG:
     # Add this to your settings
@@ -263,8 +250,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     frontend_url,
-    SITE_DOMAIN,
-    os.environ.get('SITE_DOMAIN', 'http://localhost:8000')
+    SITE_DOMAIN
 ]
 
 # CORS settings for development
@@ -272,8 +258,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     frontend_url,
-    SITE_DOMAIN,
-    os.environ.get('SITE_DOMAIN', 'http://localhost:8000')
+    SITE_DOMAIN
 ]
 
 # Add logging configuration
@@ -374,3 +359,8 @@ SPECTACULAR_SETTINGS = {
 
 FIELD_ENCRYPTION_KEY = config('FIELD_ENCRYPTION_KEY')
 
+UNFOLD = {
+    "COMMAND_PALETTE": {
+        "items": [], 
+    },
+}

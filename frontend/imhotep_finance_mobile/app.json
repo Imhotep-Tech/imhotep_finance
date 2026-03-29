@@ -11,7 +11,6 @@
     "ios": {
       "displayName": "Imhotep Finance",
       "associatedDomains": [
-        "applinks:imhotep-finance.vercel.app",
         "applinks:imhotep-finance.vercel.app"
       ],
       "bundleIdentifier": "com.imhoteptech.imhotep-finance-mobile"

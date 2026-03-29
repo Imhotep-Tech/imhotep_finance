@@ -51,7 +51,7 @@ const TransactionItem: React.FC<TransactionItemProps> = ({ transaction, onPress 
         >
             <View style={[styles.iconContainer, themeStyles.iconBg]}>
                 <Ionicons
-                    name={isDeposit ? "arrow-down" : "arrow-up"}
+                    name={isDeposit ? "add" : "remove"}
                     size={24}
                     color={themeStyles.iconColor}
                 />
