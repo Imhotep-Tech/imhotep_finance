@@ -56,6 +56,35 @@ function LandingPage() {
           <p className="text-xl sm:text-2xl lg:text-3xl text-[#1a3535] dark:text-gray-300 mb-8 font-medium max-w-4xl mx-auto leading-relaxed opacity-90">
             Simplify your financial management with powerful tools for tracking expenses, managing investments, and achieving your dreams.
           </p>
+          <div className="max-w-4xl mx-auto mb-10 rounded-2xl border border-[#366c6b]/20 bg-white/80 dark:bg-gray-900/70 p-5 sm:p-6 shadow-lg">
+            <p className="text-base sm:text-lg text-[#1a3535] dark:text-gray-200 font-medium mb-3">
+              🏠 Imhotep Finance is fully self-hostable in production.
+            </p>
+            <p className="text-sm sm:text-base text-[#366c6b] dark:text-emerald-400">
+              Learn how to deploy and develop it from the official docs:
+              {' '}
+              <a
+                href="https://github.com/Imhotep-Tech/imhotep_finance/blob/main/.docs/SELF_HOSTING.md"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline font-semibold hover:opacity-80"
+              >
+                Self-Hosting Guide
+              </a>
+              {' '}
+              and
+              {' '}
+              <a
+                href="https://github.com/Imhotep-Tech/imhotep_finance/blob/main/.docs/DEVELOPMENT_WORKFLOW.md"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline font-semibold hover:opacity-80"
+              >
+                Development Workflow
+              </a>
+              .
+            </p>
+          </div>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
             <Link
               to="/register"
