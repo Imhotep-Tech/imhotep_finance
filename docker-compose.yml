@@ -14,9 +14,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-    security_opt:
-      - seccomp=unconfined
-      - label=disable
 
   backend:
     build:
@@ -38,10 +35,7 @@ services:
       timeout: 5s
       retries: 5
       start_period: 40s
-    security_opt:
-      - seccomp=unconfined
-      - label=disable
-
+      
   frontend:
     build:
       context: ./frontend/imhotep_finance

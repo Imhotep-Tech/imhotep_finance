@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import api from '../constants/api';
 
 interface AuthContextType {
@@ -54,9 +54,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const loadStorageData = async () => {
       try {
-        const storedUser = await AsyncStorage.getItem('user');
-        const storedAccess = await AsyncStorage.getItem('access_token');
-        const storedRefresh = await AsyncStorage.getItem('refresh_token');
+        const storedUser = await SecureStore.getItemAsync('user');
+        const storedAccess = await SecureStore.getItemAsync('access_token');
+        const storedRefresh = await SecureStore.getItemAsync('refresh_token');
 
         if (storedUser) setUser(JSON.parse(storedUser));
         if (storedAccess) {
@@ -95,7 +95,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     // We must read refresh token from ref or storage here
-    const currentRefreshToken = refreshTokenRef.current || await AsyncStorage.getItem('refresh_token');
+    const currentRefreshToken = refreshTokenRef.current || await SecureStore.getItemAsync('refresh_token');
 
     if (!currentRefreshToken) {
       throw new Error('No refresh token available');
@@ -108,12 +108,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const newRefreshToken = response.data.refresh;
 
         if (newAccessToken) {
-          await AsyncStorage.setItem('access_token', newAccessToken);
+          await SecureStore.setItemAsync('access_token', newAccessToken);
           setAccessToken(newAccessToken);
           accessTokenRef.current = newAccessToken;
         }
         if (newRefreshToken) {
-          await AsyncStorage.setItem('refresh_token', newRefreshToken);
+          await SecureStore.setItemAsync('refresh_token', newRefreshToken);
           setRefreshToken(newRefreshToken);
           refreshTokenRef.current = newRefreshToken;
         }
@@ -141,17 +141,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     delete axios.defaults.headers.common['Authorization'];
     if (api) delete api.defaults.headers.common['Authorization'];
 
-    await AsyncStorage.removeItem('access_token');
-    await AsyncStorage.removeItem('refresh_token');
-    await AsyncStorage.removeItem('user');
+    await SecureStore.deleteItemAsync('access_token');
+    await SecureStore.deleteItemAsync('refresh_token');
+    await SecureStore.deleteItemAsync('user');
   };
 
   // Axios interceptor (Logic is identical to Web, just adapted slightly)
   useEffect(() => {
-    const createInterceptor = (axiosInstance: typeof axios) => {
+    const createInterceptor = (axiosInstance: any) => {
       return axiosInstance.interceptors.response.use(
-        (response) => response,
-        async (error) => {
+        (response: any) => response,
+        async (error: any) => {
           const originalRequest = error.config;
           const url = originalRequest?.url || '';
 
@@ -210,7 +210,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           // Verify the token by fetching user data
           const response = await api.get('/api/user-data/');
           setUser(response.data);
-          await AsyncStorage.setItem('user', JSON.stringify(response.data));
+          await SecureStore.setItemAsync('user', JSON.stringify(response.data));
         } catch (error) {
           console.error('Auth check failed:', error);
           // Token might be expired, try to refresh
@@ -220,7 +220,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               // After refresh, try fetching user data again
               const response = await api.get('/api/user-data/');
               setUser(response.data);
-              await AsyncStorage.setItem('user', JSON.stringify(response.data));
+              await SecureStore.setItemAsync('user', JSON.stringify(response.data));
             } catch (refreshError) {
               console.error('Token refresh failed during auth check:', refreshError);
               await logoutInternal();
@@ -245,9 +245,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     refreshTokenRef.current = refresh;
 
     // Async Storage must be awaited
-    await AsyncStorage.setItem('access_token', access);
-    await AsyncStorage.setItem('refresh_token', refresh);
-    await AsyncStorage.setItem('user', JSON.stringify(user));
+    await SecureStore.setItemAsync('access_token', access);
+    await SecureStore.setItemAsync('refresh_token', refresh);
+    await SecureStore.setItemAsync('user', JSON.stringify(user));
   };
 
   // Logout Function (with API call)
@@ -267,7 +267,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Update User Function
   const updateUser = async (userData: any) => {
     setUser(userData);
-    await AsyncStorage.setItem('user', JSON.stringify(userData));
+    await SecureStore.setItemAsync('user', JSON.stringify(userData));
   };
 
   const value = {
