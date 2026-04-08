@@ -1,0 +1,35 @@
+name: Publish Docker Images
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch: # Allows you to run it manually from the Actions tab
+
+jobs:
+  push_to_registry:
+    name: Build and Push Docker images
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Backend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/imhotep-backend:latest,${{ secrets.DOCKERHUB_USERNAME }}/imhotep-backend:${{ github.event.release.tag_name || 'latest' }}
+
+      - name: Build and push Frontend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend/imhotep_finance
+          file: ./frontend/imhotep_finance/Dockerfile.prod # We will create this in Step 3
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/imhotep-frontend:latest,${{ secrets.DOCKERHUB_USERNAME }}/imhotep-frontend:${{ github.event.release.tag_name || 'latest' }}

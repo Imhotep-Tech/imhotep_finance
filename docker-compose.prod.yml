@@ -1,0 +1,42 @@
+# docker-compose.prod.yml
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-imhotep_finance_db}
+      POSTGRES_USER: ${POSTGRES_USER:-imhotep_finance_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-imhotep_finance_password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+
+  backend:
+    image: kbassem10/imhotep-backend:latest
+    restart: always
+    command: >
+      sh -c "python manage.py migrate && gunicorn imhotep_finance.wsgi:application --bind 0.0.0.0:8000"
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      # Only persist data/media, not the application code
+      - backend_data:/old_data 
+    depends_on:
+      - db
+
+  frontend:
+    image: kbassem10/imhotep-frontend:latest
+    restart: always
+    ports:
+      - "80:80" # Standard HTTP port for production
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+  backend_data:
