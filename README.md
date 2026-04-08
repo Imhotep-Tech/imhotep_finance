@@ -17,7 +17,7 @@
 **Take control of your finances. Track spending. Achieve your goals.**
 
 [Features](#-features) •
-[Quick Start](#-quick-start) •
+[Getting Started](#-getting-started) •
 [Documentation](#-documentation) •
 [Tech Stack](#-tech-stack)
 
@@ -41,7 +41,7 @@ Imhotep Finance is designed to be **completely self-hostable** with no external 
 - **Free to use**: Use it for free for any purpose (personal or commercial within your organization)
 - **Easy setup**: One-command Docker deployment or manual installation
 
-See the [Setup Guide](.docs/SETUP.md) for detailed deployment instructions.
+See [Self-Hosting Guide](.docs/SELF_HOSTING.md) and [Development Workflow](.docs/DEVELOPMENT_WORKFLOW.md) for the two recommended onboarding paths.
 
 ---
 
@@ -130,54 +130,25 @@ See the [Setup Guide](.docs/SETUP.md) for detailed deployment instructions.
 
 ---
 
-## 🚀 Quick Start
+## 🚦 Getting Started
 
-### Web Application
+Choose the path that matches your goal:
 
-```bash
-# Clone the repository
-git clone https://github.com/Imhotep-Tech/imhotep_finance.git
-cd imhotep_finance
+### 🚀 I want to Self-Host (Production)
 
-# Copy environment file
-cp backend/imhotep_finance/.env.example backend/imhotep_finance/.env
+- [📘 Open the Self-Hosting Guide](.docs/SELF_HOSTING.md)
+- Uses pre-built Docker Hub images (no source code required)
+- Includes `.env` setup, production secrets, and deployment commands
 
-# Generate encryption key (required)
-python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
-# Add the generated key to backend/imhotep_finance/.env as FIELD_ENCRYPTION_KEY
+### 💻 I want to Develop (Local)
 
-# Start with Docker
-docker compose up --build
-```
-
-| Service | URL |
-|---------|-----|
-| 🖥️ Frontend | http://localhost:3000 |
-| ⚙️ Backend API | http://localhost:8000 |
-| 📚 API Docs (Swagger) | http://localhost:8000/swagger/ |
-| 🔧 Developer Portal | http://localhost:3000/developer |
-| 👤 Django Admin | http://localhost:8000/admin/ |
+- [🧱 Open the Development Workflow](.docs/DEVELOPMENT_WORKFLOW.md)
+- Uses local source builds with `docker compose up --build`
+- Includes hot-reload workflow and dependency management notes
 
 ### 📱 Mobile App
 
-```bash
-# Navigate to mobile app directory
-cd frontend/imhotep_finance_mobile
-
-# Install dependencies
-npm install
-
-# Start Expo development server
-npx expo start
-```
-
-**Run on your device:**
-- 📱 **Expo Go**: Scan QR code with Expo Go app ([iOS](https://apps.apple.com/app/expo-go/id982107779) | [Android](https://play.google.com/store/apps/details?id=host.exp.exponent))
-- 🤖 **Android Emulator**: Press `a` in terminal
-- 🍎 **iOS Simulator**: Press `i` in terminal (macOS only)
-- 🌐 **Web Browser**: Press `w` in terminal
-
-> 📘 For detailed setup instructions, see **[Setup Guide](.docs/SETUP.md)** and **[Mobile App Guide](.docs/MOBILE_APP.md)**
+- [📱 Open the Mobile App Guide](.docs/MOBILE_APP.md)
 
 ---
 
@@ -188,13 +159,14 @@ Comprehensive documentation is available in the `.docs/` folder:
 | Document | Description |
 |----------|-------------|
 | [🚀 Setup Guide](.docs/SETUP.md) | Prerequisites, Docker & manual installation, initial configuration |
+| [🚀 Self-Hosting Guide](.docs/SELF_HOSTING.md) | Production deployment with pre-built Docker Hub images |
 | [📱 Mobile App Guide](.docs/MOBILE_APP.md) | React Native app setup, development, and deployment |
 | [📘 API Documentation](.docs/API_DOCUMENTATION.md) | Swagger/OpenAPI docs, JWT authorization, endpoint reference |
 | [⚙️ Environment Variables](.docs/ENVIRONMENT_VARIABLES.md) | Backend & frontend configuration, production setup |
 | [🧩 Folder Structure](.docs/FOLDER_STRUCTURE.md) | Project organization and architecture |
 | [🧪 Testing Guide](.docs/TESTING.md) | Running & writing tests, test structure |
 | [👥 Contributing](.docs/CONTRIBUTING.md) | How to contribute, code style, PR guidelines |
-| [🧱 Development Workflow](.docs/DEVELOPMENT_WORKFLOW.md) | Development practices, CI/CD, best practices |
+| [🧱 Development Workflow](.docs/DEVELOPMENT_WORKFLOW.md) | Local development with Docker builds, hot reload, and dependencies |
 
 ---
 
