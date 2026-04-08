@@ -4,7 +4,7 @@
     "slug": "imhotep-finance",
     "version": "1.2.0",
     "orientation": "portrait",
-    "icon": "./assets/images/imhotep_finance.png",
+    "icon": "./assets/images/imhotep_finance_zoomed.png",
     "scheme": "imhotep-finance",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -17,9 +17,9 @@
     },
     "android": {
       "appName": "Imhotep Finance",
+      "usesCleartextTraffic": true,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/imhotep_finance.png",
-        "monochromeImage": "./assets/images/icon-monochrome.png",
+        "foregroundImage": "./assets/images/imhotep_finance_zoomed.png",
         "backgroundColor": "#366c6b"
       },
       "intentFilters": [
@@ -78,7 +78,7 @@
               "targetCellWidth": 4,
               "targetCellHeight": 2,
               "description": "Total net worth and score",
-              "previewImage": "./assets/images/imhotep_finance.png",
+              "previewImage": "./assets/images/widget_preview_networth.png",
               "updatePeriodMillis": 0
             }
           ]

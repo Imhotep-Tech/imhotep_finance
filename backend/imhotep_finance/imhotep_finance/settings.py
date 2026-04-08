@@ -39,6 +39,9 @@ ALLOWED_HOSTS = [
     ]
 
 if DEBUG:
+    # Local development (including Docker + mobile on LAN):
+    # allow requests via machine IP without updating ALLOWED_HOSTS each time.
+    ALLOWED_HOSTS = ['*']
     # Add this to your settings
     CORS_ALLOW_ALL_ORIGINS = True
 else:
