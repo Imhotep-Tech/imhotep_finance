@@ -114,7 +114,6 @@ export default function UpdateChecker() {
   const [downloadProgress, setDownloadProgress] = useState<number | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState<string | null>(null);
-  const [downloadedUri, setDownloadedUri] = useState<string | null>(null);
 
   useEffect(() => {
     checkForUpdates();
@@ -219,7 +218,7 @@ export default function UpdateChecker() {
     }
   };
 
-  const downloadApk = useCallback(async () => {
+  const downloadAndInstallApk = useCallback(async () => {
     if (!updateInfo) return;
 
     setIsDownloading(true);
@@ -229,20 +228,12 @@ export default function UpdateChecker() {
     try {
       const fileName = `imhotep-finance-${updateInfo.version}.apk`;
       
-      // Use the new expo-file-system API with File class
       const apkFile = new File(Paths.cache, fileName);
       
-      // If file already exists for this version, reuse it instead of re-downloading
       if (apkFile.exists) {
-        console.log('APK already downloaded, skipping download');
-        setIsDownloading(false);
-        setDownloadProgress(100);
-        setDownloadedUri(apkFile.uri);
-        return;
+        await apkFile.delete();
       }
 
-      // Download the APK with progress tracking using legacy API
-      // The new API doesn't have built-in progress callbacks yet
       const downloadResumable = LegacyFileSystem.createDownloadResumable(
         updateInfo.downloadUrl,
         apkFile.uri,
@@ -261,7 +252,17 @@ export default function UpdateChecker() {
 
       console.log('APK downloaded to:', result.uri);
       setDownloadProgress(100);
-      setDownloadedUri(result.uri);
+
+      // Convert file:// URI to content:// URI for Android 7.0+
+      const contentUri = await LegacyFileSystem.getContentUriAsync(result.uri);
+      
+      await IntentLauncher.startActivityAsync('android.intent.action.VIEW', {
+        data: contentUri,
+        flags: 1, // FLAG_GRANT_READ_URI_PERMISSION
+        type: 'application/vnd.android.package-archive',
+      });
+
+      setShowModal(false);
       setIsDownloading(false);
     } catch (error: any) {
       console.error('Download/Install failed:', error);
@@ -269,30 +270,6 @@ export default function UpdateChecker() {
       setIsDownloading(false);
     }
   }, [updateInfo]);
-
-  const installDownloadedApk = useCallback(async () => {
-    try {
-      if (!downloadedUri) {
-        return;
-      }
-
-      // Convert file:// URI to content:// URI for Android 7.0+
-      const contentUri = await LegacyFileSystem.getContentUriAsync(downloadedUri);
-
-      await IntentLauncher.startActivityAsync('android.intent.action.VIEW', {
-        data: contentUri,
-        // FLAG_GRANT_READ_URI_PERMISSION | FLAG_ACTIVITY_NEW_TASK
-        flags: 1 | 268435456,
-        type: 'application/vnd.android.package-archive',
-      });
-
-      // Keep modal closed while system installer is shown
-      setShowModal(false);
-    } catch (error: any) {
-      console.error('Install failed:', error);
-      setDownloadError(error.message || 'Install failed. Please try again.');
-    }
-  }, [downloadedUri]);
 
   const handleSkipVersion = async () => {
     if (updateInfo) {
@@ -365,11 +342,11 @@ export default function UpdateChecker() {
               <>
                 <TouchableOpacity
                   style={[styles.button, styles.primaryButton, { backgroundColor: colors.primary }]}
-                  onPress={downloadedUri ? installDownloadedApk : downloadApk}
+                  onPress={downloadAndInstallApk}
                   activeOpacity={0.8}
                 >
                   <Text style={styles.primaryButtonText}>
-                    {downloadedUri ? '📲 Install Update' : '📥 Download Update'}
+                    📥 Download & Install
                   </Text>
                 </TouchableOpacity>
 
