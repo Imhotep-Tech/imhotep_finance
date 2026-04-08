@@ -5,5 +5,10 @@
     "postman.settings.dotenv-detection-notification-visibility": false,
     "cSpell.words": [
         "Uncategorized"
-    ]
+    ],
+    "builder.serverUrl": "http://localhost:8081",
+    "builder.command": "",
+    "builder.runDevServer": false,
+    "builder.autoDetectDevServer": true,
+    "builder.launchType": "editor"
 }
