@@ -18,6 +18,7 @@ import { Ionicons } from '@expo/vector-icons';
 import api from '../constants/api';
 import CurrencySelect from './CurrencySelect';
 import CategorySelect from './CategorySelect';
+import { updateNetworthWidget } from '../widgets/widget-updater';
 
 interface AddScheduledTransactionModalProps {
     onClose: () => void;
@@ -93,7 +94,7 @@ const AddScheduledTransactionModal: React.FC<AddScheduledTransactionModalProps> 
                 await api.post('/api/finance-management/scheduled-trans/add-scheduled-trans/', payload);
                 Alert.alert('Success', 'Scheduled transaction added successfully!');
             }
-
+            updateNetworthWidget();
             onSuccess();
         } catch (err: any) {
             const errorMessage = err.response?.data?.error || (editMode ? 'Failed to update scheduled transaction.' : 'Failed to add scheduled transaction.');
@@ -118,6 +119,7 @@ const AddScheduledTransactionModal: React.FC<AddScheduledTransactionModalProps> 
                             if (initialValues.id) {
                                 await api.delete(`/api/finance-management/scheduled-trans/delete-scheduled-trans/${initialValues.id}/`);
                                 Alert.alert('Success', 'Scheduled transaction deleted successfully!');
+                                updateNetworthWidget();
                                 onSuccess();
                             }
                         } catch (err: any) {

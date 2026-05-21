@@ -225,10 +225,10 @@ export default function ForgotPasswordScreen() {
             </Text>
 
             <Link href="/(auth)/login" asChild>
-              <TouchableOpacity style={[styles.submitButton, { backgroundColor: colors.primary }]}>
-                <Text style={styles.submitButtonText}>Back to Login</Text>
-              </TouchableOpacity>
-            </Link>
+                <TouchableOpacity style={StyleSheet.flatten([styles.submitButton, { backgroundColor: colors.primary }])}>
+                  <Text style={styles.submitButtonText}>Back to Login</Text>
+                </TouchableOpacity>
+              </Link>
           </View>
         </View>
       </View>

@@ -14,16 +14,19 @@ import {
     ScrollView
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import api from '@/constants/api';
 import TransactionItem from '@/components/TransactionItem';
 import AddTransactionModal from '@/components/AddTransactionModal';
 import CategorySelect from '@/components/CategorySelect';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { updateNetworthWidget } from '@/widgets/widget-updater';
 
 export default function TransactionsScreen() {
     const colorScheme = useColorScheme();
     const isDark = colorScheme === 'dark';
+    const router = useRouter();
 
     const [transactions, setTransactions] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
@@ -190,6 +193,7 @@ export default function TransactionsScreen() {
                             setLoading(true);
                             await api.post('/api/finance-management/recalculate-networth/');
                             Alert.alert("Success", "Networth recalculated successfully!");
+                            updateNetworthWidget();
                         } catch (e: any) {
                             Alert.alert("Error", e.response?.data?.error || "Failed to recalculate networth");
                         } finally {
@@ -215,6 +219,12 @@ export default function TransactionsScreen() {
                     onPress={() => setShowFilterModal(true)}
                 >
                     <Ionicons name="options" size={24} color={isDark ? '#cbd5e1' : '#475569'} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={[styles.filterButton, themeStyles.filterButton, { marginLeft: 8 }]}
+                    onPress={() => router.push('/(tabs)/scheduled')}
+                >
+                    <Ionicons name="repeat" size={24} color={isDark ? '#cbd5e1' : '#475569'} />
                 </TouchableOpacity>
             </View>
 

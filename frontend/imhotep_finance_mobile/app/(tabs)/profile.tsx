@@ -20,23 +20,23 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useAuth } from '@/contexts/AuthContext';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import { useUpdateChecker } from '@/hooks/use-update-checker';
 import api from '@/constants/api';
 import CurrencySelect from '@/components/CurrencySelect'; // Import CurrencySelect
+import { updateNetworthWidget } from '@/widgets/widget-updater';
 
 // Theme colors
 const themes = {
   light: {
     background: '#FFFFFF',
-    surface: '#F9FAFB',
+    surface: '#f1f5f9',
     surfaceActive: '#FFFFFF',
-    text: '#1F2937',
+    text: '#111827',
     textSecondary: '#6B7280',
     placeholder: '#9CA3AF',
     border: '#D1D5DB',
     borderLight: '#E5E7EB',
-    primary: '#366c6b', // Updated to match dashboard
-    primaryLight: '#eaf6f6', // Updated to match dashboard
+    primary: '#366c6b',
+    primaryLight: '#eaf6f6',
     error: '#EF4444',
     errorLight: '#FEF2F2',
     success: '#22C55E',
@@ -46,16 +46,16 @@ const themes = {
     overlay: 'rgba(0, 0, 0, 0.5)',
   },
   dark: {
-    background: '#1F2937',
-    surface: '#374151',
-    surfaceActive: '#4B5563',
+    background: '#1e293b',
+    surface: '#0f172a',
+    surfaceActive: '#1e293b',
     text: '#F9FAFB',
     textSecondary: '#9CA3AF',
     placeholder: '#6B7280',
-    border: '#4B5563',
-    borderLight: '#374151',
-    primary: '#51adac', // Updated to match dashboard
-    primaryLight: '#244746', // Updated to match dashboard
+    border: '#334155',
+    borderLight: '#1e293b',
+    primary: '#51adac',
+    primaryLight: '#244746',
     error: '#F87171',
     errorLight: '#7F1D1D',
     success: '#4ADE80',
@@ -68,9 +68,8 @@ const themes = {
 
 export default function ProfileScreen() {
   const { user, logout, updateUser, token } = useAuth();
-  const { checking: checkingUpdates, checkForUpdates } = useUpdateChecker();
-  const backgroundColor = useThemeColor({}, 'background');
   const colorScheme = useColorScheme();
+  const backgroundColor = colorScheme === 'dark' ? '#0f172a' : '#f8fafc';
   const colors = themes[colorScheme === 'dark' ? 'dark' : 'light'];
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -290,6 +289,7 @@ export default function ProfileScreen() {
       }
 
       setSuccess('Financial settings updated successfully!');
+      updateNetworthWidget();
 
     } catch (err: any) {
       setError(err.response?.data?.error || err.message || 'Failed to update settings');
@@ -334,7 +334,7 @@ export default function ProfileScreen() {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          <ThemedView style={styles.header}>
+          <ThemedView style={styles.header} lightColor="#f8fafc" darkColor="#0f172a">
             <ThemedText type="title" style={styles.title}>My Profile</ThemedText>
             <ThemedText style={[styles.subtitle, { color: colors.textSecondary }]}>
               Manage your account and preferences
@@ -610,21 +610,7 @@ export default function ProfileScreen() {
             </View>
           )}
 
-          {/* Check for Updates Button */}
-          <Pressable
-            style={[styles.updateButton, { backgroundColor: colors.primary }]}
-            onPress={() => checkForUpdates()}
-            disabled={checkingUpdates}
-          >
-            {checkingUpdates ? (
-              <ActivityIndicator color="#fff" size="small" />
-            ) : (
-              <>
-                <Ionicons name="cloud-download-outline" size={24} color="#fff" />
-                <ThemedText style={styles.updateButtonText}>Check for Updates</ThemedText>
-              </>
-            )}
-          </Pressable>
+
 
           {/* Logout Button */}
           <Pressable style={styles.logoutButton} onPress={handleLogout}>
@@ -851,21 +837,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  updateButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 14,
-    marginHorizontal: 16,
-    marginTop: 24,
-    borderRadius: 8,
-    gap: 8,
-  },
-  updateButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
+
   logoutButton: {
     flexDirection: 'row',
     alignItems: 'center',

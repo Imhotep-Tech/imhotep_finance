@@ -18,6 +18,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import api from '../constants/api';
 import CurrencySelect from './CurrencySelect';
 import CategorySelect from './CategorySelect';
+import { updateNetworthWidget } from '../widgets/widget-updater';
 
 interface AddTransactionModalProps {
     onClose: () => void;
@@ -84,7 +85,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                 await api.post('/api/finance-management/transaction/add-transactions/', payload);
                 Alert.alert('Success', 'Transaction added successfully!');
             }
-
+            updateNetworthWidget();
             onSuccess();
         } catch (err: any) {
             const errorMessage = err.response?.data?.error || (editMode ? 'Failed to update transaction.' : 'Failed to add transaction.');
@@ -121,6 +122,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                             if (initialValues.id) {
                                 await api.delete(`/api/finance-management/transaction/delete-transactions/${initialValues.id}/`);
                                 Alert.alert('Success', 'Transaction deleted successfully!');
+                                updateNetworthWidget();
                                 onSuccess();
                             }
                         } catch (err: any) {

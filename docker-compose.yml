@@ -20,7 +20,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - "8000:8000"
+      - "8010:8000"
     env_file:
       - ./backend/imhotep_finance/.env
     volumes:
@@ -30,7 +30,7 @@ services:
       db:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "nc -z localhost 8000 || exit 1"]
+      test: ["CMD-SHELL", "nc -z localhost 8010 || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -43,7 +43,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - VITE_API_URL=http://localhost:8000
+      - VITE_API_URL=http://localhost:8010
     volumes:
       - ./frontend/imhotep_finance:/app:Z
       - /app/node_modules

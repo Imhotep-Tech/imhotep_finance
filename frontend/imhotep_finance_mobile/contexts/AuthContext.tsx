@@ -1,7 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../constants/api';
+import { updateNetworthWidget } from '../widgets/widget-updater';
 
 interface AuthContextType {
   user: any;
@@ -62,6 +64,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (storedAccess) {
           setAccessToken(storedAccess);
           accessTokenRef.current = storedAccess;
+          await AsyncStorage.setItem('access_token', storedAccess);
         }
         if (storedRefresh) {
           setRefreshToken(storedRefresh);
@@ -109,6 +112,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         if (newAccessToken) {
           await SecureStore.setItemAsync('access_token', newAccessToken);
+          await AsyncStorage.setItem('access_token', newAccessToken);
           setAccessToken(newAccessToken);
           accessTokenRef.current = newAccessToken;
         }
@@ -142,8 +146,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (api) delete api.defaults.headers.common['Authorization'];
 
     await SecureStore.deleteItemAsync('access_token');
+    await AsyncStorage.removeItem('access_token');
     await SecureStore.deleteItemAsync('refresh_token');
     await SecureStore.deleteItemAsync('user');
+
+    // Reset widget to logged-out state
+    updateNetworthWidget({ isLoggedIn: false });
   };
 
   // Axios interceptor (Logic is identical to Web, just adapted slightly)
@@ -246,8 +254,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     // Async Storage must be awaited
     await SecureStore.setItemAsync('access_token', access);
+    await AsyncStorage.setItem('access_token', access);
     await SecureStore.setItemAsync('refresh_token', refresh);
     await SecureStore.setItemAsync('user', JSON.stringify(user));
+
+    // Update widget in background
+    updateNetworthWidget();
   };
 
   // Logout Function (with API call)

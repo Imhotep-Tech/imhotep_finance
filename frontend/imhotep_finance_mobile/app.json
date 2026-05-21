@@ -2,22 +2,18 @@
   "expo": {
     "name": "Imhotep Financial Manager",
     "slug": "imhotep-finance",
-    "version": "1.2.1",
+    "version": "1.3.0",
     "orientation": "portrait",
     "icon": "./assets/images/imhotep_finance_zoomed.png",
     "scheme": "imhotep-finance",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
-      "displayName": "Imhotep Finance",
       "associatedDomains": [
         "applinks:imhotep-finance.vercel.app"
       ],
       "bundleIdentifier": "com.imhoteptech.imhotep-finance-mobile"
     },
     "android": {
-      "appName": "Imhotep Finance",
-      "usesCleartextTraffic": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/imhotep_finance_zoomed.png",
         "backgroundColor": "#366c6b"
@@ -83,7 +79,12 @@
             }
           ]
         }
-      ]
+      ],
+      "expo-font",
+      "expo-image",
+      "expo-secure-store",
+      "expo-status-bar",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
@@ -94,12 +95,6 @@
       "eas": {
         "projectId": "c1a10f77-5fb8-4ce7-b257-80e64d5dbb2a"
       }
-    },
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
-    "updates": {
-      "url": "https://u.expo.dev/c1a10f77-5fb8-4ce7-b257-80e64d5dbb2a"
     },
     "owner": "imhoteptech"
   }

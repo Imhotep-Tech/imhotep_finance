@@ -25,6 +25,7 @@ const { width } = Dimensions.get('window');
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import { updateNetworthWidget } from '@/widgets/widget-updater';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -40,25 +41,34 @@ export default function Dashboard() {
   const [initialType, setInitialType] = useState<'deposit' | 'withdraw'>('deposit');
 
   const fetchData = async () => {
+    let latestNetworth = '0';
+    let latestCurrency = 'USD';
+    let latestScore: number | null = null;
+    let hasError = false;
+
     try {
       // 1. Fetch Networth
       const networthRes = await api.get('/api/finance-management/get-networth/');
-      setNetworth(networthRes.data.networth || '0');
+      latestNetworth = networthRes.data.networth || '0';
+      setNetworth(latestNetworth);
       if (networthRes.data.favorite_currency) {
-        setFavoriteCurrency(networthRes.data.favorite_currency);
+        latestCurrency = networthRes.data.favorite_currency;
+        setFavoriteCurrency(latestCurrency);
       }
     } catch (err: any) {
       if (err.response?.status === 404) {
         setNetworth('0');
       } else {
         console.warn('Networth fetch error:', err);
+        hasError = true;
       }
     }
 
     try {
       // 2. Fetch Favorite Currency (redundant but good backup)
       const favRes = await axios.get('/api/get-fav-currency/');
-      setFavoriteCurrency(favRes.data.favorite_currency || favoriteCurrency || 'USD');
+      latestCurrency = favRes.data.favorite_currency || latestCurrency || 'USD';
+      setFavoriteCurrency(latestCurrency);
     } catch (err: any) {
       if (err.response?.status !== 404) {
         console.warn('Favorite currency fetch error:', err);
@@ -69,7 +79,8 @@ export default function Dashboard() {
       // 3. Fetch Target Score
       const scoreRes = await api.get('/api/finance-management/target/get-score/');
       if (scoreRes.data.score_txt) {
-        setScore(scoreRes.data.score);
+        latestScore = scoreRes.data.score;
+        setScore(latestScore);
         setScoreTxt(scoreRes.data.score_txt);
         setTarget(scoreRes.data.target);
       }
@@ -88,6 +99,16 @@ export default function Dashboard() {
 
     setLoading(false);
     setRefreshing(false);
+
+    // Update the Android widget with the fetched values
+    updateNetworthWidget({
+      isLoggedIn: true,
+      favoriteCurrency: latestCurrency,
+      networth: latestNetworth,
+      score: latestScore,
+      hasError,
+      isRefreshing: false,
+    });
   };
 
   const runApplyScheduledIfNeeded = async () => {
@@ -108,22 +129,25 @@ export default function Dashboard() {
     }
   };
 
+  const loadDashboardData = async () => {
+    await runApplyScheduledIfNeeded();
+    await fetchData();
+  };
+
   useEffect(() => {
-    fetchData();
-    runApplyScheduledIfNeeded();
+    loadDashboardData();
   }, []);
 
   // Reload when screen comes into focus
   useFocusEffect(
     useCallback(() => {
-      fetchData();
+      loadDashboardData();
     }, [])
   );
 
   const onRefresh = () => {
     setRefreshing(true);
-    fetchData();
-    runApplyScheduledIfNeeded();
+    loadDashboardData();
   };
 
   const getScoreColor = () => {
@@ -302,7 +326,7 @@ export default function Dashboard() {
         onClose={() => setShowAddModal(false)}
         onSuccess={() => {
           setShowAddModal(false);
-          fetchData();
+          loadDashboardData();
         }}
       />
     </View>

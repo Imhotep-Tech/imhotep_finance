@@ -50,7 +50,6 @@ export function NetWorthWidget(props: NetWorthWidgetProps) {
         width: 'match_parent',
         flexDirection: 'column',
         justifyContent: 'space-between',
-        alignItems: 'stretch',
         padding: 12,
         backgroundColor: '#0f172a',
         borderRadius: 16,

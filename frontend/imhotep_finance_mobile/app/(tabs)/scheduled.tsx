@@ -17,6 +17,7 @@ import api from '@/constants/api';
 import ScheduledTransactionItem from '@/components/ScheduledTransactionItem';
 import AddScheduledTransactionModal from '@/components/AddScheduledTransactionModal';
 import CategorySelect from '@/components/CategorySelect';
+import { updateNetworthWidget } from '@/widgets/widget-updater';
 
 export default function ScheduledTransactionsScreen() {
     const colorScheme = useColorScheme();
@@ -155,6 +156,7 @@ export default function ScheduledTransactionsScreen() {
 
         try {
             const res = await api.post(`/api/finance-management/scheduled-trans/update-scheduled-trans-status/${transaction.id}/`);
+            updateNetworthWidget();
 
             // 3. Confirm with server data (optional, but good for consistency)
             if (res.data.status !== undefined && res.data.status !== newStatus) {

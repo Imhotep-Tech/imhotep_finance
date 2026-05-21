@@ -27,9 +27,9 @@ const getHostFromScriptUrl = () => {
 
 const getDevUrl = () => {
   const detectedHost = getHostFromExpo() || getHostFromScriptUrl();
-  if (detectedHost) return `http://${detectedHost}:8000`;
-  if (Platform.OS === 'android') return 'http://10.0.2.2:8000';
-  return 'http://127.0.0.1:8000';
+  if (detectedHost) return `http://${detectedHost}:8010`;
+  if (Platform.OS === 'android') return 'http://10.0.2.2:8010';
+  return 'http://127.0.0.1:8010';
 };
 
 const DEV_URL = getDevUrl();

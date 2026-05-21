@@ -1,13 +1,12 @@
 import { Tabs, Redirect } from 'expo-router';
 import React from 'react';
-import { Platform } from 'react-native';
+import { Platform, View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 
 import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
+
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useAuth } from '@/contexts/AuthContext';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 // Theme colors for the layout
@@ -35,7 +34,7 @@ const themes = {
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const { isAuthenticated, loading } = useAuth();
-  const colors = themes[colorScheme ?? 'light'];
+  const colors = themes[colorScheme === 'dark' ? 'dark' : 'light'];
 
   // Show loading screen while checking auth
   if (loading) {
@@ -65,56 +64,57 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: Colors[colorScheme === 'dark' ? 'dark' : 'light'].tint,
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarStyle: {
           backgroundColor: colors.tabBar,
           borderTopColor: colorScheme === 'dark' ? '#374151' : '#E5E7EB',
-          height: Platform.OS === 'ios' ? 88 : 64,
-          paddingBottom: Platform.OS === 'ios' ? 28 : 8,
+          height: Platform.OS === 'ios' ? 64 : 56,
+          paddingBottom: Platform.OS === 'ios' ? 12 : 4,
         },
+        tabBarShowLabel: true,
       }}>
       <Tabs.Screen
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          tabBarIcon: ({ color }) => <Ionicons name="home" size={24} color={color} />,
         }}
       />
       <Tabs.Screen
         name="transactions"
         options={{
           title: 'Transactions',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="list.bullet" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="scheduled"
-        options={{
-          title: 'Scheduled',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="repeat" color={color} />,
+          tabBarIcon: ({ color }) => <Ionicons name="swap-vertical" size={24} color={color} />,
         }}
       />
       <Tabs.Screen
         name="wishlist"
         options={{
           title: 'Wishlist',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="star.fill" color={color} />,
+          tabBarIcon: ({ color }) => <Ionicons name="star" size={24} color={color} />,
         }}
       />
       <Tabs.Screen
         name="reports"
         options={{
           title: 'Reports',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="chart.pie.fill" color={color} />,
+          tabBarIcon: ({ color }) => <Ionicons name="pie-chart" size={24} color={color} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.fill" color={color} />,
+          tabBarIcon: ({ color }) => <Ionicons name="person" size={24} color={color} />,
+        }}
+      />
+      {/* Hidden from tab bar but still navigable */}
+      <Tabs.Screen
+        name="scheduled"
+        options={{
+          href: null,
         }}
       />
     </Tabs>
