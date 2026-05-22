@@ -38,6 +38,26 @@
             "BROWSABLE",
             "DEFAULT"
           ]
+        },
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "imhotep-finance.vercel.app",
+              "pathPrefix": "/verify-email"
+            },
+            {
+              "scheme": "https",
+              "host": "imhotep-finance.vercel.app",
+              "pathPrefix": "/verify-email-change"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ],
       "package": "com.imhoteptech.imhotep_finance_mobile"
@@ -96,6 +116,12 @@
         "projectId": "c1a10f77-5fb8-4ce7-b257-80e64d5dbb2a"
       }
     },
-    "owner": "imhoteptech"
+    "owner": "imhoteptech",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/c1a10f77-5fb8-4ce7-b257-80e64d5dbb2a"
+    }
   }
 }
