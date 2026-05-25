@@ -45,3 +45,4 @@ app-example
 .env.*
 
 *.apk
+*.aab
