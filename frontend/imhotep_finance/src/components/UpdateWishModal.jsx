@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import CurrencySelect from './CurrencySelect';
+import PlaceSelect from './PlaceSelect';
 
 const UpdateWishModal = ({
   onClose,
@@ -11,6 +12,7 @@ const UpdateWishModal = ({
   const [currency, setCurrency] = useState(initialValues.currency || '');
   const [wishDetails, setWishDetails] = useState(initialValues.wish_details || '');
   const [link, setLink] = useState(initialValues.link || '');
+  const [place, setPlace] = useState(initialValues.place || '');
   const [year, setYear] = useState(initialValues.year || new Date().getFullYear());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -22,6 +24,7 @@ const UpdateWishModal = ({
       setCurrency(initialValues.currency || '');
       setWishDetails(initialValues.wish_details || '');
       setLink(initialValues.link || '');
+      setPlace(initialValues.place || '');
       setYear(initialValues.year || new Date().getFullYear());
     }
   }, [initialValues]);
@@ -45,6 +48,7 @@ const UpdateWishModal = ({
           year,
           wish_details: wishDetails,
           link,
+          place,
         }
       );
       setSuccess('Wish updated successfully!');
@@ -136,6 +140,14 @@ const UpdateWishModal = ({
                 onChange={e => setLink(e.target.value)}
                 className="chef-input"
                 placeholder="Link (optional)"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Place</label>
+              <PlaceSelect
+                value={place}
+                onChange={setPlace}
+                currency={currency}
               />
             </div>
             <div className="flex justify-end gap-2 mt-4">

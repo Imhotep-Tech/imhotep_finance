@@ -28,3 +28,18 @@ class CategoryResponseSerializer(serializers.Serializer):
         child=serializers.CharField(),
         help_text="List of frequently used category names"
     )
+
+class PlaceRequestSerializer(serializers.Serializer):
+    status = serializers.ChoiceField(
+        choices=['Deposit', 'Withdraw', 'ANY'],
+        default='ANY',
+        required=False,
+        help_text="Filter places by transaction status"
+    )
+
+class PlaceResponseSerializer(serializers.Serializer):
+    id = serializers.IntegerField(help_text="User ID")
+    place = serializers.ListField(
+        child=serializers.CharField(),
+        help_text="List of frequently used place names"
+    )

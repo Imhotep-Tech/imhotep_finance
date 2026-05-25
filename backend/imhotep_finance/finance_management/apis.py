@@ -6,13 +6,16 @@ from drf_spectacular.utils import extend_schema
 from finance_management.services import (
     get_user_networth_service,
     get_user_networth_details_service,
-    get_user_categories_service
+    get_user_categories_service,
+    get_user_places_service
 )
 from finance_management.serializers import (
     NetworthResponseSerializer,
     NetworthDetailsResponseSerializer,
     CategoryRequestSerializer,
-    CategoryResponseSerializer
+    CategoryResponseSerializer,
+    PlaceRequestSerializer,
+    PlaceResponseSerializer
 )
 
 
@@ -78,4 +81,28 @@ class GetCategoryApi(APIView):
         return Response({
             'id': user.id,
             'category': categories,
+        }, status=status.HTTP_200_OK)
+
+class GetPlacesApi(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        tags=['Finance Management'],
+        description="Get user's most frequently used places optionally filtered by currency.",
+        parameters=[PlaceRequestSerializer],
+        responses={200: PlaceResponseSerializer},
+        operation_id='get_places'
+    )
+    def get(self, request):
+        """Get current authenticated user's most frequently used places.
+        Optional query param: ?currency=ANY|<specific_currency>
+        """
+        user = request.user
+        currency_param = request.query_params.get('currency', 'ANY')
+        
+        places = get_user_places_service(user, currency=currency_param)
+        
+        return Response({
+            'id': user.id,
+            'places': places,
         }, status=status.HTTP_200_OK)

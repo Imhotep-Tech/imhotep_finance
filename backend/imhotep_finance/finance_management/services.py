@@ -1,4 +1,4 @@
-from backend.imhotep_finance.finance_management.utils.get_user_places import get_places
+from finance_management.utils.get_user_places import get_places
 from finance_management.utils.get_networth import get_networth, get_netWorth_details
 from finance_management.utils.get_category import get_category
 

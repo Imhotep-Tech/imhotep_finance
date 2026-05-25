@@ -47,18 +47,11 @@ export default function NetWorthDetailsScreen() {
             const res = await api.get('/api/finance-management/get-networth-details/');
             let data = res.data.networth_details;
 
-            // Normalize: if dict, convert to array of {currency, amount}
-            if (Array.isArray(data)) {
-                setDetails(data);
-            } else if (data && typeof data === 'object') {
-                setDetails(
-                    Object.entries(data).map(([currency, amount]) => ({
-                        currency,
-                        amount: amount as number
-                    }))
-                );
+            if (data && typeof data === 'object' && !Array.isArray(data)) {
+                // data is a dict of { "PlaceName": [{ currency: "USD", amount: 100 }] }
+                setDetails(data as any);
             } else {
-                setDetails([]);
+                setDetails([] as any);
             }
         } catch (err) {
             console.error('Failed to fetch net worth details:', err);
@@ -107,7 +100,7 @@ export default function NetWorthDetailsScreen() {
                             <ActivityIndicator size="large" color={colors.primary} />
                             <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Loading...</Text>
                         </View>
-                    ) : details.length === 0 ? (
+                    ) : Object.keys(details).length === 0 ? (
                         <View style={styles.emptyContainer}>
                             <Ionicons name="wallet-outline" size={64} color={colors.textSecondary} />
                             <Text style={[styles.emptyText, { color: colors.textSecondary }]}>No net worth details found.</Text>
@@ -116,24 +109,34 @@ export default function NetWorthDetailsScreen() {
                             </Text>
                         </View>
                     ) : (
-                        <View style={styles.grid}>
-                            {details.map((item, idx) => (
-                                <LinearGradient
-                                    key={idx}
-                                    colors={['#51adac', '#428a89']}
-                                    start={{ x: 0, y: 0 }}
-                                    end={{ x: 1, y: 1 }}
-                                    style={styles.currencyCard}
-                                >
-                                    <Text style={styles.currencyLabel}>{item.currency}</Text>
-                                    <Text style={styles.currencyAmount}>
-                                        {Number(item.amount || 0).toLocaleString(undefined, {
-                                            minimumFractionDigits: 2,
-                                            maximumFractionDigits: 2
-                                        })}
-                                    </Text>
-                                    <Text style={styles.currencySubtext}>Total Amount</Text>
-                                </LinearGradient>
+                        <View style={{ gap: 24, marginBottom: 24 }}>
+                            {Object.entries(details).map(([place, currencies], idx) => (
+                                <View key={idx} style={[styles.placeGroupCard, { backgroundColor: colors.surface }]}>
+                                    <View style={styles.placeHeader}>
+                                        <Ionicons name="location-outline" size={24} color={colors.primary} />
+                                        <Text style={[styles.placeTitle, { color: colors.text }]}>{place}</Text>
+                                    </View>
+                                    <View style={styles.grid}>
+                                        {(currencies as any[]).map((item, cIdx) => (
+                                            <LinearGradient
+                                                key={cIdx}
+                                                colors={['#51adac', '#428a89']}
+                                                start={{ x: 0, y: 0 }}
+                                                end={{ x: 1, y: 1 }}
+                                                style={styles.currencyCard}
+                                            >
+                                                <Text style={styles.currencyLabel}>{item.currency}</Text>
+                                                <Text style={styles.currencyAmount}>
+                                                    {Number(item.amount || 0).toLocaleString(undefined, {
+                                                        minimumFractionDigits: 2,
+                                                        maximumFractionDigits: 2
+                                                    })}
+                                                </Text>
+                                                <Text style={styles.currencySubtext}>Total Amount</Text>
+                                            </LinearGradient>
+                                        ))}
+                                    </View>
+                                </View>
                             ))}
                         </View>
                     )}
@@ -256,5 +259,27 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 16,
         fontWeight: '600',
+    },
+    placeGroupCard: {
+        borderRadius: 16,
+        padding: 16,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 8,
+        elevation: 2,
+    },
+    placeHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: 'rgba(0,0,0,0.05)',
+        paddingBottom: 8,
+        gap: 8,
+    },
+    placeTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
     },
 });
