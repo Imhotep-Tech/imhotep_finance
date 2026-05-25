@@ -1,8 +1,21 @@
 export const versionEntries = [
   {
+    version: '8.0',
+    date: 'May 25, 2026',
+    badge: { label: 'MAJOR', color: 'yellow' },
+    summary: 'React Native Mobile App Major Release (Independent numbering from Web App)',
+    bullets: [
+      'Please Note: The mobile application version numbering is different and independent from the web application version numbers.',
+      'Added the "Move Money" feature inside the Net Worth details page (web and mobile), enabling seamless funds transfer between places.',
+      'Transactions are executed atomically via the backend and backed by withdrawal/deposit transactions in the "Transfer" category.',
+      'Fixed bottom sheet keyboard-avoiding glitches on Android devices (e.g. Oppo soft keyboard layout collapses) by utilizing system resizing.',
+      'Resolved monthly reports recalculation bugs and duplicate place groupings by normalizing (whitespace stripping and title-casing) place names.',
+      'Implemented real-time incremental updates to cached reports place breakdowns on transaction changes, and fixed database report serialization.'
+    ]
+  },
+  {
     version: '7.4.1',
     date: 'March 12, 2026',
-    badge: { label: 'CURRENT', color: 'red' },
     summary: 'React Native Mobile App Get widget support and bug fixes',
     bullets: [
       'Added widget support for iOS and Android with Expo WidgetKit',

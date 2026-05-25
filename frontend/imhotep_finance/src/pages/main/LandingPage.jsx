@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Footer from '../../components/common/Footer';
 import Logo from '../../assets/Logo.jpeg';
+import { versionEntries } from '../../utils/versionData';
 
 // Features data with emojis
 const features = [
@@ -26,6 +27,32 @@ const features = [
     description: "Automate your recurring payments and never miss a bill."
   },
 ];
+
+const featuresAdded = versionEntries.reduce((total, entry) => total + entry.bullets.length, 0);
+
+const calculateDevelopmentMonths = () => {
+  if (versionEntries.length < 2) {
+    return 0;
+  }
+
+  const latestRelease = new Date(versionEntries[0].date);
+  const earliestRelease = new Date(versionEntries[versionEntries.length - 1].date);
+
+  if (Number.isNaN(latestRelease.getTime()) || Number.isNaN(earliestRelease.getTime())) {
+    return 0;
+  }
+
+  let months = (latestRelease.getFullYear() - earliestRelease.getFullYear()) * 12
+    + (latestRelease.getMonth() - earliestRelease.getMonth());
+
+  if (latestRelease.getDate() < earliestRelease.getDate()) {
+    months -= 1;
+  }
+
+  return Math.max(months, 0);
+};
+
+const developmentMonths = calculateDevelopmentMonths();
 
 function LandingPage() {
   const [currentFeature, setCurrentFeature] = useState(0);
@@ -118,14 +145,18 @@ function LandingPage() {
           </div>
           {/* Stats */}
           <div className="mt-16 flex justify-center">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 justify-center">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 justify-center">
               <div className="glass-effect rounded-lg p-6 text-center transform hover:scale-105 transition-all duration-300 bg-white/80 dark:bg-gray-900/60">
                 <div className="text-3xl font-bold text-[#366c6b] dark:text-emerald-400 mb-2">170+</div>
                 <div className="text-[#1a3535] dark:text-gray-300 opacity-90">Currencies Supported</div>
               </div>
               <div className="glass-effect rounded-lg p-6 text-center transform hover:scale-105 transition-all duration-300 bg-white/80 dark:bg-gray-900/60">
-                <div className="text-3xl font-bold text-[#366c6b] dark:text-emerald-400 mb-2">99.9%</div>
-                <div className="text-[#1a3535] dark:text-gray-300 opacity-90">Uptime</div>
+                <div className="text-3xl font-bold text-[#366c6b] dark:text-emerald-400 mb-2">{featuresAdded}+</div>
+                <div className="text-[#1a3535] dark:text-gray-300 opacity-90">Features Added</div>
+              </div>
+              <div className="glass-effect rounded-lg p-6 text-center transform hover:scale-105 transition-all duration-300 bg-white/80 dark:bg-gray-900/60">
+                <div className="text-3xl font-bold text-[#366c6b] dark:text-emerald-400 mb-2">{developmentMonths} mo</div>
+                <div className="text-[#1a3535] dark:text-gray-300 opacity-90">Development Time</div>
               </div>
             </div>
           </div>

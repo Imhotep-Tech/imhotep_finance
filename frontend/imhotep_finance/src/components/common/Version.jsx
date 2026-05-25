@@ -1,13 +1,34 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { versionEntries } from '../../utils/versionData';
+import Footer from './Footer';
 
-// Mock Footer component for standalone functionality
-const Footer = () => (
-  <footer className="bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm mt-12 py-6 text-center text-gray-600 dark:text-gray-400 border-t border-gray-200 dark:border-gray-800">
-    <p>&copy; 2025 Imhotep Financial Manager. All rights reserved.</p>
-  </footer>
-);
+const majorVersions = versionEntries.filter((entry) => entry.badge?.label === 'MAJOR').length + 1;
+const featuresAdded = versionEntries.reduce((total, entry) => total + entry.bullets.length, 0);
+
+const calculateDevelopmentMonths = () => {
+  if (versionEntries.length < 2) {
+    return 0;
+  }
+
+  const latestRelease = new Date(versionEntries[0].date);
+  const earliestRelease = new Date(versionEntries[versionEntries.length - 1].date);
+
+  if (Number.isNaN(latestRelease.getTime()) || Number.isNaN(earliestRelease.getTime())) {
+    return 0;
+  }
+
+  let months = (latestRelease.getFullYear() - earliestRelease.getFullYear()) * 12
+    + (latestRelease.getMonth() - earliestRelease.getMonth());
+
+  if (latestRelease.getDate() < earliestRelease.getDate()) {
+    months -= 1;
+  }
+
+  return Math.max(months, 0);
+};
+
+const developmentMonths = calculateDevelopmentMonths();
 
 const Version = () => {
   const navigate = useNavigate();
@@ -75,15 +96,15 @@ const Version = () => {
         {/* Statistics Section */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-white/90 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-6 text-center shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-shadow duration-200">
-            <div className="text-3xl font-bold text-teal-600 dark:text-teal-400 mb-2">7</div>
+            <div className="text-3xl font-bold text-teal-600 dark:text-teal-400 mb-2">{majorVersions}</div>
             <div className="text-gray-700 dark:text-gray-300">Major Versions</div>
           </div>
           <div className="bg-white/90 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-6 text-center shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-shadow duration-200">
-            <div className="text-3xl font-bold text-teal-600 dark:text-teal-400 mb-2">100+</div>
+            <div className="text-3xl font-bold text-teal-600 dark:text-teal-400 mb-2">{featuresAdded}+</div>
             <div className="text-gray-700 dark:text-gray-300">Features Added</div>
           </div>
           <div className="bg-white/90 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-6 text-center shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-shadow duration-200">
-            <div className="text-3xl font-bold text-teal-600 dark:text-teal-400 mb-2">19</div>
+            <div className="text-3xl font-bold text-teal-600 dark:text-teal-400 mb-2">{developmentMonths}</div>
             <div className="text-gray-700 dark:text-gray-300">Months of Development</div>
           </div>
         </div>
