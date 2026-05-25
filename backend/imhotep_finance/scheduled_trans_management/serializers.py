@@ -44,7 +44,13 @@ class ScheduledTransactionInputSerializer(serializers.Serializer):
         required=True,
         help_text="Transaction type: Deposit or Withdraw"
     )
-    
+    place = serializers.CharField(
+        max_length=255,
+        required=False,
+        allow_blank=True,
+        allow_null=True,
+        help_text="Place of transaction (e.g., Bank, Cash, wallet, home, etc.)"
+    )
     def validate_amount(self, value):
         """Ensure amount is positive."""
         if value <= 0:

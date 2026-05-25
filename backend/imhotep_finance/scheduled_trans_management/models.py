@@ -30,6 +30,7 @@ class ScheduledTransaction(models.Model):
     scheduled_trans_details = EncryptedCharField(max_length=255, blank=True, null=True)
     category = EncryptedCharField(max_length=100, blank=True, null=True)
     last_time_added = models.DateTimeField(blank=True, null=True)
+    place = models.CharField(max_length=255, default='General', blank=True, null=True)
     status =  models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
