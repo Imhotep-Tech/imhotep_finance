@@ -30,7 +30,8 @@ class CreateTransactionServiceTest(TestCase):
             trans_status='deposit',
             category='Salary',
             trans_details='Monthly salary',
-            transaction_date=date.today()
+            transaction_date=date.today(),
+            place='General'
         )
         
         self.assertIsNotNone(transaction.id)
@@ -51,7 +52,8 @@ class CreateTransactionServiceTest(TestCase):
             trans_status='deposit',
             category='Initial',
             trans_details='',
-            transaction_date=date.today()
+            transaction_date=date.today(),
+            place='General'
         )
         
         # Withdraw
@@ -62,7 +64,8 @@ class CreateTransactionServiceTest(TestCase):
             trans_status='withdraw',
             category='Food',
             trans_details='Groceries',
-            transaction_date=date.today()
+            transaction_date=date.today(),
+            place='General'
         )
         
         self.assertEqual(transaction.amount, 50)
@@ -79,7 +82,8 @@ class CreateTransactionServiceTest(TestCase):
                 trans_status='withdraw',
                 category='Food',
                 trans_details='',
-                transaction_date=date.today()
+                transaction_date=date.today(),
+                place='General'
             )
         self.assertIn('Insufficient funds', str(context.exception))
     
@@ -93,7 +97,8 @@ class CreateTransactionServiceTest(TestCase):
                 trans_status='deposit',
                 category='Test',
                 trans_details='',
-                transaction_date=date.today()
+                transaction_date=date.today(),
+                place='General'
             )
     
     def test_create_transaction_no_user(self):
@@ -106,7 +111,8 @@ class CreateTransactionServiceTest(TestCase):
                 trans_status='deposit',
                 category='Test',
                 trans_details='',
-                transaction_date=date.today()
+                transaction_date=date.today(),
+                place='General'
             )
     
     def test_create_transaction_invalid_currency(self):
@@ -119,7 +125,8 @@ class CreateTransactionServiceTest(TestCase):
                 trans_status='deposit',
                 category='Test',
                 trans_details='',
-                transaction_date=date.today()
+                transaction_date=date.today(),
+                place='General'
             )
 
 
@@ -133,7 +140,8 @@ class DeleteTransactionServiceTest(TestCase):
             trans_status='deposit',
             category='Test',
             trans_details='',
-            transaction_date=date.today()
+            transaction_date=date.today(),
+            place='General'
         )
     
     def test_delete_transaction_success(self):
@@ -154,7 +162,8 @@ class DeleteTransactionServiceTest(TestCase):
             trans_status='withdraw',
             category='Test',
             trans_details='',
-            transaction_date=date.today()
+            transaction_date=date.today(),
+            place='General'
         )
         
         # Try to delete the deposit
@@ -190,7 +199,8 @@ class UpdateTransactionServiceTest(TestCase):
             trans_status='deposit',
             category='Initial',
             trans_details='',
-            transaction_date=date.today()
+            transaction_date=date.today(),
+            place='General'
         )
     
     def test_update_transaction_amount(self):
@@ -203,7 +213,8 @@ class UpdateTransactionServiceTest(TestCase):
             trans_status='deposit',
             category='Updated',
             trans_details='Updated details',
-            transaction_date=date.today()
+            transaction_date=date.today(),
+            place='General'
         )
         
         self.assertEqual(updated.amount, 150)
@@ -220,7 +231,8 @@ class UpdateTransactionServiceTest(TestCase):
             trans_status='deposit',
             category='Extra',
             trans_details='',
-            transaction_date=date.today()
+            transaction_date=date.today(),
+            place='General'
         )
         
         updated = update_transaction(
@@ -231,10 +243,45 @@ class UpdateTransactionServiceTest(TestCase):
             trans_status='withdraw',
             category='Updated',
             trans_details='',
-            transaction_date=date.today()
+            transaction_date=date.today(),
+            place='General'
         )
         
         self.assertEqual(updated.trans_status, 'withdraw')
+
+    def test_update_transaction_rejects_currency_change(self):
+        """Test that currency changes are rejected on update"""
+        with self.assertRaises(ValidationError) as context:
+            update_transaction(
+                user=self.user,
+                transaction_id=self.transaction.id,
+                amount=100,
+                currency='EUR',
+                trans_status='deposit',
+                category='Updated',
+                trans_details='Updated details',
+                transaction_date=date.today(),
+                place='General'
+            )
+
+        self.assertIn('Currency cannot be changed', str(context.exception))
+
+    def test_update_transaction_rejects_place_change(self):
+        """Test that place changes are rejected on update"""
+        with self.assertRaises(ValidationError) as context:
+            update_transaction(
+                user=self.user,
+                transaction_id=self.transaction.id,
+                amount=100,
+                currency='USD',
+                trans_status='deposit',
+                category='Updated',
+                trans_details='Updated details',
+                transaction_date=date.today(),
+                place='Office'
+            )
+
+        self.assertIn('Place cannot be changed', str(context.exception))
     
     def test_update_transaction_insufficient_balance(self):
         """Test updating to withdraw with insufficient balance"""
@@ -247,9 +294,10 @@ class UpdateTransactionServiceTest(TestCase):
                 trans_status='withdraw',
                 category='Test',
                 trans_details='',
-                transaction_date=date.today()
+                transaction_date=date.today(),
+                place='General'
             )
-        self.assertIn('Insufficient balance', str(context.exception))
+        self.assertIn('Insufficient funds', str(context.exception))
 
 
 class BulkImportTransactionsTest(TestCase):

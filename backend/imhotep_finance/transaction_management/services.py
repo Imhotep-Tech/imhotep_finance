@@ -142,6 +142,14 @@ def update_transaction(*, user, transaction_id, amount, currency, trans_details,
 
     # Get the transaction
     trans_obj = get_object_or_404(Transactions, id=transaction_id, user=user)
+
+    # Currency and place are immutable once the transaction has been created.
+    # Keep the existing net worth bucket intact and only allow the mutable fields to change.
+    if currency != trans_obj.currency:
+        raise ValidationError("Currency cannot be changed after a transaction is created")
+
+    if place != trans_obj.place:
+        raise ValidationError("Place cannot be changed after a transaction is created")
     
     # Create a snapshot of old transaction data
     class OldTransactionSnapshot:
@@ -166,7 +174,7 @@ def update_transaction(*, user, transaction_id, amount, currency, trans_details,
     old_net_worth = NetWorth.objects.filter(user=user, currency=old_currency, place=old_place).first()
     if not old_net_worth:
         raise ValidationError("Associated net worth record not found for the old transaction")
-    if old_amount != amount or old_currency != currency or old_status.lower() != trans_status.lower() or old_place != place:
+    if old_amount != amount or old_status.lower() != trans_status.lower():
         #revert old transaction effect on net_worth
         if old_status.lower() == "withdraw":
                 old_net_worth.total += old_amount
@@ -203,7 +211,7 @@ def update_transaction(*, user, transaction_id, amount, currency, trans_details,
         trans_obj.place = place
         trans_obj.save()
 
-        if old_amount != amount or old_currency != currency or old_status.lower() != trans_status.lower() or old_place != place:
+        if old_amount != amount or old_status.lower() != trans_status.lower():
             # Update net_worth
             new_net_worth.total = new_net_worth_total
             new_net_worth.save()
