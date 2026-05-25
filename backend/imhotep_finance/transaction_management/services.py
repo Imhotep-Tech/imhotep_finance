@@ -164,16 +164,14 @@ def update_transaction(*, user, transaction_id, amount, currency, trans_details,
     old_place = trans_obj.place
 
     old_net_worth = NetWorth.objects.filter(user=user, currency=old_currency, place=old_place).first()
-
+    if not old_net_worth:
+        raise ValidationError("Associated net worth record not found for the old transaction")
     if old_amount != amount or old_currency != currency or old_status.lower() != trans_status.lower() or old_place != place:
-
         #revert old transaction effect on net_worth
         if old_status.lower() == "withdraw":
-            if old_net_worth:
                 old_net_worth.total += old_amount
                 old_net_worth.save()
         elif old_status.lower() == "deposit":
-            if old_net_worth:
                 old_net_worth.total -= old_amount
                 if old_net_worth.total < 0:
                     raise ValidationError("Cannot update transaction as it would result in negative balance")
@@ -181,20 +179,18 @@ def update_transaction(*, user, transaction_id, amount, currency, trans_details,
         else:
             raise ValidationError("Invalid old transaction status")
     
-    #update new transaction effect on net_worth
-    new_net_worth, created = NetWorth.objects.get_or_create(user=user, currency=currency, place=place, defaults={'total': 0})
+        #update new transaction effect on net_worth
+        new_net_worth, created = NetWorth.objects.get_or_create(user=user, currency=currency, place=place, defaults={'total': 0})
 
-    new_net_worth_total = float(new_net_worth.total)
-    if trans_status.lower() == "withdraw":
-        if new_net_worth_total < amount:
-            raise ValidationError(f"Insufficient funds. You only have {new_net_worth_total} {currency}.")
-        new_net_worth.total -= amount
-        new_net_worth.save()
-    elif trans_status.lower() == "deposit":
-        new_net_worth.total += amount
-        new_net_worth.save()
-    else:
-        raise ValidationError("Invalid new transaction status")
+        new_net_worth_total = float(new_net_worth.total)
+        if trans_status.lower() == "withdraw":
+            if new_net_worth_total < amount:
+                raise ValidationError(f"Insufficient funds. You only have {new_net_worth_total} {currency}.")
+            new_net_worth_total -= amount
+        elif trans_status.lower() == "deposit":
+            new_net_worth_total += amount
+        else:
+            raise ValidationError("Invalid new transaction status")
     
     with transaction.atomic():
         # Update transaction
@@ -207,9 +203,10 @@ def update_transaction(*, user, transaction_id, amount, currency, trans_details,
         trans_obj.place = place
         trans_obj.save()
 
-        # Update net_worth
-        new_net_worth.total = new_net_worth_total
-        new_net_worth.save()
+        if old_amount != amount or old_currency != currency or old_status.lower() != trans_status.lower() or old_place != place:
+            # Update net_worth
+            new_net_worth.total = new_net_worth_total
+            new_net_worth.save()
 
         # Update reports
         save_user_report_with_transaction_update(
