@@ -52,6 +52,19 @@ class CreateTransactionServiceTest(TestCase):
         with self.assertRaises(ValidationError):
             create_transaction(user=self.user, amount=100, currency='INVALID', trans_status='deposit', category='Test', trans_details='', transaction_date=date.today(), place='General')
 
+    def test_create_transaction_cleans_dirty_place_casing(self):
+        """Test that messy casing and whitespaces in place names are formatted properly during creation"""
+        transaction = create_transaction(user=self.user, amount=100, currency='USD', trans_status='deposit', category='Test', trans_details='', transaction_date=date.today(), place='   oFFiCE  ')
+        self.assertEqual(transaction.place, 'Office')
+        networth = NetWorth.objects.get(user=self.user, currency='USD', place='Office')
+        self.assertEqual(float(networth.total), 100)
+
+        # Empty place should default to 'General'
+        empty_transaction = create_transaction(user=self.user, amount=50, currency='USD', trans_status='deposit', category='Test', trans_details='', transaction_date=date.today(), place='   ')
+        self.assertEqual(empty_transaction.place, 'General')
+        networth_general = NetWorth.objects.get(user=self.user, currency='USD', place='General')
+        self.assertEqual(float(networth_general.total), 50)
+
 class DeleteTransactionServiceTest(TestCase):
 
     def setUp(self):
@@ -122,6 +135,15 @@ class UpdateTransactionServiceTest(TestCase):
         with self.assertRaises(ValidationError) as context:
             update_transaction(user=self.user, transaction_id=withdraw_trans.id, amount=200, currency='USD', trans_status='withdraw', category='Test', trans_details='', transaction_date=date.today(), place='General')
         self.assertIn('Insufficient funds', str(context.exception))
+
+    def test_update_transaction_cleans_dirty_place_casing(self):
+        """Test that messy casing and whitespaces in place names are formatted properly during update"""
+        updated = update_transaction(user=self.user, transaction_id=self.transaction.id, amount=100, currency='USD', trans_status='deposit', category='Updated', trans_details='', transaction_date=date.today(), place='  home  ')
+        self.assertEqual(updated.place, 'Home')
+        old_networth = NetWorth.objects.get(user=self.user, currency='USD', place='General')
+        new_networth = NetWorth.objects.get(user=self.user, currency='USD', place='Home')
+        self.assertEqual(float(old_networth.total), 0)
+        self.assertEqual(float(new_networth.total), 100)
 
 class BulkImportTransactionsTest(TestCase):
 

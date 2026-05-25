@@ -17,7 +17,7 @@ def recalculate_networth(user):
                 trans.save(update_fields=['place'])
 
         # 2. Get all unique currency and place combinations from cleaned user's transactions
-        combinations = list(Transactions.objects.filter(user=user).values_list('currency', 'place').distinct())
+        combinations = list(Transactions.objects.filter(user=user).values_list('currency', 'place').order_by().distinct())
 
         print(f"Unique combinations: {combinations}")
         
