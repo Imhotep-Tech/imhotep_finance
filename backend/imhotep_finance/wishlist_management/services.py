@@ -7,7 +7,7 @@ from django.db import transaction
 from wishlist_management.models import Wishlist
 from transaction_management.services import create_transaction, delete_transaction
 
-def create_wish(*,user, price, currency, year, wish_details, link):
+def create_wish(*,user, price, currency, year, wish_details, link, place):
     """Create a transaction and update networth."""
 
     #Just in case more security for inner calls
@@ -38,6 +38,7 @@ def create_wish(*,user, price, currency, year, wish_details, link):
             year=year,
             wish_details=wish_details,
             link=link,
+            place=place
         )
                      
     return wish
@@ -63,7 +64,7 @@ def delete_wish(*, user, wish_id):
 
     return
 
-def update_wish(*, user, wish_id, price, currency, year, wish_details, link):
+def update_wish(*, user, wish_id, price, currency, year, wish_details, link, place):
     """Update a wish."""
     #Just in case more security for inner calls
     if not user:
@@ -98,6 +99,7 @@ def update_wish(*, user, wish_id, price, currency, year, wish_details, link):
         wish.currency = currency
         wish.wish_details = wish_details
         wish.link = link
+        wish.place = place
         wish.save()
     except Exception as e:
         raise ValidationError(f'Error happened while saving: {str(e)}')
@@ -129,7 +131,8 @@ def update_wish_status(*, user, wish_id):
                 trans_details=wish_details,
                 category="Wishes",
                 trans_status="Withdraw",
-                transaction_date=current_date
+                transaction_date=current_date,
+                place=wish.place
             )
 
             if not trans:

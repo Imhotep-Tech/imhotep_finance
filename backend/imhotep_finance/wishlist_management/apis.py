@@ -51,6 +51,7 @@ class WishCreateApi(APIView):
                 year=data['year'],
                 wish_details=data.get('wish_details'),
                 link=data.get('link'),
+                place=data.get('place')
             )
             return Response(
                 {"message": "Wish created successfully", "id": wish.id},
@@ -137,6 +138,7 @@ class WishUpdateApi(APIView):
                 year=data['year'],
                 wish_details=data.get('wish_details'),
                 link=data.get('link'),
+                place=data.get('place')
             )
             
             return Response({

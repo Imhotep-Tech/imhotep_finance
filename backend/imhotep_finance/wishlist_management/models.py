@@ -32,6 +32,7 @@ class Wishlist(models.Model):
     status = models.BooleanField(choices=STATUS_CHOICES, default=False)
     link = EncryptedCharField(max_length=255, blank=True, null=True)
     wish_details = EncryptedCharField(max_length=255, blank=True, null=True)
+    place = models.CharField(max_length=255, default='General', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

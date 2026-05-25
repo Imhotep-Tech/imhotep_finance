@@ -24,6 +24,7 @@ def serialize_wishlist(wish):
         "status": wish.status,
         "link": wish.link,
         "wish_details": wish.wish_details,
+        "place": wish.place,
         "created_at": wish.created_at.isoformat() if wish.created_at else None,
     }
 
