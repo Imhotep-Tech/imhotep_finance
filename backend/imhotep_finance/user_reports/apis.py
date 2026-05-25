@@ -255,3 +255,67 @@ class RecalculateReportsApi(APIView):
                 {'error': f'Error in recalculating reports: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+@method_decorator(csrf_exempt, name='dispatch')
+class NetWorthByPlaceApi(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    @extend_schema(
+        tags=['Reports'],
+        responses={
+            200: OpenApiTypes.OBJECT,
+            500: 'Internal server error'
+        },
+        description='Get current wealth distribution by place converted to favorite currency.',
+        operation_id='get_networth_by_place'
+    )
+    def get(self, request):
+        """Return the current wealth distribution by place in the favorite currency."""
+        try:
+            from transaction_management.models import NetWorth
+            from finance_management.utils.currencies import convert_to_fav_currency
+            
+            user = request.user
+            networth_db = NetWorth.objects.filter(user=user)
+            
+            # group by place and currency
+            places = {}
+            for i in networth_db:
+                place = i.place or 'General'
+                currency = i.currency
+                total = i.total or 0.0
+                
+                if place not in places:
+                    places[place] = {}
+                    
+                places[place][currency] = places[place].get(currency, 0) + float(total)
+                
+            # convert to favorite currency
+            result = []
+            total_wealth = 0.0
+            for place, currencies in places.items():
+                converted_total, _ = convert_to_fav_currency(user, currencies)
+                converted_total = float(converted_total) if converted_total else 0.0
+                total_wealth += converted_total
+                result.append({
+                    'place': place,
+                    'converted_amount': converted_total
+                })
+                
+            # calculate percentage
+            for r in result:
+                r['percentage'] = round((r['converted_amount'] / total_wealth) * 100, 1) if total_wealth > 0 else 0
+                
+            result.sort(key=lambda x: x['percentage'], reverse=True)
+            
+            return Response({
+                'networth_by_place': result,
+                'favorite_currency': user.favorite_currency or 'USD'
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            print(f"Net worth by place error: {str(e)}")
+            return Response(
+                {'error': f'Error in retrieving net worth by place: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

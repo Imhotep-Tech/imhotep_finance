@@ -131,17 +131,19 @@ const AddTransactionModal = ({
               <div className="flex gap-4">
                 <button
                   type="button"
-                  className={`chef-button-secondary px-4 py-2 rounded transition-all duration-200 dark:text-gray-100 dark:bg-gray-800 ${status === 'deposit' ? 'bg-green-100 text-green-700 font-bold ring-2 ring-green-300 dark:ring-green-700 shadow-sm scale-[1.02]' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}
-                  onClick={() => setStatus('deposit')}
+                  className={`chef-button-secondary px-4 py-2 rounded transition-all duration-200 dark:text-gray-100 dark:bg-gray-800 ${status === 'deposit' ? 'bg-green-100 text-green-700 font-bold ring-2 ring-green-300 dark:ring-green-700 shadow-sm scale-[1.02]' : 'hover:bg-gray-100 dark:hover:bg-gray-700'} ${editMode ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  onClick={() => !editMode && setStatus('deposit')}
                   aria-pressed={status === 'deposit'}
+                  disabled={editMode}
                 >
                   Income
                 </button>
                 <button
                   type="button"
-                  className={`chef-button-secondary px-4 py-2 rounded transition-all duration-200 dark:text-gray-100 dark:bg-gray-800 ${status === 'withdraw' ? 'bg-red-100 text-red-700 font-bold ring-2 ring-red-300 dark:ring-red-700 shadow-sm scale-[1.02]' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}
-                  onClick={() => setStatus('withdraw')}
+                  className={`chef-button-secondary px-4 py-2 rounded transition-all duration-200 dark:text-gray-100 dark:bg-gray-800 ${status === 'withdraw' ? 'bg-red-100 text-red-700 font-bold ring-2 ring-red-300 dark:ring-red-700 shadow-sm scale-[1.02]' : 'hover:bg-gray-100 dark:hover:bg-gray-700'} ${editMode ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  onClick={() => !editMode && setStatus('withdraw')}
                   aria-pressed={status === 'withdraw'}
+                  disabled={editMode}
                 >
                   Expense
                 </button>
@@ -183,7 +185,6 @@ const AddTransactionModal = ({
                 value={place}
                 onChange={setPlace}
                 currency={currency}
-                disabled={editMode}
               />
             </div>
             <div>

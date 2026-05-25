@@ -92,11 +92,11 @@ class UpdateTransactionServiceTest(TestCase):
         networth = NetWorth.objects.get(user=self.user, currency='USD')
         self.assertEqual(float(networth.total), 150)
 
-    def test_update_transaction_status(self):
+    def test_update_transaction_rejects_status_change(self):
         """Test updating transaction status from deposit to withdraw"""
-        create_transaction(user=self.user, amount=200, currency='USD', trans_status='deposit', category='Extra', trans_details='', transaction_date=date.today(), place='General')
-        updated = update_transaction(user=self.user, transaction_id=self.transaction.id, amount=100, currency='USD', trans_status='withdraw', category='Updated', trans_details='', transaction_date=date.today(), place='General')
-        self.assertEqual(updated.trans_status, 'withdraw')
+        with self.assertRaises(ValidationError) as context:
+            update_transaction(user=self.user, transaction_id=self.transaction.id, amount=100, currency='USD', trans_status='withdraw', category='Updated', trans_details='', transaction_date=date.today(), place='General')
+        self.assertIn('Transaction status (Income/Expense) cannot be changed after creation', str(context.exception))
 
     def test_update_transaction_rejects_currency_change(self):
         """Test that currency changes are rejected on update"""
@@ -104,16 +104,23 @@ class UpdateTransactionServiceTest(TestCase):
             update_transaction(user=self.user, transaction_id=self.transaction.id, amount=100, currency='EUR', trans_status='deposit', category='Updated', trans_details='Updated details', transaction_date=date.today(), place='General')
         self.assertIn('Currency cannot be changed', str(context.exception))
 
-    def test_update_transaction_rejects_place_change(self):
-        """Test that place changes are rejected on update"""
-        with self.assertRaises(ValidationError) as context:
-            update_transaction(user=self.user, transaction_id=self.transaction.id, amount=100, currency='USD', trans_status='deposit', category='Updated', trans_details='Updated details', transaction_date=date.today(), place='Office')
-        self.assertIn('Place cannot be changed', str(context.exception))
+    def test_update_transaction_accepts_place_change(self):
+        """Test that place changes are accepted on update and update net worth correctly"""
+        updated = update_transaction(user=self.user, transaction_id=self.transaction.id, amount=100, currency='USD', trans_status='deposit', category='Updated', trans_details='Updated details', transaction_date=date.today(), place='Office')
+        self.assertEqual(updated.place, 'Office')
+        old_networth = NetWorth.objects.get(user=self.user, currency='USD', place='General')
+        new_networth = NetWorth.objects.get(user=self.user, currency='USD', place='Office')
+        self.assertEqual(float(old_networth.total), 0)
+        self.assertEqual(float(new_networth.total), 100)
 
     def test_update_transaction_insufficient_balance(self):
-        """Test updating to withdraw with insufficient balance"""
+        """Test updating a withdraw transaction to an amount that exceeds available balance"""
+        create_transaction(user=self.user, amount=50, currency='USD', trans_status='deposit', category='Extra', trans_details='', transaction_date=date.today(), place='General')
+        # Total balance is 150 (100 from setup + 50)
+        withdraw_trans = create_transaction(user=self.user, amount=20, currency='USD', trans_status='withdraw', category='Test', trans_details='', transaction_date=date.today(), place='General')
+        # Now try to update the withdraw to 200, which exceeds the balance
         with self.assertRaises(ValidationError) as context:
-            update_transaction(user=self.user, transaction_id=self.transaction.id, amount=200, currency='USD', trans_status='withdraw', category='Test', trans_details='', transaction_date=date.today(), place='General')
+            update_transaction(user=self.user, transaction_id=withdraw_trans.id, amount=200, currency='USD', trans_status='withdraw', category='Test', trans_details='', transaction_date=date.today(), place='General')
         self.assertIn('Insufficient funds', str(context.exception))
 
 class BulkImportTransactionsTest(TestCase):

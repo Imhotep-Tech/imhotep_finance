@@ -7,7 +7,16 @@ def recalculate_networth(user):
         if not user:
             return False, "User must be provided"
 
-        # Get all unique currency and place combinations from user's transactions
+        # 1. First, cleanly update all transaction places to ensure consistent grouping
+        all_transactions = Transactions.objects.filter(user=user)
+        for trans in all_transactions:
+            raw_place = trans.place
+            actual_place = raw_place.strip().title() if raw_place and str(raw_place).strip() else 'General'
+            if raw_place != actual_place:
+                trans.place = actual_place
+                trans.save(update_fields=['place'])
+
+        # 2. Get all unique currency and place combinations from cleaned user's transactions
         combinations = list(Transactions.objects.filter(user=user).values_list('currency', 'place').distinct())
 
         print(f"Unique combinations: {combinations}")
@@ -24,12 +33,14 @@ def recalculate_networth(user):
         # Clear existing networth records for this user
         NetWorth.objects.filter(user=user).delete()
         
-        # Calculate totals for each currency & place
+        # Calculate totals for each currency & actual_place
         currency_totals = {}
+        networth_balances = {}
         created_count = 0
         
         for currency, place in combinations:
             actual_place = place or 'General'
+            
             # Get all deposits for this combination
             deposits = Transactions.objects.filter(
                 user=user,
@@ -48,8 +59,12 @@ def recalculate_networth(user):
             
             # Calculate net balance (deposits - withdrawals)
             net_balance = float(deposits) - float(withdrawals)
+            
+            key = (currency, actual_place)
+            networth_balances[key] = networth_balances.get(key, 0.0) + net_balance
             currency_totals[currency] = currency_totals.get(currency, 0.0) + net_balance
             
+        for (currency, actual_place), net_balance in networth_balances.items():
             # Create networth record for all combinations (even zero balances for tracking)
             NetWorth.objects.create(
                 user=user,
@@ -59,7 +74,7 @@ def recalculate_networth(user):
             )
             created_count += 1
             
-            print(f"Currency: {currency}, Place: {actual_place}, Deposits: {deposits}, Withdrawals: {withdrawals}, Net: {net_balance}")
+            print(f"Currency: {currency}, Place: {actual_place}, Net: {net_balance}")
         
         return True, {
             "currencies_processed": len(set(c[0] for c in combinations)),

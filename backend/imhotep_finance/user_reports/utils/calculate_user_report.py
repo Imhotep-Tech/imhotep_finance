@@ -14,7 +14,7 @@ def calculate_user_report(start_date, end_date, user):
                 user=user,
                 trans_status__iexact='withdraw',
                 date__range=(start_date, end_date)
-            ).values('amount', 'currency', 'category')
+            ).values('amount', 'currency', 'category', 'place')
         )
         
         # Get deposit transactions
@@ -23,7 +23,7 @@ def calculate_user_report(start_date, end_date, user):
                 user=user,
                 trans_status__iexact='deposit',
                 date__range=(start_date, end_date)
-            ).values('amount', 'currency', 'category')
+            ).values('amount', 'currency', 'category', 'place')
         )
 
         total_withdraw = 0.0
@@ -42,17 +42,30 @@ def calculate_user_report(start_date, end_date, user):
                 trans["converted_amount"] = 0
             total_withdraw += trans["converted_amount"]
 
-        # Concatenate Withdraw transactions on the categories
+        # Concatenate Withdraw transactions on the categories and places
         withdraw_categories = {}
+        withdraw_places = {}
         for trans in user_withdraw_on_range:
             category = trans["category"] or "Uncategorized"
+            place = trans["place"] or "General"
+            
             if category not in withdraw_categories:
                 withdraw_categories[category] = trans["converted_amount"]
             else:
                 withdraw_categories[category] += trans["converted_amount"]
-        user_withdraw_on_range = [
+                
+            if place not in withdraw_places:
+                withdraw_places[place] = trans["converted_amount"]
+            else:
+                withdraw_places[place] += trans["converted_amount"]
+                
+        user_withdraw_on_range_formatted = [
             {"category": category, "converted_amount": amount, "percentage": 0}
             for category, amount in withdraw_categories.items()
+        ]
+        user_withdraw_by_place = [
+            {"place": place, "converted_amount": amount, "percentage": 0}
+            for place, amount in withdraw_places.items()
         ]
 
         total_deposit = 0.0
@@ -71,33 +84,55 @@ def calculate_user_report(start_date, end_date, user):
                 trans["converted_amount"] = 0
             total_deposit += trans["converted_amount"]
 
-        # Concatenate Deposit transactions on the categories
+        # Concatenate Deposit transactions on the categories and places
         deposit_categories = {}
+        deposit_places = {}
         for trans in user_deposit_on_range:
             category = trans["category"] or "Uncategorized"
+            place = trans["place"] or "General"
+            
             if category not in deposit_categories:
                 deposit_categories[category] = trans["converted_amount"]
             else:
                 deposit_categories[category] += trans["converted_amount"]
-        user_deposit_on_range = [
+                
+            if place not in deposit_places:
+                deposit_places[place] = trans["converted_amount"]
+            else:
+                deposit_places[place] += trans["converted_amount"]
+                
+        user_deposit_on_range_formatted = [
             {"category": category, "converted_amount": amount, "percentage": 0}
             for category, amount in deposit_categories.items()
         ]
+        user_deposit_by_place = [
+            {"place": place, "converted_amount": amount, "percentage": 0}
+            for place, amount in deposit_places.items()
+        ]
         
         #calculate percentages
-        if user_withdraw_on_range and total_withdraw > 0:
-            for trans in user_withdraw_on_range:
+        if user_withdraw_on_range_formatted and total_withdraw > 0:
+            for trans in user_withdraw_on_range_formatted:
+                trans["percentage"] = round((trans["converted_amount"] / total_withdraw) * 100, 1)
+        if user_withdraw_by_place and total_withdraw > 0:
+            for trans in user_withdraw_by_place:
                 trans["percentage"] = round((trans["converted_amount"] / total_withdraw) * 100, 1)
 
-        if user_deposit_on_range and total_deposit > 0:
-            for trans in user_deposit_on_range:
+        if user_deposit_on_range_formatted and total_deposit > 0:
+            for trans in user_deposit_on_range_formatted:
+                trans["percentage"] = round((trans["converted_amount"] / total_deposit) * 100, 1)
+        if user_deposit_by_place and total_deposit > 0:
+            for trans in user_deposit_by_place:
                 trans["percentage"] = round((trans["converted_amount"] / total_deposit) * 100, 1)
 
-        user_withdraw_on_range = sorted(user_withdraw_on_range, key=lambda x: x['percentage'], reverse=True)
-        user_deposit_on_range = sorted(user_deposit_on_range, key=lambda x: x['percentage'], reverse=True)
+        user_withdraw_on_range_formatted = sorted(user_withdraw_on_range_formatted, key=lambda x: x['percentage'], reverse=True)
+        user_withdraw_by_place = sorted(user_withdraw_by_place, key=lambda x: x['percentage'], reverse=True)
+        
+        user_deposit_on_range_formatted = sorted(user_deposit_on_range_formatted, key=lambda x: x['percentage'], reverse=True)
+        user_deposit_by_place = sorted(user_deposit_by_place, key=lambda x: x['percentage'], reverse=True)
 
-        return user_withdraw_on_range, user_deposit_on_range, total_withdraw or 0.0, total_deposit or 0.0
+        return user_withdraw_on_range_formatted, user_deposit_on_range_formatted, user_withdraw_by_place, user_deposit_by_place, total_withdraw or 0.0, total_deposit or 0.0
         
     except Exception as e:
         print(f"Error in calculate_user_report: {str(e)}")
-        return [], [], 0.0, 0.0  # Return empty lists and zero totals on error
+        return [], [], [], [], 0.0, 0.0  # Return empty lists and zero totals on error

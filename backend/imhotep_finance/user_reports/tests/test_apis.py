@@ -123,3 +123,34 @@ class RecalculateReportsApiTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('summary', response.data)
         self.assertGreaterEqual(response.data['summary']['total_months_processed'], 1)
+
+class NetWorthByPlaceApiTest(TestCase):
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user(username='testuser', password='testpass123', favorite_currency='USD')
+        self.client.force_authenticate(user=self.user)
+        self.url = reverse('networth_by_place')
+        NetWorth.objects.create(user=self.user, currency='USD', total=1000, place='Bank')
+        NetWorth.objects.create(user=self.user, currency='EUR', total=500, place='Cash')
+        NetWorth.objects.create(user=self.user, currency='USD', total=200, place='General')
+
+    def test_get_networth_by_place_success(self):
+        """Test getting net worth grouped by place"""
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('networth_by_place', response.data)
+        self.assertIn('favorite_currency', response.data)
+        
+        data = response.data['networth_by_place']
+        self.assertEqual(len(data), 3)
+        
+        # Bank should have 1000 USD
+        bank_data = next((item for item in data if item['place'] == 'Bank'), None)
+        self.assertIsNotNone(bank_data)
+        self.assertEqual(bank_data['converted_amount'], 1000.0)
+        
+        # Cash should have 500 EUR converted to USD (assuming 1:1 or whatever the mock is)
+        cash_data = next((item for item in data if item['place'] == 'Cash'), None)
+        self.assertIsNotNone(cash_data)
+        self.assertGreater(cash_data['converted_amount'], 0)

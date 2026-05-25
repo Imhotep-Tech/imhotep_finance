@@ -4,7 +4,8 @@ from .apis import (
     MonthlyReportHistoryApi,
     ReportHistoryYearsApi,
     YearlyReportApi,
-    RecalculateReportsApi
+    RecalculateReportsApi,
+    NetWorthByPlaceApi
 )
 
 urlpatterns = [
@@ -13,4 +14,5 @@ urlpatterns = [
     path('get-report-history-years/', ReportHistoryYearsApi.as_view(), name='report_history_years'),
     path('get-yearly-report/', YearlyReportApi.as_view(), name='yearly_report'),
     path('recalculate-reports/', RecalculateReportsApi.as_view(), name='recalculate_reports'),
+    path('get-networth-by-place/', NetWorthByPlaceApi.as_view(), name='networth_by_place'),
 ]

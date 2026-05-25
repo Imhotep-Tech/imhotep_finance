@@ -40,8 +40,11 @@ def create_transaction(*,user, amount, currency, trans_details, category, trans_
     if currency not in get_allowed_currencies():
         raise ValidationError("Currency code not supported")
 
+    # Clean place to ensure consistent grouping
+    place = place.strip().title() if place and str(place).strip() else 'General'
+
     if trans_status.lower() == "withdraw":
-        net_worth = NetWorth.objects.filter(user=user, currency=currency).first()
+        net_worth = NetWorth.objects.filter(user=user, currency=currency, place=place).first()
         current_balance = net_worth.total if net_worth else 0.00
 
         if current_balance < amount:
@@ -140,16 +143,17 @@ def update_transaction(*, user, transaction_id, amount, currency, trans_details,
     if currency not in get_allowed_currencies():
         raise ValidationError("Currency code not supported")
 
+    # Enforce default place to prevent orphans and ensure consistent grouping
+    place = place.strip().title() if place and str(place).strip() else 'General'
+
     # Get the transaction
     trans_obj = get_object_or_404(Transactions, id=transaction_id, user=user)
 
-    # Currency and place are immutable once the transaction has been created.
-    # Keep the existing net worth bucket intact and only allow the mutable fields to change.
     if currency != trans_obj.currency:
         raise ValidationError("Currency cannot be changed after a transaction is created")
-
-    if place != trans_obj.place:
-        raise ValidationError("Place cannot be changed after a transaction is created")
+    
+    if trans_status.lower() != trans_obj.trans_status.lower():
+        raise ValidationError("Transaction status (Income/Expense) cannot be changed after creation")
     
     # Create a snapshot of old transaction data
     class OldTransactionSnapshot:
@@ -174,7 +178,7 @@ def update_transaction(*, user, transaction_id, amount, currency, trans_details,
     old_net_worth = NetWorth.objects.filter(user=user, currency=old_currency, place=old_place).first()
     if not old_net_worth:
         raise ValidationError("Associated net worth record not found for the old transaction")
-    if old_amount != amount or old_status.lower() != trans_status.lower():
+    if old_amount != amount or old_status.lower() != trans_status.lower() or old_place != place:
         #revert old transaction effect on net_worth
         if old_status.lower() == "withdraw":
                 old_net_worth.total += old_amount
@@ -211,7 +215,7 @@ def update_transaction(*, user, transaction_id, amount, currency, trans_details,
         trans_obj.place = place
         trans_obj.save()
 
-        if old_amount != amount or old_status.lower() != trans_status.lower():
+        if old_amount != amount or old_status.lower() != trans_status.lower() or old_place != place:
             # Update net_worth
             new_net_worth.total = new_net_worth_total
             new_net_worth.save()

@@ -157,6 +157,25 @@ const Reports = () => {
     return `${monthNames[month - 1]} ${year}`;
   };
 
+  const [netWorthByPlace, setNetWorthByPlace] = useState(null);
+  const [netWorthLoading, setNetWorthLoading] = useState(true);
+
+  // Fetch Net Worth by Place
+  useEffect(() => {
+    const fetchNetWorth = async () => {
+      try {
+        const res = await axios.get('/api/finance-management/get-networth-by-place/');
+        setNetWorthByPlace(res.data.networth_by_place || []);
+      } catch (err) {
+        console.warn('Failed to fetch net worth by place:', err);
+        setNetWorthByPlace([]);
+      } finally {
+        setNetWorthLoading(false);
+      }
+    };
+    fetchNetWorth();
+  }, [favoriteCurrency]); // Re-fetch if favorite currency changes
+
   const expenseChartData = {
     labels: getDisplayData()?.user_withdraw_on_range?.map(item => item.category) || [],
     datasets: [
@@ -174,6 +193,41 @@ const Reports = () => {
       {
         data: getDisplayData()?.user_deposit_on_range?.map(item => item.converted_amount) || [],
         backgroundColor: getDisplayData()?.user_deposit_on_range?.map((_, index) => `hsl(${120 + (index * 15)}, 70%, 50%)`) || [],
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const [viewBy, setViewBy] = useState('category'); // 'category' or 'place'
+
+  const expensePlaceChartData = {
+    labels: getDisplayData()?.user_withdraw_by_place?.map(item => item.place) || [],
+    datasets: [
+      {
+        data: getDisplayData()?.user_withdraw_by_place?.map(item => item.converted_amount) || [],
+        backgroundColor: getDisplayData()?.user_withdraw_by_place?.map((_, index) => `hsl(${30 + (index * 25)}, 70%, 50%)`) || [],
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const incomePlaceChartData = {
+    labels: getDisplayData()?.user_deposit_by_place?.map(item => item.place) || [],
+    datasets: [
+      {
+        data: getDisplayData()?.user_deposit_by_place?.map(item => item.converted_amount) || [],
+        backgroundColor: getDisplayData()?.user_deposit_by_place?.map((_, index) => `hsl(${180 + (index * 25)}, 70%, 50%)`) || [],
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const netWorthPlaceChartData = {
+    labels: netWorthByPlace?.map(item => item.place) || [],
+    datasets: [
+      {
+        data: netWorthByPlace?.map(item => item.converted_amount) || [],
+        backgroundColor: netWorthByPlace?.map((_, index) => `hsl(${220 + (index * 25)}, 70%, 50%)`) || [],
         borderWidth: 1,
       },
     ],
@@ -324,6 +378,33 @@ const Reports = () => {
               </div>
             </div>
 
+            {/* View By Toggle - Category vs Place */}
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mb-4">
+              <button
+                onClick={() => setViewBy('category')}
+                className={`flex-1 px-4 sm:px-6 py-3 rounded-xl font-semibold transition-all duration-300 text-sm sm:text-base ${
+                  viewBy === 'category'
+                    ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white shadow-lg'
+                    : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'
+                }`}
+              >
+                <span className="material-icons align-middle mr-2">category</span>
+                View by Category
+              </button>
+              
+              <button
+                onClick={() => setViewBy('place')}
+                className={`flex-1 px-4 sm:px-6 py-3 rounded-xl font-semibold transition-all duration-300 text-sm sm:text-base ${
+                  viewBy === 'place'
+                    ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white shadow-lg'
+                    : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'
+                }`}
+              >
+                <span className="material-icons align-middle mr-2">place</span>
+                View by Place
+              </button>
+            </div>
+
             {/* Report Type Toggle - Mobile responsive */}
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
               <button
@@ -443,61 +524,184 @@ const Reports = () => {
               </div>
             </div>
 
-            {/* Charts Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Expense Chart */}
-              <div className="chef-card rounded-xl p-6 shadow-lg border-l-4 border-red-500">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">Expense Breakdown</h3>
-                {getDisplayData()?.user_withdraw_on_range?.length ? (
-                  <div className="relative h-80">
-                    <Pie data={expenseChartData} options={chartOptions} />
+            {/* Category View */}
+            {viewBy === 'category' && (
+              <>
+                {/* Charts Section */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  {/* Expense Chart */}
+                  <div className="chef-card rounded-xl p-6 shadow-lg border-l-4 border-red-500">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">Expense Breakdown</h3>
+                    {getDisplayData()?.user_withdraw_on_range?.length ? (
+                      <div className="relative h-80">
+                        <Pie data={expenseChartData} options={chartOptions} />
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 dark:text-gray-400 text-center">No expense data available.</p>
+                    )}
                   </div>
-                ) : (
-                  <p className="text-gray-500 dark:text-gray-400 text-center">No expense data available.</p>
-                )}
-              </div>
 
-              {/* Income Chart */}
-              <div className="chef-card rounded-xl p-6 shadow-lg border-l-4 border-green-500">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">Income Breakdown</h3>
-                {getDisplayData()?.user_deposit_on_range?.length ? (
-                  <div className="relative h-80">
-                    <Pie data={incomeChartData} options={chartOptions} />
+                  {/* Income Chart */}
+                  <div className="chef-card rounded-xl p-6 shadow-lg border-l-4 border-green-500">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">Income Breakdown</h3>
+                    {getDisplayData()?.user_deposit_on_range?.length ? (
+                      <div className="relative h-80">
+                        <Pie data={incomeChartData} options={chartOptions} />
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 dark:text-gray-400 text-center">No income data available.</p>
+                    )}
                   </div>
-                ) : (
-                  <p className="text-gray-500 dark:text-gray-400 text-center">No income data available.</p>
-                )}
-              </div>
-            </div>
+                </div>
 
-            {/* Detailed Lists */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Expense Details */}
-              <div className="chef-card rounded-xl p-6">
-                <h3 className="text-lg font-semibold text-red-600 dark:text-red-400 mb-4">Expense Details</h3>
-                {getDisplayData()?.user_withdraw_on_range?.map((item, index) => (
-                  <div key={index} className="flex justify-between py-2 border-b border-[var(--border)]">
-                    <span>{item.category}</span>
-                    <span className="font-semibold">
-                      {item.converted_amount.toFixed(2)} {favoriteCurrency} ({item.percentage}%)
-                    </span>
+                {/* Detailed Lists */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+                  {/* Expense Details */}
+                  <div className="chef-card rounded-xl p-6">
+                    <h3 className="text-lg font-semibold text-red-600 dark:text-red-400 mb-4">Expense Details</h3>
+                    {getDisplayData()?.user_withdraw_on_range?.map((item, index) => (
+                      <div key={index} className="flex justify-between py-2 border-b border-[var(--border)]">
+                        <span>{item.category}</span>
+                        <span className="font-semibold">
+                          {item.converted_amount.toFixed(2)} {favoriteCurrency} ({item.percentage}%)
+                        </span>
+                      </div>
+                    )) || <p className="text-gray-500 dark:text-gray-400">No details available.</p>}
                   </div>
-                )) || <p className="text-gray-500 dark:text-gray-400">No details available.</p>}
-              </div>
 
-              {/* Income Details */}
-              <div className="chef-card rounded-xl p-6">
-                <h3 className="text-lg font-semibold text-green-600 dark:text-green-400 mb-4">Income Details</h3>
-                {getDisplayData()?.user_deposit_on_range?.map((item, index) => (
-                  <div key={index} className="flex justify-between py-2 border-b border-[var(--border)]">
-                    <span>{item.category}</span>
-                    <span className="font-semibold">
-                      {item.converted_amount.toFixed(2)} {favoriteCurrency} ({item.percentage}%)
-                    </span>
+                  {/* Income Details */}
+                  <div className="chef-card rounded-xl p-6">
+                    <h3 className="text-lg font-semibold text-green-600 dark:text-green-400 mb-4">Income Details</h3>
+                    {getDisplayData()?.user_deposit_on_range?.map((item, index) => (
+                      <div key={index} className="flex justify-between py-2 border-b border-[var(--border)]">
+                        <span>{item.category}</span>
+                        <span className="font-semibold">
+                          {item.converted_amount.toFixed(2)} {favoriteCurrency} ({item.percentage}%)
+                        </span>
+                      </div>
+                    )) || <p className="text-gray-500 dark:text-gray-400">No details available.</p>}
                   </div>
-                )) || <p className="text-gray-500 dark:text-gray-400">No details available.</p>}
-              </div>
-            </div>
+                </div>
+              </>
+            )}
+
+            {/* Place View */}
+            {viewBy === 'place' && (
+              <>
+                {/* Income and Expenses by Place */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+                  {/* Expense Place Chart */}
+                  <div className="chef-card rounded-xl p-6 shadow-lg border-l-4 border-orange-500">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">Expense By Place</h3>
+                    {getDisplayData()?.user_withdraw_by_place?.length ? (
+                      <div className="relative h-80">
+                        <Pie data={expensePlaceChartData} options={chartOptions} />
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 dark:text-gray-400 text-center">No expense data available.</p>
+                    )}
+                  </div>
+
+                  {/* Income Place Chart */}
+                  <div className="chef-card rounded-xl p-6 shadow-lg border-l-4 border-teal-500">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">Income By Place</h3>
+                    {getDisplayData()?.user_deposit_by_place?.length ? (
+                      <div className="relative h-80">
+                        <Pie data={incomePlaceChartData} options={chartOptions} />
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 dark:text-gray-400 text-center">No income data available.</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Detailed Place Lists */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+                  {/* Expense Details by Place */}
+                  <div className="chef-card rounded-xl p-6">
+                    <h3 className="text-lg font-semibold text-orange-600 dark:text-orange-400 mb-4">Expense Place Details</h3>
+                    {getDisplayData()?.user_withdraw_by_place?.map((item, index) => (
+                      <div key={index} className="flex justify-between py-2 border-b border-[var(--border)]">
+                        <span>{item.place}</span>
+                        <span className="font-semibold">
+                          {item.converted_amount.toFixed(2)} {favoriteCurrency} ({item.percentage}%)
+                        </span>
+                      </div>
+                    )) || <p className="text-gray-500 dark:text-gray-400">No details available.</p>}
+                  </div>
+
+                  {/* Income Details by Place */}
+                  <div className="chef-card rounded-xl p-6">
+                    <h3 className="text-lg font-semibold text-teal-600 dark:text-teal-400 mb-4">Income Place Details</h3>
+                    {getDisplayData()?.user_deposit_by_place?.map((item, index) => (
+                      <div key={index} className="flex justify-between py-2 border-b border-[var(--border)]">
+                        <span>{item.place}</span>
+                        <span className="font-semibold">
+                          {item.converted_amount.toFixed(2)} {favoriteCurrency} ({item.percentage}%)
+                        </span>
+                      </div>
+                    )) || <p className="text-gray-500 dark:text-gray-400">No details available.</p>}
+                  </div>
+                </div>
+
+                {/* Current Wealth Distribution by Place */}
+                <div className="mt-8 mb-8">
+                  <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100 flex items-center gap-3">
+                    Current Wealth By Place
+                  </h2>
+                  {netWorthLoading ? (
+                    <div className="flex justify-center p-12">
+                      <span className="loading loading-spinner loading-lg text-[#366c6b]"></span>
+                    </div>
+                  ) : netWorthByPlace?.length > 0 ? (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                      {/* Chart visualization */}
+                      <div className="chef-card rounded-xl p-6 shadow-lg border-l-4 border-[#366c6b]">
+                        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
+                           Wealth Distribution
+                        </h3>
+                        <div className="relative h-80">
+                          <Pie data={netWorthPlaceChartData} options={chartOptions} />
+                        </div>
+                      </div>
+                      
+                      {/* List visualization */}
+                      <div className="chef-card rounded-xl p-6 shadow-lg border-l-4 border-gray-500">
+                        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
+                           <span className="material-icons text-gray-500">list</span>
+                           Wealth Details
+                        </h3>
+                        <div className="flex flex-col gap-4">
+                          {netWorthByPlace.map((item, index) => (
+                            <div key={index} className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex justify-between items-center transition-colors hover:bg-gray-100 dark:hover:bg-gray-750">
+                              <div className="flex items-center gap-3">
+                                <div className="p-2 bg-[#366c6b]/10 text-[#366c6b] rounded-lg">
+                                  <span className="material-icons">place</span>
+                                </div>
+                                <span className="font-medium text-lg text-gray-900 dark:text-gray-100">{item.place}</span>
+                              </div>
+                              <div className="text-right">
+                                <div className="font-bold text-xl text-[#366c6b]">
+                                  {Number(item.converted_amount).toFixed(2)} {favoriteCurrency}
+                                </div>
+                                <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                                  {item.percentage}%
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="chef-card p-8 rounded-2xl text-center">
+                      <span className="material-icons text-5xl text-gray-400 dark:text-gray-600 mb-3">money_off</span>
+                      <p className="text-gray-500 dark:text-gray-400 font-medium">No wealth data available by place.</p>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
           </>
         )}
       </div>
