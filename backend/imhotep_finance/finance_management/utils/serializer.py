@@ -9,6 +9,7 @@ def serialize_transaction(trans):
         "trans_status": trans.trans_status,
         "trans_details": trans.trans_details,
         "category": trans.category,
+        "place": trans.place,
         "created_at": trans.created_at.isoformat() if trans.created_at else None,
     }
 
@@ -24,6 +25,7 @@ def serialize_wishlist(wish):
         "status": wish.status,
         "link": wish.link,
         "wish_details": wish.wish_details,
+        "place": wish.place,
         "created_at": wish.created_at.isoformat() if wish.created_at else None,
     }
 
@@ -39,6 +41,7 @@ def serialize_scheduled_trans(scheduled_trans):
         "scheduled_trans_details": scheduled_trans.scheduled_trans_details,
         "category": scheduled_trans.category,
         "status": scheduled_trans.status,
+        "place": scheduled_trans.place,
         "created_at": scheduled_trans.created_at.isoformat() if scheduled_trans.created_at else None,
     }
 

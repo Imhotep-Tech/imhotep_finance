@@ -18,6 +18,7 @@ class Transactions(models.Model):
     trans_status = models.CharField(max_length=8, choices=TRANSACTIONS_STATUS)
     trans_details = EncryptedCharField(max_length=255, blank=True, null=True)
     category = EncryptedCharField(max_length=100, blank=True, null=True)
+    place = models.CharField(max_length=255, default="General", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
@@ -34,13 +35,22 @@ class NetWorth(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='netWorths')
     total = models.FloatField(default=0.0)
     currency = models.CharField(max_length=4)
+    place = models.CharField(max_length=255, default="General", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
-        return f"NetWorth of {self.user.username} with currency {self.currency}"
+        return f"NetWorth of {self.user.username} with currency {self.currency} at {self.place}"
     
     class Meta:
         db_table = 'finance_management_networth'
         verbose_name = "NetWorth"
         verbose_name_plural = "NetWorth"
         ordering = ['-created_at']
+        
+        # Add the unique constraint here
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'currency', 'place'], 
+                name='unique_user_currency_place'
+            )
+        ]

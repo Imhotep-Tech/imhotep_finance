@@ -115,6 +115,7 @@ const ShowWishlist = () => {
       currency: wish.currency,
       wish_details: wish.wish_details,
       link: wish.link,
+      place: wish.place,
       year: wish.year,
       id: wish.id,
     },
@@ -195,6 +196,7 @@ const ShowWishlist = () => {
                       <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Price</th>
                       <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Currency</th>
                       <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Year</th>
+                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Place</th>
                       <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Link</th>
                       <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Status</th>
                       <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Actions</th>
@@ -214,6 +216,9 @@ const ShowWishlist = () => {
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap text-gray-700 dark:text-gray-300 font-medium">
                           {w.year}
+                        </td>
+                        <td className="px-4 py-2 whitespace-nowrap text-gray-700 dark:text-gray-300 font-medium">
+                          {w.place || 'General'}
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap">
                           {w.link ? (
@@ -305,6 +310,12 @@ const ShowWishlist = () => {
                         </div>
                         <div className="text-sm text-gray-500 dark:text-gray-400">{w.year}</div>
                       </div>
+                    </div>
+                    <div className="mb-2">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800">
+                        <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                        {w.place || 'General'}
+                      </span>
                     </div>
                     {w.link && (
                       <div className="mb-2">

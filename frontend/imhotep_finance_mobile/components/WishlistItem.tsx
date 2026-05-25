@@ -9,6 +9,7 @@ interface WishlistItemProps {
         price: string | number;
         currency: string;
         year: number;
+        place?: string;
         wish_details: string;
         link?: string;
         status: boolean; // true = completed
@@ -85,7 +86,7 @@ const WishlistItem: React.FC<WishlistItemProps> = ({
                 </View>
 
                 <View style={styles.infoRow}>
-                    <Text style={[styles.year, themeStyles.subText]}>Year: {wish.year}</Text>
+                    <Text style={[styles.year, themeStyles.subText]}>Year: {wish.year}{wish.place && wish.place !== 'General' ? ` • ${wish.place}` : ''}</Text>
                     {wish.link ? (
                         <TouchableOpacity onPress={handleOpenLink}>
                             <Text style={[styles.link, themeStyles.link]} numberOfLines={1}>

@@ -20,7 +20,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - "8010:8000"
+      - "8010:8010"
     env_file:
       - ./backend/imhotep_finance/.env
     volumes:

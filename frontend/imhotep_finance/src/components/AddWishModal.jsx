@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import CurrencySelect from './CurrencySelect';
+import PlaceSelect from './PlaceSelect';
 
 const AddWishModal = ({
   onClose,
@@ -11,6 +12,7 @@ const AddWishModal = ({
   const [currency, setCurrency] = useState('');
   const [wishDetails, setWishDetails] = useState('');
   const [link, setLink] = useState('');
+  const [place, setPlace] = useState('');
   const [year, setYear] = useState(initialYear);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -33,6 +35,7 @@ const AddWishModal = ({
         year,
         wish_details: wishDetails,
         link,
+        place,
       });
       setSuccess('Wish added successfully!');
       setTimeout(() => {
@@ -126,6 +129,14 @@ const AddWishModal = ({
                 onChange={e => setLink(e.target.value)}
                 className="chef-input"
                 placeholder="Link (optional)"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Place</label>
+              <PlaceSelect
+                value={place}
+                onChange={setPlace}
+                currency={currency}
               />
             </div>
             <div className="flex justify-end gap-2 mt-4">

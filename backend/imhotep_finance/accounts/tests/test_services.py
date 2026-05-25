@@ -5,32 +5,12 @@ from django.utils.encoding import force_bytes
 from unittest.mock import patch, MagicMock
 from accounts.models import User
 from django.utils import timezone
-from accounts.services import (
-    login_user,
-    demo_login,
-    register_user,
-    verify_email,
-    logout_user,
-    request_password_reset,
-    request_password_reset,
-    confirm_password_reset_otp,
-    validate_password_reset_token,
-    update_user_profile,
-    change_user_password,
-    verify_email_change,
-    get_google_oauth_url,
-    authenticate_with_google
-)
-
+from accounts.services import login_user, demo_login, register_user, verify_email, logout_user, request_password_reset, request_password_reset, confirm_password_reset_otp, validate_password_reset_token, update_user_profile, change_user_password, verify_email_change, get_google_oauth_url, authenticate_with_google
 
 class LoginUserServiceTests(TestCase):
+
     def setUp(self):
-        self.user = User.objects.create_user(
-            username='testuser',
-            email='test@example.com',
-            password='testpass123',
-            email_verify=True
-        )
+        self.user = User.objects.create_user(username='testuser', email='test@example.com', password='testpass123', email_verify=True)
 
     def test_login_with_username_success(self):
         user, message = login_user('testuser', 'testpass123')
@@ -48,12 +28,7 @@ class LoginUserServiceTests(TestCase):
         self.assertEqual(message, 'Invalid credentials')
 
     def test_login_with_unverified_email(self):
-        unverified_user = User.objects.create_user(
-            username='unverified',
-            email='unverified@example.com',
-            password='testpass123',
-            email_verify=False
-        )
+        unverified_user = User.objects.create_user(username='unverified', email='unverified@example.com', password='testpass123', email_verify=False)
         with patch('accounts.services.send_mail'):
             user, message = login_user('unverified', 'testpass123')
             self.assertIsNotNone(user)
@@ -64,8 +39,8 @@ class LoginUserServiceTests(TestCase):
         self.assertIsNone(user)
         self.assertEqual(message, 'Username/email and password are required')
 
-
 class DemoLoginServiceTests(TestCase):
+
     def test_demo_login_creates_user_if_not_exists(self):
         user = demo_login('demo', 'demo@imhotep.tech', 'demo_password_123!')
         self.assertIsNotNone(user)
@@ -73,26 +48,16 @@ class DemoLoginServiceTests(TestCase):
         self.assertTrue(user.email_verify)
 
     def test_demo_login_returns_existing_user(self):
-        User.objects.create_user(
-            username='demo',
-            email='demo@imhotep.tech',
-            password='demo_password_123!'
-        )
+        User.objects.create_user(username='demo', email='demo@imhotep.tech', password='demo_password_123!')
         user = demo_login('demo', 'demo@imhotep.tech', 'demo_password_123!')
         self.assertIsNotNone(user)
         self.assertEqual(User.objects.filter(username='demo').count(), 1)
 
-
 class RegisterUserServiceTests(TestCase):
+
     @patch('accounts.services.send_mail')
     def test_register_user_success(self, mock_send_mail):
-        user, message = register_user(
-            'newuser',
-            'newuser@example.com',
-            'testpass123',
-            'John',
-            'Doe'
-        )
+        user, message = register_user('newuser', 'newuser@example.com', 'testpass123', 'John', 'Doe')
         self.assertIsNotNone(user)
         self.assertIn('Verification email sent', message)
         self.assertEqual(user.username, 'newuser')
@@ -110,15 +75,10 @@ class RegisterUserServiceTests(TestCase):
         self.assertIsNone(user)
         self.assertIn('already registered', message)
 
-
 class VerifyEmailServiceTests(TestCase):
+
     def setUp(self):
-        self.user = User.objects.create_user(
-            username='testuser',
-            email='test@example.com',
-            password='testpass123',
-            email_verify=False
-        )
+        self.user = User.objects.create_user(username='testuser', email='test@example.com', password='testpass123', email_verify=False)
         self.uid = urlsafe_base64_encode(force_bytes(self.user.pk))
         self.token = default_token_generator.make_token(self.user)
 
@@ -134,14 +94,10 @@ class VerifyEmailServiceTests(TestCase):
         result = verify_email(self.uid, 'invalid-token')
         self.assertFalse(result)
 
-
 class PasswordResetServiceTests(TestCase):
+
     def setUp(self):
-        self.user = User.objects.create_user(
-            username='testuser',
-            email='test@example.com',
-            password='oldpass123'
-        )
+        self.user = User.objects.create_user(username='testuser', email='test@example.com', password='oldpass123')
 
     @patch('accounts.services.send_mail')
     def test_request_password_reset_success(self, mock_send_mail):
@@ -153,28 +109,24 @@ class PasswordResetServiceTests(TestCase):
     @patch('accounts.services.send_mail')
     def test_request_password_reset_nonexistent_email(self, mock_send_mail):
         success, message = request_password_reset('nonexistent@example.com')
-        self.assertTrue(success)  # Returns success for security
+        self.assertTrue(success)
         self.assertIn('password reset OTP has been sent', message)
 
     def test_confirm_password_reset_otp_success(self):
-        # Generate OTP
         otp = '123456'
         self.user.otp_code = otp
         self.user.otp_created_at = timezone.now()
         self.user.save()
-        
         success, message = confirm_password_reset_otp(self.user.email, otp, 'NewPass123!')
         self.assertTrue(success)
         self.user.refresh_from_db()
         self.assertTrue(self.user.check_password('NewPass123!'))
 
     def test_confirm_password_reset_otp_invalid_otp(self):
-        # Generate OTP
         otp = '123456'
         self.user.otp_code = otp
         self.user.otp_created_at = timezone.now()
         self.user.save()
-        
         success, message = confirm_password_reset_otp(self.user.email, '654321', 'NewPass123!')
         self.assertFalse(success)
         self.assertIn('Invalid OTP', message)
@@ -192,16 +144,10 @@ class PasswordResetServiceTests(TestCase):
         self.assertFalse(valid)
         self.assertIsNone(email)
 
-
 class ProfileServiceTests(TestCase):
+
     def setUp(self):
-        self.user = User.objects.create_user(
-            username='testuser',
-            email='test@example.com',
-            password='testpass123',
-            first_name='John',
-            last_name='Doe'
-        )
+        self.user = User.objects.create_user(username='testuser', email='test@example.com', password='testpass123', first_name='John', last_name='Doe')
 
     def test_update_user_profile_first_name(self):
         user, message = update_user_profile(self.user, first_name='Jane')
@@ -256,14 +202,13 @@ class ProfileServiceTests(TestCase):
         uid = urlsafe_base64_encode(force_bytes(self.user.pk))
         token = default_token_generator.make_token(self.user)
         new_email_encoded = urlsafe_base64_encode(force_bytes(new_email))
-        
         success, message = verify_email_change(uid, token, new_email_encoded)
         self.assertTrue(success)
         self.user.refresh_from_db()
         self.assertEqual(self.user.email, new_email)
 
-
 class GoogleAuthServiceTests(TestCase):
+
     def test_get_google_oauth_url(self):
         url = get_google_oauth_url()
         self.assertIn('accounts.google.com', url)
@@ -273,21 +218,8 @@ class GoogleAuthServiceTests(TestCase):
     @patch('accounts.services.requests.get')
     @patch('accounts.services.send_mail')
     def test_authenticate_with_google_new_user(self, mock_send_mail, mock_get, mock_post):
-        # Mock token exchange
-        mock_post.return_value = MagicMock(
-            status_code=200,
-            json=lambda: {'access_token': 'test_token'}
-        )
-        # Mock user info
-        mock_get.return_value = MagicMock(
-            status_code=200,
-            json=lambda: {
-                'email': 'newuser@gmail.com',
-                'given_name': 'New',
-                'family_name': 'User'
-            }
-        )
-        
+        mock_post.return_value = MagicMock(status_code=200, json=lambda: {'access_token': 'test_token'})
+        mock_get.return_value = MagicMock(status_code=200, json=lambda: {'email': 'newuser@gmail.com', 'given_name': 'New', 'family_name': 'User'})
         user, message, is_new_user = authenticate_with_google('test_code')
         self.assertIsNotNone(user)
         self.assertTrue(is_new_user)
@@ -296,27 +228,9 @@ class GoogleAuthServiceTests(TestCase):
     @patch('accounts.services.requests.post')
     @patch('accounts.services.requests.get')
     def test_authenticate_with_google_existing_user(self, mock_get, mock_post):
-        existing_user = User.objects.create_user(
-            username='existing',
-            email='existing@gmail.com',
-            email_verify=True
-        )
-        
-        # Mock token exchange
-        mock_post.return_value = MagicMock(
-            status_code=200,
-            json=lambda: {'access_token': 'test_token'}
-        )
-        # Mock user info
-        mock_get.return_value = MagicMock(
-            status_code=200,
-            json=lambda: {
-                'email': 'existing@gmail.com',
-                'given_name': 'Existing',
-                'family_name': 'User'
-            }
-        )
-        
+        existing_user = User.objects.create_user(username='existing', email='existing@gmail.com', email_verify=True)
+        mock_post.return_value = MagicMock(status_code=200, json=lambda: {'access_token': 'test_token'})
+        mock_get.return_value = MagicMock(status_code=200, json=lambda: {'email': 'existing@gmail.com', 'given_name': 'Existing', 'family_name': 'User'})
         user, message, is_new_user = authenticate_with_google('test_code')
         self.assertIsNotNone(user)
         self.assertFalse(is_new_user)

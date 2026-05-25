@@ -124,6 +124,7 @@ const ShowScheduledTransactions = () => {
       amount: tx.amount,
       currency: tx.currency,
       category: tx.category,
+      place: tx.place,
       scheduled_trans_details: tx.scheduled_trans_details,
       status: tx.status,
       id: tx.id,
@@ -186,6 +187,7 @@ const ShowScheduledTransactions = () => {
                       <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Amount</th>
                       <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Currency</th>
                       <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Category</th>
+                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Place</th>
                       <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Description</th>
                       <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Actions</th>
                     </tr>
@@ -207,6 +209,9 @@ const ShowScheduledTransactions = () => {
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap">
                           <CategoryTag type={tx.scheduled_trans_status} category={tx.category} />
+                        </td>
+                        <td className="px-4 py-2 whitespace-nowrap text-gray-700 dark:text-gray-300 font-medium">
+                          {tx.place || 'General'}
                         </td>
                         <td className="px-4 py-2 text-gray-700 dark:text-gray-300 max-w-xs">
                           <div className="truncate">
@@ -300,8 +305,12 @@ const ShowScheduledTransactions = () => {
                         <div className="text-sm text-gray-500 dark:text-gray-400">Day {tx.day_of_month}</div>
                       </div>
                     </div>
-                    <div className="mb-2">
+                    <div className="mb-2 flex flex-wrap gap-2">
                       <CategoryTag type={tx.scheduled_trans_status} category={tx.category} />
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800">
+                        <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                        {tx.place || 'General'}
+                      </span>
                     </div>
                     {tx.scheduled_trans_details && (
                       <div className="mb-2">

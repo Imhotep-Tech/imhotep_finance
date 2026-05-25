@@ -34,8 +34,15 @@ def get_netWorth_details(request):
     user = request.user
     networth_db = NetWorth.objects.filter(user=user)
 
-    currency_dict = {}
+    details = {}
     for i in networth_db:
-        currency_dict[i.currency] = currency_dict.get(i.currency, 0) + i.total
+        place = i.place or 'General'
+        if place not in details:
+            details[place] = []
+            
+        details[place].append({
+            'currency': i.currency,
+            'amount': i.total
+        })
 
-    return currency_dict
+    return details

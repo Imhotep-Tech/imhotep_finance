@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import CurrencySelect from './CurrencySelect';
 import CategorySelect from './CategorySelect';
+import PlaceSelect from './PlaceSelect';
 
 const AddScheduledTransactionModal = ({
   onClose,
@@ -15,6 +16,7 @@ const AddScheduledTransactionModal = ({
   const [amount, setAmount] = useState(initialValues.amount || '');
   const [currency, setCurrency] = useState(initialValues.currency || '');
   const [category, setCategory] = useState(initialValues.category || '');
+  const [place, setPlace] = useState(initialValues.place || '');
   const [details, setDetails] = useState(initialValues.scheduled_trans_details || '');
   const [isActive, setIsActive] = useState(initialValues.status !== undefined ? initialValues.status : true);
   const [loading, setLoading] = useState(false);
@@ -38,6 +40,7 @@ const AddScheduledTransactionModal = ({
       setAmount(initialValues.amount || '');
       setCurrency(initialValues.currency || '');
       setCategory(initialValues.category || '');
+      setPlace(initialValues.place || '');
       setDetails(initialValues.scheduled_trans_details || '');
       setDayOfMonth(initialValues.day_of_month || '');
       setIsActive(initialValues.status !== undefined ? initialValues.status : true);
@@ -62,6 +65,7 @@ const AddScheduledTransactionModal = ({
         amount,
         currency,
         category,
+        place,
         scheduled_trans_details: details,
         status: isActive,
       };
@@ -182,6 +186,14 @@ const AddScheduledTransactionModal = ({
                 value={category}
                 onChange={setCategory}
                 status={status}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Place</label>
+              <PlaceSelect
+                value={place}
+                onChange={setPlace}
+                currency={currency}
               />
             </div>
             <div>

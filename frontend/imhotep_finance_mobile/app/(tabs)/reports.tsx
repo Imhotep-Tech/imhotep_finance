@@ -75,6 +75,9 @@ export default function ReportsScreen() {
     const isDark = colorScheme === 'dark';
 
     const [reportType, setReportType] = useState<'monthly' | 'yearly'>('monthly');
+    const [viewBy, setViewBy] = useState<'category' | 'place'>('category');
+    const [netWorthByPlace, setNetWorthByPlace] = useState<any[]>([]);
+    const [netWorthLoading, setNetWorthLoading] = useState(false);
     const [loading, setLoading] = useState(true);
     const [dataLoading, setDataLoading] = useState(false);
     const [recalculateLoading, setRecalculateLoading] = useState(false);
@@ -95,6 +98,25 @@ export default function ReportsScreen() {
     // Selectors Visibility
     const [showMonthSelector, setShowMonthSelector] = useState(false);
     const [showYearSelector, setShowYearSelector] = useState(false);
+
+    const fetchNetWorthByPlace = async () => {
+        setNetWorthLoading(true);
+        try {
+            const res = await api.get('/api/finance-management/get-networth-by-place/');
+            setNetWorthByPlace(res.data.networth_by_place || []);
+        } catch (err) {
+            console.warn('Failed to fetch net worth by place:', err);
+            setNetWorthByPlace([]);
+        } finally {
+            setNetWorthLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (viewBy === 'place') {
+            fetchNetWorthByPlace();
+        }
+    }, [viewBy, favoriteCurrency]);
 
     // Initial Load
     useEffect(() => {
@@ -175,6 +197,10 @@ export default function ReportsScreen() {
             if (res.data.favorite_currency || res.data.report_data?.favorite_currency) {
                 const newCurr = res.data.favorite_currency || res.data.report_data?.favorite_currency;
                 if (newCurr !== favoriteCurrency) setFavoriteCurrency(newCurr);
+            }
+
+            if (viewBy === 'place') {
+                fetchNetWorthByPlace();
             }
 
         } catch (err: any) {
@@ -310,6 +336,44 @@ export default function ReportsScreen() {
                     </TouchableOpacity>
                 </View>
 
+                {/* View By Toggle: Category vs Place */}
+                <View style={styles.viewByTabContainer}>
+                    <TouchableOpacity
+                        style={[
+                            styles.viewByTab,
+                            viewBy === 'category' ? themeStyles.activeTab : themeStyles.inactiveTab,
+                            viewBy === 'category' && styles.activeTabShadow
+                        ]}
+                        onPress={() => setViewBy('category')}
+                    >
+                        <Ionicons
+                            name="apps"
+                            size={18}
+                            color={viewBy === 'category' ? 'white' : (isDark ? '#cbd5e1' : '#475569')}
+                        />
+                        <Text style={[styles.tabText, viewBy === 'category' ? themeStyles.activeTabText : themeStyles.inactiveTabText]}>
+                            By Category
+                        </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[
+                            styles.viewByTab,
+                            viewBy === 'place' ? themeStyles.activeTab : themeStyles.inactiveTab,
+                            viewBy === 'place' && styles.activeTabShadow
+                        ]}
+                        onPress={() => setViewBy('place')}
+                    >
+                        <Ionicons
+                            name="location"
+                            size={18}
+                            color={viewBy === 'place' ? 'white' : (isDark ? '#cbd5e1' : '#475569')}
+                        />
+                        <Text style={[styles.tabText, viewBy === 'place' ? themeStyles.activeTabText : themeStyles.inactiveTabText]}>
+                            By Place
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+
                 {/* Toggles */}
                 <View style={styles.tabContainer}>
                     <TouchableOpacity
@@ -439,63 +503,160 @@ export default function ReportsScreen() {
                         </View>
 
                         {/* Breakdown Sections */}
-                        <View style={[styles.section, themeStyles.card]}>
-                            <View style={styles.sectionHeader}>
-                                <Ionicons name="wallet" size={22} color="#ef4444" />
-                                <Text style={[styles.sectionTitle, themeStyles.text]}>Expense Breakdown</Text>
-                            </View>
-                            {(!reportData.user_withdraw_on_range || reportData.user_withdraw_on_range.length === 0) ? (
-                                <View style={styles.noDataContainer}>
-                                    <Ionicons name="information-circle-outline" size={32} color={isDark ? '#475569' : '#cbd5e1'} />
-                                    <Text style={[styles.noDataText, themeStyles.subText]}>No expense data available</Text>
-                                </View>
-                            ) : (
-                                reportData.user_withdraw_on_range.map((item: any, idx: number) => (
-                                    <View key={idx} style={styles.breakdownItem}>
-                                        <View style={styles.breakdownHeader}>
-                                            <Text style={[styles.categoryName, themeStyles.text]}>{item.category}</Text>
-                                            <Text style={[styles.categoryValue, { color: '#ef4444' }]}>{item.percentage}%</Text>
-                                        </View>
-                                        <ProgressBar
-                                            percentage={parseFloat(item.percentage)}
-                                            color={`hsl(${0 + (idx * 25)}, 70%, 50%)`}
-                                        />
-                                        <Text style={[styles.categoryAmount, themeStyles.subText]}>
-                                            {formatCurrency(item.converted_amount)}
-                                        </Text>
+                        {viewBy === 'category' ? (
+                            <>
+                                <View style={[styles.section, themeStyles.card]}>
+                                    <View style={styles.sectionHeader}>
+                                        <Ionicons name="wallet" size={22} color="#ef4444" />
+                                        <Text style={[styles.sectionTitle, themeStyles.text]}>Expense Breakdown</Text>
                                     </View>
-                                ))
-                            )}
-                        </View>
+                                    {(!reportData.user_withdraw_on_range || reportData.user_withdraw_on_range.length === 0) ? (
+                                        <View style={styles.noDataContainer}>
+                                            <Ionicons name="information-circle-outline" size={32} color={isDark ? '#475569' : '#cbd5e1'} />
+                                            <Text style={[styles.noDataText, themeStyles.subText]}>No expense data available</Text>
+                                        </View>
+                                    ) : (
+                                        reportData.user_withdraw_on_range.map((item: any, idx: number) => (
+                                            <View key={idx} style={styles.breakdownItem}>
+                                                <View style={styles.breakdownHeader}>
+                                                    <Text style={[styles.categoryName, themeStyles.text]}>{item.category}</Text>
+                                                    <Text style={[styles.categoryValue, { color: '#ef4444' }]}>{item.percentage}%</Text>
+                                                </View>
+                                                <ProgressBar
+                                                    percentage={parseFloat(item.percentage)}
+                                                    color={`hsl(${0 + (idx * 25)}, 70%, 50%)`}
+                                                />
+                                                <Text style={[styles.categoryAmount, themeStyles.subText]}>
+                                                    {formatCurrency(item.converted_amount)}
+                                                </Text>
+                                            </View>
+                                        ))
+                                    )}
+                                </View>
 
-                        <View style={[styles.section, themeStyles.card]}>
-                            <View style={styles.sectionHeader}>
-                                <Ionicons name="cash" size={22} color="#22c55e" />
-                                <Text style={[styles.sectionTitle, themeStyles.text]}>Income Breakdown</Text>
-                            </View>
-                            {(!reportData.user_deposit_on_range || reportData.user_deposit_on_range.length === 0) ? (
-                                <View style={styles.noDataContainer}>
-                                    <Ionicons name="information-circle-outline" size={32} color={isDark ? '#475569' : '#cbd5e1'} />
-                                    <Text style={[styles.noDataText, themeStyles.subText]}>No income data available</Text>
-                                </View>
-                            ) : (
-                                reportData.user_deposit_on_range.map((item: any, idx: number) => (
-                                    <View key={idx} style={styles.breakdownItem}>
-                                        <View style={styles.breakdownHeader}>
-                                            <Text style={[styles.categoryName, themeStyles.text]}>{item.category}</Text>
-                                            <Text style={[styles.categoryValue, { color: '#22c55e' }]}>{item.percentage}%</Text>
-                                        </View>
-                                        <ProgressBar
-                                            percentage={parseFloat(item.percentage)}
-                                            color={`hsl(${120 + (idx * 25)}, 65%, 45%)`}
-                                        />
-                                        <Text style={[styles.categoryAmount, themeStyles.subText]}>
-                                            {formatCurrency(item.converted_amount)}
-                                        </Text>
+                                <View style={[styles.section, themeStyles.card]}>
+                                    <View style={styles.sectionHeader}>
+                                        <Ionicons name="cash" size={22} color="#22c55e" />
+                                        <Text style={[styles.sectionTitle, themeStyles.text]}>Income Breakdown</Text>
                                     </View>
-                                ))
-                            )}
-                        </View>
+                                    {(!reportData.user_deposit_on_range || reportData.user_deposit_on_range.length === 0) ? (
+                                        <View style={styles.noDataContainer}>
+                                            <Ionicons name="information-circle-outline" size={32} color={isDark ? '#475569' : '#cbd5e1'} />
+                                            <Text style={[styles.noDataText, themeStyles.subText]}>No income data available</Text>
+                                        </View>
+                                    ) : (
+                                        reportData.user_deposit_on_range.map((item: any, idx: number) => (
+                                            <View key={idx} style={styles.breakdownItem}>
+                                                <View style={styles.breakdownHeader}>
+                                                    <Text style={[styles.categoryName, themeStyles.text]}>{item.category}</Text>
+                                                    <Text style={[styles.categoryValue, { color: '#22c55e' }]}>{item.percentage}%</Text>
+                                                </View>
+                                                <ProgressBar
+                                                    percentage={parseFloat(item.percentage)}
+                                                    color={`hsl(${120 + (idx * 25)}, 65%, 45%)`}
+                                                />
+                                                <Text style={[styles.categoryAmount, themeStyles.subText]}>
+                                                    {formatCurrency(item.converted_amount)}
+                                                </Text>
+                                            </View>
+                                        ))
+                                    )}
+                                </View>
+                            </>
+                        ) : (
+                            <>
+                                {/* View By Place */}
+                                <View style={[styles.section, themeStyles.card]}>
+                                    <View style={styles.sectionHeader}>
+                                        <Ionicons name="wallet" size={22} color="#f97316" />
+                                        <Text style={[styles.sectionTitle, themeStyles.text]}>Expense by Place</Text>
+                                    </View>
+                                    {(!reportData.user_withdraw_by_place || reportData.user_withdraw_by_place.length === 0) ? (
+                                        <View style={styles.noDataContainer}>
+                                            <Ionicons name="information-circle-outline" size={32} color={isDark ? '#475569' : '#cbd5e1'} />
+                                            <Text style={[styles.noDataText, themeStyles.subText]}>No place expense data available</Text>
+                                        </View>
+                                    ) : (
+                                        reportData.user_withdraw_by_place.map((item: any, idx: number) => (
+                                            <View key={idx} style={styles.breakdownItem}>
+                                                <View style={styles.breakdownHeader}>
+                                                    <Text style={[styles.categoryName, themeStyles.text]}>{item.place}</Text>
+                                                    <Text style={[styles.categoryValue, { color: '#f97316' }]}>{item.percentage}%</Text>
+                                                </View>
+                                                <ProgressBar
+                                                    percentage={parseFloat(item.percentage)}
+                                                    color={`hsl(${30 + (idx * 25)}, 70%, 50%)`}
+                                                />
+                                                <Text style={[styles.categoryAmount, themeStyles.subText]}>
+                                                    {formatCurrency(item.converted_amount)}
+                                                </Text>
+                                            </View>
+                                        ))
+                                    )}
+                                </View>
+
+                                <View style={[styles.section, themeStyles.card]}>
+                                    <View style={styles.sectionHeader}>
+                                        <Ionicons name="cash" size={22} color="#0d9488" />
+                                        <Text style={[styles.sectionTitle, themeStyles.text]}>Income by Place</Text>
+                                    </View>
+                                    {(!reportData.user_deposit_by_place || reportData.user_deposit_by_place.length === 0) ? (
+                                        <View style={styles.noDataContainer}>
+                                            <Ionicons name="information-circle-outline" size={32} color={isDark ? '#475569' : '#cbd5e1'} />
+                                            <Text style={[styles.noDataText, themeStyles.subText]}>No place income data available</Text>
+                                        </View>
+                                    ) : (
+                                        reportData.user_deposit_by_place.map((item: any, idx: number) => (
+                                            <View key={idx} style={styles.breakdownItem}>
+                                                <View style={styles.breakdownHeader}>
+                                                    <Text style={[styles.categoryName, themeStyles.text]}>{item.place}</Text>
+                                                    <Text style={[styles.categoryValue, { color: '#0d9488' }]}>{item.percentage}%</Text>
+                                                </View>
+                                                <ProgressBar
+                                                    percentage={parseFloat(item.percentage)}
+                                                    color={`hsl(${180 + (idx * 25)}, 65%, 45%)`}
+                                                />
+                                                <Text style={[styles.categoryAmount, themeStyles.subText]}>
+                                                    {formatCurrency(item.converted_amount)}
+                                                </Text>
+                                            </View>
+                                        ))
+                                    )}
+                                </View>
+
+                                {/* Current Wealth by Place */}
+                                <View style={[styles.section, themeStyles.card]}>
+                                    <View style={styles.sectionHeader}>
+                                        <Ionicons name="pie-chart" size={22} color="#366c6b" />
+                                        <Text style={[styles.sectionTitle, themeStyles.text]}>Current Wealth by Place</Text>
+                                    </View>
+                                    {netWorthLoading ? (
+                                        <ActivityIndicator size="small" color="#366c6b" style={{ marginVertical: 20 }} />
+                                    ) : (!netWorthByPlace || netWorthByPlace.length === 0) ? (
+                                        <View style={styles.noDataContainer}>
+                                            <Ionicons name="information-circle-outline" size={32} color={isDark ? '#475569' : '#cbd5e1'} />
+                                            <Text style={[styles.noDataText, themeStyles.subText]}>No wealth data available by place</Text>
+                                        </View>
+                                    ) : (
+                                        netWorthByPlace.map((item: any, idx: number) => (
+                                            <View key={idx} style={styles.breakdownItem}>
+                                                <View style={styles.breakdownHeader}>
+                                                    <Text style={[styles.categoryName, themeStyles.text]}>{item.place}</Text>
+                                                    <Text style={[styles.categoryValue, { color: '#366c6b' }]}>{parseFloat(item.percentage).toFixed(1)}%</Text>
+                                                </View>
+                                                <ProgressBar
+                                                    percentage={parseFloat(item.percentage)}
+                                                    color={`hsl(${220 + (idx * 25)}, 70%, 50%)`}
+                                                />
+                                                <Text style={[styles.categoryAmount, themeStyles.subText]}>
+                                                    {formatCurrency(item.converted_amount)}
+                                                </Text>
+                                            </View>
+                                        ))
+                                    )}
+                                </View>
+                            </>
+                        )}
                     </View>
                 )}
             </ScrollView>
@@ -789,6 +950,22 @@ const styles = StyleSheet.create({
     },
     optionText: {
         fontSize: 16,
-    }
+    },
+    viewByTabContainer: {
+        flexDirection: 'row',
+        marginHorizontal: 20,
+        marginBottom: 16,
+        gap: 12,
+    },
+    viewByTab: {
+        flex: 1,
+        flexDirection: 'row',
+        paddingVertical: 14,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 16,
+        borderWidth: 1,
+        gap: 8,
+    },
 });
 

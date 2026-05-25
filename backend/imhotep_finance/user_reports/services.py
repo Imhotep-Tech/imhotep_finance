@@ -54,13 +54,15 @@ def get_monthly_report_for_user(*, user, month, year):
             end_date = date(year, month, last_day)
             
             # Calculate report data
-            user_withdraw_on_range, user_deposit_on_range, total_withdraw, total_deposit = calculate_user_report(start_date, end_date, user)
+            user_withdraw_on_range, user_deposit_on_range, user_withdraw_by_place, user_deposit_by_place, total_withdraw, total_deposit = calculate_user_report(start_date, end_date, user)
             
             # Format the response data
             month_name = calendar.month_name[month]
             response_data = {
                 "user_withdraw_on_range": user_withdraw_on_range,
                 "user_deposit_on_range": user_deposit_on_range,
+                "user_withdraw_by_place": user_withdraw_by_place,
+                "user_deposit_by_place": user_deposit_by_place,
                 "total_withdraw": float(total_withdraw) if total_withdraw is not None else 0.0,
                 "total_deposit": float(total_deposit) if total_deposit is not None else 0.0,
                 "current_month": f"{month_name} {year}",
@@ -150,6 +152,8 @@ def get_yearly_report_for_user(*, user, year=None):
     total_deposit = 0.0
     withdraw_categories = {}
     deposit_categories = {}
+    withdraw_places = {}
+    deposit_places = {}
     
     for monthly_report in monthly_reports:
         data = monthly_report.data
@@ -176,6 +180,18 @@ def get_yearly_report_for_user(*, user, year=None):
             category = item['category']
             amount = item['converted_amount']
             deposit_categories[category] = deposit_categories.get(category, 0) + amount
+            
+        # Aggregate withdraw places
+        for item in data.get('user_withdraw_by_place', []):
+            place = item['place']
+            amount = item['converted_amount']
+            withdraw_places[place] = withdraw_places.get(place, 0) + amount
+            
+        # Aggregate deposit places
+        for item in data.get('user_deposit_by_place', []):
+            place = item['place']
+            amount = item['converted_amount']
+            deposit_places[place] = deposit_places.get(place, 0) + amount
     
     # Convert category dictionaries to lists with percentages
     user_withdraw_on_range = []
@@ -188,6 +204,17 @@ def get_yearly_report_for_user(*, user, year=None):
                 "percentage": percentage
             })
         user_withdraw_on_range.sort(key=lambda x: x['percentage'], reverse=True)
+        
+    user_withdraw_by_place = []
+    if total_withdraw > 0:
+        for place, amount in withdraw_places.items():
+            percentage = round((amount / total_withdraw) * 100, 1)
+            user_withdraw_by_place.append({
+                "place": place,
+                "converted_amount": float(amount),
+                "percentage": percentage
+            })
+        user_withdraw_by_place.sort(key=lambda x: x['percentage'], reverse=True)
     
     user_deposit_on_range = []
     if total_deposit > 0:
@@ -199,10 +226,23 @@ def get_yearly_report_for_user(*, user, year=None):
                 "percentage": percentage
             })
         user_deposit_on_range.sort(key=lambda x: x['percentage'], reverse=True)
+        
+    user_deposit_by_place = []
+    if total_deposit > 0:
+        for place, amount in deposit_places.items():
+            percentage = round((amount / total_deposit) * 100, 1)
+            user_deposit_by_place.append({
+                "place": place,
+                "converted_amount": float(amount),
+                "percentage": percentage
+            })
+        user_deposit_by_place.sort(key=lambda x: x['percentage'], reverse=True)
     
     return {
         "user_withdraw_on_range": user_withdraw_on_range,
         "user_deposit_on_range": user_deposit_on_range,
+        "user_withdraw_by_place": user_withdraw_by_place,
+        "user_deposit_by_place": user_deposit_by_place,
         "total_withdraw": float(total_withdraw),
         "total_deposit": float(total_deposit),
         "current_month": f"Year {year}",
@@ -251,13 +291,15 @@ def recalculate_all_reports_for_user(*, user):
             last_day_of_month = calendar.monthrange(current_date.year, current_date.month)[1]
             last_day = date(current_date.year, current_date.month, last_day_of_month)
             
-            # Calculate report data for this month - FIXED: only 3 arguments
+            # Calculate report data for this month
             (
                 user_withdraw_on_range,
                 user_deposit_on_range,
+                user_withdraw_by_place,
+                user_deposit_by_place,
                 total_withdraw,
                 total_deposit,
-            ) = calculate_user_report(first_day, last_day, user)  # Removed None argument
+            ) = calculate_user_report(first_day, last_day, user)
             
             # Prepare response data structure
             month_name = calendar.month_name[current_date.month]
@@ -277,6 +319,22 @@ def recalculate_all_reports_for_user(*, user):
                         "percentage": float(item.get('percentage', 0))
                     }
                     for item in user_deposit_on_range
+                ],
+                "user_withdraw_by_place": [
+                    {
+                        "place": item['place'],
+                        "converted_amount": float(item['converted_amount']),
+                        "percentage": float(item.get('percentage', 0))
+                    }
+                    for item in user_withdraw_by_place
+                ],
+                "user_deposit_by_place": [
+                    {
+                        "place": item['place'],
+                        "converted_amount": float(item['converted_amount']),
+                        "percentage": float(item.get('percentage', 0))
+                    }
+                    for item in user_deposit_by_place
                 ],
                 "total_withdraw": float(total_withdraw) if total_withdraw is not None else 0.0,
                 "total_deposit": float(total_deposit) if total_deposit is not None else 0.0,

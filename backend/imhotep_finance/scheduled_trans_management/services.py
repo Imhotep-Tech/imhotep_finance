@@ -7,7 +7,7 @@ import calendar
 from datetime import date, datetime, time
 
 
-def create_scheduled_transaction(*, user, day_of_month, amount, currency, scheduled_trans_status, category, scheduled_trans_details):
+def create_scheduled_transaction(*, user, day_of_month, amount, currency, scheduled_trans_status, category, scheduled_trans_details, place="General"):
     """Create a scheduled transaction."""
     
     if not user:
@@ -39,6 +39,7 @@ def create_scheduled_transaction(*, user, day_of_month, amount, currency, schedu
             scheduled_trans_status=scheduled_trans_status,
             category=category,
             scheduled_trans_details=scheduled_trans_details,
+            place=place,
             status=True  # Active by default
         )
     
@@ -60,7 +61,7 @@ def delete_scheduled_transaction(*, user, scheduled_trans_id):
     return True
 
 
-def update_scheduled_transaction(*, user, scheduled_trans_id, day_of_month, amount, currency, scheduled_trans_status, category, scheduled_trans_details):
+def update_scheduled_transaction(*, user, scheduled_trans_id, day_of_month, amount, currency, scheduled_trans_status, category, scheduled_trans_details, place="General"):
     """Update a scheduled transaction."""
     from django.shortcuts import get_object_or_404
     
@@ -93,6 +94,7 @@ def update_scheduled_transaction(*, user, scheduled_trans_id, day_of_month, amou
         scheduled_trans.scheduled_trans_status = scheduled_trans_status
         scheduled_trans.category = category
         scheduled_trans.scheduled_trans_details = scheduled_trans_details
+        scheduled_trans.place = place
         scheduled_trans.save()
     
     return scheduled_trans
@@ -173,7 +175,8 @@ def apply_scheduled_transactions(*, user):
                             currency=sched.currency,
                             trans_details=sched.scheduled_trans_details,
                             category=sched.category,
-                            trans_status=sched.scheduled_trans_status
+                            trans_status=sched.scheduled_trans_status,
+                            place=sched.place
                         )
                         
                         # Successfully created transaction

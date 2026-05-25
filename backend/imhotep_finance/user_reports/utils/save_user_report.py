@@ -145,6 +145,34 @@ def save_user_report_with_transaction(user, start_date, transaction, parent_func
             if total > 0:
                 for item in report_data.get("user_deposit_on_range", []):
                     item["percentage"] = round((item.get("converted_amount", 0) / total) * 100, 1)
+
+            # Update or add place breakdown
+            place_val = transaction.place
+            actual_place = place_val.strip().title() if place_val and str(place_val).strip() else "General"
+            found_place = False
+            if "user_deposit_by_place" not in report_data:
+                report_data["user_deposit_by_place"] = []
+            for item in report_data["user_deposit_by_place"]:
+                if item["place"] == actual_place:
+                    item["converted_amount"] = item.get("converted_amount", 0) + amount
+                    found_place = True
+                    break
+            
+            if not found_place and amount > 0:
+                report_data["user_deposit_by_place"].append({
+                    "place": actual_place,
+                    "converted_amount": amount,
+                    "percentage": 0
+                })
+            
+            report_data["user_deposit_by_place"] = [
+                item for item in report_data["user_deposit_by_place"]
+                if item.get("converted_amount", 0) > 0
+            ]
+            
+            if total > 0:
+                for item in report_data["user_deposit_by_place"]:
+                    item["percentage"] = round((item.get("converted_amount", 0) / total) * 100, 1)
         
         elif trans_status == "withdraw":
             report_data["total_withdraw"] = report_data.get("total_withdraw", 0) + amount
@@ -177,6 +205,34 @@ def save_user_report_with_transaction(user, start_date, transaction, parent_func
             if total > 0:
                 for item in report_data.get("user_withdraw_on_range", []):
                     item["percentage"] = round((item.get("converted_amount", 0) / total) * 100, 1)
+
+            # Update or add place breakdown
+            place_val = transaction.place
+            actual_place = place_val.strip().title() if place_val and str(place_val).strip() else "General"
+            found_place = False
+            if "user_withdraw_by_place" not in report_data:
+                report_data["user_withdraw_by_place"] = []
+            for item in report_data["user_withdraw_by_place"]:
+                if item["place"] == actual_place:
+                    item["converted_amount"] = item.get("converted_amount", 0) + amount
+                    found_place = True
+                    break
+            
+            if not found_place and amount > 0:
+                report_data["user_withdraw_by_place"].append({
+                    "place": actual_place,
+                    "converted_amount": amount,
+                    "percentage": 0
+                })
+            
+            report_data["user_withdraw_by_place"] = [
+                item for item in report_data["user_withdraw_by_place"]
+                if item.get("converted_amount", 0) > 0
+            ]
+            
+            if total > 0:
+                for item in report_data["user_withdraw_by_place"]:
+                    item["percentage"] = round((item.get("converted_amount", 0) / total) * 100, 1)
         
         # Ensure totals don't go negative
         report_data["total_deposit"] = max(0, report_data.get("total_deposit", 0))
@@ -195,6 +251,8 @@ def save_user_report_with_transaction(user, start_date, transaction, parent_func
     # Create new report if it doesn't exist and amount is positive
     elif amount > 0:
         month_name = calendar.month_name[start_date.month]
+        place_val = transaction.place
+        actual_place = place_val.strip().title() if place_val and str(place_val).strip() else "General"
         report_data = {
             "current_month": f"{month_name} {start_date.year}",
             "total_withdraw": float(amount) if trans_status == "withdraw" else 0.0,
@@ -213,6 +271,20 @@ def save_user_report_with_transaction(user, start_date, transaction, parent_func
                     "percentage": 100.0
                 }
             ] if trans_status == "deposit" else [],
+            "user_withdraw_by_place": [
+                {
+                    "place": actual_place,
+                    "converted_amount": float(amount),
+                    "percentage": 100.0
+                }
+            ] if trans_status == "withdraw" else [],
+            "user_deposit_by_place": [
+                {
+                    "place": actual_place,
+                    "converted_amount": float(amount),
+                    "percentage": 100.0
+                }
+            ] if trans_status == "deposit" else [],
             "favorite_currency": user.favorite_currency or 'USD'
         }
         
@@ -221,7 +293,7 @@ def save_user_report_with_transaction(user, start_date, transaction, parent_func
                 user=user,
                 month=start_date.month,
                 year=start_date.year,
-                data=report_data
+                data=json.dumps(report_data)
             )
             user_report.save()
             return True, None

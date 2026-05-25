@@ -31,7 +31,13 @@ class WishlistInputSerializer(serializers.Serializer):
         allow_null=True,
         help_text="Link to product/item"
     )
-    
+    place = serializers.CharField(
+        max_length=255,
+        required=False,
+        allow_blank=True,
+        allow_null=True,
+        help_text="Place of transaction (e.g., Bank, Cash, wallet, home, etc.)"
+    )
     def validate_price(self, value):
         """Ensure price is positive."""
         if value <= 0:

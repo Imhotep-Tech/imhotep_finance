@@ -73,7 +73,7 @@ const ImportTransactionsModal = ({ onClose, onSuccess }) => {
   };
 
   const handleDownloadTemplate = () => {
-    const csvContent = 'date,amount,currency,trans_status,category,trans_details\n2025-01-15,100.00,USD,deposit,Salary,Monthly salary\n2025-01-16,50.00,USD,withdraw,Food,Groceries';
+    const csvContent = 'date,amount,currency,trans_status,category,place,trans_details\n2025-01-15,100.00,USD,deposit,Salary,Bank,Monthly salary\n2025-01-16,50.00,USD,withdraw,Food,General,Groceries';
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -129,7 +129,7 @@ const ImportTransactionsModal = ({ onClose, onSuccess }) => {
               </h3>
               <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
                 <li><strong>Required columns:</strong> date, amount, currency, trans_status</li>
-                <li><strong>Optional columns:</strong> category, trans_details</li>
+                <li><strong>Optional columns:</strong> category, place, trans_details</li>
                 <li><strong>Date format:</strong> YYYY-MM-DD (e.g., 2025-01-15)</li>
                 <li><strong>trans_status:</strong> deposit or withdraw</li>
                 <li><strong>Max file size:</strong> 5MB | <strong>Max rows:</strong> 1000</li>

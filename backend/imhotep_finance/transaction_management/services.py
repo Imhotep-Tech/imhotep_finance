@@ -11,8 +11,8 @@ from wishlist_management.models import Wishlist
 import csv
 from io import TextIOWrapper
 
-def create_transaction(*,user, amount, currency, trans_details, category, trans_status, transaction_date):
-    """Create a transaction and update networth."""
+def create_transaction(*,user, amount, currency, trans_details, category, trans_status, transaction_date, place):
+    """Create a transaction and update net_worth."""
 
     #Just in case more security for inner calls
     if not user:
@@ -40,8 +40,11 @@ def create_transaction(*,user, amount, currency, trans_details, category, trans_
     if currency not in get_allowed_currencies():
         raise ValidationError("Currency code not supported")
 
+    # Clean place to ensure consistent grouping
+    place = place.strip().title() if place and str(place).strip() else 'General'
+
     if trans_status.lower() == "withdraw":
-        net_worth = NetWorth.objects.filter(user=user, currency=currency).first()
+        net_worth = NetWorth.objects.filter(user=user, currency=currency, place=place).first()
         current_balance = net_worth.total if net_worth else 0.00
 
         if current_balance < amount:
@@ -56,15 +59,17 @@ def create_transaction(*,user, amount, currency, trans_details, category, trans_
             currency=currency,
             trans_status=trans_status,
             category=category,
-            trans_details=trans_details
+            trans_details=trans_details,
+            place=place
         )
 
         #Update NetWorth
         net_worth_obj, created = NetWorth.objects.get_or_create(
-                user=user, 
-                currency=currency,
-                defaults={'total': 0}
-            )
+            user=user,
+            currency=currency,
+            place=place,
+            defaults={'total': 0}
+        )
         if trans_status.lower() == "deposit":
             net_worth_obj.total += amount
         else:
@@ -77,7 +82,7 @@ def create_transaction(*,user, amount, currency, trans_details, category, trans_
     return user_transaction
 
 def delete_transaction(*, user, transaction_id):
-    """Delete a transaction and update networth and related entities."""
+    """Delete a transaction and update net_worth and related entities."""
 
     # Get the transaction
     trans_obj = get_object_or_404(Transactions, id=transaction_id, user=user)
@@ -85,10 +90,11 @@ def delete_transaction(*, user, transaction_id):
     old_amount = trans_obj.amount
     old_currency = trans_obj.currency
     old_trans_status = trans_obj.trans_status
+    old_place = trans_obj.place
     transaction_date = trans_obj.date
 
-    # Get current networth
-    net_worth_obj = get_object_or_404(NetWorth, user=user, currency=old_currency)
+    # Get current net_worth
+    net_worth_obj = get_object_or_404(NetWorth, user=user, currency=old_currency, place=old_place)
     old_total = float(net_worth_obj.total)
 
     # Calculate new total
@@ -113,18 +119,17 @@ def delete_transaction(*, user, transaction_id):
             user, transaction_date, trans_obj, parent_function="delete_transaction"
         )
         
-        
         # Delete the transaction
         trans_obj.delete()
         
-        # Update networth
+        # Update net_worth
         net_worth_obj.total = new_total
         net_worth_obj.save()
     
     return new_total
 
-def update_transaction(*, user, transaction_id, amount, currency, trans_details, category, trans_status, transaction_date: date):
-    """Update a transaction and recalculate networth."""
+def update_transaction(*, user, transaction_id, amount, currency, trans_details, category, trans_status, transaction_date: date, place: str):
+    """Update a transaction and recalculate net_worth."""
     
     if currency is None or amount is None:
         raise ValidationError("You have to choose the currency and amount!")
@@ -138,8 +143,17 @@ def update_transaction(*, user, transaction_id, amount, currency, trans_details,
     if currency not in get_allowed_currencies():
         raise ValidationError("Currency code not supported")
 
+    # Enforce default place to prevent orphans and ensure consistent grouping
+    place = place.strip().title() if place and str(place).strip() else 'General'
+
     # Get the transaction
     trans_obj = get_object_or_404(Transactions, id=transaction_id, user=user)
+
+    if currency != trans_obj.currency:
+        raise ValidationError("Currency cannot be changed after a transaction is created")
+    
+    if trans_status.lower() != trans_obj.trans_status.lower():
+        raise ValidationError("Transaction status (Income/Expense) cannot be changed after creation")
     
     # Create a snapshot of old transaction data
     class OldTransactionSnapshot:
@@ -150,6 +164,7 @@ def update_transaction(*, user, transaction_id, amount, currency, trans_details,
             self.trans_status = original_transaction.trans_status
             self.category = original_transaction.category
             self.trans_details = original_transaction.trans_details
+            self.place = original_transaction.place
             self.user = original_transaction.user
             self.id = original_transaction.id
 
@@ -158,43 +173,37 @@ def update_transaction(*, user, transaction_id, amount, currency, trans_details,
     old_amount = float(trans_obj.amount)
     old_status = trans_obj.trans_status
     old_currency = trans_obj.currency
+    old_place = trans_obj.place
 
-    # Get or create networth for the currency
-    net_worth_obj, created = NetWorth.objects.get_or_create(
-        user=user,
-        currency=currency,
-        defaults={'total': 0}
-    )
-    current_total = float(net_worth_obj.total)
-
-    # If currency changed, need to handle old currency networth
-    if old_currency != currency:
-        old_net_worth = NetWorth.objects.filter(user=user, currency=old_currency).first()
-        if old_net_worth:
-            # Reverse old transaction from old currency
-            if old_status.lower() == "withdraw":
-                old_net_worth.total += old_amount
-            elif old_status.lower() == "deposit":
-                old_net_worth.total -= old_amount
-            old_net_worth.save()
-    else:
-        # Same currency - reverse old transaction effect
+    old_net_worth = NetWorth.objects.filter(user=user, currency=old_currency, place=old_place).first()
+    if not old_net_worth:
+        raise ValidationError("Associated net worth record not found for the old transaction")
+    if old_amount != amount or old_status.lower() != trans_status.lower() or old_place != place:
+        #revert old transaction effect on net_worth
         if old_status.lower() == "withdraw":
-            current_total += old_amount
+                old_net_worth.total += old_amount
+                old_net_worth.save()
         elif old_status.lower() == "deposit":
-            current_total -= old_amount
+                old_net_worth.total -= old_amount
+                if old_net_worth.total < 0:
+                    raise ValidationError("Cannot update transaction as it would result in negative balance")
+                old_net_worth.save()
+        else:
+            raise ValidationError("Invalid old transaction status")
+    
+        #update new transaction effect on net_worth
+        new_net_worth, created = NetWorth.objects.get_or_create(user=user, currency=currency, place=place, defaults={'total': 0})
 
-    # Apply new transaction effect
-    if trans_status.lower() == "withdraw":
-        new_total = current_total - amount
-    elif trans_status.lower() == "deposit":
-        new_total = current_total + amount
-    else:
-        raise ValidationError("Transaction status must be either Deposit or Withdraw")
-
-    if new_total < 0:
-        raise ValidationError("Insufficient balance for this withdrawal")
-
+        new_net_worth_total = float(new_net_worth.total)
+        if trans_status.lower() == "withdraw":
+            if new_net_worth_total < amount:
+                raise ValidationError(f"Insufficient funds. You only have {new_net_worth_total} {currency}.")
+            new_net_worth_total -= amount
+        elif trans_status.lower() == "deposit":
+            new_net_worth_total += amount
+        else:
+            raise ValidationError("Invalid new transaction status")
+    
     with transaction.atomic():
         # Update transaction
         trans_obj.date = transaction_date
@@ -203,11 +212,13 @@ def update_transaction(*, user, transaction_id, amount, currency, trans_details,
         trans_obj.category = category
         trans_obj.currency = currency
         trans_obj.trans_status = trans_status
+        trans_obj.place = place
         trans_obj.save()
 
-        # Update networth
-        net_worth_obj.total = new_total
-        net_worth_obj.save()
+        if old_amount != amount or old_status.lower() != trans_status.lower() or old_place != place:
+            # Update net_worth
+            new_net_worth.total = new_net_worth_total
+            new_net_worth.save()
 
         # Update reports
         save_user_report_with_transaction_update(
@@ -252,6 +263,7 @@ def parse_csv_transactions(file) -> Tuple[List[Dict], List[str]]:
             amount_str = normalized_row.get('amount', '')
             currency_val = normalized_row.get('currency', '')
             trans_status_val = normalized_row.get('trans_status', '')
+            place_val = normalized_row.get('place', 'General')
             
             # Validate required fields
             if not date_val:
@@ -294,6 +306,7 @@ def parse_csv_transactions(file) -> Tuple[List[Dict], List[str]]:
                 'trans_status': trans_status_lower,
                 'trans_details': normalized_row.get('trans_details', ''),
                 'category': normalized_row.get('category', ''),
+                'place': normalized_row.get('place', 'General'),
             })
     
     except Exception as e:
@@ -319,7 +332,8 @@ def bulk_import_transactions(*, user, transactions_data: List[Dict]) -> Tuple[in
             trans_status_val = transaction_data.get('trans_status', '')
             trans_details = transaction_data.get('trans_details', '')
             category = transaction_data.get('category', '')
-            
+            place = transaction_data.get('place', 'General')
+
             # Parse date
             try:
                 if isinstance(date_val, str):
@@ -341,7 +355,8 @@ def bulk_import_transactions(*, user, transactions_data: List[Dict]) -> Tuple[in
                 trans_status=trans_status_val.lower(),
                 category=category,
                 trans_details=trans_details,
-                transaction_date=transaction_date
+                transaction_date=transaction_date,
+                place=place
             )
             
             created_count += 1

@@ -54,7 +54,8 @@ class ScheduledTransactionCreateApi(APIView):
                 currency=data['currency'],
                 scheduled_trans_status=data['scheduled_trans_status'],
                 category=data.get('category'),
-                scheduled_trans_details=data.get('scheduled_trans_details')
+                scheduled_trans_details=data.get('scheduled_trans_details'),
+                place=data.get('place', 'General')
             )
             
             return Response({
@@ -145,7 +146,8 @@ class ScheduledTransactionUpdateApi(APIView):
                 currency=data['currency'],
                 scheduled_trans_status=data['scheduled_trans_status'],
                 category=data.get('category'),
-                scheduled_trans_details=data.get('scheduled_trans_details')
+                scheduled_trans_details=data.get('scheduled_trans_details'),
+                place=data.get('place', 'General')
             )
             
             return Response({

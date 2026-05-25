@@ -59,7 +59,8 @@ class TransactionCreateApi(APIView):
                 trans_status=data['trans_status'],
                 category=data.get('category'),
                 trans_details=data.get('trans_details'),
-                transaction_date=data.get('date')
+                transaction_date=data.get('date'),
+                place=data.get('place')
             )
             return Response(
                 {"message": "Transaction created successfully", "id": transaction.id},
@@ -152,10 +153,11 @@ class TransactionUpdateApi(APIView):
                 trans_status=data['trans_status'],
                 category=data.get('category'),
                 trans_details=data.get('trans_details'),
-                transaction_date=data['date']
+                transaction_date=data['date'],
+                place=data.get('place', 'General')
             )
             
-            # Get updated networth
+            # Get updated net_worth
             try:
                 networth = get_networth(request)
             except Exception as e:

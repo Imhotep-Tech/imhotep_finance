@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import CurrencySelect from './CurrencySelect';
 import CategorySelect from './CategorySelect';
+import PlaceSelect from './PlaceSelect';
 
 const AddTransactionModal = ({
   onClose,
@@ -14,6 +15,7 @@ const AddTransactionModal = ({
   const [amount, setAmount] = useState(initialValues.amount || '');
   const [desc, setDesc] = useState(initialValues.desc || '');
   const [category, setCategory] = useState(initialValues.category || '');
+  const [place, setPlace] = useState(initialValues.place || '');
   const [currency, setCurrency] = useState(initialValues.currency || '');
   const [date, setDate] = useState(initialValues.date || '');
   const [loading, setLoading] = useState(false);
@@ -41,6 +43,7 @@ const AddTransactionModal = ({
       setAmount(initialValues.amount || '');
       setDesc(initialValues.desc || '');
       setCategory(initialValues.category || '');
+      setPlace(initialValues.place || '');
       setCurrency(initialValues.currency || '');
       setDate(initialValues.date || '');
       setStatus(initialValues.trans_status || initialType);
@@ -70,6 +73,7 @@ const AddTransactionModal = ({
             currency,
             trans_status: status,
             category,
+            place,
             trans_details: desc,
             date: date || undefined,
           }
@@ -81,6 +85,7 @@ const AddTransactionModal = ({
           currency,
           trans_status: status,
           category,
+          place,
           trans_details: desc,
           date: date || undefined,
         });
@@ -126,17 +131,19 @@ const AddTransactionModal = ({
               <div className="flex gap-4">
                 <button
                   type="button"
-                  className={`chef-button-secondary px-4 py-2 rounded transition-all duration-200 dark:text-gray-100 dark:bg-gray-800 ${status === 'deposit' ? 'bg-green-100 text-green-700 font-bold ring-2 ring-green-300 dark:ring-green-700 shadow-sm scale-[1.02]' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}
-                  onClick={() => setStatus('deposit')}
+                  className={`chef-button-secondary px-4 py-2 rounded transition-all duration-200 dark:text-gray-100 dark:bg-gray-800 ${status === 'deposit' ? 'bg-green-100 text-green-700 font-bold ring-2 ring-green-300 dark:ring-green-700 shadow-sm scale-[1.02]' : 'hover:bg-gray-100 dark:hover:bg-gray-700'} ${editMode ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  onClick={() => !editMode && setStatus('deposit')}
                   aria-pressed={status === 'deposit'}
+                  disabled={editMode}
                 >
                   Income
                 </button>
                 <button
                   type="button"
-                  className={`chef-button-secondary px-4 py-2 rounded transition-all duration-200 dark:text-gray-100 dark:bg-gray-800 ${status === 'withdraw' ? 'bg-red-100 text-red-700 font-bold ring-2 ring-red-300 dark:ring-red-700 shadow-sm scale-[1.02]' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}
-                  onClick={() => setStatus('withdraw')}
+                  className={`chef-button-secondary px-4 py-2 rounded transition-all duration-200 dark:text-gray-100 dark:bg-gray-800 ${status === 'withdraw' ? 'bg-red-100 text-red-700 font-bold ring-2 ring-red-300 dark:ring-red-700 shadow-sm scale-[1.02]' : 'hover:bg-gray-100 dark:hover:bg-gray-700'} ${editMode ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  onClick={() => !editMode && setStatus('withdraw')}
                   aria-pressed={status === 'withdraw'}
+                  disabled={editMode}
                 >
                   Expense
                 </button>
@@ -170,6 +177,14 @@ const AddTransactionModal = ({
                 value={category}
                 onChange={setCategory}
                 status={status}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Place</label>
+              <PlaceSelect
+                value={place}
+                onChange={setPlace}
+                currency={currency}
               />
             </div>
             <div>
