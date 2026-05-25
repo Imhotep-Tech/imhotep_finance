@@ -43,3 +43,9 @@ class PlaceResponseSerializer(serializers.Serializer):
         child=serializers.CharField(),
         help_text="List of frequently used place names"
     )
+
+class MoveMoneyRequestSerializer(serializers.Serializer):
+    source_place = serializers.CharField(required=True, max_length=255, help_text="The source place name")
+    target_place = serializers.CharField(required=True, max_length=255, help_text="The target place name")
+    amount = serializers.FloatField(required=True, help_text="Amount to transfer")
+    currency = serializers.CharField(required=True, max_length=4, help_text="Currency to transfer")

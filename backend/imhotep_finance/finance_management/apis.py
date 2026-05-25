@@ -1,8 +1,14 @@
-from rest_framework import status
+from rest_framework import status, serializers
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema
+from django.db import transaction
+from django.core.exceptions import ValidationError as DjangoValidationError
+from rest_framework.exceptions import ValidationError as DRFValidationError
+from transaction_management.services import create_transaction
+from transaction_management.models import NetWorth
+from datetime import date
 from finance_management.services import (
     get_user_networth_service,
     get_user_networth_details_service,
@@ -15,7 +21,8 @@ from finance_management.serializers import (
     CategoryRequestSerializer,
     CategoryResponseSerializer,
     PlaceRequestSerializer,
-    PlaceResponseSerializer
+    PlaceResponseSerializer,
+    MoveMoneyRequestSerializer
 )
 
 
@@ -106,3 +113,69 @@ class GetPlacesApi(APIView):
             'id': user.id,
             'places': places,
         }, status=status.HTTP_200_OK)
+
+class MoveMoneyApi(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        tags=['Finance Management'],
+        description="Move money between two places.",
+        request=MoveMoneyRequestSerializer,
+        responses={200: serializers.Serializer},
+        operation_id='move_money'
+    )
+    def post(self, request):
+        serializer = MoveMoneyRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        user = request.user
+        source_place = serializer.validated_data['source_place'].strip().title()
+        target_place = serializer.validated_data['target_place'].strip().title()
+        amount = serializer.validated_data['amount']
+        currency = serializer.validated_data['currency']
+        
+        if amount <= 0:
+            raise DRFValidationError("Amount must be greater than zero.")
+            
+        if source_place == target_place:
+            raise DRFValidationError("Source and target places must be different.")
+            
+        # Check if the source place and currency combination is available
+        source_networth = NetWorth.objects.filter(user=user, currency=currency, place=source_place).first()
+        if not source_networth:
+            raise DRFValidationError(f"Source place '{source_place}' with currency '{currency}' does not exist.")
+            
+        if source_networth.total < amount:
+            raise DRFValidationError(f"Insufficient funds in '{source_place}'. Available: {source_networth.total} {currency}.")
+            
+        try:
+            with transaction.atomic():
+                # 1. Create withdraw transaction from source place
+                withdraw_trans = create_transaction(
+                    user=user,
+                    amount=amount,
+                    currency=currency,
+                    trans_details=f"Transfer to {target_place}",
+                    category="Transfer",
+                    trans_status="Withdraw",
+                    transaction_date=date.today(),
+                    place=source_place
+                )
+                
+                # 2. Create deposit transaction to target place
+                deposit_trans = create_transaction(
+                    user=user,
+                    amount=amount,
+                    currency=currency,
+                    trans_details=f"Transfer from {source_place}",
+                    category="Transfer",
+                    trans_status="Deposit",
+                    transaction_date=date.today(),
+                    place=target_place
+                )
+        except DjangoValidationError as e:
+            raise DRFValidationError(e.message)
+        except Exception as e:
+            raise DRFValidationError(str(e))
+            
+        return Response({"message": "Money moved successfully"}, status=status.HTTP_200_OK)

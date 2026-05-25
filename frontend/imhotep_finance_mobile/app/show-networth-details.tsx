@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, RefreshControl, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, RefreshControl, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
 import { Stack, router } from 'expo-router';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -38,9 +38,19 @@ export default function NetWorthDetailsScreen() {
     const isDark = colorScheme === 'dark';
     const colors = themes[isDark ? 'dark' : 'light'];
 
-    const [details, setDetails] = useState<NetWorthDetail[]>([]);
+    const [details, setDetails] = useState<Record<string, NetWorthDetail[]>>({});
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
+
+    // Move Money states
+    const [showMoveModal, setShowMoveModal] = useState(false);
+    const [sourcePlace, setSourcePlace] = useState('');
+    const [targetPlace, setTargetPlace] = useState('');
+    const [targetPlaceInput, setTargetPlaceInput] = useState('');
+    const [isCustomTarget, setIsCustomTarget] = useState(false);
+    const [currency, setCurrency] = useState('');
+    const [amount, setAmount] = useState('');
+    const [submitting, setSubmitting] = useState(false);
 
     const fetchDetails = async () => {
         try {
@@ -51,11 +61,11 @@ export default function NetWorthDetailsScreen() {
                 // data is a dict of { "PlaceName": [{ currency: "USD", amount: 100 }] }
                 setDetails(data as any);
             } else {
-                setDetails([] as any);
+                setDetails({});
             }
         } catch (err) {
             console.error('Failed to fetch net worth details:', err);
-            setDetails([]);
+            setDetails({});
         } finally {
             setLoading(false);
             setRefreshing(false);
@@ -69,6 +79,49 @@ export default function NetWorthDetailsScreen() {
     const onRefresh = () => {
         setRefreshing(true);
         fetchDetails();
+    };
+
+    const handleMoveSubmit = async () => {
+        const finalTarget = isCustomTarget ? targetPlaceInput.trim() : targetPlace;
+        if (!sourcePlace || !currency || !finalTarget || !amount) {
+            Alert.alert('Error', 'All fields are required.');
+            return;
+        }
+
+        if (sourcePlace.toLowerCase().trim() === finalTarget.toLowerCase().trim()) {
+            Alert.alert('Error', 'Source and target places must be different.');
+            return;
+        }
+
+        const parsedAmount = parseFloat(amount);
+        if (isNaN(parsedAmount) || parsedAmount <= 0) {
+            Alert.alert('Error', 'Amount must be greater than zero.');
+            return;
+        }
+
+        const maxAvailable = (details[sourcePlace] || []).find(item => item.currency === currency)?.amount || 0;
+        if (parsedAmount > maxAvailable) {
+            Alert.alert('Error', `Insufficient funds in ${sourcePlace}. Maximum available is ${maxAvailable} ${currency}.`);
+            return;
+        }
+
+        setSubmitting(true);
+        try {
+            await api.post('/api/finance-management/move-money/', {
+                source_place: sourcePlace,
+                target_place: finalTarget,
+                amount: parsedAmount,
+                currency
+            });
+            setShowMoveModal(false);
+            Alert.alert('Success', 'Money moved successfully!');
+            fetchDetails();
+        } catch (err: any) {
+            const errorMessage = err.response?.data?.error || err.response?.data?.detail || 'An error occurred during transfer.';
+            Alert.alert('Error', errorMessage);
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     return (
@@ -141,16 +194,200 @@ export default function NetWorthDetailsScreen() {
                         </View>
                     )}
 
-                    {/* Back to Dashboard Button */}
-                    <TouchableOpacity
-                        style={[styles.backButton, { backgroundColor: colors.primary }]}
-                        onPress={() => router.back()}
-                    >
-                        <Ionicons name="home-outline" size={20} color="#fff" />
-                        <Text style={styles.backButtonText}>Back to Dashboard</Text>
-                    </TouchableOpacity>
+                    {/* Action Buttons */}
+                    <View style={styles.buttonRow}>
+                        <TouchableOpacity
+                            style={[styles.moveButton, { backgroundColor: colors.primary }]}
+                            onPress={() => {
+                                setSourcePlace('');
+                                setTargetPlace('');
+                                setTargetPlaceInput('');
+                                setIsCustomTarget(false);
+                                setCurrency('');
+                                setAmount('');
+                                setShowMoveModal(true);
+                            }}
+                        >
+                            <Ionicons name="swap-horizontal-outline" size={20} color="#fff" />
+                            <Text style={styles.backButtonText}>Move Money</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={[styles.backButtonOutline, { borderColor: colors.primary, borderWidth: 1 }]}
+                            onPress={() => router.back()}
+                        >
+                            <Ionicons name="home-outline" size={20} color={colors.primary} />
+                            <Text style={[styles.backButtonText, { color: colors.primary }]}>Dashboard</Text>
+                        </TouchableOpacity>
+                    </View>
                 </ScrollView>
             </View>
+
+            {/* Move Money Native Overlay Modal */}
+            <Modal
+                visible={showMoveModal}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={() => setShowMoveModal(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
+                        <View style={styles.modalHeader}>
+                            <Text style={[styles.modalTitle, { color: colors.text }]}>Move Money</Text>
+                            <TouchableOpacity onPress={() => setShowMoveModal(false)}>
+                                <Ionicons name="close" size={24} color={colors.text} />
+                            </TouchableOpacity>
+                        </View>
+
+                        <ScrollView contentContainerStyle={{ gap: 20 }}>
+                            {/* Source Place */}
+                            <View>
+                                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Source Place</Text>
+                                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsContainer}>
+                                    {Object.keys(details).map(place => (
+                                        <TouchableOpacity
+                                            key={place}
+                                            style={[
+                                                styles.chip,
+                                                { borderColor: colors.border },
+                                                sourcePlace === place && { backgroundColor: colors.primary, borderColor: colors.primary }
+                                            ]}
+                                            onPress={() => {
+                                                setSourcePlace(place);
+                                                setCurrency('');
+                                                setAmount('');
+                                            }}
+                                        >
+                                            <Text style={[styles.chipText, { color: colors.text }, sourcePlace === place && { color: '#fff', fontWeight: 'bold' }]}>
+                                                {place}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    ))}
+                                </ScrollView>
+                            </View>
+
+                            {/* Currency */}
+                            {sourcePlace ? (
+                                <View>
+                                    <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Currency</Text>
+                                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsContainer}>
+                                        {(details[sourcePlace] || []).map(item => (
+                                            <TouchableOpacity
+                                                key={item.currency}
+                                                style={[
+                                                    styles.chip,
+                                                    { borderColor: colors.border },
+                                                    currency === item.currency && { backgroundColor: colors.primary, borderColor: colors.primary }
+                                                ]}
+                                                onPress={() => {
+                                                    setCurrency(item.currency);
+                                                    setAmount('');
+                                                }}
+                                            >
+                                                <Text style={[styles.chipText, { color: colors.text }, currency === item.currency && { color: '#fff', fontWeight: 'bold' }]}>
+                                                    {item.currency}
+                                                </Text>
+                                            </TouchableOpacity>
+                                        ))}
+                                    </ScrollView>
+                                    {currency ? (
+                                        <Text style={[styles.balanceText, { color: colors.textSecondary }]}>
+                                            Available: {Number((details[sourcePlace] || []).find(item => item.currency === currency)?.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
+                                        </Text>
+                                    ) : null}
+                                </View>
+                            ) : null}
+
+                            {/* Target Place */}
+                            <View>
+                                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Target Place</Text>
+                                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsContainer}>
+                                    {Object.keys(details)
+                                        .filter(place => place !== sourcePlace)
+                                        .map(place => (
+                                            <TouchableOpacity
+                                                key={place}
+                                                style={[
+                                                    styles.chip,
+                                                    { borderColor: colors.border },
+                                                    !isCustomTarget && targetPlace === place && { backgroundColor: colors.primary, borderColor: colors.primary }
+                                                ]}
+                                                onPress={() => {
+                                                    setIsCustomTarget(false);
+                                                    setTargetPlace(place);
+                                                }}
+                                            >
+                                                <Text style={[styles.chipText, { color: colors.text }, !isCustomTarget && targetPlace === place && { color: '#fff', fontWeight: 'bold' }]}>
+                                                    {place}
+                                                </Text>
+                                            </TouchableOpacity>
+                                        ))}
+                                    <TouchableOpacity
+                                        style={[
+                                            styles.chip,
+                                            { borderColor: colors.border },
+                                            isCustomTarget && { backgroundColor: colors.primary, borderColor: colors.primary }
+                                        ]}
+                                        onPress={() => {
+                                            setIsCustomTarget(true);
+                                            setTargetPlace('');
+                                        }}
+                                    >
+                                        <Text style={[styles.chipText, { color: colors.text }, isCustomTarget && { color: '#fff', fontWeight: 'bold' }]}>
+                                            + New Place
+                                        </Text>
+                                    </TouchableOpacity>
+                                </ScrollView>
+
+                                {isCustomTarget ? (
+                                    <TextInput
+                                        style={[styles.textInput, { borderColor: colors.border, color: colors.text, backgroundColor: isDark ? '#1F2937' : '#F9FAFB' }]}
+                                        placeholder="Enter new place name..."
+                                        placeholderTextColor={colors.textSecondary}
+                                        value={targetPlaceInput}
+                                        onChangeText={setTargetPlaceInput}
+                                        autoCapitalize="words"
+                                    />
+                                ) : null}
+                            </View>
+
+                            {/* Amount */}
+                            <View>
+                                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Amount</Text>
+                                <TextInput
+                                    style={[styles.textInput, { borderColor: colors.border, color: colors.text, backgroundColor: isDark ? '#1F2937' : '#F9FAFB' }]}
+                                    placeholder="0.00"
+                                    placeholderTextColor={colors.textSecondary}
+                                    value={amount}
+                                    onChangeText={setAmount}
+                                    keyboardType="numeric"
+                                />
+                            </View>
+
+                            {/* Actions */}
+                            <View style={styles.modalActions}>
+                                <TouchableOpacity
+                                    style={[styles.modalButton, { borderColor: colors.border, borderWidth: 1 }]}
+                                    onPress={() => setShowMoveModal(false)}
+                                >
+                                    <Text style={{ color: colors.text, fontWeight: '600' }}>Cancel</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[styles.modalButton, { backgroundColor: colors.primary }]}
+                                    onPress={handleMoveSubmit}
+                                    disabled={submitting}
+                                >
+                                    {submitting ? (
+                                        <ActivityIndicator size="small" color="#fff" />
+                                    ) : (
+                                        <Text style={{ color: '#fff', fontWeight: '600' }}>Move</Text>
+                                    )}
+                                </TouchableOpacity>
+                            </View>
+                        </ScrollView>
+                    </View>
+                </View>
+            </Modal>
         </>
     );
 }
@@ -240,6 +477,35 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: 'rgba(255, 255, 255, 0.8)',
     },
+    buttonRow: {
+        flexDirection: 'row',
+        gap: 12,
+        marginTop: 8,
+        marginBottom: 16,
+    },
+    moveButton: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 14,
+        borderRadius: 12,
+        gap: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 2,
+    },
+    backButtonOutline: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 14,
+        borderRadius: 12,
+        gap: 8,
+    },
     backButton: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -281,5 +547,69 @@ const styles = StyleSheet.create({
     placeTitle: {
         fontSize: 20,
         fontWeight: 'bold',
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'flex-end',
+    },
+    modalContent: {
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+        padding: 24,
+        maxHeight: '85%',
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    modalTitle: {
+        fontSize: 22,
+        fontWeight: 'bold',
+    },
+    inputLabel: {
+        fontSize: 14,
+        fontWeight: '600',
+        marginBottom: 8,
+    },
+    chipsContainer: {
+        flexDirection: 'row',
+        gap: 8,
+        paddingBottom: 4,
+    },
+    chip: {
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 20,
+        borderWidth: 1,
+        backgroundColor: 'transparent',
+    },
+    chipText: {
+        fontSize: 14,
+    },
+    balanceText: {
+        fontSize: 12,
+        marginTop: 4,
+    },
+    textInput: {
+        borderWidth: 1,
+        borderRadius: 12,
+        padding: 12,
+        fontSize: 16,
+        marginTop: 8,
+    },
+    modalActions: {
+        flexDirection: 'row',
+        gap: 12,
+        marginTop: 24,
+    },
+    modalButton: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 14,
+        borderRadius: 12,
     },
 });

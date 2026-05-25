@@ -46,8 +46,10 @@ def calculate_user_report(start_date, end_date, user):
         withdraw_categories = {}
         withdraw_places = {}
         for trans in user_withdraw_on_range:
-            category = trans["category"] or "Uncategorized"
-            place = trans["place"] or "General"
+            raw_category = trans["category"]
+            category = raw_category.strip().title() if raw_category and str(raw_category).strip() else "Uncategorized"
+            raw_place = trans["place"]
+            place = raw_place.strip().title() if raw_place and str(raw_place).strip() else "General"
             
             if category not in withdraw_categories:
                 withdraw_categories[category] = trans["converted_amount"]
@@ -88,8 +90,10 @@ def calculate_user_report(start_date, end_date, user):
         deposit_categories = {}
         deposit_places = {}
         for trans in user_deposit_on_range:
-            category = trans["category"] or "Uncategorized"
-            place = trans["place"] or "General"
+            raw_category = trans["category"]
+            category = raw_category.strip().title() if raw_category and str(raw_category).strip() else "Uncategorized"
+            raw_place = trans["place"]
+            place = raw_place.strip().title() if raw_place and str(raw_place).strip() else "General"
             
             if category not in deposit_categories:
                 deposit_categories[category] = trans["converted_amount"]

@@ -18,6 +18,7 @@ import { Ionicons } from '@expo/vector-icons';
 import api from '../constants/api';
 import CurrencySelect from './CurrencySelect';
 import CategorySelect from './CategorySelect';
+import PlaceSelect from './PlaceSelect';
 import { updateNetworthWidget } from '../widgets/widget-updater';
 
 interface AddScheduledTransactionModalProps {
@@ -41,6 +42,7 @@ const AddScheduledTransactionModal: React.FC<AddScheduledTransactionModalProps> 
     const [amount, setAmount] = useState(initialValues.amount || '');
     const [desc, setDesc] = useState(initialValues.desc || '');
     const [category, setCategory] = useState(initialValues.category || '');
+    const [place, setPlace] = useState(initialValues.place || '');
     const [currency, setCurrency] = useState(initialValues.currency || '');
     const [dayOfMonth, setDayOfMonth] = useState(initialValues.day_of_month ? String(initialValues.day_of_month) : '');
     const [isActive, setIsActive] = useState(initialValues.status !== undefined ? initialValues.status : true);
@@ -52,6 +54,7 @@ const AddScheduledTransactionModal: React.FC<AddScheduledTransactionModalProps> 
             setAmount(initialValues.amount ? String(initialValues.amount) : '');
             setDesc(initialValues.scheduled_trans_details || '');
             setCategory(initialValues.category || '');
+            setPlace(initialValues.place || '');
             setCurrency(initialValues.currency || '');
             setDayOfMonth(initialValues.day_of_month ? String(initialValues.day_of_month) : '');
             setIsActive(initialValues.status !== undefined ? initialValues.status : true);
@@ -79,6 +82,7 @@ const AddScheduledTransactionModal: React.FC<AddScheduledTransactionModalProps> 
                 currency,
                 scheduled_trans_status: status,
                 category,
+                place,
                 scheduled_trans_details: desc,
                 day_of_month: day,
                 status: isActive
@@ -168,7 +172,7 @@ const AddScheduledTransactionModal: React.FC<AddScheduledTransactionModalProps> 
             onRequestClose={onClose}
         >
             <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
                 style={styles.container}
             >
                 <View style={[styles.modalView, themeStyles.container]}>
@@ -241,6 +245,14 @@ const AddScheduledTransactionModal: React.FC<AddScheduledTransactionModalProps> 
                             value={category}
                             onChange={setCategory}
                             status={status}
+                        />
+
+                        {/* Place */}
+                        <Text style={[styles.label, themeStyles.subText]}>Place</Text>
+                        <PlaceSelect
+                            value={place}
+                            onChange={setPlace}
+                            currency={currency}
                         />
 
                         {/* Description */}

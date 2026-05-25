@@ -15,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import api from '@/constants/api';
 import CurrencySelect from './CurrencySelect';
+import PlaceSelect from './PlaceSelect';
 
 interface AddWishlistModalProps {
     visible: boolean;
@@ -39,6 +40,7 @@ const AddWishlistModal: React.FC<AddWishlistModalProps> = ({
     const [price, setPrice] = useState('');
     const [currency, setCurrency] = useState('EGP'); // Default
     const [year, setYear] = useState(currentYear.toString());
+    const [place, setPlace] = useState(initialValues.place || '');
     const [details, setDetails] = useState('');
     const [link, setLink] = useState('');
     const [loading, setLoading] = useState(false);
@@ -50,6 +52,7 @@ const AddWishlistModal: React.FC<AddWishlistModalProps> = ({
                 setCurrency(initialValues.currency || 'EGP');
                 setYear(initialValues.year ? initialValues.year.toString() : currentYear.toString());
                 setDetails(initialValues.wish_details || '');
+                setPlace(initialValues.place || '');
                 setLink(initialValues.link || '');
             } else {
                 // Reset for add mode
@@ -57,6 +60,7 @@ const AddWishlistModal: React.FC<AddWishlistModalProps> = ({
                 setCurrency('EGP');
                 setYear(currentYear.toString());
                 setDetails('');
+                setPlace('');
                 setLink('');
             }
         }
@@ -88,6 +92,7 @@ const AddWishlistModal: React.FC<AddWishlistModalProps> = ({
                 currency,
                 year: yearNum,
                 wish_details: details,
+                place,
                 link: link
             };
 
@@ -132,7 +137,7 @@ const AddWishlistModal: React.FC<AddWishlistModalProps> = ({
             onRequestClose={onClose}
         >
             <KeyboardAvoidingView
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                behavior={Platform.OS === "ios" ? "padding" : undefined}
                 style={styles.modalOverlay}
             >
                 <View style={[styles.modalContent, themeStyles.modalContent]}>
@@ -189,6 +194,14 @@ const AddWishlistModal: React.FC<AddWishlistModalProps> = ({
                             value={year}
                             onChangeText={setYear}
                             maxLength={4}
+                        />
+
+                        {/* Place */}
+                        <Text style={[styles.label, themeStyles.label]}>Place</Text>
+                        <PlaceSelect
+                            value={place}
+                            onChange={setPlace}
+                            currency={currency}
                         />
 
                         {/* Link */}

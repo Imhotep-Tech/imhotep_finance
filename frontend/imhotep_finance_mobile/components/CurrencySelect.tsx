@@ -9,9 +9,10 @@ interface CurrencySelectProps {
     value: string;
     onChange: (value: string) => void;
     required?: boolean;
+    disabled?: boolean;
 }
 
-const CurrencySelect: React.FC<CurrencySelectProps> = ({ value, onChange, required }) => {
+const CurrencySelect: React.FC<CurrencySelectProps> = ({ value, onChange, required, disabled = false }) => {
     const [modalVisible, setModalVisible] = useState(false);
     const [search, setSearch] = useState('');
     const [favoriteCurrency, setFavoriteCurrency] = useState('');
@@ -60,6 +61,7 @@ const CurrencySelect: React.FC<CurrencySelectProps> = ({ value, onChange, requir
         selector: {
             backgroundColor: isDark ? '#1e293b' : '#fff',
             borderColor: isDark ? '#475569' : '#ddd',
+            opacity: disabled ? 0.6 : 1,
         },
         text: {
             color: isDark ? '#f1f5f9' : '#333',
@@ -81,7 +83,8 @@ const CurrencySelect: React.FC<CurrencySelectProps> = ({ value, onChange, requir
         <View>
             <TouchableOpacity
                 style={[styles.selector, themeStyles.selector]}
-                onPress={() => setModalVisible(true)}
+                onPress={() => !disabled && setModalVisible(true)}
+                disabled={disabled}
             >
                 <Text style={[styles.selectorText, themeStyles.text]}>{value || 'Select Currency'}</Text>
                 <Ionicons name="chevron-down" size={20} color={isDark ? '#94a3b8' : '#666'} />

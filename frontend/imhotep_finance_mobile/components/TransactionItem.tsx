@@ -9,6 +9,7 @@ interface TransactionItemProps {
         amount: string | number;
         currency: string;
         category: string;
+        place?: string;
         trans_status: string;
         trans_details: string;
         date: string;
@@ -60,7 +61,7 @@ const TransactionItem: React.FC<TransactionItemProps> = ({ transaction, onPress 
             <View style={styles.contentContainer}>
                 <View style={styles.topRow}>
                     <Text style={[styles.category, themeStyles.text]} numberOfLines={1}>
-                        {transaction.category || 'No Category'}
+                        {transaction.category || 'No Category'}{transaction.place && transaction.place !== 'General' ? ` • ${transaction.place}` : ''}
                     </Text>
                     <Text style={[styles.amount, themeStyles.amount]}>
                         {isDeposit ? '+' : '-'} {Number(transaction.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {transaction.currency}

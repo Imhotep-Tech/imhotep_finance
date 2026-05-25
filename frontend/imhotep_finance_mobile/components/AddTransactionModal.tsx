@@ -18,6 +18,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import api from '../constants/api';
 import CurrencySelect from './CurrencySelect';
 import CategorySelect from './CategorySelect';
+import PlaceSelect from './PlaceSelect';
 import { updateNetworthWidget } from '../widgets/widget-updater';
 
 interface AddTransactionModalProps {
@@ -41,6 +42,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     const [amount, setAmount] = useState(initialValues.amount || '');
     const [desc, setDesc] = useState(initialValues.desc || '');
     const [category, setCategory] = useState(initialValues.category || '');
+    const [place, setPlace] = useState(initialValues.place || '');
     const [currency, setCurrency] = useState(initialValues.currency || '');
     const [date, setDate] = useState(initialValues.date ? new Date(initialValues.date) : new Date());
     const [showDatePicker, setShowDatePicker] = useState(false);
@@ -52,6 +54,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
             setAmount(initialValues.amount ? String(initialValues.amount) : '');
             setDesc(initialValues.trans_details || '');
             setCategory(initialValues.category || '');
+            setPlace(initialValues.place || '');
             setCurrency(initialValues.currency || '');
             setDate(initialValues.date ? new Date(initialValues.date) : new Date());
         }
@@ -71,6 +74,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                 currency,
                 trans_status: status,
                 category,
+                place,
                 trans_details: desc,
                 date: date.toISOString().split('T')[0],
             };
@@ -171,7 +175,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
             onRequestClose={onClose}
         >
             <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
                 style={styles.container}
             >
                 <View style={[styles.modalView, themeStyles.container]}>
@@ -224,6 +228,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                             value={currency}
                             onChange={setCurrency}
                             required
+                            disabled={editMode}
                         />
 
                         {/* Category */}
@@ -232,6 +237,14 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                             value={category}
                             onChange={setCategory}
                             status={status}
+                        />
+
+                        {/* Place */}
+                        <Text style={[styles.label, themeStyles.subText]}>Place</Text>
+                        <PlaceSelect
+                            value={place}
+                            onChange={setPlace}
+                            currency={currency}
                         />
 
                         {/* Description */}
