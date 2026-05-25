@@ -1,3 +1,4 @@
+from backend.imhotep_finance.finance_management.utils.get_user_places import get_places
 from finance_management.utils.get_networth import get_networth, get_netWorth_details
 from finance_management.utils.get_category import get_category
 
@@ -52,3 +53,16 @@ def get_user_categories_service(user, status='ANY'):
         list: List of category names
     """
     return get_category(user, status)
+
+def get_user_places_service(user, currency='ANY'):
+    """
+    Get user's most frequently used places with counts filtered by currency.
+    
+    Args:
+        user: User object
+        currency: Currency filter (ANY or specific currency)
+        
+    Returns:
+        list: List of place names
+    """
+    return get_places(user, currency=currency)
