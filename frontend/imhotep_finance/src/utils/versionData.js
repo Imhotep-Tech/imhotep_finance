@@ -1,7 +1,7 @@
 export const versionEntries = [
   {
     version: '8.0',
-    date: 'May 25, 2026',
+    date: 'May 26, 2026',
     badge: { label: 'MAJOR', color: 'yellow' },
     summary: 'React Native Mobile App Major Release (Independent numbering from Web App)',
     bullets: [
@@ -10,7 +10,10 @@ export const versionEntries = [
       'Transactions are executed atomically via the backend and backed by withdrawal/deposit transactions in the "Transfer" category.',
       'Fixed bottom sheet keyboard-avoiding glitches on Android devices (e.g. Oppo soft keyboard layout collapses) by utilizing system resizing.',
       'Resolved monthly reports recalculation bugs and duplicate place groupings by normalizing (whitespace stripping and title-casing) place names.',
-      'Implemented real-time incremental updates to cached reports place breakdowns on transaction changes, and fixed database report serialization.'
+      'Implemented real-time incremental updates to cached reports place breakdowns on transaction changes, and fixed database report serialization.',
+      'Added comprehensive test coverage for the new features and bug fixes.',
+      'Updated documentation with detailed explanations of the "Move Money" feature and the underlying transaction handling logic.',
+      'Added "Convert Currency" feature allowing users to convert transaction amounts to their preferred currency using real-time exchange rates.'
     ]
   },
   {
