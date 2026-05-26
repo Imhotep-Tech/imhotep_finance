@@ -49,3 +49,10 @@ class MoveMoneyRequestSerializer(serializers.Serializer):
     target_place = serializers.CharField(required=True, max_length=255, help_text="The target place name")
     amount = serializers.FloatField(required=True, help_text="Amount to transfer")
     currency = serializers.CharField(required=True, max_length=4, help_text="Currency to transfer")
+
+class ConvertCurrencyRequestSerializer(serializers.Serializer):
+    place = serializers.CharField(required=True, max_length=255, help_text="The place name where conversion happens")
+    source_currency = serializers.CharField(required=True, max_length=4, help_text="Currency to convert from")
+    target_currency = serializers.CharField(required=True, max_length=4, help_text="Currency to convert to")
+    amount = serializers.FloatField(required=True, help_text="Amount of source currency to convert")
+    target_amount = serializers.FloatField(required=True, help_text="Amount of target currency to receive")

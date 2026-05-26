@@ -1,5 +1,5 @@
 from django.urls import path, include
-from .apis import GetNetworthApi, GetNetworthDetailsApi, GetCategoryApi, GetPlacesApi, MoveMoneyApi
+from .apis import GetNetworthApi, GetNetworthDetailsApi, GetCategoryApi, GetPlacesApi, MoveMoneyApi, ConvertCurrencyApi, GetExchangeRatesApi
 
 urlpatterns = [
     # Core finance management endpoints - New DDD class-based APIs
@@ -8,6 +8,8 @@ urlpatterns = [
     path('get-category/', GetCategoryApi.as_view(), name='get_category'),
     path('get-places/', GetPlacesApi.as_view(), name='get_places'),
     path('move-money/', MoveMoneyApi.as_view(), name='move_money'),
+    path('convert-currency/', ConvertCurrencyApi.as_view(), name='convert_currency'),
+    path('get-exchange-rates/', GetExchangeRatesApi.as_view(), name='get_exchange_rates'),
     
     # Sub-app endpoints
     path('transaction/', include('transaction_management.urls')),

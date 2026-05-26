@@ -5,6 +5,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import api from '@/constants/api';
+import { currencies as allCurrencies } from '@/constants/currencies';
 
 interface NetWorthDetail {
     currency: string;
@@ -52,6 +53,17 @@ export default function NetWorthDetailsScreen() {
     const [amount, setAmount] = useState('');
     const [submitting, setSubmitting] = useState(false);
 
+    // Convert Currency states
+    const [showConvertModal, setShowConvertModal] = useState(false);
+    const [convertPlace, setConvertPlace] = useState('');
+    const [sourceCurrency, setSourceCurrency] = useState('');
+    const [targetCurrency, setTargetCurrency] = useState('');
+    const [convertAmount, setConvertAmount] = useState('');
+    const [targetAmount, setTargetAmount] = useState('');
+    const [exchangeRate, setExchangeRate] = useState('');
+    const [convertSubmitting, setConvertSubmitting] = useState(false);
+    const [exchangeRates, setExchangeRates] = useState<Record<string, number> | null>(null);
+
     const fetchDetails = async () => {
         try {
             const res = await api.get('/api/finance-management/get-networth-details/');
@@ -74,6 +86,9 @@ export default function NetWorthDetailsScreen() {
 
     useEffect(() => {
         fetchDetails();
+        api.get('/api/finance-management/get-exchange-rates/')
+            .then(res => setExchangeRates(res.data))
+            .catch(() => console.error("Failed to load exchange rates"));
     }, []);
 
     const onRefresh = () => {
@@ -121,6 +136,97 @@ export default function NetWorthDetailsScreen() {
             Alert.alert('Error', errorMessage);
         } finally {
             setSubmitting(false);
+        }
+    };
+
+    const updateDefaultRate = (src: string, tgt: string) => {
+        if (src && tgt && exchangeRates) {
+            const srcRate = exchangeRates[src];
+            const tgtRate = exchangeRates[tgt];
+            if (srcRate && tgtRate) {
+                const rate = (tgtRate / srcRate).toFixed(6);
+                setExchangeRate(rate);
+                const parsedAmount = parseFloat(convertAmount);
+                if (!isNaN(parsedAmount)) {
+                    setTargetAmount((parsedAmount * parseFloat(rate)).toFixed(2));
+                }
+                return;
+            }
+        }
+        setExchangeRate('');
+        setTargetAmount('');
+    };
+
+    const handleConvertAmountChange = (val: string) => {
+        setConvertAmount(val);
+        const parsedVal = parseFloat(val);
+        const parsedRate = parseFloat(exchangeRate);
+        if (!isNaN(parsedVal) && !isNaN(parsedRate) && parsedRate > 0) {
+            setTargetAmount((parsedVal * parsedRate).toFixed(2));
+        } else {
+            setTargetAmount('');
+        }
+    };
+
+    const handleExchangeRateChange = (val: string) => {
+        setExchangeRate(val);
+        const parsedAmount = parseFloat(convertAmount);
+        const parsedRate = parseFloat(val);
+        if (!isNaN(parsedAmount) && !isNaN(parsedRate) && parsedRate > 0) {
+            setTargetAmount((parsedAmount * parsedRate).toFixed(2));
+        }
+    };
+
+    const handleTargetAmountChange = (val: string) => {
+        setTargetAmount(val);
+        const parsedTarget = parseFloat(val);
+        const parsedAmount = parseFloat(convertAmount);
+        if (!isNaN(parsedTarget) && !isNaN(parsedAmount) && parsedAmount > 0) {
+            setExchangeRate((parsedTarget / parsedAmount).toFixed(6));
+        }
+    };
+
+    const handleConvertSubmit = async () => {
+        if (!convertPlace || !sourceCurrency || !targetCurrency || !convertAmount || !targetAmount) {
+            Alert.alert('Error', 'All fields are required.');
+            return;
+        }
+
+        if (sourceCurrency === targetCurrency) {
+            Alert.alert('Error', 'Source and target currencies must be different.');
+            return;
+        }
+
+        const parsedAmount = parseFloat(convertAmount);
+        const parsedTargetAmount = parseFloat(targetAmount);
+        if (isNaN(parsedAmount) || parsedAmount <= 0 || isNaN(parsedTargetAmount) || parsedTargetAmount <= 0) {
+            Alert.alert('Error', 'Amounts must be greater than zero.');
+            return;
+        }
+
+        const maxAvailable = (details[convertPlace] || []).find(item => item.currency === sourceCurrency)?.amount || 0;
+        if (parsedAmount > maxAvailable) {
+            Alert.alert('Error', `Insufficient funds. Maximum available is ${maxAvailable} ${sourceCurrency}.`);
+            return;
+        }
+
+        setConvertSubmitting(true);
+        try {
+            await api.post('/api/finance-management/convert-currency/', {
+                place: convertPlace,
+                source_currency: sourceCurrency,
+                target_currency: targetCurrency,
+                amount: parsedAmount,
+                target_amount: parsedTargetAmount
+            });
+            setShowConvertModal(false);
+            Alert.alert('Success', 'Currency converted successfully!');
+            fetchDetails();
+        } catch (err: any) {
+            const errorMessage = err.response?.data?.error || err.response?.data?.detail || 'An error occurred during conversion.';
+            Alert.alert('Error', errorMessage);
+        } finally {
+            setConvertSubmitting(false);
         }
     };
 
@@ -196,6 +302,22 @@ export default function NetWorthDetailsScreen() {
 
                     {/* Action Buttons */}
                     <View style={styles.buttonRow}>
+                        <TouchableOpacity
+                            style={[styles.moveButton, { backgroundColor: '#2563EB' }]}
+                            onPress={() => {
+                                setConvertPlace('');
+                                setSourceCurrency('');
+                                setTargetCurrency('');
+                                setConvertAmount('');
+                                setTargetAmount('');
+                                setExchangeRate('');
+                                setShowConvertModal(true);
+                            }}
+                        >
+                            <Ionicons name="cash-outline" size={20} color="#fff" />
+                            <Text style={styles.backButtonText}>Convert Currencies</Text>
+                        </TouchableOpacity>
+
                         <TouchableOpacity
                             style={[styles.moveButton, { backgroundColor: colors.primary }]}
                             onPress={() => {
@@ -388,6 +510,176 @@ export default function NetWorthDetailsScreen() {
                     </View>
                 </View>
             </Modal>
+
+            {/* Convert Currency Native Overlay Modal */}
+            <Modal
+                visible={showConvertModal}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={() => setShowConvertModal(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
+                        <View style={styles.modalHeader}>
+                            <Text style={[styles.modalTitle, { color: colors.text }]}>Convert Currency</Text>
+                            <TouchableOpacity onPress={() => setShowConvertModal(false)}>
+                                <Ionicons name="close" size={24} color={colors.text} />
+                            </TouchableOpacity>
+                        </View>
+
+                        <ScrollView contentContainerStyle={{ gap: 20 }}>
+                            {/* Place */}
+                            <View>
+                                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Place</Text>
+                                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsContainer}>
+                                    {Object.keys(details).map(place => (
+                                        <TouchableOpacity
+                                            key={place}
+                                            style={[
+                                                styles.chip,
+                                                { borderColor: colors.border },
+                                                convertPlace === place && { backgroundColor: colors.primary, borderColor: colors.primary }
+                                            ]}
+                                            onPress={() => {
+                                                setConvertPlace(place);
+                                                setSourceCurrency('');
+                                                setTargetCurrency('');
+                                                setExchangeRate('');
+                                                setTargetAmount('');
+                                            }}
+                                        >
+                                            <Text style={[styles.chipText, { color: colors.text }, convertPlace === place && { color: '#fff', fontWeight: 'bold' }]}>
+                                                {place}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    ))}
+                                </ScrollView>
+                            </View>
+
+                            {convertPlace ? (
+                                <>
+                                    {/* Source Currency */}
+                                    <View>
+                                        <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Current Currency</Text>
+                                        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsContainer}>
+                                            {(details[convertPlace] || []).map(item => (
+                                                <TouchableOpacity
+                                                    key={item.currency}
+                                                    style={[
+                                                        styles.chip,
+                                                        { borderColor: colors.border },
+                                                        sourceCurrency === item.currency && { backgroundColor: colors.primary, borderColor: colors.primary }
+                                                    ]}
+                                                    onPress={() => {
+                                                        setSourceCurrency(item.currency);
+                                                        updateDefaultRate(item.currency, targetCurrency);
+                                                    }}
+                                                >
+                                                    <Text style={[styles.chipText, { color: colors.text }, sourceCurrency === item.currency && { color: '#fff', fontWeight: 'bold' }]}>
+                                                        {item.currency}
+                                                    </Text>
+                                                </TouchableOpacity>
+                                            ))}
+                                        </ScrollView>
+                                        {sourceCurrency ? (
+                                            <Text style={[styles.balanceText, { color: colors.textSecondary }]}>
+                                                Available: {Number((details[convertPlace] || []).find(item => item.currency === sourceCurrency)?.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {sourceCurrency}
+                                            </Text>
+                                        ) : null}
+                                    </View>
+
+                                    {/* Target Currency */}
+                                    <View>
+                                        <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Target Currency</Text>
+                                        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsContainer}>
+                                            {allCurrencies.map(c => (
+                                                <TouchableOpacity
+                                                    key={c}
+                                                    style={[
+                                                        styles.chip,
+                                                        { borderColor: colors.border },
+                                                        targetCurrency === c && { backgroundColor: colors.primary, borderColor: colors.primary }
+                                                    ]}
+                                                    onPress={() => {
+                                                        setTargetCurrency(c);
+                                                        updateDefaultRate(sourceCurrency, c);
+                                                    }}
+                                                >
+                                                    <Text style={[styles.chipText, { color: colors.text }, targetCurrency === c && { color: '#fff', fontWeight: 'bold' }]}>
+                                                        {c}
+                                                    </Text>
+                                                </TouchableOpacity>
+                                            ))}
+                                        </ScrollView>
+                                    </View>
+                                </>
+                            ) : null}
+
+                            {/* Rate */}
+                            <View>
+                                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Rate</Text>
+                                <TextInput
+                                    style={[styles.textInput, { borderColor: colors.border, color: colors.text, backgroundColor: isDark ? '#1F2937' : '#F9FAFB' }]}
+                                    placeholder="0.00"
+                                    placeholderTextColor={colors.textSecondary}
+                                    value={exchangeRate}
+                                    onChangeText={handleExchangeRateChange}
+                                    keyboardType="numeric"
+                                />
+                            </View>
+
+                            <View style={{ flexDirection: 'row', gap: 12 }}>
+                                {/* Amount */}
+                                <View style={{ flex: 1 }}>
+                                    <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Amount ({sourceCurrency || '...'})</Text>
+                                    <TextInput
+                                        style={[styles.textInput, { borderColor: colors.border, color: colors.text, backgroundColor: isDark ? '#1F2937' : '#F9FAFB' }]}
+                                        placeholder="0.00"
+                                        placeholderTextColor={colors.textSecondary}
+                                        value={convertAmount}
+                                        onChangeText={handleConvertAmountChange}
+                                        keyboardType="numeric"
+                                    />
+                                </View>
+                                
+                                {/* Target Amount */}
+                                <View style={{ flex: 1 }}>
+                                    <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Target ({targetCurrency || '...'})</Text>
+                                    <TextInput
+                                        style={[styles.textInput, { borderColor: colors.border, color: colors.text, backgroundColor: isDark ? '#1F2937' : '#F9FAFB' }]}
+                                        placeholder="0.00"
+                                        placeholderTextColor={colors.textSecondary}
+                                        value={targetAmount}
+                                        onChangeText={handleTargetAmountChange}
+                                        keyboardType="numeric"
+                                    />
+                                </View>
+                            </View>
+
+                            {/* Actions */}
+                            <View style={styles.modalActions}>
+                                <TouchableOpacity
+                                    style={[styles.modalButton, { borderColor: colors.border, borderWidth: 1 }]}
+                                    onPress={() => setShowConvertModal(false)}
+                                >
+                                    <Text style={{ color: colors.text, fontWeight: '600' }}>Cancel</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[styles.modalButton, { backgroundColor: '#2563EB' }]}
+                                    onPress={handleConvertSubmit}
+                                    disabled={convertSubmitting}
+                                >
+                                    {convertSubmitting ? (
+                                        <ActivityIndicator size="small" color="#fff" />
+                                    ) : (
+                                        <Text style={{ color: '#fff', fontWeight: '600' }}>Convert</Text>
+                                    )}
+                                </TouchableOpacity>
+                            </View>
+                        </ScrollView>
+                    </View>
+                </View>
+            </Modal>
         </>
     );
 }
@@ -479,18 +771,19 @@ const styles = StyleSheet.create({
     },
     buttonRow: {
         flexDirection: 'row',
-        gap: 12,
+        justifyContent: 'space-between',
         marginTop: 8,
         marginBottom: 16,
+        flexWrap: 'wrap',
     },
     moveButton: {
-        flex: 1,
+        width: '48%',
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
         paddingVertical: 14,
         borderRadius: 12,
-        gap: 8,
+        marginBottom: 12,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
@@ -498,13 +791,14 @@ const styles = StyleSheet.create({
         elevation: 2,
     },
     backButtonOutline: {
-        flex: 1,
+        width: '48%',
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
         paddingVertical: 14,
         borderRadius: 12,
-        gap: 8,
+        marginBottom: 12,
+        borderWidth: 1,
     },
     backButton: {
         flexDirection: 'row',
@@ -602,8 +896,10 @@ const styles = StyleSheet.create({
     },
     modalActions: {
         flexDirection: 'row',
-        gap: 12,
-        marginTop: 24,
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        marginTop: 8,
+        marginBottom: 16,
     },
     modalButton: {
         flex: 1,

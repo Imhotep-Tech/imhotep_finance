@@ -9,6 +9,7 @@ from rest_framework.exceptions import ValidationError as DRFValidationError
 from transaction_management.services import create_transaction
 from transaction_management.models import NetWorth
 from datetime import date
+from finance_management.utils.currencies import get_or_update_rates
 from finance_management.services import (
     get_user_networth_service,
     get_user_networth_details_service,
@@ -22,7 +23,8 @@ from finance_management.serializers import (
     CategoryResponseSerializer,
     PlaceRequestSerializer,
     PlaceResponseSerializer,
-    MoveMoneyRequestSerializer
+    MoveMoneyRequestSerializer,
+    ConvertCurrencyRequestSerializer
 )
 
 
@@ -179,3 +181,86 @@ class MoveMoneyApi(APIView):
             raise DRFValidationError(str(e))
             
         return Response({"message": "Money moved successfully"}, status=status.HTTP_200_OK)
+
+class GetExchangeRatesApi(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        tags=['Finance Management'],
+        description="Get current exchange rates against USD.",
+        responses={200: serializers.DictField()},
+        operation_id='get_exchange_rates'
+    )
+    def get(self, request):
+        rates = get_or_update_rates()
+        if rates:
+            return Response(rates, status=status.HTTP_200_OK)
+        return Response({"error": "Failed to fetch exchange rates."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class ConvertCurrencyApi(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        tags=['Finance Management'],
+        description="Convert currency within the same place.",
+        request=ConvertCurrencyRequestSerializer,
+        responses={200: serializers.Serializer},
+        operation_id='convert_currency'
+    )
+    def post(self, request):
+        serializer = ConvertCurrencyRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        user = request.user
+        place = serializer.validated_data['place'].strip().title()
+        source_currency = serializer.validated_data['source_currency']
+        target_currency = serializer.validated_data['target_currency']
+        amount = serializer.validated_data['amount']
+        target_amount = serializer.validated_data['target_amount']
+        
+        if amount <= 0 or target_amount <= 0:
+            raise DRFValidationError("Amounts must be greater than zero.")
+            
+        if source_currency == target_currency:
+            raise DRFValidationError("Source and target currencies must be different.")
+            
+        # Check if the source place and currency combination is available
+        source_networth = NetWorth.objects.filter(user=user, currency=source_currency, place=place).first()
+        if not source_networth:
+            raise DRFValidationError(f"Place '{place}' with currency '{source_currency}' does not exist.")
+            
+        if source_networth.total < amount:
+            raise DRFValidationError(f"Insufficient funds in '{place}'. Available: {source_networth.total} {source_currency}.")
+            
+        try:
+            with transaction.atomic():
+                # 1. Create withdraw transaction
+                withdraw_trans = create_transaction(
+                    user=user,
+                    amount=amount,
+                    currency=source_currency,
+                    trans_details=f"Currency Conversion to {target_currency}",
+                    category="Conversion",
+                    trans_status="Withdraw",
+                    transaction_date=date.today(),
+                    place=place
+                )
+                
+                # 2. Create deposit transaction
+                deposit_trans = create_transaction(
+                    user=user,
+                    amount=target_amount,
+                    currency=target_currency,
+                    trans_details=f"Currency Conversion from {source_currency}",
+                    category="Conversion",
+                    trans_status="Deposit",
+                    transaction_date=date.today(),
+                    place=place
+                )
+        except DjangoValidationError as e:
+            raise DRFValidationError(e.message)
+        except Exception as e:
+            raise DRFValidationError(str(e))
+            
+        return Response({"message": "Currency converted successfully"}, status=status.HTTP_200_OK)
