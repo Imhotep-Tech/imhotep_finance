@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.imhoteptech.imhotep_finance_mobile",
+      "sha256_cert_fingerprints": [
+        "71:DA:88:B0:BB:A1:26:D3:9F:B6:38:67:62:4D:8D:BC:40:1F:C9:FB:83:75:70:60:73:83:95:0E:A6:50:DC:4C"
+      ]
+    }
+  }
+]

@@ -14,6 +14,11 @@
       "bundleIdentifier": "com.imhoteptech.imhotep-finance-mobile"
     },
     "android": {
+      "package": "com.imhoteptech.imhotep_finance_mobile",
+      "versionCode": 1,
+      "permissions": [
+        "INTERNET"
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/imhotep_finance_zoomed.png",
         "backgroundColor": "#366c6b"
@@ -38,29 +43,8 @@
             "BROWSABLE",
             "DEFAULT"
           ]
-        },
-        {
-          "action": "VIEW",
-          "autoVerify": true,
-          "data": [
-            {
-              "scheme": "https",
-              "host": "imhotep-finance.vercel.app",
-              "pathPrefix": "/verify-email"
-            },
-            {
-              "scheme": "https",
-              "host": "imhotep-finance.vercel.app",
-              "pathPrefix": "/verify-email-change"
-            }
-          ],
-          "category": [
-            "BROWSABLE",
-            "DEFAULT"
-          ]
         }
-      ],
-      "package": "com.imhoteptech.imhotep_finance_mobile"
+      ]
     },
     "web": {
       "output": "static",
