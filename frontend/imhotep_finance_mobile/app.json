@@ -11,10 +11,10 @@
       "associatedDomains": [
         "applinks:imhotep-finance.vercel.app"
       ],
-      "bundleIdentifier": "com.imhoteptech.imhotep-finance-mobile"
+      "bundleIdentifier": "com.imhoteptech.imhotep_finance"
     },
     "android": {
-      "package": "com.imhoteptech.imhotep_finance_mobile",
+      "package": "com.imhoteptech.imhotep_finance",
       "versionCode": 1,
       "permissions": [
         "INTERNET"
