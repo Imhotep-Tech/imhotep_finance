@@ -3,11 +3,6 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "installCommand": "npm install",
-  "rewrites": [
-    {
-      "source": "/((?!\\.well-known/assetlinks\\.json).*)"
-    }
-  ],
   "headers": [
     {
       "source": "/.well-known/assetlinks.json",
