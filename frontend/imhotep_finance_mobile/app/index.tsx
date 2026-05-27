@@ -1,24 +1,30 @@
-import { Redirect } from 'expo-router';
+import { useRouter, useRootNavigationState } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { useEffect } from 'react';
 
 export default function Index() {
   const { isAuthenticated, loading } = useAuth();
+  const router = useRouter();
+  const rootNavigationState = useRootNavigationState();
 
-  if (loading) {
-    return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" color="#2563EB" />
-      </View>
-    );
-  }
+  useEffect(() => {
+    // Wait for the navigation root to be mounted and auth state to be resolved
+    if (!rootNavigationState?.key || loading) return;
 
-  // Redirect based on auth status
-  if (isAuthenticated) {
-    return <Redirect href="/(tabs)" />;
-  }
+    if (isAuthenticated) {
+      router.replace('/(tabs)');
+    } else {
+      router.replace('/(auth)/login');
+    }
+  }, [isAuthenticated, loading, rootNavigationState?.key, router]);
 
-  return <Redirect href="/(auth)/login" />;
+  // Always show a loading spinner while waiting for auth and router to mount
+  return (
+    <View style={styles.container}>
+      <ActivityIndicator size="large" color="#366c6b" />
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({

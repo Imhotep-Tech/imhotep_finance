@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Modal, TouchableOpacity, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, Modal, TouchableOpacity, FlatList, StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import api from '../constants/api'; // Use the configured api instance
 import { Ionicons } from '@expo/vector-icons';
@@ -87,8 +87,12 @@ const PlaceSelect: React.FC<PlaceSelectProps> = ({ value, onChange, currency, di
                 visible={modalVisible}
                 onRequestClose={() => setModalVisible(false)}
             >
-                <View style={styles.modalOverlay}>
-                    <View style={[styles.modalContent, themeStyles.modalContent]}>
+                <KeyboardAvoidingView
+                    style={{ flex: 1 }}
+                    behavior="padding"
+                >
+                    <View style={styles.modalOverlay}>
+                        <View style={[styles.modalContent, themeStyles.modalContent]}>
                         <View style={styles.modalHeader}>
                             <Text style={[styles.modalTitle, themeStyles.text]}>Select Place</Text>
                             <TouchableOpacity onPress={() => setModalVisible(false)}>
@@ -108,6 +112,8 @@ const PlaceSelect: React.FC<PlaceSelectProps> = ({ value, onChange, currency, di
                             <ActivityIndicator size="small" color="#51adac" />
                         ) : (
                             <FlatList
+                                keyboardShouldPersistTaps="handled"
+                                keyboardDismissMode="on-drag"
                                 data={filtered}
                                 keyExtractor={(item, index) => item + index}
                                 renderItem={({ item }) => (
@@ -156,8 +162,9 @@ const PlaceSelect: React.FC<PlaceSelectProps> = ({ value, onChange, currency, di
                                 <Text style={styles.addNewText}>Add "{search}" as new</Text>
                             </TouchableOpacity>
                         )}
+                        </View>
                     </View>
-                </View>
+                </KeyboardAvoidingView>
             </Modal>
         </View>
     );

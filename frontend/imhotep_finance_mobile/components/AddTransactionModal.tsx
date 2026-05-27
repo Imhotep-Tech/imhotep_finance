@@ -175,7 +175,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
             onRequestClose={onClose}
         >
             <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                behavior="padding"
                 style={styles.container}
             >
                 <View style={[styles.modalView, themeStyles.container]}>

@@ -11,7 +11,8 @@ import {
     Platform,
     TextInput,
     Alert,
-    ScrollView
+    ScrollView,
+    KeyboardAvoidingView
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -253,6 +254,8 @@ export default function TransactionsScreen() {
                 }
                 onEndReached={loadMore}
                 onEndReachedThreshold={0.3}
+                keyboardShouldPersistTaps="handled"
+                keyboardDismissMode="on-drag"
                 ListFooterComponent={() => {
                     if (loading && !refreshing && transactions.length > 0) {
                         return (
@@ -319,94 +322,100 @@ export default function TransactionsScreen() {
                 transparent={true}
                 onRequestClose={() => setShowFilterModal(false)}
             >
-                <View style={styles.modalOverlay}>
-                    <View style={[styles.modalContent, themeStyles.modalContent]}>
-                        <View style={styles.modalHeader}>
-                            <Text style={[styles.modalTitle, themeStyles.text]}>Filter Transactions</Text>
-                            <TouchableOpacity onPress={() => setShowFilterModal(false)}>
-                                <Ionicons name="close" size={24} color={themeStyles.text.color} />
-                            </TouchableOpacity>
+                <KeyboardAvoidingView
+                    style={{ flex: 1 }}
+                    behavior="padding"
+                >
+                    <View style={styles.modalOverlay}>
+                        <View style={[styles.modalContent, themeStyles.modalContent]}>
+                            <ScrollView keyboardShouldPersistTaps="handled">
+                                <View style={styles.modalHeader}>
+                                    <Text style={[styles.modalTitle, themeStyles.text]}>Filter Transactions</Text>
+                                    <TouchableOpacity onPress={() => setShowFilterModal(false)}>
+                                        <Ionicons name="close" size={24} color={themeStyles.text.color} />
+                                    </TouchableOpacity>
+                                </View>
+
+                                <Text style={[styles.label, themeStyles.text]}>Search</Text>
+                                <TextInput
+                                    style={[styles.input, themeStyles.input]}
+                                    placeholder="Search description..."
+                                    placeholderTextColor={isDark ? '#94a3b8' : '#999'}
+                                    value={detailsSearch}
+                                    onChangeText={setDetailsSearch}
+                                />
+
+                                {/* Category Filter */}
+                                <Text style={[styles.label, themeStyles.text]}>Category</Text>
+                                <CategorySelect
+                                    value={categoryFilter}
+                                    onChange={setCategoryFilter}
+                                    status={statusFilter || 'ANY'}
+                                />
+
+                                {/* Date Filters */}
+                                <Text style={[styles.label, themeStyles.text]}>Date Range</Text>
+                                <View style={styles.dateRow}>
+                                    <TouchableOpacity
+                                        style={[styles.dateInput, themeStyles.input]}
+                                        onPress={() => setShowStartPicker(true)}
+                                    >
+                                        <Text style={themeStyles.text}>{startDate ? startDate.toISOString().split('T')[0] : 'Start Date'}</Text>
+                                        <Ionicons name="calendar-outline" size={20} color={themeStyles.subText.color} />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={[styles.dateInput, themeStyles.input]}
+                                        onPress={() => setShowEndPicker(true)}
+                                    >
+                                        <Text style={themeStyles.text}>{endDate ? endDate.toISOString().split('T')[0] : 'End Date'}</Text>
+                                        <Ionicons name="calendar-outline" size={20} color={themeStyles.subText.color} />
+                                    </TouchableOpacity>
+                                </View>
+
+                                {showStartPicker && (
+                                    <DateTimePicker
+                                        value={startDate || new Date()}
+                                        mode="date"
+                                        display="default"
+                                        onChange={(e, d) => {
+                                            setShowStartPicker(Platform.OS === 'ios');
+                                            if (d) setStartDate(d);
+                                        }}
+                                    />
+                                )}
+                                {showEndPicker && (
+                                    <DateTimePicker
+                                        value={endDate || new Date()}
+                                        mode="date"
+                                        display="default"
+                                        onChange={(e, d) => {
+                                            setShowEndPicker(Platform.OS === 'ios');
+                                            if (d) setEndDate(d);
+                                        }}
+                                    />
+                                )}
+
+                                {/* Actions */}
+                                <View style={styles.modalActions}>
+                                    <TouchableOpacity
+                                        style={[styles.modalButton, styles.clearButton]}
+                                        onPress={() => {
+                                            clearFilters();
+                                        }}
+                                    >
+                                        <Text style={styles.clearButtonText}>Clear</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={[styles.modalButton, styles.applyButton]}
+                                        onPress={applyFilters}
+                                    >
+                                        <Text style={styles.applyButtonText}>Apply Filters</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </ScrollView>
                         </View>
-
-                        <Text style={[styles.label, themeStyles.text]}>Search</Text>
-                        <TextInput
-                            style={[styles.input, themeStyles.input]}
-                            placeholder="Search description..."
-                            placeholderTextColor={isDark ? '#94a3b8' : '#999'}
-                            value={detailsSearch}
-                            onChangeText={setDetailsSearch}
-                        />
-
-                        {/* Category Filter */}
-                        <Text style={[styles.label, themeStyles.text]}>Category</Text>
-                        <CategorySelect
-                            value={categoryFilter}
-                            onChange={setCategoryFilter}
-                            status={statusFilter || 'ANY'}
-                        />
-
-                        {/* Date Filters */}
-                        <Text style={[styles.label, themeStyles.text]}>Date Range</Text>
-                        <View style={styles.dateRow}>
-                            <TouchableOpacity
-                                style={[styles.dateInput, themeStyles.input]}
-                                onPress={() => setShowStartPicker(true)}
-                            >
-                                <Text style={themeStyles.text}>{startDate ? startDate.toISOString().split('T')[0] : 'Start Date'}</Text>
-                                <Ionicons name="calendar-outline" size={20} color={themeStyles.subText.color} />
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={[styles.dateInput, themeStyles.input]}
-                                onPress={() => setShowEndPicker(true)}
-                            >
-                                <Text style={themeStyles.text}>{endDate ? endDate.toISOString().split('T')[0] : 'End Date'}</Text>
-                                <Ionicons name="calendar-outline" size={20} color={themeStyles.subText.color} />
-                            </TouchableOpacity>
-                        </View>
-
-                        {showStartPicker && (
-                            <DateTimePicker
-                                value={startDate || new Date()}
-                                mode="date"
-                                display="default"
-                                onChange={(e, d) => {
-                                    setShowStartPicker(Platform.OS === 'ios');
-                                    if (d) setStartDate(d);
-                                }}
-                            />
-                        )}
-                        {showEndPicker && (
-                            <DateTimePicker
-                                value={endDate || new Date()}
-                                mode="date"
-                                display="default"
-                                onChange={(e, d) => {
-                                    setShowEndPicker(Platform.OS === 'ios');
-                                    if (d) setEndDate(d);
-                                }}
-                            />
-                        )}
-
-                        {/* Actions */}
-                        <View style={styles.modalActions}>
-                            <TouchableOpacity
-                                style={[styles.modalButton, styles.clearButton]}
-                                onPress={() => {
-                                    clearFilters();
-                                }}
-                            >
-                                <Text style={styles.clearButtonText}>Clear</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={[styles.modalButton, styles.applyButton]}
-                                onPress={applyFilters}
-                            >
-                                <Text style={styles.applyButtonText}>Apply Filters</Text>
-                            </TouchableOpacity>
-                        </View>
-
                     </View>
-                </View>
+                </KeyboardAvoidingView>
             </Modal>
         </View>
     );

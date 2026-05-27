@@ -324,7 +324,7 @@ export default function ProfileScreen() {
     <SafeAreaView style={[styles.container, { backgroundColor }]} edges={['top']}>
       <KeyboardAvoidingView
         style={styles.keyboardAvoid}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior="padding"
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
         <ScrollView
@@ -629,7 +629,7 @@ export default function ProfileScreen() {
       >
         <KeyboardAvoidingView
           style={[styles.modalOverlay, { backgroundColor: colors.overlay }]}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          behavior="padding"
         >
           <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
             <View style={[styles.modalHeader, { borderBottomColor: colors.borderLight }]}>

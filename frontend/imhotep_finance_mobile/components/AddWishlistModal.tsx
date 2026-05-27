@@ -137,7 +137,7 @@ const AddWishlistModal: React.FC<AddWishlistModalProps> = ({
             onRequestClose={onClose}
         >
             <KeyboardAvoidingView
-                behavior={Platform.OS === "ios" ? "padding" : undefined}
+                behavior="padding"
                 style={styles.modalOverlay}
             >
                 <View style={[styles.modalContent, themeStyles.modalContent]}>

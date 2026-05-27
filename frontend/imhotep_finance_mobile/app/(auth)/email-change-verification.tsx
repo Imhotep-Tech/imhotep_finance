@@ -167,7 +167,7 @@ export default function EmailChangeVerificationScreen() {
   return (
     <KeyboardAvoidingView
       style={[styles.container, { backgroundColor: colors.background }]}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior="padding"
     >
       <ScrollView
         contentContainerStyle={styles.scrollContent}

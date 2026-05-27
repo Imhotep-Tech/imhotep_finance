@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, RefreshControl, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, RefreshControl, TouchableOpacity, Modal, TextInput, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { Stack, router } from 'expo-router';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -352,6 +352,10 @@ export default function NetWorthDetailsScreen() {
                 transparent={true}
                 onRequestClose={() => setShowMoveModal(false)}
             >
+                <KeyboardAvoidingView
+                    style={{ flex: 1 }}
+                    behavior="padding"
+                >
                 <View style={styles.modalOverlay}>
                     <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
                         <View style={styles.modalHeader}>
@@ -361,7 +365,7 @@ export default function NetWorthDetailsScreen() {
                             </TouchableOpacity>
                         </View>
 
-                        <ScrollView contentContainerStyle={{ gap: 20 }}>
+                        <ScrollView contentContainerStyle={{ gap: 20 }} keyboardShouldPersistTaps="handled">
                             {/* Source Place */}
                             <View>
                                 <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Source Place</Text>
@@ -509,6 +513,7 @@ export default function NetWorthDetailsScreen() {
                         </ScrollView>
                     </View>
                 </View>
+                </KeyboardAvoidingView>
             </Modal>
 
             {/* Convert Currency Native Overlay Modal */}
@@ -518,6 +523,10 @@ export default function NetWorthDetailsScreen() {
                 transparent={true}
                 onRequestClose={() => setShowConvertModal(false)}
             >
+                <KeyboardAvoidingView
+                    style={{ flex: 1 }}
+                    behavior="padding"
+                >
                 <View style={styles.modalOverlay}>
                     <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
                         <View style={styles.modalHeader}>
@@ -527,7 +536,7 @@ export default function NetWorthDetailsScreen() {
                             </TouchableOpacity>
                         </View>
 
-                        <ScrollView contentContainerStyle={{ gap: 20 }}>
+                        <ScrollView contentContainerStyle={{ gap: 20 }} keyboardShouldPersistTaps="handled">
                             {/* Place */}
                             <View>
                                 <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Place</Text>
@@ -679,6 +688,7 @@ export default function NetWorthDetailsScreen() {
                         </ScrollView>
                     </View>
                 </View>
+                </KeyboardAvoidingView>
             </Modal>
         </>
     );

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Modal, TouchableOpacity, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, Modal, TouchableOpacity, FlatList, StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Ionicons } from '@expo/vector-icons';
 import api from '../constants/api'; // Use the configured api instance
@@ -96,8 +96,12 @@ const CurrencySelect: React.FC<CurrencySelectProps> = ({ value, onChange, requir
                 visible={modalVisible}
                 onRequestClose={() => setModalVisible(false)}
             >
-                <View style={styles.modalOverlay}>
-                    <View style={[styles.modalContent, themeStyles.modalContent]}>
+                <KeyboardAvoidingView
+                    style={{ flex: 1 }}
+                    behavior="padding"
+                >
+                    <View style={styles.modalOverlay}>
+                        <View style={[styles.modalContent, themeStyles.modalContent]}>
                         <View style={styles.modalHeader}>
                             <Text style={[styles.modalTitle, themeStyles.text]}>Select Currency</Text>
                             <TouchableOpacity onPress={() => setModalVisible(false)}>
@@ -114,6 +118,8 @@ const CurrencySelect: React.FC<CurrencySelectProps> = ({ value, onChange, requir
                         />
 
                         <FlatList
+                            keyboardShouldPersistTaps="handled"
+                            keyboardDismissMode="on-drag"
                             data={filtered}
                             keyExtractor={(item) => item}
                             renderItem={({ item }) => (
@@ -131,8 +137,9 @@ const CurrencySelect: React.FC<CurrencySelectProps> = ({ value, onChange, requir
                             )}
                             ListEmptyComponent={<Text style={styles.emptyText}>No currencies found</Text>}
                         />
+                        </View>
                     </View>
-                </View>
+                </KeyboardAvoidingView>
             </Modal>
         </View>
     );
