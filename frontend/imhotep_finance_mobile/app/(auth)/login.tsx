@@ -70,6 +70,7 @@ export default function LoginScreen() {
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
   const [loading, setLoading] = useState(false);
+  const [demoLoading, setDemoLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const { login } = useAuth();
@@ -173,6 +174,28 @@ export default function LoginScreen() {
 
     setLoading(false);
   };
+
+  const handleDemoLogin = async () => {
+    if (loading || demoLoading) return;
+
+    try {
+      setDemoLoading(true);
+      setError('');
+      setInfo('');
+
+      const response = await axios.post('/api/auth/login/demo/');
+      const { access, refresh, user: userData } = response.data;
+
+      await login({ access, refresh, user: userData });
+      router.replace('/(tabs)');
+    } catch (error) {
+      console.error('Demo login failed:', error);
+      setError('Failed to login as demo user');
+    } finally {
+      setDemoLoading(false);
+    }
+  };
+
 
   return (
     <KeyboardAvoidingView
@@ -287,12 +310,28 @@ export default function LoginScreen() {
           <TouchableOpacity
             style={[styles.submitButton, { backgroundColor: colors.primary }, loading && styles.submitButtonDisabled]}
             onPress={handleSubmit}
-            disabled={loading}
+            disabled={loading || demoLoading}
           >
             {loading ? (
               <ActivityIndicator color="white" />
             ) : (
               <Text style={styles.submitButtonText}>Sign in</Text>
+            )}
+          </TouchableOpacity>
+
+          {/* Demo Login Button */}
+          <TouchableOpacity
+            style={[styles.submitButton, { backgroundColor: '#d97706', marginTop: 12 }, demoLoading && styles.submitButtonDisabled]}
+            onPress={handleDemoLogin}
+            disabled={loading || demoLoading}
+          >
+            {demoLoading ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Ionicons name="eye-outline" size={20} color="white" style={{ marginRight: 8 }} />
+                <Text style={styles.submitButtonText}>Try Demo Account</Text>
+              </View>
             )}
           </TouchableOpacity>
 

@@ -109,3 +109,23 @@ class PasswordResetConfirmOTPSerializer(serializers.Serializer):
         if data['new_password'] != data['confirm_password']:
             raise serializers.ValidationError("Passwords do not match")
         return data
+
+class RequestDeleteAccountOTPSerializer(serializers.Serializer):
+    # Empty serializer, just requires authentication
+    pass
+
+class DeleteAccountConfirmSerializer(serializers.Serializer):
+    otp = serializers.CharField(max_length=6, min_length=6, required=False, allow_blank=True, help_text="6-digit OTP code")
+    password = serializers.CharField(required=False, allow_blank=True, help_text="Current user password")
+
+    def validate(self, data):
+        otp = data.get('otp')
+        password = data.get('password')
+
+        if not otp and not password:
+            raise serializers.ValidationError("You must provide either an OTP or your password to confirm account deletion.")
+
+        if otp and password:
+            raise serializers.ValidationError("Please provide either an OTP or your password, not both.")
+
+        return data

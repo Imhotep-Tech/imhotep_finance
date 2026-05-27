@@ -47,6 +47,13 @@ const Profile = () => {
     target: '',
   });
 
+  // Account Deletion state
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteMethod, setDeleteMethod] = useState(''); // 'password' or 'otp'
+  const [deleteCredential, setDeleteCredential] = useState('');
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+
   // Filtered currencies for dropdown search
   const filteredCurrencies = currencies.filter(c =>
     c.toLowerCase().includes(currencyData.search.toLowerCase())
@@ -263,6 +270,49 @@ const Profile = () => {
       ...prev,
       [field]: !prev[field]
     }));
+  };
+
+  const handleRequestDeleteOTP = async () => {
+    setDeleteLoading(true);
+    setError('');
+    setSuccess('');
+    try {
+      const response = await axios.post('/api/profile/request-delete-otp/');
+      setSuccess(response.data.message || 'OTP sent successfully');
+      setOtpSent(true);
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to send OTP');
+    }
+    setDeleteLoading(false);
+  };
+
+  const handleConfirmDeleteAccount = async () => {
+    if (!deleteCredential) {
+      setError('Please enter your password or OTP');
+      return;
+    }
+    
+    setDeleteLoading(true);
+    setError('');
+    setSuccess('');
+    
+    try {
+      const payload = deleteMethod === 'otp' 
+        ? { otp: deleteCredential } 
+        : { password: deleteCredential };
+        
+      await axios.post('/api/profile/delete-account/', payload);
+      setSuccess('Account deleted successfully');
+      setShowDeleteModal(false);
+      
+      // Logout and redirect to login
+      setTimeout(() => {
+        logout();
+      }, 1500);
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to delete account');
+    }
+    setDeleteLoading(false);
   };
 
   return (
@@ -566,6 +616,30 @@ const Profile = () => {
                 </button>
               </div>
             </form>
+
+            {/* Danger Zone */}
+            {user?.username !== 'demo' && (
+              <div className="mt-8 pt-6 border-t border-red-200 dark:border-red-900/30">
+                <h3 className="text-xl font-bold font-chef text-red-600 dark:text-red-400 mb-2">Danger Zone</h3>
+                <p className="text-gray-600 dark:text-gray-300 font-medium mb-4">
+                  Once you delete your account, there is no going back. Please be certain.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowDeleteModal(true);
+                    setDeleteMethod('');
+                    setDeleteCredential('');
+                    setOtpSent(false);
+                    setError('');
+                    setSuccess('');
+                  }}
+                  className="chef-button bg-red-100 hover:bg-red-200 text-red-700 dark:bg-red-900/30 dark:hover:bg-red-900/50 dark:text-red-400 border border-red-300 dark:border-red-800 transition-colors"
+                >
+                  Delete Account
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -920,6 +994,103 @@ const Profile = () => {
           </div>
         )}
       </div>
+
+      {/* Delete Account Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md overflow-hidden transform transition-all p-6">
+            <h3 className="text-2xl font-bold text-red-600 dark:text-red-400 mb-2">Delete Account</h3>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">
+              This action cannot be undone. How would you like to verify your identity to proceed?
+            </p>
+
+            {/* Error and Success in Modal */}
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg text-sm">{error}</div>
+            )}
+            {success && (
+              <div className="mb-4 p-3 bg-green-50 text-green-700 rounded-lg text-sm">{success}</div>
+            )}
+
+            {!deleteMethod ? (
+              <div className="space-y-3">
+                <button
+                  onClick={() => setDeleteMethod('password')}
+                  className="w-full py-3 px-4 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 rounded-xl font-semibold transition-colors"
+                >
+                  Verify with Password
+                </button>
+                <button
+                  onClick={() => {
+                    setDeleteMethod('otp');
+                    handleRequestDeleteOTP();
+                  }}
+                  disabled={deleteLoading}
+                  className="w-full py-3 px-4 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 rounded-xl font-semibold transition-colors disabled:opacity-50"
+                >
+                  {deleteLoading ? 'Sending OTP...' : 'Verify with Email OTP'}
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {deleteMethod === 'otp' && otpSent && (
+                  <p className="text-sm text-green-600 dark:text-green-400 font-medium">
+                    An OTP has been sent to your email address.
+                  </p>
+                )}
+                
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">
+                    {deleteMethod === 'otp' ? 'Enter 6-digit OTP' : 'Enter your password'}
+                  </label>
+                  <input
+                    type={deleteMethod === 'otp' ? 'text' : 'password'}
+                    value={deleteCredential}
+                    onChange={(e) => setDeleteCredential(e.target.value)}
+                    className="chef-input w-full"
+                    placeholder={deleteMethod === 'otp' ? '123456' : '••••••••'}
+                  />
+                </div>
+
+                <div className="flex space-x-3 pt-2">
+                  <button
+                    onClick={handleConfirmDeleteAccount}
+                    disabled={deleteLoading || !deleteCredential}
+                    className="flex-1 py-3 px-4 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold transition-colors disabled:opacity-50"
+                  >
+                    {deleteLoading ? 'Deleting...' : 'Confirm Delete'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setDeleteMethod('');
+                      setDeleteCredential('');
+                      setError('');
+                      setSuccess('');
+                    }}
+                    className="flex-1 py-3 px-4 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-xl font-semibold transition-colors"
+                  >
+                    Back
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <button
+              onClick={() => {
+                setShowDeleteModal(false);
+                setError('');
+                setSuccess('');
+              }}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+
       <Footer />
     </div>
   );

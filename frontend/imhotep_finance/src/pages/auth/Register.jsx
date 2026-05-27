@@ -359,6 +359,12 @@ const Register = () => {
                   </div>
                 </div>
               </div>
+              <div className="text-center text-sm text-gray-600 dark:text-gray-300 mt-2 mb-4">
+                By creating an account, you agree to our{' '}
+                <Link to="/privacy-policy" className="font-semibold text-[#366c6b] hover:underline transition-colors">
+                  Privacy Policy
+                </Link>
+              </div>
               <button
                 type="submit"
                 disabled={loading}

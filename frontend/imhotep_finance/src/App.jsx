@@ -26,6 +26,7 @@ import ShowScheduledTransactions from './pages/main/ShowScheduledTransactions'
 import ShowTargetHistory from './pages/main/ShowTargetHistory'
 import Reports from './pages/main/Reports'
 import Version from './components/common/Version'
+import PrivacyPolicy from './pages/PrivacyPolicy'
 
 // PWA Components
 import InstallPrompt from './components/pwa/InstallPrompt';
@@ -176,6 +177,7 @@ function App() {
                 path="/version-history"
                 element={<Version />}
               />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </div>

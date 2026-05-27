@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -86,6 +87,13 @@ export default function ProfileScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  // Delete account modal state
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteMethod, setDeleteMethod] = useState(''); // 'password' or 'otp'
+  const [deleteCredential, setDeleteCredential] = useState('');
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteOtpSent, setDeleteOtpSent] = useState(false);
 
   // Email verification modal state
   const [showOtpModal, setShowOtpModal] = useState(false);
@@ -165,6 +173,49 @@ export default function ProfileScreen() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRequestDeleteOTP = async () => {
+    setDeleteLoading(true);
+    setError('');
+    setSuccess('');
+    try {
+      const response = await api.post('/api/profile/request-delete-otp/');
+      setSuccess(response.data.message || 'OTP sent successfully');
+      setDeleteOtpSent(true);
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to send OTP');
+    }
+    setDeleteLoading(false);
+  };
+
+  const handleConfirmDeleteAccount = async () => {
+    if (!deleteCredential) {
+      setError('Please enter your password or OTP');
+      return;
+    }
+    
+    setDeleteLoading(true);
+    setError('');
+    setSuccess('');
+    
+    try {
+      const payload = deleteMethod === 'otp' 
+        ? { otp: deleteCredential } 
+        : { password: deleteCredential };
+        
+      await api.post('/api/profile/delete-account/', payload);
+      setSuccess('Account deleted successfully');
+      setShowDeleteModal(false);
+      
+      // Logout
+      setTimeout(() => {
+        logout();
+      }, 1500);
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to delete account');
+    }
+    setDeleteLoading(false);
   };
 
 
@@ -467,6 +518,29 @@ export default function ProfileScreen() {
                   <ThemedText style={styles.buttonText}>Update Profile</ThemedText>
                 )}
               </Pressable>
+
+              {/* Danger Zone */}
+              {user?.username !== 'demo' && (
+                <View style={[styles.dangerZone, { borderTopColor: colors.error }]}>
+                  <ThemedText style={[styles.dangerZoneTitle, { color: colors.error }]}>Danger Zone</ThemedText>
+                  <ThemedText style={[styles.dangerZoneText, { color: colors.textSecondary }]}>
+                    Once you delete your account, there is no going back. Please be certain.
+                  </ThemedText>
+                  <Pressable
+                    style={[styles.dangerButton, { backgroundColor: colors.errorLight, borderColor: colors.error }]}
+                    onPress={() => {
+                      setShowDeleteModal(true);
+                      setDeleteMethod('');
+                      setDeleteCredential('');
+                      setDeleteOtpSent(false);
+                      setError('');
+                      setSuccess('');
+                    }}
+                  >
+                    <ThemedText style={{ color: colors.error, fontWeight: 'bold' }}>Delete Account</ThemedText>
+                  </Pressable>
+                </View>
+              )}
             </View>
           )}
 
@@ -612,6 +686,18 @@ export default function ProfileScreen() {
 
 
 
+          {/* Privacy Policy Button */}
+          <Pressable 
+            style={[styles.privacyButton, { backgroundColor: colors.surface, borderColor: colors.border }]} 
+            onPress={() => router.push('/privacy-policy')}
+          >
+            <View style={styles.privacyButtonLeft}>
+              <Ionicons name="shield-checkmark-outline" size={22} color={colors.primary} />
+              <ThemedText style={styles.privacyButtonText}>Privacy Policy</ThemedText>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+          </Pressable>
+
           {/* Logout Button */}
           <Pressable style={styles.logoutButton} onPress={handleLogout}>
             <Ionicons name="log-out-outline" size={24} color="#fff" />
@@ -691,6 +777,111 @@ export default function ProfileScreen() {
           </View>
         </KeyboardAvoidingView>
       </Modal>
+
+      {/* Delete Account Modal */}
+      <Modal
+        visible={showDeleteModal}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setShowDeleteModal(false)}
+      >
+        <KeyboardAvoidingView
+          style={[styles.modalOverlay, { backgroundColor: colors.overlay }]}
+          behavior="padding"
+        >
+          <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
+            <View style={[styles.modalHeader, { borderBottomColor: colors.borderLight }]}>
+              <ThemedText type="subtitle" style={{ color: colors.error }}>Delete Account</ThemedText>
+              <Pressable onPress={() => setShowDeleteModal(false)}>
+                <Ionicons name="close" size={24} color={colors.textSecondary} />
+              </Pressable>
+            </View>
+
+            <View style={styles.modalContent}>
+              <ThemedText style={[styles.modalDescription, { color: colors.textSecondary }]}>
+                This action cannot be undone. How would you like to verify your identity to proceed?
+              </ThemedText>
+
+              {!deleteMethod ? (
+                <View style={{ gap: 12 }}>
+                  <Pressable
+                    style={[styles.dangerButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
+                    onPress={() => setDeleteMethod('password')}
+                  >
+                    <ThemedText style={{ color: colors.text }}>Verify with Password</ThemedText>
+                  </Pressable>
+                  <Pressable
+                    style={[styles.dangerButton, { backgroundColor: colors.surface, borderColor: colors.border }, deleteLoading && styles.buttonDisabled]}
+                    onPress={() => {
+                      setDeleteMethod('otp');
+                      handleRequestDeleteOTP();
+                    }}
+                    disabled={deleteLoading}
+                  >
+                    {deleteLoading ? (
+                      <ActivityIndicator color={colors.text} />
+                    ) : (
+                      <ThemedText style={{ color: colors.text }}>Verify with Email OTP</ThemedText>
+                    )}
+                  </Pressable>
+                </View>
+              ) : (
+                <View style={{ gap: 16 }}>
+                  {deleteMethod === 'otp' && deleteOtpSent && (
+                    <ThemedText style={{ color: colors.success, fontSize: 14 }}>
+                      An OTP has been sent to your email address.
+                    </ThemedText>
+                  )}
+                  <View>
+                    <ThemedText style={[styles.label, { color: colors.textSecondary }]}>
+                      {deleteMethod === 'otp' ? 'Enter 6-digit OTP' : 'Enter your password'}
+                    </ThemedText>
+                    <TextInput
+                      style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
+                      value={deleteCredential}
+                      onChangeText={setDeleteCredential}
+                      placeholder={deleteMethod === 'otp' ? '123456' : '••••••••'}
+                      placeholderTextColor={colors.placeholder}
+                      secureTextEntry={deleteMethod === 'password'}
+                      keyboardType={deleteMethod === 'otp' ? 'numeric' : 'default'}
+                    />
+                  </View>
+
+                  <View style={styles.modalActions}>
+                    <Pressable
+                      style={[styles.cancelButton, { borderColor: colors.border }]}
+                      onPress={() => {
+                        setDeleteMethod('');
+                        setDeleteCredential('');
+                        setError('');
+                        setSuccess('');
+                      }}
+                    >
+                      <ThemedText style={{ color: colors.textSecondary }}>Back</ThemedText>
+                    </Pressable>
+                    <Pressable
+                      style={[
+                        styles.verifyButton,
+                        { backgroundColor: colors.error },
+                        (deleteLoading || !deleteCredential) && styles.buttonDisabled,
+                      ]}
+                      onPress={handleConfirmDeleteAccount}
+                      disabled={deleteLoading || !deleteCredential}
+                    >
+                      {deleteLoading ? (
+                        <ActivityIndicator color="#fff" />
+                      ) : (
+                        <ThemedText style={styles.buttonText}>Confirm Delete</ThemedText>
+                      )}
+                    </Pressable>
+                  </View>
+                </View>
+              )}
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
     </SafeAreaView>
   );
 }
@@ -838,6 +1029,26 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
+  privacyButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    marginHorizontal: 16,
+    marginTop: 24,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  privacyButtonLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  privacyButtonText: {
+    fontSize: 16,
+    fontWeight: '500',
+  },
   logoutButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -904,6 +1115,26 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 12,
     borderRadius: 8,
+    alignItems: 'center',
+  },
+  dangerZone: {
+    marginTop: 24,
+    paddingTop: 16,
+    borderTopWidth: 1,
+  },
+  dangerZoneTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  dangerZoneText: {
+    fontSize: 14,
+    marginBottom: 16,
+  },
+  dangerButton: {
+    padding: 14,
+    borderRadius: 8,
+    borderWidth: 1,
     alignItems: 'center',
   },
 });

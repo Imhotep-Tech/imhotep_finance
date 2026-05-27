@@ -101,7 +101,7 @@ class Command(BaseCommand):
             html_content = html_template.render(context)
 
             subject = "🚀 Imhotep Finance has been upgraded – reset your password"
-            from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "no-reply@imhotep-finance.com")
+            from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "imhoteptech@outlook.com")
             to = [email]
 
             msg = EmailMultiAlternatives(subject, "", from_email, to)

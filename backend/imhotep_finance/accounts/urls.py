@@ -26,6 +26,8 @@ from .apis import (
     ChangePasswordApi,
     VerifyEmailChangeApi,
     VerifyEmailChangeOTPApi,
+    RequestDeleteAccountOTPApi,
+    DeleteAccountApi,
 )
 
 urlpatterns = [
@@ -65,5 +67,6 @@ urlpatterns = [
     path('profile/change-password/', ChangePasswordApi.as_view(), name='change_password'),
     path('profile/verify-email-change/', VerifyEmailChangeApi.as_view(), name='verify_email_change'),
     path('profile/verify-email-change-otp/', VerifyEmailChangeOTPApi.as_view(), name='verify_email_change_otp'),
-
+    path('profile/request-delete-otp/', RequestDeleteAccountOTPApi.as_view(), name='request_delete_account_otp'),
+    path('profile/delete-account/', DeleteAccountApi.as_view(), name='delete_account'),
 ]

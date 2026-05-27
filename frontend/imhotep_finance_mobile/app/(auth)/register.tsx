@@ -338,6 +338,18 @@ export default function RegisterScreen() {
             </View>
           </View>
 
+          {/* Privacy Policy Mention */}
+          <View style={styles.privacyMentionContainer}>
+            <Text style={[styles.privacyMentionText, { color: colors.textSecondary }]}>
+              By creating an account, you agree to our{' '}
+            </Text>
+            <Link href="/privacy-policy" asChild>
+              <TouchableOpacity>
+                <Text style={[styles.privacyMentionLink, { color: colors.primary }]}>Privacy Policy</Text>
+              </TouchableOpacity>
+            </Link>
+          </View>
+
           {/* Submit Button */}
           <TouchableOpacity
             style={[styles.submitButton, { backgroundColor: colors.primary }, loading && styles.submitButtonDisabled]}
@@ -440,6 +452,21 @@ const styles = StyleSheet.create({
   },
   eyeIcon: {
     paddingRight: 12,
+  },
+  privacyMentionContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    marginBottom: 16,
+    paddingHorizontal: 8,
+  },
+  privacyMentionText: {
+    fontSize: 12,
+    textAlign: 'center',
+  },
+  privacyMentionLink: {
+    fontSize: 12,
+    fontWeight: '600',
   },
   submitButton: {
     paddingVertical: 14,

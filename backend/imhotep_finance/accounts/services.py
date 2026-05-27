@@ -572,3 +572,62 @@ def verify_email_change(uid, token, new_email_encoded):
     user.save()
 
     return True, 'Email updated successfully'
+
+def request_delete_account_otp(user):
+    """Generate and send an OTP for account deletion"""
+    if user.username == 'demo':
+        return False, 'Demo user cannot delete account.'
+
+    try:
+        otp = generate_otp(user)
+        mail_subject = 'Confirm Account Deletion - Imhotep Finance'
+        
+        # In a real scenario, you could use a template. For now, simple message.
+        message = (
+            f"Hello {user.username},\n\n"
+            f"You have requested to delete your Imhotep Finance account.\n"
+            f"Please use the following OTP to confirm your account deletion: {otp}\n\n"
+            f"If you did not request this, please ignore this email and your account will remain secure.\n\n"
+            f"Best regards,\nImhotep Finance Team"
+        )
+        
+        send_mail(
+            mail_subject, 
+            message, 
+            'imhoteptech1@gmail.com', 
+            [user.email], 
+            html_message=message.replace('\n', '<br>')
+        )
+        
+        return True, 'A confirmation OTP has been sent to your email.'
+        
+    except Exception as email_error:
+        print(f"Failed to send account deletion OTP email: {str(email_error)}")
+        return False, 'Failed to send OTP email. Please try again later.'
+
+def delete_user_account(user, password=None, otp=None):
+    """Delete the user account using either password or OTP"""
+    if user.username == 'demo':
+        return False, 'Demo user cannot delete account.'
+
+    if not password and not otp:
+        return False, 'Password or OTP is required to delete your account.'
+
+    if password:
+        if not user.check_password(password):
+            return False, 'Incorrect password.'
+    
+    if otp:
+        if not user.otp_code or user.otp_code != otp:
+            return False, 'Invalid OTP.'
+        
+        if user.otp_created_at and (timezone.now() - user.otp_created_at).total_seconds() > 900:
+            return False, 'OTP has expired.'
+
+    # Credentials are valid, delete the user
+    try:
+        user.delete()
+        return True, 'Account deleted successfully.'
+    except Exception as e:
+        print(f"Failed to delete user account: {str(e)}")
+        return False, 'An error occurred while deleting your account. Please try again.'

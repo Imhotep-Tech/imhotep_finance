@@ -22,10 +22,10 @@ export default function RootLayout() {
         {/* 2. Place the banner right below the providers */}
         <OfflineBanner />
         
-        <Stack>
+        <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-          <Stack.Screen name="+not-found" />
+          <Stack.Screen name="+not-found" options={{ headerShown: true }} />
         </Stack>
       </ThemeProvider>
     </AuthProvider>

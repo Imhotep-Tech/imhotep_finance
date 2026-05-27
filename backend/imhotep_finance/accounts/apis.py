@@ -24,7 +24,9 @@ from accounts.services import (
     authenticate_with_google,
     update_user_profile,
     change_user_password,
-    verify_email_change
+    verify_email_change,
+    request_delete_account_otp,
+    delete_user_account
 )
 from accounts.serializers import (
     ChangeFavCurrencyRequestSerializer,
@@ -43,7 +45,9 @@ from accounts.serializers import (
     VerifyEmailChangeRequestSerializer,
     VerifyEmailChangeOTPRequestSerializer,
     VerifyAccountOTPRequestSerializer,
-    PasswordResetConfirmOTPSerializer
+    PasswordResetConfirmOTPSerializer,
+    RequestDeleteAccountOTPSerializer,
+    DeleteAccountConfirmSerializer
 )
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
@@ -817,4 +821,64 @@ class OAuthSessionBridgeApi(APIView):
             return Response(
                 {'error': f'An error occurred: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class RequestDeleteAccountOTPApi(APIView):
+    permission_classes = [IsAuthenticated]
+    throttle_classes = [AuthenticationRateThrottle]
+
+    @extend_schema(
+        tags=['User Profile'],
+        description="Request an OTP to confirm account deletion.",
+        request=RequestDeleteAccountOTPSerializer,
+        responses={200: {'description': 'OTP sent successfully'}, 400: {'description': 'Error sending OTP'}},
+        operation_id='request_delete_account_otp'
+    )
+    def post(self, request):
+        """Request OTP for account deletion"""
+        serializer = RequestDeleteAccountOTPSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        success, message = request_delete_account_otp(request.user)
+
+        if success:
+            return Response(
+                {'message': message}, 
+                status=status.HTTP_200_OK
+            )
+        else:
+            return Response(
+                {'error': message}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+class DeleteAccountApi(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        tags=['User Profile'],
+        description="Confirm and execute account deletion using OTP or Password.",
+        request=DeleteAccountConfirmSerializer,
+        responses={200: {'description': 'Account deleted successfully'}, 400: {'description': 'Validation error'}},
+        operation_id='delete_account_confirm'
+    )
+    def post(self, request):
+        """Confirm account deletion"""
+        serializer = DeleteAccountConfirmSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        otp = serializer.validated_data.get('otp')
+        password = serializer.validated_data.get('password')
+
+        success, message = delete_user_account(request.user, password=password, otp=otp)
+
+        if success:
+            return Response(
+                {'message': message}, 
+                status=status.HTTP_200_OK
+            )
+        else:
+            return Response(
+                {'error': message}, 
+                status=status.HTTP_400_BAD_REQUEST
             )
