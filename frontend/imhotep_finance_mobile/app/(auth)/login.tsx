@@ -13,10 +13,12 @@ import {
   Alert,
   useColorScheme,
 } from 'react-native';
-import { useRouter, Link } from 'expo-router';
+import { useRouter, Link, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import * as WebBrowser from 'expo-web-browser';
+import * as Linking from 'expo-linking';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/contexts/AuthContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -75,6 +77,32 @@ export default function LoginScreen() {
 
   const { login } = useAuth();
   const router = useRouter();
+  const params = useLocalSearchParams();
+
+  // Handle returning from the web Google Login flow
+  React.useEffect(() => {
+    if (params.access && params.refresh) {
+      const handleWebLogin = async () => {
+        setLoading(true);
+        try {
+          // Temporarily set token to fetch user data
+          axios.defaults.headers.common['Authorization'] = `Bearer ${params.access}`;
+          const response = await axios.get('/api/user-data/');
+          await login({
+            access: params.access as string,
+            refresh: params.refresh as string,
+            user: response.data
+          });
+          router.replace('/(tabs)');
+        } catch (e) {
+          console.error("Web login failed:", e);
+          setError('Failed to complete Google login');
+          setLoading(false);
+        }
+      };
+      handleWebLogin();
+    }
+  }, [params.access, params.refresh]);
 
   const loginUser = async (username: string, password: string) => {
     try {
@@ -196,6 +224,20 @@ export default function LoginScreen() {
     }
   };
 
+  const handleGoogleLogin = async () => {
+    if (loading || demoLoading) return;
+    try {
+      setLoading(true);
+      setError('');
+      setInfo('');
+      const urlResponse = await axios.get('/api/auth/google/url/');
+      await Linking.openURL(urlResponse.data.auth_url);
+    } catch (error) {
+      console.error('Failed to initiate Google login:', error);
+      setError('Failed to initiate Google login');
+      setLoading(false);
+    }
+  };
 
   return (
     <KeyboardAvoidingView
@@ -317,6 +359,30 @@ export default function LoginScreen() {
             ) : (
               <Text style={styles.submitButtonText}>Sign in</Text>
             )}
+          </TouchableOpacity>
+
+          {/* Divider */}
+          <View style={styles.divider}>
+            <View style={[styles.dividerLine, { backgroundColor: colors.divider }]} />
+            <Text style={[styles.dividerText, { color: colors.textSecondary }]}>or continue with</Text>
+            <View style={[styles.dividerLine, { backgroundColor: colors.divider }]} />
+          </View>
+
+          {/* Google Login Button */}
+          <TouchableOpacity
+            style={[styles.submitButton, { paddingVertical: 0, overflow: 'hidden' }, loading && styles.submitButtonDisabled]}
+            onPress={handleGoogleLogin}
+            disabled={loading || demoLoading}
+          >
+            <LinearGradient
+              colors={['#366c6b', '#1a3535']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={{ width: '100%', paddingVertical: 14, alignItems: 'center', flexDirection: 'row', justifyContent: 'center' }}
+            >
+              <Ionicons name="logo-google" size={20} color="white" style={{ marginRight: 8 }} />
+              <Text style={styles.submitButtonText}>Sign in with Google</Text>
+            </LinearGradient>
           </TouchableOpacity>
 
           {/* Demo Login Button */}

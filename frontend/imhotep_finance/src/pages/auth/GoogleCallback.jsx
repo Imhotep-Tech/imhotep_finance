@@ -10,6 +10,8 @@ const GoogleCallback = () => {
   const [status, setStatus] = useState('processing');
   const [message, setMessage] = useState('Processing Google authentication...');
   const [isNewUser, setIsNewUser] = useState(false);
+  const [isAndroidDevice, setIsAndroidDevice] = useState(false);
+  const [authData, setAuthData] = useState(null);
   const hasProcessed = useRef(false);
 
   const googleAuth = async (code) => {
@@ -73,12 +75,21 @@ const GoogleCallback = () => {
           login(result.data);
           setStatus('success');
           setIsNewUser(result.isNewUser);
-          if (result.isNewUser) {
-            setMessage('Welcome to Imhotep Finance! Your account has been created successfully.');
+          setAuthData(result.data);
+          
+          const isAndroid = /android/i.test(navigator.userAgent);
+          setIsAndroidDevice(isAndroid);
+
+          if (isAndroid) {
+            setMessage('Android device detected. Do you want to open the Imhotep Finance app?');
           } else {
-            setMessage('Login successful! Redirecting to dashboard...');
+            if (result.isNewUser) {
+              setMessage('Welcome to Imhotep Finance! Your account has been created successfully.');
+            } else {
+              setMessage('Login successful! Redirecting to dashboard...');
+            }
+            setTimeout(() => navigate('/dashboard'), 2000);
           }
-          setTimeout(() => navigate('/dashboard'), 2000);
         } else {
           setStatus('error');
           setMessage(result.error || 'Google authentication failed.');
@@ -243,6 +254,14 @@ const GoogleCallback = () => {
     }
   };
 
+  const handleOpenApp = () => {
+    if (authData) {
+      window.location.href = `imhotep-finance://login?access=${authData.access}&refresh=${authData.refresh}`;
+    } else {
+      window.location.href = 'imhotep-finance://';
+    }
+  };
+
   return (
     <div
       className="min-h-screen bg-[var(--bg)] text-[var(--text)] transition-colors relative flex items-center justify-center p-4"
@@ -302,8 +321,8 @@ const GoogleCallback = () => {
             </div>
           )}
 
-          {/* Countdown/redirect info for success state */}
-          {status === 'success' && (
+          {/* Countdown/redirect info for success state (Non-Android) */}
+          {status === 'success' && !isAndroidDevice && (
             <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-900 rounded-xl">
               <div className="flex items-center justify-center">
                 <svg className="w-5 h-5 text-blue-500 dark:text-blue-300 mr-3" fill="currentColor" viewBox="0 0 20 20">
@@ -313,6 +332,30 @@ const GoogleCallback = () => {
                   Redirecting to your dashboard...
                 </span>
               </div>
+            </div>
+          )}
+
+          {/* Android App Redirect */}
+          {status === 'success' && isAndroidDevice && (
+            <div className="mt-6 p-4 bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-900 rounded-xl">
+              <p className="mb-4 text-teal-800 dark:text-teal-200 font-medium text-sm">
+                You can continue in the Imhotep Finance mobile app for the best experience.
+              </p>
+              <button 
+                onClick={handleOpenApp}
+                className="w-full bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white py-3 rounded-lg font-semibold shadow-md flex items-center justify-center"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+                Open in App
+              </button>
+              <button
+                onClick={() => navigate('/dashboard')}
+                className="w-full mt-3 text-[#366c6b] dark:text-teal-400 font-medium py-2 hover:underline"
+              >
+                Continue in Browser
+              </button>
             </div>
           )}
 
