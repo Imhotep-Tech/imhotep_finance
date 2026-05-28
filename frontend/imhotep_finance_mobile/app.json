@@ -87,13 +87,7 @@
       "expo-image",
       "expo-secure-store",
       "expo-status-bar",
-      "expo-web-browser",
-      [
-        "@react-native-google-signin/google-signin",
-        {
-          "iosUrlScheme": "com.googleusercontent.apps.YOUR_IOS_REVERSED_CLIENT_ID"
-        }
-      ]
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
