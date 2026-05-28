@@ -109,7 +109,6 @@ export default function GoogleSignInButton({ onError }: Props) {
     try {
       _gsiModule.GoogleSignin.configure({
         webClientId: WEB_GOOGLE_CLIENT_ID,
-        androidClientId: ANDROID_GOOGLE_CLIENT_ID,
         offlineAccess: false,
         scopes: ['profile', 'email'],
       });
