@@ -8,6 +8,7 @@ from datetime import datetime
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
 from accounts.services import (
+    authenticate_mobile_with_google_token,
     login_user,
     demo_login,
     register_user,
@@ -550,6 +551,75 @@ class GoogleAuthApi(APIView):
         if is_new_user:
             response_data['is_new_user'] = True
 
+        return Response(response_data, status=status.HTTP_200_OK)
+
+class GoogleMobileLoginApi(APIView):
+    """
+    Unified Google login endpoint that accepts either:
+    - `code` (web Authorization Code flow)
+    - `access_token` (mobile native sign-in token from @react-native-google-signin/google-signin)
+    """
+    permission_classes = [AllowAny]
+    throttle_classes = [AuthenticationRateThrottle]
+
+    @extend_schema(
+        tags=['Authentication'],
+        description=(
+            "Authenticate with Google. Mobile clients send `access_token` (from native Google Sign-In). "
+            "Web clients send `code` (authorization code). Returns SimpleJWT access + refresh tokens."
+        ),
+        request={
+            'application/json': {
+                'type': 'object',
+                'properties': {
+                    'access_token': {'type': 'string', 'description': 'Google access token from native mobile sign-in'},
+                    'code': {'type': 'string', 'description': 'Google authorization code from web OAuth flow'},
+                },
+            }
+        },
+        responses={
+            200: GoogleAuthResponseSerializer,
+            400: {'description': 'Neither code nor access_token provided'},
+            401: {'description': 'Google authentication failed'},
+            429: 'Rate limit exceeded',
+        },
+        operation_id='google_mobile_authenticate'
+    )
+
+    def post(self, request):
+        code = request.data.get('code')
+        mobile_access_token = request.data.get('access_token')
+
+        if code:
+            # Web Authorization Code flow
+            user, message, is_new = authenticate_with_google(code)
+        elif mobile_access_token:
+            # Mobile native flow — token is used directly against whitelisted googleapis.com endpoint
+            user, message, is_new = authenticate_mobile_with_google_token(mobile_access_token)
+        else:
+            return Response(
+                {'error': 'Either code or access_token is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if not user:
+            return Response({'error': message}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # Generate SimpleJWT tokens for the mobile session
+        refresh = RefreshToken.for_user(user)
+        response_data = {
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+            'message': message,
+            'is_new_user': is_new,
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+            }
+        }
         return Response(response_data, status=status.HTTP_200_OK)
 
 class GetProfileApi(APIView):

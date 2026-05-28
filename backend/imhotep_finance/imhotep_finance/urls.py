@@ -33,6 +33,8 @@ urlpatterns = [
     path('api/finance-management/', include('transaction_management.urls')),
     path('api/finance-management/', include('user_reports.urls')),
     path('api/finance-management/wishlist/', include('wishlist_management.urls')),
+    # Mobile Offline Sync
+    path('api/sync/', include('transaction_management.sync_urls')),
     # OpenAPI 3.0 schema endpoints (automatically generated from code)
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     # Swagger UI - Interactive API documentation

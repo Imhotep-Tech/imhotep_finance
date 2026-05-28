@@ -2,6 +2,7 @@ from django.db import models
 from accounts.models import User
 from django.utils import timezone
 from encrypted_model_fields.fields import EncryptedCharField
+import uuid
 
 # Create your models here.
 class Transactions(models.Model):
@@ -20,6 +21,10 @@ class Transactions(models.Model):
     category = EncryptedCharField(max_length=100, blank=True, null=True)
     place = models.CharField(max_length=255, default="General", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    # --- Offline Sync Fields ---
+    client_uuid = models.UUIDField(unique=True, default=uuid.uuid4, editable=False, db_index=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_deleted = models.BooleanField(default=False, db_index=True)
     
     def __str__(self):
         return f"Transaction of {self.user.username} ({self.date.strftime('%Y-%m-%d')}) with amount {self.amount} and Status of {self.trans_status}"
@@ -37,6 +42,10 @@ class NetWorth(models.Model):
     currency = models.CharField(max_length=4)
     place = models.CharField(max_length=255, default="General", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    # --- Offline Sync Fields ---
+    client_uuid = models.UUIDField(unique=True, default=uuid.uuid4, editable=False, db_index=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_deleted = models.BooleanField(default=False, db_index=True)
     
     def __str__(self):
         return f"NetWorth of {self.user.username} with currency {self.currency} at {self.place}"

@@ -19,6 +19,7 @@ import api from '@/constants/api';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
 
@@ -29,6 +30,7 @@ import { updateNetworthWidget } from '@/widgets/widget-updater';
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
   // ... existing state ...
   const [networth, setNetworth] = useState('0');
   const [favoriteCurrency, setFavoriteCurrency] = useState('USD');
@@ -190,7 +192,7 @@ export default function Dashboard() {
       <View style={[styles.orb, { top: 100, right: -50, backgroundColor: isDark ? 'rgba(54, 108, 107, 0.1)' : 'rgba(54, 108, 107, 0.2)' }]} />
 
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 8 }]}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={isDark ? "#fff" : "#366c6b"} />
         }
@@ -316,7 +318,7 @@ export default function Dashboard() {
           /> */}
         </View>
 
-        <View style={{ height: 100 }} />
+        <View style={{ height: insets.bottom + 16 }} />
       </ScrollView>
 
       {/* Add Transaction Modal */}
@@ -392,7 +394,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 16,
-    paddingTop: 60, // Space for status bar
+    // paddingTop is set dynamically via insets.top in the ScrollView
   },
   orb: {
     position: 'absolute',

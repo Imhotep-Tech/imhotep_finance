@@ -15,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import api from '@/constants/api';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const FilterModal = ({ visible, options, onSelect, onClose, title, selectedValue }: any) => {
     const colorScheme = useColorScheme();
@@ -71,6 +72,7 @@ const FilterModal = ({ visible, options, onSelect, onClose, title, selectedValue
 
 
 export default function ReportsScreen() {
+    const insets = useSafeAreaInsets();
     const colorScheme = useColorScheme();
     const isDark = colorScheme === 'dark';
 
@@ -322,7 +324,7 @@ export default function ReportsScreen() {
                 refreshControl={<RefreshControl refreshing={dataLoading} onRefresh={fetchReportData} tintColor="#366c6b" />}
             >
                 {/* Header */}
-                <View style={styles.header}>
+                <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
                     <View>
                         <Text style={[styles.title, themeStyles.text]}>Financial Reports</Text>
                         <Text style={[styles.subtitle, themeStyles.subText]}>Track your financial performance</Text>
@@ -702,7 +704,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingTop: 60,
+        paddingTop: 0,
         paddingHorizontal: 20,
         paddingBottom: 20,
     },

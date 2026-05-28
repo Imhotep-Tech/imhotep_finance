@@ -410,6 +410,66 @@ def authenticate_with_google(code):
 
     return user, 'User created and authenticated successfully', True
 
+def authenticate_mobile_with_google_token(google_access_token):
+    """
+    Authenticate user using an access_token sent directly from the mobile app.
+    Reuses your exact user verification, creation, and email logic.
+    """
+    # 1. Bypass code exchange - use the access token from the mobile app
+    userinfo_url = 'https://www.googleapis.com/oauth2/v3/userinfo'
+    headers = {'Authorization': f'Bearer {google_access_token}'}
+    userinfo_response = requests.get(userinfo_url, headers=headers)
+
+    if userinfo_response.status_code != 200:
+        return None, 'Failed to get user info from Google via mobile token', False
+
+    user_info = userinfo_response.json()
+
+    email = user_info.get('email')
+    if not email:
+        return None, 'No email returned from Google', False
+
+    first_name = user_info.get('given_name', '')
+    last_name = user_info.get('family_name', '')
+
+    # 2. Check if user exists
+    user = User.objects.filter(email=email).first()
+    if user:
+        return user, 'User authenticated successfully via mobile', False
+
+    # 3. Create a new user (ensure unique username)
+    username = email.split('@')[0]
+    base_username = username
+    counter = 1
+    while User.objects.filter(username=username).exists():
+        username = f"{base_username}{counter}"
+        counter += 1
+
+    user = User.objects.create_user(
+        username=username,
+        email=email,
+        first_name=first_name,
+        last_name=last_name,
+        email_verify=True,
+        is_active=True
+    )
+
+    # 4. Send welcome email
+    try:
+        mail_subject = 'Welcome to Imhotep Finance!'
+        message = render_to_string('welcome_email.html', {
+            'user': user,
+            'domain': SITE_DOMAIN.rstrip('/'),
+            'frontend_url': frontend_url,
+            'uid': user.pk,
+            'token': '',
+        })
+        send_mail(mail_subject, '', 'imhoteptech1@gmail.com', [user.email], html_message=message)
+    except Exception as email_error:
+        print(f"Failed to send welcome email: {str(email_error)}")
+
+    return user, 'User created and authenticated successfully via mobile', True
+
 def update_user_profile(user, first_name=None, last_name=None, username=None, email=None):
     """Update user profile information"""
     messages = []

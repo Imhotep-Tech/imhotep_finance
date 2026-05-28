@@ -1,6 +1,7 @@
 import { Tabs, Redirect } from 'expo-router';
 import React from 'react';
 import { Platform, View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { HapticTab } from '@/components/haptic-tab';
 
@@ -35,6 +36,7 @@ export default function TabLayout() {
   const colorScheme = useColorScheme();
   const { isAuthenticated, loading } = useAuth();
   const colors = themes[colorScheme === 'dark' ? 'dark' : 'light'];
+  const insets = useSafeAreaInsets();
 
   // Show loading screen while checking auth
   if (loading) {
@@ -70,8 +72,10 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: colors.tabBar,
           borderTopColor: colorScheme === 'dark' ? '#374151' : '#E5E7EB',
-          height: Platform.OS === 'ios' ? 64 : 56,
-          paddingBottom: Platform.OS === 'ios' ? 12 : 4,
+          // Height = icon area (48) + safe area bottom inset (home indicator / nav bar)
+          height: 48 + insets.bottom,
+          paddingBottom: insets.bottom,
+          paddingTop: 4,
         },
         tabBarShowLabel: true,
       }}>

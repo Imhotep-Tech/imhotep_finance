@@ -2,7 +2,7 @@
   "expo": {
     "name": "Imhotep Financial Manager",
     "slug": "imhotep-finance",
-    "version": "2.0.1",
+    "version": "2.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/imhotep_finance_zoomed.png",
     "scheme": "imhotep-finance",
@@ -15,7 +15,7 @@
     },
     "android": {
       "package": "com.imhoteptech.imhotep_finance",
-      "versionCode": 2,
+      "versionCode": 3,
       "permissions": [
         "INTERNET"
       ],
@@ -87,7 +87,13 @@
       "expo-image",
       "expo-secure-store",
       "expo-status-bar",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.YOUR_IOS_REVERSED_CLIENT_ID"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

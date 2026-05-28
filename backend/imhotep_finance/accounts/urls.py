@@ -13,7 +13,6 @@ from .apis import (
     DemoLoginApi,
     LogoutApi,
     RegisterApi,
-
     VerifyEmailApi,
     VerifyAccountOTPApi,
     PasswordResetRequestApi,
@@ -21,6 +20,7 @@ from .apis import (
     PasswordResetValidateApi,
     GoogleLoginUrlApi,
     GoogleAuthApi,
+    GoogleMobileLoginApi,
     GetProfileApi,
     UpdateProfileApi,
     ChangePasswordApi,
@@ -60,6 +60,7 @@ urlpatterns = [
     path('auth/google/url/', GoogleLoginUrlApi.as_view(), name='google_login_url'),
     path('auth/google/authenticate/', GoogleAuthApi.as_view(), name='google_auth'),
     path('auth/google/callback/', google_callback, name='google_callback'),  # Keep this as function view (redirect)
+    path('auth/google/mobile/', GoogleMobileLoginApi.as_view(), name='google_mobile_login'),
 
     # Profile endpoints
     path('profile/', GetProfileApi.as_view(), name='get_profile'),

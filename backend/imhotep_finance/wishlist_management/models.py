@@ -2,6 +2,7 @@ from django.db import models
 from accounts.models import User
 from django.utils import timezone
 from encrypted_model_fields.fields import EncryptedCharField
+import uuid
 
 def current_year():
     return timezone.now().year
@@ -34,6 +35,10 @@ class Wishlist(models.Model):
     wish_details = EncryptedCharField(max_length=255, blank=True, null=True)
     place = models.CharField(max_length=255, default='General', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    # --- Offline Sync Fields ---
+    client_uuid = models.UUIDField(unique=True, default=uuid.uuid4, editable=False, db_index=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_deleted = models.BooleanField(default=False, db_index=True)
 
     def __str__(self):
         return f"Wishlist of {self.user.username} ({self.year}) with amount {self.price} and status {self.status} and currency {self.currency}"

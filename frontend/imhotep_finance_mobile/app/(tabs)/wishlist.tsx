@@ -15,8 +15,10 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import api from '@/constants/api';
 import WishlistItem from '@/components/WishlistItem';
 import AddWishlistModal from '@/components/AddWishlistModal';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function WishlistScreen() {
+    const insets = useSafeAreaInsets();
     const colorScheme = useColorScheme();
     const isDark = colorScheme === 'dark';
 
@@ -185,7 +187,7 @@ export default function WishlistScreen() {
     return (
         <View style={[styles.container, themeStyles.container]}>
             {/* Header */}
-            <View style={[styles.header, themeStyles.header]}>
+            <View style={[styles.header, themeStyles.header, { paddingTop: insets.top + 12 }]}>
                 <Text style={[styles.headerTitle, themeStyles.text]}>Wishlist</Text>
 
                 {/* Year Filter */}
@@ -226,7 +228,7 @@ export default function WishlistScreen() {
 
             {/* Add Button (Floating) */}
             <TouchableOpacity
-                style={styles.fab}
+                style={[styles.fab, { bottom: insets.bottom + 16 }]}
                 onPress={() => {
                     setEditWish(null);
                     setShowAddModal(true);
@@ -256,7 +258,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     header: {
-        paddingTop: 60, // Status bar
+        paddingTop: 0,
         paddingBottom: 16,
         paddingHorizontal: 20,
         flexDirection: 'row',
@@ -288,7 +290,7 @@ const styles = StyleSheet.create({
     },
     fab: {
         position: 'absolute',
-        bottom: 30,
+        bottom: 16,
         right: 30,
         width: 56,
         height: 56,

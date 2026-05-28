@@ -23,11 +23,13 @@ import AddTransactionModal from '@/components/AddTransactionModal';
 import CategorySelect from '@/components/CategorySelect';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { updateNetworthWidget } from '@/widgets/widget-updater';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function TransactionsScreen() {
     const colorScheme = useColorScheme();
     const isDark = colorScheme === 'dark';
     const router = useRouter();
+    const insets = useSafeAreaInsets();
 
     const [transactions, setTransactions] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
@@ -210,7 +212,7 @@ export default function TransactionsScreen() {
     return (
         <View style={[styles.container, themeStyles.container]}>
             {/* Header */}
-            <View style={[styles.header, themeStyles.header]}>
+            <View style={[styles.header, themeStyles.header, { paddingTop: insets.top + 12 }]}>
                 <View>
                     <Text style={[styles.headerTitle, themeStyles.text]}>Transactions</Text>
                     <Text style={[styles.headerSubtitle, themeStyles.subText]}>Manage your financial activity</Text>
@@ -293,7 +295,7 @@ export default function TransactionsScreen() {
 
             {/* Add Button (Floating) */}
             <TouchableOpacity
-                style={styles.fab}
+                style={[styles.fab, { bottom: insets.bottom + 16 }]}
                 onPress={() => {
                     setEditTransaction(null);
                     setShowAddModal(true);
@@ -427,7 +429,6 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     header: {
-        paddingTop: 60,
         paddingBottom: 20,
         paddingHorizontal: 20,
         flexDirection: 'row',

@@ -19,6 +19,8 @@ import axios from 'axios';
 import * as WebBrowser from 'expo-web-browser';
 import { useAuth } from '@/contexts/AuthContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import GoogleSignInButton from '@/components/GoogleSignInButton';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const themes = {
   light: {
@@ -198,10 +200,14 @@ export default function LoginScreen() {
 
 
   return (
-    <KeyboardAvoidingView
+    <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background }]}
-      behavior="padding"
+      edges={['top', 'bottom']}
     >
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior="padding"
+      >
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
@@ -335,6 +341,21 @@ export default function LoginScreen() {
             )}
           </TouchableOpacity>
 
+          {/* OR Divider */}
+          <View style={[styles.divider, { marginTop: 20, marginBottom: 4 }]}>
+            <View style={[styles.dividerLine, { backgroundColor: colors.divider }]} />
+            <Text style={[styles.dividerText, { color: colors.textSecondary }]}>OR</Text>
+            <View style={[styles.dividerLine, { backgroundColor: colors.divider }]} />
+          </View>
+
+          {/* Google Sign-In */}
+          <GoogleSignInButton
+            onError={(msg) => {
+              setError(msg);
+              setInfo('');
+            }}
+          />
+
           {/* Sign Up Link */}
           <View style={styles.signUpContainer}>
             <Text style={[styles.signUpText, { color: colors.textSecondary }]}>Don't have an account? </Text>
@@ -346,7 +367,8 @@ export default function LoginScreen() {
           </View>
         </View>
       </ScrollView>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
