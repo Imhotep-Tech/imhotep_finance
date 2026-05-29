@@ -12,9 +12,12 @@ import {
   Platform,
   useColorScheme,
   Keyboard,
+  Switch,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as LocalAuthentication from 'expo-local-authentication';
 import { router } from 'expo-router';
 
 import { ThemedText } from '@/components/themed-text';
@@ -83,10 +86,53 @@ export default function ProfileScreen() {
     }
   };
 
-  const [activeTab, setActiveTab] = useState<'profile' | 'password' | 'financial'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'financial'>('profile');
+  const [appLockEnabled, setAppLockEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  // Load App Lock settings on mount
+  useEffect(() => {
+    const checkAppLockStatus = async () => {
+      try {
+        const enabled = await AsyncStorage.getItem('app_lock_enabled');
+        setAppLockEnabled(enabled === 'true');
+      } catch (e) {
+        console.error('Error loading app lock status:', e);
+      }
+    };
+    checkAppLockStatus();
+  }, []);
+
+  const handleToggleAppLock = async (value: boolean) => {
+    try {
+      const hasHardware = await LocalAuthentication.hasHardwareAsync();
+
+      if (!hasHardware) {
+        Alert.alert('Not Supported', 'Your device does not support biometric or passcode authentication.');
+        return;
+      }
+
+      // Prompt authentication to verify user permission
+      const result = await LocalAuthentication.authenticateAsync({
+        promptMessage: value ? 'Confirm to enable App Lock' : 'Confirm to disable App Lock',
+        fallbackLabel: 'Use PIN',
+      });
+
+      if (result.success) {
+        await AsyncStorage.setItem('app_lock_enabled', value ? 'true' : 'false');
+        setAppLockEnabled(value);
+        setSuccess(value ? 'App Lock enabled successfully!' : 'App Lock disabled successfully!');
+      } else {
+        // Switch will not toggle if they cancel/fail
+        Alert.alert('Authentication Failed', 'Could not verify your identity.');
+      }
+    } catch (e) {
+      console.error(e);
+      Alert.alert('Error', 'An error occurred while setting up App Lock.');
+    }
+  };
 
   // Delete account modal state
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -418,12 +464,12 @@ export default function ProfileScreen() {
             <Pressable
               style={[
                 styles.tab,
-                activeTab === 'password' && [styles.activeTab, { backgroundColor: colors.surfaceActive }],
+                activeTab === 'security' && [styles.activeTab, { backgroundColor: colors.surfaceActive }],
               ]}
-              onPress={() => { setActiveTab('password'); setError(''); setSuccess(''); }}
+              onPress={() => { setActiveTab('security'); setError(''); setSuccess(''); }}
             >
-              <ThemedText style={[styles.tabText, activeTab === 'password' && { color: colors.primary }]}>
-                Password
+              <ThemedText style={[styles.tabText, activeTab === 'security' && { color: colors.primary }]}>
+                Security
               </ThemedText>
             </Pressable>
             <Pressable
@@ -544,9 +590,34 @@ export default function ProfileScreen() {
             </View>
           )}
 
-          {/* Password Form */}
-          {activeTab === 'password' && (
+          {/* Security Tab (App Lock & Password Change) */}
+          {activeTab === 'security' && (
             <View style={styles.form}>
+              {/* App Lock Settings Card */}
+              <View style={[styles.securityCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                <View style={styles.securityRow}>
+                  <View style={styles.securityTextContainer}>
+                    <ThemedText style={[styles.securityTitle, { color: colors.text }]} type="defaultSemiBold">
+                      App Lock
+                    </ThemedText>
+                    <ThemedText style={[styles.securityDescription, { color: colors.textSecondary }]}>
+                      Require Face ID/Fingerprint or your device PIN to unlock the app when opening or returning.
+                    </ThemedText>
+                  </View>
+                  <Switch
+                    value={appLockEnabled}
+                    onValueChange={handleToggleAppLock}
+                    trackColor={{ false: colors.border, true: colors.primary }}
+                    thumbColor={Platform.OS === 'android' ? '#ffffff' : undefined}
+                  />
+                </View>
+              </View>
+
+              <View style={[styles.divider, { backgroundColor: colors.borderLight }]} />
+
+              <ThemedText style={[styles.sectionTitle, { color: colors.text }]} type="defaultSemiBold">
+                Change Password
+              </ThemedText>
               <View style={styles.inputGroup}>
                 <ThemedText style={[styles.label, { color: colors.textSecondary }]}>
                   Current Password <ThemedText style={{ color: colors.error }}>*</ThemedText>
@@ -1136,5 +1207,44 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     alignItems: 'center',
+  },
+  securityCard: {
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  securityRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 16,
+  },
+  securityTextContainer: {
+    flex: 1,
+  },
+  securityTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  securityDescription: {
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  divider: {
+    height: 1,
+    width: '100%',
+    marginVertical: 20,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 16,
   },
 });

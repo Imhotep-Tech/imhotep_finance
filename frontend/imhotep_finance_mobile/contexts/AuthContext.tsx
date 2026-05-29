@@ -149,6 +149,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     await AsyncStorage.removeItem('access_token');
     await SecureStore.deleteItemAsync('refresh_token');
     await SecureStore.deleteItemAsync('user');
+    await AsyncStorage.setItem('app_lock_enabled', 'false');
 
     // Reset widget to logged-out state
     updateNetworthWidget({ isLoggedIn: false });
