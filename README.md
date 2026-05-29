@@ -8,8 +8,8 @@
 [![License](https://img.shields.io/badge/License-Dual%20License-blue?style=for-the-badge)](LICENSE)
 [![Django](https://img.shields.io/badge/Django-5.2-092E20?style=for-the-badge&logo=django)](https://www.djangoproject.com/)
 [![React](https://img.shields.io/badge/React-19.x-61DAFB?style=for-the-badge&logo=react)](https://reactjs.org/)
-[![React Native](https://img.shields.io/badge/React_Native-0.81-61DAFB?style=for-the-badge&logo=react)](https://reactnative.dev/)
-[![Expo](https://img.shields.io/badge/Expo-54.x-000020?style=for-the-badge&logo=expo)](https://expo.dev/)
+[![React Native](https://img.shields.io/badge/React_Native-0.85-61DAFB?style=for-the-badge&logo=react)](https://reactnative.dev/)
+[![Expo](https://img.shields.io/badge/Expo-56.x-000020?style=for-the-badge&logo=expo)](https://expo.dev/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker)](https://www.docker.com/)
 [![Django CI/CD](https://github.com/Imhotep-Tech/imhotep_finance/actions/workflows/django-ci.yml/badge.svg)](https://github.com/Imhotep-Tech/imhotep_finance/actions/workflows/django-ci.yml)
 [![codecov](https://codecov.io/gh/Imhotep-Tech/imhotep_finance/branch/main/graph/badge.svg)](https://codecov.io/gh/Imhotep-Tech/imhotep_finance)
@@ -56,6 +56,7 @@ See [Self-Hosting Guide](.docs/SELF_HOSTING.md) and [Development Workflow](.docs
 - Detailed transaction history
 - Smart category suggestions
 - Multi-currency support
+- Multi-place asset tracking (e.g. Bank, Cash, Safe)
 - CSV import/export
 
 </td>
@@ -89,6 +90,8 @@ See [Self-Hosting Guide](.docs/SELF_HOSTING.md) and [Development Workflow](.docs
 - Monthly income automation
 - Smart category detection
 - Automated net worth calculation
+- Inter-place money transfers
+- Intra-place currency conversions
 
 </td>
 </tr>
@@ -176,8 +179,8 @@ Comprehensive documentation is available in the `.docs/` folder:
 
 | Web Frontend | Mobile App | Backend | Database | DevOps |
 |:------------:|:----------:|:-------:|:--------:|:------:|
-| React 19 | React Native 0.81 | Django 5.2 | PostgreSQL | Docker |
-| Vite | Expo 54.x | Django REST Framework | | Docker Compose |
+| React 19 | React Native 0.85 | Django 5.2 | PostgreSQL | Docker |
+| Vite | Expo 56.x | Django REST Framework | | Docker Compose |
 | Tailwind CSS | TypeScript | JWT Auth | | |
 | React Router | Expo Router | drf-spectacular | | |
 | Axios | Axios | | | |
@@ -268,6 +271,6 @@ For commercial licensing inquiries, please contact **imhoteptech@outlook.com**.
 
 *"Take control of your finances. Achieve your goals."*
 
-[Documentation](.docs/) • [API Docs](http://localhost:8000/swagger/) • [Developer Portal](http://localhost:3000/developer)
+[Documentation](.docs/) • [API Docs](http://localhost:8000/swagger/)
 
 </div>

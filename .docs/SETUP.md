@@ -64,7 +64,6 @@ docker compose up --build
 - Backend API → http://localhost:8000
 - Swagger Docs → http://localhost:8000/swagger/
 - Django Admin → http://localhost:8000/admin/
-- Developer Portal → http://localhost:3000/developer
 
 > 💡 **Production Tip**: For production deployment, update `ALLOWED_HOSTS` and `CORS_ALLOWED_ORIGINS` in your `.env` file to match your domain.
 
@@ -181,7 +180,6 @@ After setup, verify everything is working:
 1. **Backend**: Visit http://localhost:8000/admin/ and log in with your superuser account
 2. **Frontend**: Visit http://localhost:3000 and create a new account
 3. **API Docs**: Visit http://localhost:8000/swagger/ to see the API documentation
-4. **Developer Portal**: Visit http://localhost:3000/developer to access the OAuth2 developer portal
 
 ---
 

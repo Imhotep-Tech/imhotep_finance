@@ -62,7 +62,7 @@ Content-Type: application/json
   "refresh": "your_refresh_token"
 }
 ```
-### 3. Google OAuth (User Login)
+### 2. Google OAuth (User Login)
 
 Users can log in with their Google account:
 
@@ -126,10 +126,12 @@ Content-Type: application/json
 - `POST /api/auth/login/` - User login (username/password)
 - `POST /api/auth/register/` - User registration
 - `POST /api/auth/token/refresh/` - Refresh JWT token
-- `POST /api/auth/google/url/` - Get Google OAuth URL
-- `POST /api/auth/google/authenticate/` - Authenticate with Google
-- `POST /api/auth/password/reset/` - Request password reset
-- `POST /api/auth/password/reset/confirm/` - Confirm password reset
+- `GET /api/auth/google/url/` - Get Google OAuth URL
+- `POST /api/auth/google/authenticate/` - Authenticate with Google (web)
+- `POST /api/auth/google/mobile/` - Authenticate with Google (mobile)
+- `POST /api/auth/password-reset/` - Request password reset OTP
+- `POST /api/auth/password-reset/confirm/` - Confirm password reset with OTP
+- `POST /api/auth/password-reset/validate/` - Validate password reset code
 
 ### Transaction Endpoints
 
@@ -144,6 +146,9 @@ Content-Type: application/json
 
 - `GET /api/finance-management/networth/` - Get net worth
 - `GET /api/finance-management/categories/` - List categories
+- `GET /api/finance-management/get-places/` - List user's active places (e.g. Bank, Cash, Safe)
+- `POST /api/finance-management/move-money/` - Transfer funds between two places
+- `POST /api/finance-management/convert-currency/` - Perform currency conversions within a place
 
 ### Scheduled Transactions
 
@@ -174,9 +179,55 @@ Content-Type: application/json
 ### User Profile
 
 - `GET /api/profile/` - Get user profile
-- `PUT /api/profile/` - Update user profile
-- `POST /api/profile/change-email/` - Request email change
+- `PUT /api/profile/update/` - Update user profile
+- `POST /api/profile/change-password/` - Change password
 - `POST /api/profile/verify-email-change/` - Verify email change
+- `POST /api/profile/verify-email-change-otp/` - Verify email change OTP
+- `POST /api/profile/request-delete-otp/` - Request account deletion OTP
+- `POST /api/profile/delete-account/` - Delete account
+
+## Places & Money Management
+
+Imhotep Finance models your assets by distributing them across different virtual or physical **Places** (e.g., `Bank`, `Cash`, `Safe`). Net Worth values, Transactions, Scheduled Transactions, and Wishlist items are all tied to a specific **Place**.
+
+The backend provides automated services to transfer money between places and perform currency conversions:
+
+### 1. Inter-Place Transfer (`POST /api/finance-management/move-money/`)
+This endpoint allows transferring funds from one place to another. 
+- **Payload Schema**:
+  ```json
+  {
+    "source_place": "Cash",
+    "target_place": "Bank",
+    "amount": 500.0,
+    "currency": "USD"
+  }
+  ```
+- **Backend Execution**:
+  1. Validates that the user has sufficient funds in the source place for the selected currency.
+  2. Wraps the operation in a database transaction block (`transaction.atomic()`).
+  3. Creates a **Withdraw** transaction from the source place (e.g. `source_place = "Cash"`) with category `"Transfer"` and description `"Transfer to Bank"`.
+  4. Creates a corresponding **Deposit** transaction to the target place (e.g. `target_place = "Bank"`) with category `"Transfer"` and description `"Transfer from Cash"`.
+  5. The system dynamically updates the Net Worth representation for both locations.
+
+### 2. Intra-Place Currency Conversion (`POST /api/finance-management/convert-currency/`)
+This endpoint allows converting funds from one currency to another within a single place.
+- **Payload Schema**:
+  ```json
+  {
+    "place": "Bank",
+    "source_currency": "USD",
+    "target_currency": "EUR",
+    "amount": 100.0,
+    "target_amount": 92.0
+  }
+  ```
+- **Backend Execution**:
+  1. Validates that the user has sufficient funds of the source currency in the specified place.
+  2. Wraps the execution in a database transaction block.
+  3. Creates a **Withdraw** transaction for the `source_currency` (e.g. `USD`) with category `"Conversion"`.
+  4. Creates a **Deposit** transaction for the `target_currency` (e.g. `EUR`) with the converted amount.
+  5. Automatically recalculates and updates the place's currency balances.
 
 ## Response Formats
 
@@ -266,7 +317,6 @@ See individual endpoint documentation in Swagger UI for available filters.
 
 ## Additional Resources
 
-- [OAuth2 Public API Documentation](oauth2-public-api.md) - For third-party integrations
 - [Setup Guide](SETUP.md) - Initial setup and configuration
 - [Testing Guide](TESTING.md) - API testing practices
 

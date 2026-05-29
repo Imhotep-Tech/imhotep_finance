@@ -90,7 +90,7 @@ For local development on physical devices, update `constants/api.ts` with your m
 | `DATABASE_URL` or `DB_*` | ✅ Yes | PostgreSQL database connection |
 | `FIELD_ENCRYPTION_KEY` | ✅ Yes | Fernet key for encrypting sensitive fields |
 | `JWT_SECRET` | ✅ Yes | Secret for JWT token signing |
-| `SITE_DOMAIN` | ✅ Yes | Backend domain (used for OAuth2 redirects) |
+| `SITE_DOMAIN` | ✅ Yes | Backend domain (used for Google OAuth redirects) |
 | `FRONTEND_URL` | ✅ Yes | Frontend domain (for CORS and redirects) |
 | `DEBUG` | ⚠️ Recommended | Set to `0` in production |
 | `ALLOWED_HOSTS` | ⚠️ Recommended | Comma-separated list of allowed hosts |
@@ -203,4 +203,3 @@ When using Docker, environment variables can be set in:
 
 For more information, see:
 - [Setup Guide](SETUP.md) - Initial configuration
-- [OAuth2 Public API](oauth2-public-api.md) - OAuth2 configuration

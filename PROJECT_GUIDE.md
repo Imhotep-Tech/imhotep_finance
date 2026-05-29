@@ -13,7 +13,6 @@ Complete documentation is available in the `.docs/` folder:
 | [🚀 Setup Guide](.docs/SETUP.md) | Prerequisites, Docker & manual installation, initial configuration |
 | [📱 Mobile App Guide](.docs/MOBILE_APP.md) | React Native app setup, development, and deployment |
 | [📘 API Documentation](.docs/API_DOCUMENTATION.md) | Swagger/OpenAPI docs, JWT authorization, endpoint reference |
-| [🔌 OAuth2 Public API](.docs/oauth2-public-api.md) | Complete guide for third-party developers, OAuth2 integration |
 | [⚙️ Environment Variables](.docs/ENVIRONMENT_VARIABLES.md) | Backend & frontend configuration, production setup |
 | [🧩 Folder Structure](.docs/FOLDER_STRUCTURE.md) | Project organization and architecture |
 | [🧪 Testing Guide](.docs/TESTING.md) | Running & writing tests, test structure |
@@ -67,7 +66,6 @@ docker compose up --build
 | Frontend | http://localhost:3000 |
 | Backend API | http://localhost:8000 |
 | Swagger Docs | http://localhost:8000/swagger/ |
-| Developer Portal | http://localhost:3000/developer |
 | Django Admin | http://localhost:8000/admin/ |
 
 **Mobile App:**

@@ -66,13 +66,10 @@ imhotep_finance/
 │   │   │   │   │   ├── Footer.jsx
 │   │   │   │   │   ├── ThemeToggle.jsx
 │   │   │   │   │   └── ...
-│   │   │   │   ├── developer/    # Developer portal components
-│   │   │   │   │   └── CreateAppModal.jsx
 │   │   │   │   └── pwa/          # PWA components
 │   │   │   ├── pages/            # Page components
 │   │   │   │   ├── auth/         # Authentication pages
 │   │   │   │   ├── main/         # Main app pages
-│   │   │   │   ├── developer/    # Developer portal pages
 │   │   │   │   └── profile/      # User profile pages
 │   │   │   ├── contexts/         # React contexts
 │   │   │   │   ├── AuthContext.jsx
@@ -114,9 +111,13 @@ imhotep_finance/
 │   │   ├── contexts/          # React Context providers
 │   │   │   └── AuthContext.tsx
 │   │   ├── hooks/             # Custom React hooks
-│   │   │   ├── useAuth.ts
-│   │   │   ├── useColorScheme.ts
-│   │   │   └── useTransactions.ts
+│   │   │   ├── use-color-scheme.ts
+│   │   │   ├── use-color-scheme.web.ts
+│   │   │   └── use-theme-color.ts
+│   │   ├── widgets/           # Android home-screen widgets
+│   │   │   ├── NetWorthShortcutsWidget.tsx
+│   │   │   └── widget-updater.tsx
+│   │   ├── widget-task-handler.tsx # Android widget task registration handler
 │   │   ├── assets/            # Images, fonts, icons
 │   │   ├── app.json           # Expo configuration
 │   │   ├── eas.json           # EAS Build configuration
@@ -169,7 +170,9 @@ imhotep_finance/
 - **`components/`**: Reusable React Native components
 - **`constants/`**: API configuration, colors, TypeScript types
 - **`contexts/`**: React Context for state management (AuthContext)
-- **`hooks/`**: Custom React hooks (useAuth, useColorScheme, etc.)
+- **`hooks/`**: Custom React hooks for theme detection and layout styles (use-color-scheme, use-theme-color)
+- **`widgets/`**: Android home-screen widget code (NetWorthShortcutsWidget)
+- **`widget-task-handler.tsx`**: Android widget task handler registration
 - **`assets/`**: Images, fonts, and icons
 
 ## Testing Structure

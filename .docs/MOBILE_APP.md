@@ -17,6 +17,7 @@ The **Imhotep Finance Mobile App** is a cross-platform mobile application built 
 - ⏰ **Scheduled Transactions**: Manage recurring bills and income
 - 👤 **Profile**: Manage account settings and preferences
 - 🔐 **Secure Authentication**: JWT-based authentication with email verification
+- 🏠 **Places Asset Tracking**: Track transactions and net worth across custom places (e.g. Bank, Cash, Safe) and execute transfers or conversions
 - 🌓 **Dark Mode**: Automatic theme switching based on system preferences
 
 ---
@@ -68,13 +69,15 @@ After starting the development server, you'll see a QR code and several options:
 
 ### Technology Stack
 
-- **React Native 0.81** – Cross-platform mobile framework
-- **Expo 54.x** – Development platform and tooling
+- **React Native 0.85** – Cross-platform mobile framework
+- **Expo 56.x** – Development platform and tooling
 - **TypeScript** – Type-safe JavaScript
 - **Expo Router** – File-based routing system
 - **Axios** – HTTP client for API requests
-- **AsyncStorage** – Local data persistence
+- **AsyncStorage** & **SecureStore** – Secure local data persistence
 - **React Context API** – State management
+- **Expo Local Authentication** – Biometric validation (FaceID / Fingerprint)
+- **React Native Android Widget** – Android home-screen widget support
 
 ### Project Structure
 
@@ -106,9 +109,12 @@ frontend/imhotep_finance_mobile/
 ├── contexts/              # React Context providers
 │   └── AuthContext.tsx    # Authentication state
 ├── hooks/                 # Custom React hooks
-│   ├── useAuth.ts        # Authentication hook
-│   ├── useColorScheme.ts # Theme detection
-│   └── useTransactions.ts
+│   ├── use-color-scheme.ts # Color scheme hook
+│   └── use-theme-color.ts  # Theme color hook
+├── widgets/               # Android widgets folder
+│   ├── NetWorthShortcutsWidget.tsx
+│   └── widget-updater.tsx
+├── widget-task-handler.tsx # Android widget task handler
 ├── assets/               # Images, fonts, icons
 ├── app.json             # Expo configuration
 ├── package.json         # Dependencies
@@ -208,6 +214,43 @@ Deep links are configured in `app.json`:
   }
 }
 ```
+
+---
+
+## 🔐 Biometric App Lock
+
+Imhotep Finance includes a biometric App Lock feature for enhanced privacy and security, shielding your financial details when the app is minimized or backgrounded.
+
+### Features
+- **Biometric Integration**: Utilizes native Face ID (iOS) or Fingerprint/Face Unlock (Android) via `expo-local-authentication`.
+- **PIN/Passcode Fallback**: Automatically requests the device security code if biometrics fail or are unconfigured.
+- **Active State Detection**: Instantly triggers the lock overlay screen when the app transitions into the background or inactive state.
+
+### Configuration
+1. Navigate to the **Profile** settings tab.
+2. Toggle the **App Lock** switch to enable/disable.
+3. Preferences are saved locally on the device using `AsyncStorage` (key: `app_lock_enabled`).
+4. Once enabled, launching the app or returning from the background triggers the lock screen.
+
+---
+
+## 📲 Home Screen Widgets (Android)
+
+Imhotep Finance supports interactive home-screen widgets on Android to trigger quick actions.
+
+### Net Worth Shortcuts Widget
+The widget provides a clean UI layout featuring three primary actions:
+1. **+ Deposit**: Deep-links to the transaction creation panel with type set to Deposit.
+2. **Net Worth**: Deep-links directly to the Net Worth balance details.
+3. **- Withdraw**: Deep-links to the transaction creation panel with type set to Withdraw.
+
+### Technical Implementation
+- **Framework**: `react-native-android-widget` for constructing widget views using React component layouts.
+- **Task Handler**: Background events and updates are registered via `widget-task-handler.tsx`.
+- **Deep Linking Schemas**:
+  - `imhotep-finance://add-transaction?type=deposit`
+  - `imhotep-finance://show-networth-details`
+  - `imhotep-finance://add-transaction?type=withdraw`
 
 ---
 

@@ -245,12 +245,14 @@ src/
 ## Test Statistics
 
 **Total Test Count:**
-- Accounts App: ~50+ tests
-- Transaction Management: ~40+ tests
-- Developer Portal: ~30+ tests
-- Public API: ~20+ tests
-- Other apps: ~100+ tests
-- **Total: ~240+ tests** covering models, views, serializers, and services
+- Accounts App: 64 tests
+- Transaction Management: 51 tests
+- Target Management: 37 tests
+- Wishlist Management: 26 tests
+- User Reports: 21 tests
+- Scheduled Transactions: 19 tests
+- Finance Management: 7 tests
+- **Total: 225 tests** covering models, views, serializers, and services
 
 **Test Categories:**
 - Happy Path Tests: ~40% (successful operations)
