@@ -1,99 +1,16 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Stack, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import api from '@/constants/api';
 import AddTransactionModal from '@/components/AddTransactionModal';
-
-type WidgetState = {
-  favoriteCurrency: string;
-  networth: string;
-  score: number | null;
-  isLoading: boolean;
-  hasError: boolean;
-};
-
-const DEFAULT_STATE: WidgetState = {
-  favoriteCurrency: 'USD',
-  networth: '0',
-  score: null,
-  isLoading: true,
-  hasError: false,
-};
-
-const getScoreColor = (score: number | null) => {
-  if (score === null) return '#f59e0b';
-  if (score > 0) return '#10b981';
-  if (score < 0) return '#ef4444';
-  return '#f59e0b';
-};
 
 export default function NetworthWidgetTestScreen() {
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
 
-  const [state, setState] = useState<WidgetState>(DEFAULT_STATE);
   const [showAddModal, setShowAddModal] = useState(false);
   const [initialType, setInitialType] = useState<'deposit' | 'withdraw'>('deposit');
-
-  const fetchData = useCallback(async () => {
-    setState((prev) => ({ ...prev, isLoading: true, hasError: false }));
-
-    try {
-      // 1. Networth
-      const networthRes = await api.get('/api/finance-management/get-networth/');
-      const networth = String(networthRes.data.networth || '0');
-
-      // 2. Favorite currency (same source as the rest of the app)
-      let favoriteCurrency = 'USD';
-      try {
-        const favRes = await api.get('/api/get-fav-currency/');
-        favoriteCurrency = favRes.data.favorite_currency || favoriteCurrency;
-      } catch {
-        // keep default
-      }
-
-      // 3. Score (optional)
-      let score: number | null = null;
-      try {
-        const scoreRes = await api.get('/api/finance-management/target/get-score/');
-        if (scoreRes.data.score_txt) {
-          score = Number(scoreRes.data.score ?? null);
-        }
-      } catch {
-        score = null;
-      }
-
-      setState({
-        favoriteCurrency,
-        networth,
-        score,
-        isLoading: false,
-        hasError: false,
-      });
-    } catch {
-      setState((prev) => ({ ...prev, isLoading: false, hasError: true }));
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  const { favoriteCurrency, networth, score, isLoading, hasError } = state;
-  const scoreColor = getScoreColor(score);
-  const scoreLabel =
-    score === null ? 'No score' : `${score > 0 ? '+' : ''}${score.toFixed(0)} ${favoriteCurrency}`;
-
-  const mainText = hasError
-    ? 'Could not load net worth'
-    : `${Number(networth || 0).toLocaleString(undefined, {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })} ${favoriteCurrency}`;
-
-  const subtitle = hasError ? 'Tap reload to try again' : 'Total Net Worth';
 
   const bg = isDark ? '#020617' : '#e5e7eb';
 
@@ -101,69 +18,48 @@ export default function NetworthWidgetTestScreen() {
     <>
       <Stack.Screen
         options={{
-          title: 'Net Worth Widget Test',
+          title: 'Secure Widget Test',
         }}
       />
       <ScrollView contentContainerStyle={[styles.root, { backgroundColor: bg }]}>
         <Text style={styles.info}>
-          This screen simulates the Android home widget so you can test logic and API responses in
-          Expo Go. The real widget uses the same endpoints and behavior.
+          This screen simulates the secure Android home widget so you can test shortcuts and deep links inside Expo Go.
         </Text>
 
+        <Text style={styles.widgetLabel}>Secure Shortcuts Widget (4x1)</Text>
         <View style={styles.widgetOuter}>
-          <TouchableOpacity
-            activeOpacity={0.85}
-            style={styles.widgetContainer}
-            onPress={() => router.push('/show-networth-details')}
-          >
-            <View style={styles.widgetTopRow}>
-              <View style={styles.widgetLeftColumn}>
-                <View style={styles.widgetHeader}>
-                  <Text style={styles.widgetTitle}>Total Net Worth</Text>
-                  {isLoading && <ActivityIndicator size="small" color="#cbd5f5" />}
-                </View>
+          <View style={styles.shortcutsWidgetContainer}>
+            <TouchableOpacity
+              style={[styles.widgetActionBigBtn, styles.depositBigBtn]}
+              onPress={() => {
+                setInitialType('deposit');
+                setShowAddModal(true);
+              }}
+            >
+              <Ionicons name="add" size={18} color="#10b981" />
+              <Text style={styles.depositBigText}>Deposit</Text>
+            </TouchableOpacity>
 
-                <Text style={styles.widgetMain}>{mainText}</Text>
-                <Text style={styles.widgetSubtitle}>{subtitle}</Text>
-              </View>
+            <TouchableOpacity
+              style={[styles.widgetActionBigBtn, styles.networthMiddleBtn]}
+              onPress={() => {
+                router.push('/show-networth-details');
+              }}
+            >
+              <Text style={styles.networthMiddleText}>Net Worth</Text>
+            </TouchableOpacity>
 
-              <View style={styles.widgetRightColumn}>
-                <TouchableOpacity style={styles.reloadBtn} onPress={fetchData}>
-                  <Ionicons name="refresh" size={16} color="#f9fafb" />
-                  <Text style={styles.reloadText}>Reload</Text>
-                </TouchableOpacity>
-
-                <View style={styles.scorePill}>
-                  <Text style={styles.scoreLabel}>Score</Text>
-                  <Text style={[styles.scoreValue, { color: scoreColor }]}>{scoreLabel}</Text>
-                </View>
-              </View>
-            </View>
-
-            <View style={styles.widgetActionsRow}>
-              <TouchableOpacity
-                style={[styles.widgetActionBigBtn, styles.depositBigBtn]}
-                onPress={() => {
-                  setInitialType('deposit');
-                  setShowAddModal(true);
-                }}
-              >
-                <Ionicons name="add" size={18} color="#10b981" />
-                <Text style={styles.depositBigText}>Deposit</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.widgetActionBigBtn, styles.withdrawBigBtn]}
-                onPress={() => {
-                  setInitialType('withdraw');
-                  setShowAddModal(true);
-                }}
-              >
-                <Ionicons name="remove" size={18} color="#ef4444" />
-                <Text style={styles.withdrawBigText}>Withdraw</Text>
-              </TouchableOpacity>
-            </View>
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.widgetActionBigBtn, styles.withdrawBigBtn]}
+              onPress={() => {
+                setInitialType('withdraw');
+                setShowAddModal(true);
+              }}
+            >
+              <Ionicons name="remove" size={18} color="#ef4444" />
+              <Text style={styles.withdrawBigText}>Withdraw</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
 
@@ -173,7 +69,6 @@ export default function NetworthWidgetTestScreen() {
         onClose={() => setShowAddModal(false)}
         onSuccess={() => {
           setShowAddModal(false);
-          fetchData();
         }}
       />
     </>
@@ -191,61 +86,32 @@ const styles = StyleSheet.create({
     color: '#4b5563',
     marginBottom: 16,
   },
+  widgetLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#64748b',
+    marginBottom: 8,
+    alignSelf: 'flex-start',
+  },
   widgetOuter: {
     alignItems: 'center',
     marginBottom: 24,
+    width: '100%',
   },
-  widgetContainer: {
+  shortcutsWidgetContainer: {
     width: '100%',
     borderRadius: 16,
     padding: 14,
     backgroundColor: '#0f172a',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 10,
     elevation: 6,
-  },
-  widgetTopRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  widgetLeftColumn: {
-    flex: 1,
-    marginRight: 8,
-  },
-  widgetRightColumn: {
-    alignItems: 'flex-end',
-    justifyContent: 'flex-start',
-    gap: 6,
-  },
-  widgetHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 4,
-  },
-  widgetTitle: {
-    fontSize: 12,
-    color: 'rgba(248, 250, 252, 0.7)',
-    fontWeight: '500',
-  },
-  widgetMain: {
-    marginTop: 4,
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#f9fafb',
-  },
-  widgetSubtitle: {
-    marginTop: 2,
-    fontSize: 11,
-    color: 'rgba(148, 163, 184, 0.9)',
-  },
-  widgetActionsRow: {
-    marginTop: 12,
-    flexDirection: 'row',
-    gap: 8,
   },
   widgetActionBigBtn: {
     flexDirection: 'row',
@@ -263,6 +129,10 @@ const styles = StyleSheet.create({
   withdrawBigBtn: {
     backgroundColor: 'rgba(239, 68, 68, 0.15)',
   },
+  networthMiddleBtn: {
+    backgroundColor: '#366c6b',
+    flex: 1.2,
+  },
   depositBigText: {
     fontSize: 14,
     fontWeight: '700',
@@ -273,38 +143,9 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#ef4444',
   },
-  scorePill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 999,
-    backgroundColor: 'rgba(15, 23, 42, 0.9)',
-    borderWidth: 1,
-    borderColor: 'rgba(148, 163, 184, 0.6)',
-  },
-  scoreLabel: {
-    fontSize: 11,
-    color: 'rgba(148, 163, 184, 0.9)',
-  },
-  scoreValue: {
-    marginLeft: 4,
-    fontSize: 11,
-    fontWeight: '600',
-  },
-  reloadBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 999,
-    backgroundColor: '#366c6b',
-    gap: 4,
-  },
-  reloadText: {
-    fontSize: 11,
-    fontWeight: '600',
+  networthMiddleText: {
+    fontSize: 14,
+    fontWeight: '700',
     color: '#f9fafb',
   },
 });
-

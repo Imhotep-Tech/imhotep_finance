@@ -102,7 +102,7 @@ export default function AppLockOverlay({ onUnlock }: AppLockOverlayProps) {
 
 const styles = StyleSheet.create({
   container: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     zIndex: 99999,
     justifyContent: 'center',
     alignItems: 'center',

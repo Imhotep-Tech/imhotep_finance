@@ -2,7 +2,7 @@
   "expo": {
     "name": "Imhotep Financial Manager",
     "slug": "imhotep-finance",
-    "version": "2.0.2",
+    "version": "2.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/imhotep_finance_zoomed.png",
     "scheme": "imhotep-finance",
@@ -70,14 +70,14 @@
           "fonts": [],
           "widgets": [
             {
-              "name": "NetWorthWidget",
-              "label": "Net Worth",
+              "name": "NetWorthShortcutsWidget",
+              "label": "Net Worth Shortcuts",
               "minWidth": "320dp",
-              "minHeight": "120dp",
+              "minHeight": "60dp",
               "targetCellWidth": 4,
-              "targetCellHeight": 2,
-              "description": "Total net worth and score",
-              "previewImage": "./assets/images/widget_preview_networth.png",
+              "targetCellHeight": 1,
+              "description": "Quick transaction shortcuts and app access",
+              "previewImage": "./assets/images/widget_preview_shortcuts.png",
               "updatePeriodMillis": 0
             }
           ]
