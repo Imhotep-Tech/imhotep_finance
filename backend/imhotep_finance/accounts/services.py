@@ -150,7 +150,7 @@ def register_user(username, email, password, first_name='', last_name=''):
         # Create a plain-text version for email client compliance (stripping HTML tags)
         plain_message = strip_tags(html_message)
         
-        # send_mail seamlessly handles either SMTP or Anymail/Brevo based on your active settings.py
+        # send_mail seamlessly handles SMTP based on your active settings.py
         send_mail(
             subject=mail_subject,
             message=plain_message,

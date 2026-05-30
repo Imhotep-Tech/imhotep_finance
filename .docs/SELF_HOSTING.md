@@ -165,6 +165,7 @@ DATABASE_PORT=5432
 
 ```env
 DEBUG=False                                 # ← MUST be False for production
+SECURE_SSL_REDIRECT=True                    # ← Set to False if running on HTTP without SSL
 SECRET_KEY=your-generated-secret-key        # ← generate a unique key
 FIELD_ENCRYPTION_KEY=your-generated-key     # ← generate a Fernet key
 ```
@@ -352,6 +353,21 @@ docker compose -f docker-compose.prod.yml restart backend
 ---
 
 ## Troubleshooting
+
+### 🔒 Local testing redirects to HTTPS or fails to load
+
+**Symptom**: Accessing `http://localhost` or your server's IP immediately redirects to `https://...` and fails with a connection error.
+
+**Fix**: By default, production security settings redirect all HTTP traffic to HTTPS. If you are running locally or on a server without SSL (on HTTP), add the following setting to your `.env` file:
+
+```env
+SECURE_SSL_REDIRECT=False
+```
+
+Then recreate the containers:
+```bash
+docker compose -f docker-compose.prod.yml up -d
+```
 
 ### Backend cannot connect to database
 

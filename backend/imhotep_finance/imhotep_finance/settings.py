@@ -46,7 +46,7 @@ if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
 else:
     # Security settings - keep these as they are
-    SECURE_SSL_REDIRECT = True
+    SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=True, cast=bool)
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_BROWSER_XSS_FILTER = True
@@ -151,14 +151,14 @@ TEMPLATES = [
     },
 ]
 
-# Email configuration for verification emails
+# Email configuration for verification emails (Google SMTP)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = config('MAIL_USER')
-EMAIL_HOST_PASSWORD = config('MAIL_PASSWORD')
-DEFAULT_FROM_EMAIL = config('MAIL_USER')
+EMAIL_HOST_USER = config('MAIL_USER', default='')
+EMAIL_HOST_PASSWORD = config('MAIL_PASSWORD', default='')
+DEFAULT_FROM_EMAIL = config('MAIL_USER', default='webmaster@localhost')
 
 WSGI_APPLICATION = 'imhotep_finance.wsgi.application'
 
