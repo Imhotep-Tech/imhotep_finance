@@ -136,6 +136,16 @@ Imhotep Finance also comes with a **native mobile app** built with React Native 
 <tr>
 <td width="50%">
 
+### 🏦 Places Management
+- Create multiple places (Bank, Wallet, Safe, etc.)
+- Segregate funds by location for accurate tracking
+- Monitor net worth per individual place
+- Seamless inter-place money transfers
+- Automatic intra-place currency conversions
+
+</td>
+<td width="50%">
+
 ### 🔐 Security & Privacy
 - JWT authentication
 - Google OAuth integration
@@ -329,10 +339,6 @@ For commercial licensing inquiries, please contact **imhoteptech@outlook.com**.
 
 *"Take control of your finances. Achieve your goals."*
 
-<<<<<<< Updated upstream
-[Documentation](.docs/) • [API Docs](http://localhost:8000/swagger/)
-=======
 [Live App](https://imhotep-finance.vercel.app/) • [Documentation](.docs/) • [Mobile App](https://github.com/Imhotep-Tech/imhotep_finance/releases/latest) • [API Docs](https://imhotep-finance.vercel.app/developer)
->>>>>>> Stashed changes
 
 </div>
