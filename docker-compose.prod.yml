@@ -27,7 +27,7 @@ services:
       db:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8000/api/health/\")' || exit 0"]
+      test: ["CMD-SHELL", "python -c 'import http.client; conn = http.client.HTTPConnection(\"localhost\", 8000); conn.request(\"GET\", \"/api/health/\"); res = conn.getresponse(); exit(0) if res.status in [200, 301, 302, 404] else exit(1)'"]
       interval: 15s
       timeout: 10s
       retries: 5

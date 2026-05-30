@@ -354,19 +354,11 @@ docker compose -f docker-compose.prod.yml restart backend
 
 ## Troubleshooting
 
-### 🔒 Local testing redirects to HTTPS, fails to load, or Gunicorn times out
+### 🔒 Local testing redirects to HTTPS or fails to load
 
-**Symptoms**:
-* Accessing `http://localhost` or your server's IP immediately redirects to `https://...` and fails with a connection error.
-* Backend logs show repeating Gunicorn worker timeouts: `[CRITICAL] WORKER TIMEOUT (pid:XX)`.
-* Backend logs show internal health checks returning 301 redirects: `"GET /api/health/ HTTP/1.1" 301 0`.
+**Symptom**: Accessing `http://localhost` or your server's IP immediately redirects to `https://...` and fails with a connection error.
 
-**Why this happens**:
-By default, production security settings force all HTTP traffic to HTTPS. When `SECURE_SSL_REDIRECT=True` is enabled but the app is run locally without an SSL certificate, Django redirects the internal health check requests to HTTPS. 
-Since Gunicorn is expecting plain HTTP on port 8000, this creates a TCP deadlock (Gunicorn waits for HTTP headers, and the health check client waits for a TLS handshake). This hangs the Gunicorn worker thread until it times out, locking up the server.
-
-**Fix**:
-Set `SECURE_SSL_REDIRECT` to `False` in your `.env` file:
+**Fix**: By default, production security settings redirect all HTTP traffic to HTTPS. If you are running locally or on a server without SSL (on HTTP), add the following setting to your `.env` file:
 
 ```env
 SECURE_SSL_REDIRECT=False
@@ -374,7 +366,6 @@ SECURE_SSL_REDIRECT=False
 
 Then recreate the containers:
 ```bash
-docker compose -f docker-compose.prod.yml down
 docker compose -f docker-compose.prod.yml up -d
 ```
 
