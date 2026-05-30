@@ -1,18 +1,28 @@
 # frontend/imhotep_finance/Dockerfile.prod
+# Multi-stage build: compile React app, then serve with Nginx
 
-# Stage 1: Build the React App
-FROM node:20-alpine as build
+# Stage 1: Build the React app
+FROM node:20-alpine AS build
 WORKDIR /app
+
 COPY package*.json ./
 RUN npm ci
-COPY . .
-# Compile the app using Vite
-RUN npm run build 
 
-# Stage 2: Serve the App with Nginx
+COPY . .
+
+# Build with empty API URL so the frontend uses relative /api/ paths
+# (nginx will proxy these to the backend container)
+ENV VITE_API_URL=""
+RUN npm run build
+
+# Stage 2: Serve with Nginx
 FROM nginx:alpine
-# Copy the compiled static files to Nginx's HTML folder
+
+# Copy compiled static files
 COPY --from=build /app/dist /usr/share/nginx/html
-# Expose port 80
+
+# Copy production nginx config (SPA routing + API proxy)
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]

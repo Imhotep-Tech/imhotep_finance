@@ -12,3 +12,4 @@ drf_spectacular
 drf_yasg
 django-encrypted-model-fields
 django-unfold
+gunicorn==23.0.0

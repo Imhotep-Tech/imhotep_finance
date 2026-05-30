@@ -1,8 +1,8 @@
 from django.contrib.auth import authenticate
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
-from django.utils.encoding import force_bytes, force_str
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_str
+from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.tokens import default_token_generator
 from accounts.models import User
 from imhotep_finance.settings import SITE_DOMAIN, frontend_url
@@ -12,6 +12,9 @@ from django.utils import timezone
 import random
 import requests
 from decouple import config
+
+from django.utils.html import strip_tags
+from django.db import transaction
 
 def generate_otp(user):
     """Generate and save a 6-digit OTP for the user"""
@@ -63,12 +66,14 @@ def login_user(username_or_email, password):
                     'otp': otp,
                     'frontend_url': frontend_url
                 })
+                plain_message = strip_tags(message)
                 send_mail(
-                    mail_subject,
-                    message,
-                    'imhoteptech1@gmail.com',
-                    [authenticated_user.email],
-                    html_message=message
+                    subject=mail_subject,
+                    message=plain_message,
+                    from_email=None,
+                    recipient_list=[authenticated_user.email],
+                    html_message=message,
+                    fail_silently=False
                 )
                 return authenticated_user, "Email not verified. Verification email sent."
             except Exception as email_error:
@@ -111,40 +116,57 @@ def register_user(username, email, password, first_name='', last_name=''):
     if User.objects.filter(email=email).exists():
         return None, f'Email {email} is already registered'
 
-    # Create a new user
-    user = None  # Initialize user variable
+    # Create a new user with atomic to make sure we don't create a user without OTP if email sending fails
     try:
-        user = User.objects.create_user(
-            username=username,
-            email=email,
-            password=password,
-            email_verify=False,
-            first_name=first_name,
-            last_name=last_name
-        )
-        user.save()
+        with transaction.atomic():
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=password,
+                email_verify=False,
+                first_name=first_name,
+                last_name=last_name
+            )
+            # Generate and save the OTP tracking token
+            otp = generate_otp(user)
     except Exception as e:
-        print(f"Failed to create user: {str(e)}")
-        return None, f'Failed to create user'
-
-    # Generate OTP
-    otp = generate_otp(user)
+        print(f"Failed to create user db entry: {str(e)}")
+        return None, 'Failed to create user'
 
     # Send verification email
     try:
         mail_subject = 'Activate your Imhotep Finance account'
-        current_site = SITE_DOMAIN.rstrip('/')  # Remove trailing slash if present
-        message = render_to_string('activate_mail_send.html', {
+        current_site = SITE_DOMAIN.rstrip('/')
+        
+        context = {
             'user': user,
             'domain': current_site,
             'frontend_url': frontend_url,
             'otp': otp,
-        })
-        send_mail(mail_subject, message, 'imhoteptech1@gmail.com', [user.email], html_message=message)
+        }
+        
+        # Render the template to html
+        html_message = render_to_string('activate_mail_send.html', context)
+        # Create a plain-text version for email client compliance (stripping HTML tags)
+        plain_message = strip_tags(html_message)
+        
+        # send_mail seamlessly handles either SMTP or Anymail/Brevo based on your active settings.py
+        send_mail(
+            subject=mail_subject,
+            message=plain_message,
+            from_email=None,  # Automatically defaults to your active environment's DEFAULT_FROM_EMAIL
+            recipient_list=[user.email],
+            html_message=html_message,
+            fail_silently=False
+        )
+        
         return user, 'User created successfully. Verification email sent.'
+
     except Exception as email_error:
+        # Logs the actual traceback details ([Errno 101] network flags, etc.)
         print(f"Failed to send verification email: {str(email_error)}")
-        # user is defined at this point, so we can return it
+        
+        # User account is safe in DB; they can request an OTP resend from the frontend dashboard later
         return user, 'User created successfully. Verification email sending failed.'
     
 def verify_account_otp(email, otp):
@@ -177,7 +199,15 @@ def verify_account_otp(email, otp):
             'domain': SITE_DOMAIN.rstrip('/'),
             'frontend_url': frontend_url,
         })
-        send_mail(mail_subject, '', 'imhoteptech1@gmail.com', [user.email], html_message=message)
+        plain_message = strip_tags(message)
+        send_mail(
+            subject=mail_subject,
+            message=plain_message,
+            from_email=None,
+            recipient_list=[user.email],
+            html_message=message,
+            fail_silently=False,
+        )
     except Exception as email_error:
         print(f"Failed to send welcome email: {str(email_error)}")
     
@@ -233,13 +263,15 @@ def request_password_reset(email):
         }
         
         message = render_to_string('password_reset_email.html', context)
+        plain_message = strip_tags(message)
         
         send_mail(
-            mail_subject, 
-            message, 
-            'imhoteptech1@gmail.com', 
-            [email], 
-            html_message=message
+            subject=mail_subject,
+            message=plain_message,
+            from_email=None,
+            recipient_list=[email],
+            html_message=message,
+            fail_silently=False,
         )
         
         return True, 'If an account with this email exists, a password reset OTP has been sent.'
@@ -404,7 +436,15 @@ def authenticate_with_google(code):
             'uid': user.pk,
             'token': '',
         })
-        send_mail(mail_subject, '', 'imhoteptech1@gmail.com', [user.email], html_message=message)
+        plain_message = strip_tags(message)
+        send_mail(
+            subject=mail_subject,
+            message=plain_message,
+            from_email=None,
+            recipient_list=[user.email],
+            html_message=message,
+            fail_silently=False,
+        )
     except Exception as email_error:
         print(f"Failed to send welcome email: {str(email_error)}")
 
@@ -530,8 +570,16 @@ def update_user_profile(user, first_name=None, last_name=None, username=None, em
                 }
                 
                 message = render_to_string('activate_mail_change_send.html', context)
+                plain_message = strip_tags(message)
                 
-                send_mail(mail_subject, '', 'imhoteptech1@gmail.com', [email], html_message=message)
+                send_mail(
+                    subject=mail_subject,
+                    message=plain_message,
+                    from_email=None,
+                    recipient_list=[email],
+                    html_message=message,
+                    fail_silently=False,
+                )
                 messages.append("Email verification OTP sent to your new email address! Please check it.")
                 
             except Exception as email_error:
@@ -652,11 +700,12 @@ def request_delete_account_otp(user):
         )
         
         send_mail(
-            mail_subject, 
-            message, 
-            'imhoteptech1@gmail.com', 
-            [user.email], 
-            html_message=message.replace('\n', '<br>')
+            subject=mail_subject,
+            message=message,
+            from_email=None,
+            recipient_list=[user.email],
+            html_message=message.replace('\n', '<br>'),
+            fail_silently=False,
         )
         
         return True, 'A confirmation OTP has been sent to your email.'

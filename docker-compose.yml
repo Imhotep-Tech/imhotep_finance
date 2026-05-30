@@ -19,6 +19,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    entrypoint: ["/entrypoint.sh"]
     ports:
       - "8010:8010"
     env_file:

@@ -16,7 +16,9 @@
 
 **Take control of your finances. Track spending. Achieve your goals.**
 
+[Try It Live](#-try-it-now) •
 [Features](#-features) •
+[Mobile App](#-mobile-app) •
 [Getting Started](#-getting-started) •
 [Documentation](#-documentation) •
 [Tech Stack](#-tech-stack)
@@ -31,17 +33,53 @@
 
 > *"Your finances, simplified. Your goals, achieved."*
 
-### 🏠 Self-Hostable - Deploy Anywhere
+---
 
-Imhotep Finance is designed to be **completely self-hostable** with no external dependencies or vendor lock-in. You have full control:
+## 🌐 Try It Now
 
-- **Deploy anywhere**: Your own server, cloud provider (AWS, Azure, GCP), or your infrastructure
-- **Complete data ownership**: All data stays on your servers - no third-party services required
-- **Privacy first**: No tracking, no analytics sent to external services
-- **Free to use**: Use it for free for any purpose (personal or commercial within your organization)
-- **Easy setup**: One-command Docker deployment or manual installation
+You don't need to install anything to get started! A **free hosted version** of Imhotep Finance is available for you to try right away:
 
-See [Self-Hosting Guide](.docs/SELF_HOSTING.md) and [Development Workflow](.docs/DEVELOPMENT_WORKFLOW.md) for the two recommended onboarding paths.
+<div align="center">
+
+### 🔗 **[Launch Imhotep Finance →](https://imhotep-finance.vercel.app/)**
+
+Sign up for a free account and start managing your finances immediately.
+
+</div>
+
+> **Note:** The hosted version is maintained by Imhotep Tech and is always running the latest stable release. If you prefer full control over your data, see the [Self-Hosting Guide](#-getting-started) below.
+
+---
+
+## 📱 Mobile App
+
+Imhotep Finance also comes with a **native mobile app** built with React Native and Expo, so you can manage your finances on the go from your Android device.
+
+<div align="center">
+
+### Download the Mobile App
+
+| Platform | Link |
+|:--------:|:----:|
+| 🤖 **Android** | [**Download Latest APK** from GitHub Releases](https://github.com/Imhotep-Tech/imhotep_finance/releases/latest) |
+
+<!-- Uncomment when available on Google Play:
+| 🤖 **Google Play** | [**Get it on Google Play**](https://play.google.com/store/apps/details?id=com.imhoteptech.imhotep_finance_mobile) |
+-->
+
+</div>
+
+**Mobile app features include:**
+
+- 📊 Dashboard with balance overview and recent transactions
+- 💰 Add, edit, and manage income/expense transactions
+- 📈 Monthly and yearly financial reports
+- 🎯 Wishlist and savings goal tracking
+- ⏰ Scheduled and recurring transaction management
+- 🔐 Secure JWT-based authentication
+- 🌓 Automatic dark/light mode based on system preferences
+
+> For full setup and development instructions, see the [📱 Mobile App Guide](.docs/MOBILE_APP.md).
 
 ---
 
@@ -133,15 +171,34 @@ See [Self-Hosting Guide](.docs/SELF_HOSTING.md) and [Development Workflow](.docs
 
 ---
 
+## 🏠 Self-Hostable — Deploy Anywhere
+
+Imhotep Finance is designed to be **completely self-hostable** with no external dependencies or vendor lock-in. You have full control:
+
+- **Deploy anywhere**: Your own server, cloud provider (AWS, Azure, GCP), or your infrastructure
+- **Complete data ownership**: All data stays on your servers — no third-party services required
+- **Privacy first**: No tracking, no analytics sent to external services
+- **Free to use**: Use it for free for any purpose (personal or commercial within your organization)
+- **Easy setup**: One-command Docker deployment or manual installation
+
+See [Self-Hosting Guide](.docs/SELF_HOSTING.md) and [Development Workflow](.docs/DEVELOPMENT_WORKFLOW.md) for the two recommended onboarding paths.
+
+---
+
 ## 🚦 Getting Started
 
 Choose the path that matches your goal:
 
+### 🌐 I want to Use It Right Away
+
+- **[Launch the hosted version →](https://imhotep-finance.vercel.app/)** — no installation needed
+
 ### 🚀 I want to Self-Host (Production)
 
 - [📘 Open the Self-Hosting Guide](.docs/SELF_HOSTING.md)
-- Uses pre-built Docker Hub images (no source code required)
-- Includes `.env` setup, production secrets, and deployment commands
+- Uses pre-built Docker Hub images — just download two files and run
+- Images: `imhoteptech/imhotep_finance_backend` · `imhoteptech/imhotep_finance_frontend`
+- Auto-updated on every push to `main` for the latest fixes
 
 ### 💻 I want to Develop (Local)
 
@@ -149,9 +206,10 @@ Choose the path that matches your goal:
 - Uses local source builds with `docker compose up --build`
 - Includes hot-reload workflow and dependency management notes
 
-### 📱 Mobile App
+### 📱 I want the Mobile App
 
 - [📱 Open the Mobile App Guide](.docs/MOBILE_APP.md)
+- [⬇️ Download the latest release](https://github.com/Imhotep-Tech/imhotep_finance/releases/latest)
 
 ---
 
@@ -271,6 +329,10 @@ For commercial licensing inquiries, please contact **imhoteptech@outlook.com**.
 
 *"Take control of your finances. Achieve your goals."*
 
+<<<<<<< Updated upstream
 [Documentation](.docs/) • [API Docs](http://localhost:8000/swagger/)
+=======
+[Live App](https://imhotep-finance.vercel.app/) • [Documentation](.docs/) • [Mobile App](https://github.com/Imhotep-Tech/imhotep_finance/releases/latest) • [API Docs](https://imhotep-finance.vercel.app/developer)
+>>>>>>> Stashed changes
 
 </div>
