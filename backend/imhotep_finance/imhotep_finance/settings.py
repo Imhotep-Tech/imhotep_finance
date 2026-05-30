@@ -152,22 +152,13 @@ TEMPLATES = [
 ]
 
 # Email configuration for verification emails
-if not DEBUG:
-    # Production: Use Brevo API backend (bypasses PythonAnywhere's SMTP block)
-    EMAIL_BACKEND = "anymail.backends.brevo.EmailBackend"
-    ANYMAIL = {
-        "BREVO_API_KEY": config('BREVO_API_KEY'),
-    }
-    DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='Imhotep Finance ')
-else:
-    # Local Development: Keep your Gmail SMTP setup
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_HOST = 'smtp.gmail.com'
-    EMAIL_PORT = 587
-    EMAIL_USE_TLS = True
-    EMAIL_HOST_USER = config('MAIL_USER')
-    EMAIL_HOST_PASSWORD = config('MAIL_PASSWORD')
-    DEFAULT_FROM_EMAIL = config('MAIL_USER')
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = config('MAIL_USER')
+EMAIL_HOST_PASSWORD = config('MAIL_PASSWORD')
+DEFAULT_FROM_EMAIL = config('MAIL_USER')
 
 WSGI_APPLICATION = 'imhotep_finance.wsgi.application'
 
