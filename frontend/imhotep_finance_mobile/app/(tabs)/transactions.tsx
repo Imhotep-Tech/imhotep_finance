@@ -56,6 +56,37 @@ export default function TransactionsScreen() {
     const [showAddModal, setShowAddModal] = useState(false);
     const [editTransaction, setEditTransaction] = useState<any>(null);
 
+    const hasActiveFilters = !!(startDate || endDate || statusFilter || categoryFilter || placeFilter || detailsSearch);
+
+    const handleRemoveFilter = (filterKey: string) => {
+        let updatedOverrides: any = {};
+
+        if (filterKey === 'startDate') {
+            setStartDate(null);
+            updatedOverrides.startDate = null;
+        } else if (filterKey === 'endDate') {
+            setEndDate(null);
+            updatedOverrides.endDate = null;
+        } else if (filterKey === 'statusFilter') {
+            setStatusFilter('');
+            updatedOverrides.statusFilter = '';
+        } else if (filterKey === 'categoryFilter') {
+            setCategoryFilter('');
+            updatedOverrides.categoryFilter = '';
+        } else if (filterKey === 'placeFilter') {
+            setPlaceFilter('');
+            updatedOverrides.placeFilter = '';
+            router.setParams({ place: '' });
+        } else if (filterKey === 'detailsSearch') {
+            setDetailsSearch('');
+            updatedOverrides.detailsSearch = '';
+        }
+
+        setPage(1);
+        setHasMore(true);
+        fetchTransactions(1, true, updatedOverrides);
+    };
+
     const themeStyles = {
         container: {
             backgroundColor: isDark ? '#0f172a' : '#f8fafc',
@@ -84,25 +115,48 @@ export default function TransactionsScreen() {
         actionButton: {
             backgroundColor: isDark ? '#334155' : 'white',
             borderColor: isDark ? '#475569' : '#e2e8f0',
+        },
+        filterChipActiveStyle: {
+            backgroundColor: isDark ? 'rgba(54, 108, 107, 0.25)' : '#eaf6f6',
+            borderColor: isDark ? '#2dd4bf' : '#366c6b',
+        },
+        filterChipTextActiveStyle: {
+            color: isDark ? '#5eead4' : '#366c6b',
         }
     };
 
-    const fetchTransactions = async (pageNum: number, refresh: boolean = false, placeOverride?: string) => {
+    const fetchTransactions = async (
+        pageNum: number, 
+        refresh: boolean = false, 
+        overrides?: {
+            startDate?: Date | null;
+            endDate?: Date | null;
+            statusFilter?: string;
+            categoryFilter?: string;
+            placeFilter?: string;
+            detailsSearch?: string;
+        }
+    ) => {
         if (loading) return;
         setLoading(true);
         setError('');
 
         try {
             const params: any = { page: pageNum };
-            if (startDate) params.start_date = startDate.toISOString().split('T')[0];
-            if (endDate) params.end_date = endDate.toISOString().split('T')[0];
-            if (statusFilter) params.trans_status = statusFilter;
-            if (categoryFilter) params.category = categoryFilter;
             
-            const currentPlaceFilter = placeOverride !== undefined ? placeOverride : placeFilter;
-            if (currentPlaceFilter) params.place = currentPlaceFilter;
-            
-            if (detailsSearch) params.details_search = detailsSearch;
+            const resolvedStart = overrides && overrides.startDate !== undefined ? overrides.startDate : startDate;
+            const resolvedEnd = overrides && overrides.endDate !== undefined ? overrides.endDate : endDate;
+            const resolvedStatus = overrides && overrides.statusFilter !== undefined ? overrides.statusFilter : statusFilter;
+            const resolvedCategory = overrides && overrides.categoryFilter !== undefined ? overrides.categoryFilter : categoryFilter;
+            const resolvedPlace = overrides && overrides.placeFilter !== undefined ? overrides.placeFilter : placeFilter;
+            const resolvedDetails = overrides && overrides.detailsSearch !== undefined ? overrides.detailsSearch : detailsSearch;
+
+            if (resolvedStart) params.start_date = resolvedStart.toISOString().split('T')[0];
+            if (resolvedEnd) params.end_date = resolvedEnd.toISOString().split('T')[0];
+            if (resolvedStatus) params.trans_status = resolvedStatus;
+            if (resolvedCategory) params.category = resolvedCategory;
+            if (resolvedPlace) params.place = resolvedPlace;
+            if (resolvedDetails) params.details_search = resolvedDetails;
 
             const res = await api.get('/api/finance-management/transaction/get-transactions/', { params });
 
@@ -147,10 +201,11 @@ export default function TransactionsScreen() {
 
     // Load when placeParam changes (handles initial mount and param updates)
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setPlaceFilter(placeParam);
         setPage(1);
         setHasMore(true);
-        fetchTransactions(1, true, placeParam);
+        fetchTransactions(1, true, { placeFilter: placeParam });
     }, [placeParam]);
 
     // Apply filters triggers reload
@@ -172,7 +227,14 @@ export default function TransactionsScreen() {
         setHasMore(true); // Reset hasMore when clearing filters
         setShowFilterModal(false);
         router.setParams({ place: '' });
-        setTimeout(() => fetchTransactions(1, true, ''), 200);
+        fetchTransactions(1, true, {
+            startDate: null,
+            endDate: null,
+            statusFilter: '',
+            categoryFilter: '',
+            placeFilter: '',
+            detailsSearch: ''
+        });
     };
 
     // Pagination
@@ -254,6 +316,91 @@ export default function TransactionsScreen() {
                     </TouchableOpacity>
                 </ScrollView>
             </View>
+
+            {/* Active Filters */}
+            {hasActiveFilters && (
+                <View style={[styles.activeFiltersContainer, { borderBottomColor: isDark ? '#334155' : '#e2e8f0' }]}>
+                    <ScrollView
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={styles.activeFiltersScroll}
+                    >
+                        <Text style={[styles.activeFiltersLabel, themeStyles.subText]}>Filters:</Text>
+                        {startDate && (
+                            <TouchableOpacity
+                                style={[styles.activeFilterChip, themeStyles.filterChipActiveStyle]}
+                                onPress={() => handleRemoveFilter('startDate')}
+                            >
+                                <Text style={[styles.activeFilterText, themeStyles.filterChipTextActiveStyle]}>
+                                    From: {startDate.toISOString().split('T')[0]}
+                                </Text>
+                                <Ionicons name="close-circle" size={16} color={isDark ? '#5eead4' : '#366c6b'} />
+                            </TouchableOpacity>
+                        )}
+                        {endDate && (
+                            <TouchableOpacity
+                                style={[styles.activeFilterChip, themeStyles.filterChipActiveStyle]}
+                                onPress={() => handleRemoveFilter('endDate')}
+                            >
+                                <Text style={[styles.activeFilterText, themeStyles.filterChipTextActiveStyle]}>
+                                    To: {endDate.toISOString().split('T')[0]}
+                                </Text>
+                                <Ionicons name="close-circle" size={16} color={isDark ? '#5eead4' : '#366c6b'} />
+                            </TouchableOpacity>
+                        )}
+                        {statusFilter && (
+                            <TouchableOpacity
+                                style={[styles.activeFilterChip, themeStyles.filterChipActiveStyle]}
+                                onPress={() => handleRemoveFilter('statusFilter')}
+                            >
+                                <Text style={[styles.activeFilterText, themeStyles.filterChipTextActiveStyle]}>
+                                    Type: {statusFilter === 'deposit' ? 'Income' : 'Expense'}
+                                </Text>
+                                <Ionicons name="close-circle" size={16} color={isDark ? '#5eead4' : '#366c6b'} />
+                            </TouchableOpacity>
+                        )}
+                        {categoryFilter && (
+                            <TouchableOpacity
+                                style={[styles.activeFilterChip, themeStyles.filterChipActiveStyle]}
+                                onPress={() => handleRemoveFilter('categoryFilter')}
+                            >
+                                <Text style={[styles.activeFilterText, themeStyles.filterChipTextActiveStyle]}>
+                                    Category: {categoryFilter}
+                                </Text>
+                                <Ionicons name="close-circle" size={16} color={isDark ? '#5eead4' : '#366c6b'} />
+                            </TouchableOpacity>
+                        )}
+                        {placeFilter && (
+                            <TouchableOpacity
+                                style={[styles.activeFilterChip, themeStyles.filterChipActiveStyle]}
+                                onPress={() => handleRemoveFilter('placeFilter')}
+                            >
+                                <Text style={[styles.activeFilterText, themeStyles.filterChipTextActiveStyle]}>
+                                    Place: {placeFilter}
+                                </Text>
+                                <Ionicons name="close-circle" size={16} color={isDark ? '#5eead4' : '#366c6b'} />
+                            </TouchableOpacity>
+                        )}
+                        {detailsSearch && (
+                            <TouchableOpacity
+                                style={[styles.activeFilterChip, themeStyles.filterChipActiveStyle]}
+                                onPress={() => handleRemoveFilter('detailsSearch')}
+                            >
+                                <Text style={[styles.activeFilterText, themeStyles.filterChipTextActiveStyle]}>
+                                    {`Search: "${detailsSearch}"`}
+                                </Text>
+                                <Ionicons name="close-circle" size={16} color={isDark ? '#5eead4' : '#366c6b'} />
+                            </TouchableOpacity>
+                        )}
+                        <TouchableOpacity
+                            style={styles.clearAllTextButton}
+                            onPress={clearFilters}
+                        >
+                            <Text style={styles.clearAllText}>Clear All</Text>
+                        </TouchableOpacity>
+                    </ScrollView>
+                </View>
+            )}
 
             {/* List */}
             <FlatList
@@ -648,6 +795,46 @@ const styles = StyleSheet.create({
         color: 'white',
         fontWeight: 'bold',
         fontSize: 16,
+    },
+    activeFiltersContainer: {
+        paddingVertical: 10,
+        paddingBottom: 12,
+        borderBottomWidth: 1,
+    },
+    activeFiltersScroll: {
+        paddingHorizontal: 20,
+        alignItems: 'center',
+        flexDirection: 'row',
+        gap: 8,
+    },
+    activeFiltersLabel: {
+        fontSize: 14,
+        fontWeight: '600',
+        marginRight: 4,
+    },
+    activeFilterChip: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 16,
+        borderWidth: 1,
+        gap: 4,
+    },
+    activeFilterText: {
+        fontSize: 13,
+        fontWeight: '600',
+    },
+    clearAllTextButton: {
+        paddingVertical: 6,
+        paddingHorizontal: 8,
+        marginLeft: 4,
+    },
+    clearAllText: {
+        fontSize: 13,
+        fontWeight: '700',
+        color: '#ef4444',
+        textDecorationLine: 'underline',
     }
 });
 

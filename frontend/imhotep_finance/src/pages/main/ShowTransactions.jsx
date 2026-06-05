@@ -433,6 +433,93 @@ const ShowTransactions = () => {
         </div>
 
         <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-800 p-8">
+          {/* Active Filter Chips */}
+          {(startDate || endDate || categoryFilter || placeFilter || statusFilter || detailsSearch) && (
+            <div className="flex flex-wrap gap-2 mb-6 p-4 bg-gray-50 dark:bg-gray-800/40 rounded-xl border border-gray-100 dark:border-gray-800">
+              <span className="text-sm font-semibold text-gray-500 dark:text-gray-400 self-center mr-2">
+                Active Filters:
+              </span>
+              {startDate && (
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#eaf6f6] text-[#366c6b] border border-[#366c6b]/20 dark:bg-teal-950/40 dark:text-teal-300">
+                  From: {startDate}
+                  <button
+                    onClick={() => { setStartDate(''); setPage(1); }}
+                    className="ml-1.5 inline-flex items-center justify-center p-0.5 rounded-full hover:bg-[#366c6b]/10 dark:hover:bg-teal-300/10"
+                  >
+                    <span className="text-[10px] font-bold">✕</span>
+                  </button>
+                </span>
+              )}
+              {endDate && (
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#eaf6f6] text-[#366c6b] border border-[#366c6b]/20 dark:bg-teal-950/40 dark:text-teal-300">
+                  To: {endDate}
+                  <button
+                    onClick={() => { setEndDate(''); setPage(1); }}
+                    className="ml-1.5 inline-flex items-center justify-center p-0.5 rounded-full hover:bg-[#366c6b]/10 dark:hover:bg-teal-300/10"
+                  >
+                    <span className="text-[10px] font-bold">✕</span>
+                  </button>
+                </span>
+              )}
+              {statusFilter && (
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#eaf6f6] text-[#366c6b] border border-[#366c6b]/20 dark:bg-teal-950/40 dark:text-teal-300">
+                  Type: {statusFilter === 'deposit' ? 'Income' : 'Expense'}
+                  <button
+                    onClick={() => { setStatusFilter(''); setPage(1); }}
+                    className="ml-1.5 inline-flex items-center justify-center p-0.5 rounded-full hover:bg-[#366c6b]/10 dark:hover:bg-teal-300/10"
+                  >
+                    <span className="text-[10px] font-bold">✕</span>
+                  </button>
+                </span>
+              )}
+              {categoryFilter && (
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#eaf6f6] text-[#366c6b] border border-[#366c6b]/20 dark:bg-teal-950/40 dark:text-teal-300">
+                  Category: {categoryFilter}
+                  <button
+                    onClick={() => { setCategoryFilter(''); setPage(1); }}
+                    className="ml-1.5 inline-flex items-center justify-center p-0.5 rounded-full hover:bg-[#366c6b]/10 dark:hover:bg-teal-300/10"
+                  >
+                    <span className="text-[10px] font-bold">✕</span>
+                  </button>
+                </span>
+              )}
+              {placeFilter && (
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#eaf6f6] text-[#366c6b] border border-[#366c6b]/20 dark:bg-teal-950/40 dark:text-teal-300">
+                  Place: {placeFilter}
+                  <button
+                    onClick={() => {
+                      setPlaceFilter('');
+                      setPage(1);
+                      const newParams = new URLSearchParams(searchParams);
+                      newParams.delete('place');
+                      setSearchParams(newParams);
+                    }}
+                    className="ml-1.5 inline-flex items-center justify-center p-0.5 rounded-full hover:bg-[#366c6b]/10 dark:hover:bg-teal-300/10"
+                  >
+                    <span className="text-[10px] font-bold">✕</span>
+                  </button>
+                </span>
+              )}
+              {detailsSearch && (
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#eaf6f6] text-[#366c6b] border border-[#366c6b]/20 dark:bg-teal-950/40 dark:text-teal-300">
+                  Search: "{detailsSearch}"
+                  <button
+                    onClick={() => { setDetailsSearch(''); setPage(1); }}
+                    className="ml-1.5 inline-flex items-center justify-center p-0.5 rounded-full hover:bg-[#366c6b]/10 dark:hover:bg-teal-300/10"
+                  >
+                    <span className="text-[10px] font-bold">✕</span>
+                  </button>
+                </span>
+              )}
+              <button
+                onClick={handleClearFilters}
+                className="text-xs text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-semibold underline ml-auto self-center"
+              >
+                Clear All
+              </button>
+            </div>
+          )}
+
           {loading ? (
             <div className="text-center text-gray-500 dark:text-gray-400 py-8">Loading transactions...</div>
           ) : error ? (
