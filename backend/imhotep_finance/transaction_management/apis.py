@@ -206,6 +206,7 @@ class TransactionListApi(APIView):
                 start_date=filters.get('start_date'),
                 end_date=filters.get('end_date'),
                 category=filters.get('category'),
+                place=filters.get('place'),
                 trans_status=filters.get('trans_status'),
                 details_search=filters.get('details_search')
             )
@@ -270,6 +271,7 @@ class TransactionExportCSVApi(APIView):
                 start_date=filters.get('start_date'),
                 end_date=filters.get('end_date'),
                 category=filters.get('category'),
+                place=filters.get('place'),
                 trans_status=filters.get('trans_status'),
                 details_search=filters.get('details_search')
             )

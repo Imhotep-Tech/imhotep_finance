@@ -56,3 +56,7 @@ class ConvertCurrencyRequestSerializer(serializers.Serializer):
     target_currency = serializers.CharField(required=True, max_length=4, help_text="Currency to convert to")
     amount = serializers.FloatField(required=True, help_text="Amount of source currency to convert")
     target_amount = serializers.FloatField(required=True, help_text="Amount of target currency to receive")
+
+class DeleteNetworthRequestSerializer(serializers.Serializer):
+    place = serializers.CharField(required=True, max_length=255, help_text="The place name of the net worth record")
+    currency = serializers.CharField(required=True, max_length=4, help_text="The currency of the net worth record")

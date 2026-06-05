@@ -24,7 +24,8 @@ from finance_management.serializers import (
     PlaceRequestSerializer,
     PlaceResponseSerializer,
     MoveMoneyRequestSerializer,
-    ConvertCurrencyRequestSerializer
+    ConvertCurrencyRequestSerializer,
+    DeleteNetworthRequestSerializer
 )
 
 
@@ -264,3 +265,39 @@ class ConvertCurrencyApi(APIView):
             raise DRFValidationError(str(e))
             
         return Response({"message": "Currency converted successfully"}, status=status.HTTP_200_OK)
+
+class DeleteNetworthApi(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        tags=['Finance Management'],
+        description="Delete a networth record if its balance is zero.",
+        request=DeleteNetworthRequestSerializer,
+        responses={200: serializers.Serializer, 400: 'Validation error'},
+        operation_id='delete_networth'
+    )
+    def delete(self, request):
+        # Allow parameters in query parameters or request body
+        data = request.data if request.data else request.query_params
+        serializer = DeleteNetworthRequestSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+
+        user = request.user
+        place = serializer.validated_data['place'].strip().title()
+        currency = serializer.validated_data['currency'].upper()
+
+        networth_record = NetWorth.objects.filter(user=user, currency=currency, place=place).first()
+
+        if not networth_record:
+            raise DRFValidationError("Net worth record not found.")
+
+        if networth_record.total != 0.0:
+            raise DRFValidationError("Only net worth records with a balance of zero can be deleted.")
+
+        networth_record.delete()
+
+        return Response({"message": "Net worth record deleted successfully"}, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        # Fallback to support POST as well for clients that have issues with DELETE bodies
+        return self.delete(request)

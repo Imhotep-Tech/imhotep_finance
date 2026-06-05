@@ -1,6 +1,5 @@
 from transaction_management.models import Transactions
-from datetime import date
-import calendar
+from datetime import date, timedelta
 
 
 def get_transactions_for_user(
@@ -9,6 +8,7 @@ def get_transactions_for_user(
     start_date= None,
     end_date = None,
     category = None,
+    place = None,
     trans_status = None,
     details_search = None
 ):
@@ -18,13 +18,12 @@ def get_transactions_for_user(
     filtered directly in the database. We filter them in memory after decryption.
     """
     
-    # Set default date range to current month if not provided
+    # Set default date range to last 30 days if not provided
     today = date.today()
     if not start_date:
-        start_date = today.replace(day=1)
+        start_date = today - timedelta(days=30)
     if not end_date:
-        last_day = calendar.monthrange(today.year, today.month)[1]
-        end_date = today.replace(day=last_day)
+        end_date = today
     
     # Base query - filter by non-encrypted fields first
     queryset = Transactions.objects.filter(
@@ -36,6 +35,10 @@ def get_transactions_for_user(
     # Apply trans_status filter (non-encrypted field)
     if trans_status and trans_status in ["Deposit", "Withdraw", "deposit", "withdraw"]:
         queryset = queryset.filter(trans_status=trans_status)
+        
+    # Apply place filter (non-encrypted field)
+    if place and place.strip():
+        queryset = queryset.filter(place=place.strip().title())
     
     # If we need to filter by encrypted fields (category or details_search),
     # we must filter in memory after decryption

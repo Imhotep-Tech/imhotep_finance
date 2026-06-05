@@ -15,9 +15,14 @@ class GetTransactionsForUserTest(TestCase):
         self.trans3 = create_transaction(user=self.user, amount=200, currency='USD', trans_status='deposit', category='Salary', trans_details='Monthly payment', transaction_date=today - timedelta(days=35), place='General')
 
     def test_get_transactions_default_date_range(self):
-        """Test getting transactions with default current month range"""
+        """Test getting transactions with default last 30 days range"""
         queryset, start_date, end_date = get_transactions_for_user(user=self.user)
-        self.assertGreater(queryset.count(), 0)
+        self.assertEqual(start_date, date.today() - timedelta(days=30))
+        self.assertEqual(end_date, date.today())
+        self.assertEqual(queryset.count(), 2)
+        self.assertIn(self.trans1, queryset)
+        self.assertIn(self.trans2, queryset)
+        self.assertNotIn(self.trans3, queryset)
 
     def test_get_transactions_with_custom_date_range(self):
         """Test getting transactions with custom date range"""
@@ -31,6 +36,13 @@ class GetTransactionsForUserTest(TestCase):
         queryset, _, _ = get_transactions_for_user(user=self.user, category='Food')
         self.assertEqual(queryset.count(), 1)
         self.assertEqual(queryset.first().category, 'Food')
+
+    def test_get_transactions_filtered_by_place(self):
+        """Test filtering transactions by place"""
+        create_transaction(user=self.user, amount=80, currency='USD', trans_status='deposit', category='Food', trans_details='Lunch', transaction_date=date.today(), place='Office')
+        queryset, _, _ = get_transactions_for_user(user=self.user, place='Office')
+        self.assertEqual(queryset.count(), 1)
+        self.assertEqual(queryset.first().place, 'Office')
 
     def test_get_transactions_filtered_by_status(self):
         """Test filtering transactions by status"""

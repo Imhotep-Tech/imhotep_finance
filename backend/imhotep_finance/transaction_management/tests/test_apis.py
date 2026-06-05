@@ -64,6 +64,14 @@ class TransactionListApiTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['transactions']), 1)
 
+    def test_list_transactions_filtered_by_place(self):
+        """Test listing transactions filtered by place"""
+        create_transaction(user=self.user, amount=80, currency='USD', trans_status='deposit', category='Test', trans_details='Lunch', transaction_date=date.today(), place='Office')
+        response = self.client.get(self.url, {'place': 'Office'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['transactions']), 1)
+        self.assertEqual(response.data['transactions'][0]['place'], 'Office')
+
     def test_list_transactions_pagination(self):
         """Test transaction list pagination"""
         response = self.client.get(self.url, {'page': '1'})

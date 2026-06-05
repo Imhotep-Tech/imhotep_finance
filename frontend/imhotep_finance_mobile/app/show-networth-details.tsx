@@ -230,6 +230,32 @@ export default function NetWorthDetailsScreen() {
         }
     };
 
+    const handleDeleteNetWorth = (place: string, currency: string) => {
+        Alert.alert(
+            'Confirm Delete',
+            `Are you sure you want to delete the ${currency} net worth record at ${place}?`,
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Delete',
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            await api.delete('/api/finance-management/delete-networth/', {
+                                data: { place, currency }
+                            });
+                            Alert.alert('Success', 'Net worth record deleted successfully!');
+                            fetchDetails();
+                        } catch (err: any) {
+                            const errorMessage = err.response?.data?.error || err.response?.data?.detail || 'An error occurred while deleting the net worth record.';
+                            Alert.alert('Error', errorMessage);
+                        }
+                    }
+                }
+            ]
+        );
+    };
+
     return (
         <>
             <Stack.Screen
@@ -277,22 +303,41 @@ export default function NetWorthDetailsScreen() {
                                     </View>
                                     <View style={styles.grid}>
                                         {(currencies as any[]).map((item, cIdx) => (
-                                            <LinearGradient
-                                                key={cIdx}
-                                                colors={['#51adac', '#428a89']}
-                                                start={{ x: 0, y: 0 }}
-                                                end={{ x: 1, y: 1 }}
-                                                style={styles.currencyCard}
-                                            >
-                                                <Text style={styles.currencyLabel}>{item.currency}</Text>
-                                                <Text style={styles.currencyAmount}>
-                                                    {Number(item.amount || 0).toLocaleString(undefined, {
-                                                        minimumFractionDigits: 2,
-                                                        maximumFractionDigits: 2
+                                            <View key={cIdx} style={{ width: '47%', position: 'relative' }}>
+                                                <TouchableOpacity
+                                                    activeOpacity={0.8}
+                                                    onPress={() => router.push({
+                                                        pathname: '/(tabs)/transactions',
+                                                        params: { place }
                                                     })}
-                                                </Text>
-                                                <Text style={styles.currencySubtext}>Total Amount</Text>
-                                            </LinearGradient>
+                                                    style={{ width: '100%' }}
+                                                >
+                                                    <LinearGradient
+                                                        colors={['#51adac', '#428a89']}
+                                                        start={{ x: 0, y: 0 }}
+                                                        end={{ x: 1, y: 1 }}
+                                                        style={[styles.currencyCard, { width: '100%' }]}
+                                                    >
+                                                        <Text style={styles.currencyLabel}>{item.currency}</Text>
+                                                        <Text style={styles.currencyAmount}>
+                                                            {Number(item.amount || 0).toLocaleString(undefined, {
+                                                                minimumFractionDigits: 2,
+                                                                maximumFractionDigits: 2
+                                                            })}
+                                                        </Text>
+                                                        <Text style={styles.currencySubtext}>Total Amount</Text>
+                                                    </LinearGradient>
+                                                </TouchableOpacity>
+                                                {Number(item.amount || 0) === 0 && (
+                                                    <TouchableOpacity
+                                                        style={styles.deleteButton}
+                                                        onPress={() => handleDeleteNetWorth(place, item.currency)}
+                                                        activeOpacity={0.7}
+                                                    >
+                                                        <Ionicons name="trash-outline" size={15} color="#FFF" />
+                                                    </TouchableOpacity>
+                                                )}
+                                            </View>
                                         ))}
                                     </View>
                                 </View>
@@ -917,5 +962,14 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         paddingVertical: 14,
         borderRadius: 12,
+    },
+    deleteButton: {
+        position: 'absolute',
+        top: 8,
+        right: 8,
+        backgroundColor: 'rgba(0, 0, 0, 0.25)',
+        padding: 6,
+        borderRadius: 20,
+        zIndex: 10,
     },
 });

@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import Footer from '../../components/common/Footer';
 import Pagination from '../../components/common/Pagination';
 import AddTransactionModal from '../../components/AddTransactionModal';
 import ImportTransactionsModal from '../../components/ImportTransactionsModal';
 import CategorySelect from '../../components/CategorySelect';
+import PlaceSelect from '../../components/PlaceSelect';
 
 const ShowTransactions = () => {
   const [transactions, setTransactions] = useState([]);
@@ -21,9 +23,16 @@ const ShowTransactions = () => {
   const [recalculateNetworthLoading, setRecalculateNetworthLoading] = useState(false);
   
   // New filter states
+  const [searchParams, setSearchParams] = useSearchParams();
   const [categoryFilter, setCategoryFilter] = useState('');
+  const [placeFilter, setPlaceFilter] = useState(searchParams.get('place') || '');
   const [statusFilter, setStatusFilter] = useState('');
   const [detailsSearch, setDetailsSearch] = useState('');
+
+  // Sync place filter with URL query param
+  useEffect(() => {
+    setPlaceFilter(searchParams.get('place') || '');
+  }, [searchParams]);
 
   // Fetch transactions
   useEffect(() => {
@@ -35,6 +44,7 @@ const ShowTransactions = () => {
         if (startDate) params.start_date = startDate;
         if (endDate) params.end_date = endDate;
         if (categoryFilter) params.category = categoryFilter;
+        if (placeFilter) params.place = placeFilter;
         if (statusFilter) params.trans_status = statusFilter;
         if (detailsSearch) params.details_search = detailsSearch;
         params.page = page;
@@ -51,7 +61,7 @@ const ShowTransactions = () => {
       setLoading(false);
     };
     fetchTransactions();
-  }, [startDate, endDate, page, showAddModal, showImportModal, editModal.open, categoryFilter, statusFilter, detailsSearch]);
+  }, [startDate, endDate, page, showAddModal, showImportModal, editModal.open, categoryFilter, placeFilter, statusFilter, detailsSearch]);
 
   const handleDateChange = (setter) => (e) => {
     setter(e.target.value);
@@ -69,11 +79,13 @@ const ShowTransactions = () => {
 
   const handleClearFilters = () => {
     setCategoryFilter('');
+    setPlaceFilter('');
     setStatusFilter('');
     setDetailsSearch('');
     setStartDate('');
     setEndDate('');
     setPage(1);
+    setSearchParams({});
   };
 
   // Export transactions as CSV
@@ -358,14 +370,27 @@ const ShowTransactions = () => {
               </select>
             </div>
 
-            {/* Category Filter */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Category</label>
-              <CategorySelect
-                value={categoryFilter}
-                onChange={handleFilterChange(setCategoryFilter)}
-                status={statusFilter || 'ANY'}
-              />
+            {/* Category & Place Filters */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Category Filter */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Category</label>
+                <CategorySelect
+                  value={categoryFilter}
+                  onChange={handleFilterChange(setCategoryFilter)}
+                  status={statusFilter || 'ANY'}
+                />
+              </div>
+
+              {/* Place Filter */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Place</label>
+                <PlaceSelect
+                  value={placeFilter}
+                  onChange={handleFilterChange(setPlaceFilter)}
+                  currency="ANY"
+                />
+              </div>
             </div>
 
             {/* Details Search */}
@@ -381,7 +406,7 @@ const ShowTransactions = () => {
             </div>
 
             {/* Clear Filters Button */}
-            {(categoryFilter || statusFilter || detailsSearch || startDate || endDate) && (
+            {(categoryFilter || placeFilter || statusFilter || detailsSearch || startDate || endDate) && (
               <div className="flex justify-end">
                 <button
                   onClick={handleClearFilters}

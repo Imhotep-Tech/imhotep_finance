@@ -134,18 +134,24 @@ class TransactionFilterSerializer(serializers.Serializer):
     start_date = serializers.DateField(
         required=False,
         allow_null=True,
-        help_text="Start date for filtering (YYYY-MM-DD). Defaults to first day of current month."
+        help_text="Start date for filtering (YYYY-MM-DD). Defaults to 30 days ago."
     )
     end_date = serializers.DateField(
         required=False,
         allow_null=True,
-        help_text="End date for filtering (YYYY-MM-DD). Defaults to last day of current month."
+        help_text="End date for filtering (YYYY-MM-DD). Defaults to today."
     )
     category = serializers.CharField(
         required=False,
         allow_null=True,
         allow_blank=True,
         help_text="Filter by category"
+    )
+    place = serializers.CharField(
+        required=False,
+        allow_null=True,
+        allow_blank=True,
+        help_text="Filter by place"
     )
     trans_status = serializers.ChoiceField(
         choices=[

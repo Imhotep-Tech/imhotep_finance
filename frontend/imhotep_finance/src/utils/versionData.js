@@ -1,5 +1,16 @@
 export const versionEntries = [
   {
+    version: '8.1.0',
+    date: 'June 5, 2026',
+    badge: { label: 'LATEST', color: 'green' },
+    summary: 'Transaction Place Filtering, Zero Net Worth Deletion, and Date Defaults',
+    bullets: [
+      'Updated the default transactions date range filter to the last 30 days instead of the current calendar month across both web and mobile apps.',
+      'Added place-based transaction filtering with dropdown selectors on the web frontend and mobile platform, complete with URL query parameter synchronization.',
+      'Implemented the option to delete zero-balance net worth records from the details page, backed by backend API validation to ensure only zero-value records are deleted.'
+    ]
+  },
+  {
     version: '8.0',
     date: 'May 26, 2026',
     badge: { label: 'MAJOR', color: 'yellow' },

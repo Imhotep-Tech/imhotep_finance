@@ -137,3 +137,51 @@ class MoveMoneyApiTest(APITestCase):
         res = self.client.post(self.url, payload, format='json')
         self.assertEqual(res.status_code, 400)
         self.assertIn("does not exist", str(res.data))
+
+class DeleteNetworthApiTest(APITestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_user(username='testuser', password='testpass123')
+        self.client.force_authenticate(user=self.user)
+        
+        # Set up initial balances
+        NetWorth.objects.create(user=self.user, currency='USD', place='Cash', total=0.0)
+        NetWorth.objects.create(user=self.user, currency='USD', place='Bank', total=500.0)
+        
+        self.url = reverse('delete_networth')
+
+    def test_delete_networth_zero_balance_success(self):
+        """Test that deleting a networth with zero balance is successful"""
+        payload = {
+            'place': 'Cash',
+            'currency': 'USD'
+        }
+        res = self.client.delete(self.url, payload, format='json')
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.data['message'], 'Net worth record deleted successfully')
+        
+        # Verify it is deleted
+        self.assertFalse(NetWorth.objects.filter(user=self.user, currency='USD', place='Cash').exists())
+
+    def test_delete_networth_non_zero_balance_fails(self):
+        """Test that deleting a networth with non-zero balance fails"""
+        payload = {
+            'place': 'Bank',
+            'currency': 'USD'
+        }
+        res = self.client.delete(self.url, payload, format='json')
+        self.assertEqual(res.status_code, 400)
+        self.assertIn("Only net worth records with a balance of zero can be deleted.", str(res.data))
+        
+        # Verify it still exists
+        self.assertTrue(NetWorth.objects.filter(user=self.user, currency='USD', place='Bank').exists())
+
+    def test_delete_networth_non_existent_fails(self):
+        """Test that deleting a non-existent networth record fails"""
+        payload = {
+            'place': 'Credit Card',
+            'currency': 'USD'
+        }
+        res = self.client.delete(self.url, payload, format='json')
+        self.assertEqual(res.status_code, 400)
+        self.assertIn("Net worth record not found.", str(res.data))

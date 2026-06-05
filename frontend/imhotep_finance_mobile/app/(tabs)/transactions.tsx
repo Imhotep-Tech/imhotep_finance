@@ -15,12 +15,13 @@ import {
     KeyboardAvoidingView
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import api from '@/constants/api';
 import TransactionItem from '@/components/TransactionItem';
 import AddTransactionModal from '@/components/AddTransactionModal';
 import CategorySelect from '@/components/CategorySelect';
+import PlaceSelect from '@/components/PlaceSelect';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { updateNetworthWidget } from '@/widgets/widget-updater';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -30,6 +31,8 @@ export default function TransactionsScreen() {
     const isDark = colorScheme === 'dark';
     const router = useRouter();
     const insets = useSafeAreaInsets();
+    const params = useLocalSearchParams<{ place?: string }>();
+    const placeParam = params.place || '';
 
     const [transactions, setTransactions] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
@@ -44,6 +47,7 @@ export default function TransactionsScreen() {
     const [endDate, setEndDate] = useState<Date | null>(null);
     const [statusFilter, setStatusFilter] = useState(''); // 'deposit', 'withdraw', ''
     const [categoryFilter, setCategoryFilter] = useState('');
+    const [placeFilter, setPlaceFilter] = useState(placeParam);
     const [detailsSearch, setDetailsSearch] = useState('');
     const [showStartPicker, setShowStartPicker] = useState(false);
     const [showEndPicker, setShowEndPicker] = useState(false);
@@ -83,7 +87,7 @@ export default function TransactionsScreen() {
         }
     };
 
-    const fetchTransactions = async (pageNum: number, refresh: boolean = false) => {
+    const fetchTransactions = async (pageNum: number, refresh: boolean = false, placeOverride?: string) => {
         if (loading) return;
         setLoading(true);
         setError('');
@@ -94,6 +98,10 @@ export default function TransactionsScreen() {
             if (endDate) params.end_date = endDate.toISOString().split('T')[0];
             if (statusFilter) params.trans_status = statusFilter;
             if (categoryFilter) params.category = categoryFilter;
+            
+            const currentPlaceFilter = placeOverride !== undefined ? placeOverride : placeFilter;
+            if (currentPlaceFilter) params.place = currentPlaceFilter;
+            
             if (detailsSearch) params.details_search = detailsSearch;
 
             const res = await api.get('/api/finance-management/transaction/get-transactions/', { params });
@@ -124,6 +132,7 @@ export default function TransactionsScreen() {
                 // If we got fewer than 10 transactions, or all were duplicates, no more pages
                 hasMoreFromAPI = newTransactions.length >= 10 && actuallyAddedCount > 0;
             }
+            setPage(pageNum);
             setHasMore(hasMoreFromAPI);
 
         } catch (err) {
@@ -136,10 +145,13 @@ export default function TransactionsScreen() {
         }
     };
 
-    // Initial load
+    // Load when placeParam changes (handles initial mount and param updates)
     useEffect(() => {
-        fetchTransactions(1, true);
-    }, []); // Run once on mount
+        setPlaceFilter(placeParam);
+        setPage(1);
+        setHasMore(true);
+        fetchTransactions(1, true, placeParam);
+    }, [placeParam]);
 
     // Apply filters triggers reload
     const applyFilters = () => {
@@ -154,11 +166,13 @@ export default function TransactionsScreen() {
         setEndDate(null);
         setStatusFilter('');
         setCategoryFilter('');
+        setPlaceFilter('');
         setDetailsSearch('');
         setPage(1);
         setHasMore(true); // Reset hasMore when clearing filters
         setShowFilterModal(false);
-        setTimeout(() => fetchTransactions(1, true), 200);
+        router.setParams({ place: '' });
+        setTimeout(() => fetchTransactions(1, true, ''), 200);
     };
 
     // Pagination
@@ -282,8 +296,8 @@ export default function TransactionsScreen() {
                         <View style={styles.emptyContainer}>
                             <Ionicons name="receipt-outline" size={64} color={isDark ? '#475569' : '#cbd5e1'} />
                             <Text style={[styles.emptyText, themeStyles.text]}>No transactions found</Text>
-                            <Text style={[styles.emptySubtext, themeStyles.subText]}>
-                                {startDate || endDate || categoryFilter || detailsSearch
+                             <Text style={[styles.emptySubtext, themeStyles.subText]}>
+                                {startDate || endDate || categoryFilter || placeFilter || detailsSearch
                                     ? 'Try adjusting your filters'
                                     : 'Add your first transaction to get started'}
                             </Text>
@@ -337,7 +351,7 @@ export default function TransactionsScreen() {
                                         <Ionicons name="close" size={24} color={themeStyles.text.color} />
                                     </TouchableOpacity>
                                 </View>
-
+                                
                                 <Text style={[styles.label, themeStyles.text]}>Search</Text>
                                 <TextInput
                                     style={[styles.input, themeStyles.input]}
@@ -353,6 +367,14 @@ export default function TransactionsScreen() {
                                     value={categoryFilter}
                                     onChange={setCategoryFilter}
                                     status={statusFilter || 'ANY'}
+                                />
+
+                                {/* Place Filter */}
+                                <Text style={[styles.label, themeStyles.text]}>Place</Text>
+                                <PlaceSelect
+                                    value={placeFilter}
+                                    onChange={setPlaceFilter}
+                                    currency="ANY"
                                 />
 
                                 {/* Date Filters */}
