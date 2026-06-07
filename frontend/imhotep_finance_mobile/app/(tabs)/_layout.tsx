@@ -2,6 +2,7 @@ import { Tabs, Redirect } from 'expo-router';
 import React from 'react';
 import { Platform, View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { BlurView } from 'expo-blur';
 
 import { HapticTab } from '@/components/haptic-tab';
 
@@ -13,22 +14,24 @@ import { Ionicons } from '@expo/vector-icons';
 // Theme colors for the layout
 const themes = {
   light: {
-    tabBar: '#FFFFFF',
+    tabBar: 'rgba(255, 255, 255, 0.85)',
     background: '#F3F4F6',
     card: '#FFFFFF',
     text: '#111827',
     textSecondary: '#6B7280',
     primary: '#2563EB',
     primaryLight: '#EFF6FF',
+    borderColor: 'rgba(0, 0, 0, 0.08)',
   },
   dark: {
-    tabBar: '#1F2937',
+    tabBar: 'rgba(31, 41, 55, 0.85)',
     background: '#111827',
     card: '#1F2937',
     text: '#F9FAFB',
     textSecondary: '#9CA3AF',
     primary: '#3B82F6',
     primaryLight: '#1E3A5F',
+    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
 };
 
@@ -63,21 +66,50 @@ export default function TabLayout() {
     return <Redirect href="/(auth)/login" />;
   }
 
+  const bottomMargin = Math.max(insets.bottom, 16);
+
   return (
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme === 'dark' ? 'dark' : 'light'].tint,
+        tabBarInactiveTintColor: colorScheme === 'dark' ? '#9CA3AF' : '#6B7280',
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarStyle: {
+          position: 'absolute',
+          bottom: bottomMargin,
+          left: 16,
+          right: 16,
           backgroundColor: colors.tabBar,
-          borderTopColor: colorScheme === 'dark' ? '#374151' : '#E5E7EB',
-          // Height = icon area (48) + safe area bottom inset (home indicator / nav bar)
-          height: 48 + insets.bottom,
-          paddingBottom: insets.bottom,
-          paddingTop: 4,
+          borderWidth: 1,
+          borderColor: colors.borderColor,
+          height: 64,
+          borderRadius: 32,
+          overflow: 'hidden',
+          paddingBottom: 0,
+          paddingTop: 0,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 8 },
+          shadowOpacity: 0.15,
+          shadowRadius: 10,
+          elevation: 5,
         },
+        tabBarBackground: () => (
+          <BlurView
+            tint={colorScheme === 'dark' ? 'dark' : 'light'}
+            intensity={80}
+            style={StyleSheet.absoluteFill}
+          />
+        ),
         tabBarShowLabel: true,
+        tabBarLabelStyle: {
+          fontSize: 10,
+          fontWeight: '600',
+          marginBottom: 8,
+        },
+        tabBarIconStyle: {
+          marginTop: 6,
+        },
       }}>
       <Tabs.Screen
         name="index"

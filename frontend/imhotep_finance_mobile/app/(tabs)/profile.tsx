@@ -969,7 +969,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: 20,
+    paddingBottom: 110,
   },
   header: {
     paddingHorizontal: 16,

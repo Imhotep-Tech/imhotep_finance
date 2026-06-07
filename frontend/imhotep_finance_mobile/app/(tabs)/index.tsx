@@ -318,7 +318,7 @@ export default function Dashboard() {
           /> */}
         </View>
 
-        <View style={{ height: insets.bottom + 16 }} />
+        <View style={{ height: insets.bottom + 100 }} />
       </ScrollView>
 
       {/* Add Transaction Modal */}

@@ -320,7 +320,7 @@ export default function ReportsScreen() {
     return (
         <View style={[styles.container, themeStyles.container]}>
             <ScrollView
-                contentContainerStyle={{ paddingBottom: 40 }}
+                contentContainerStyle={{ paddingBottom: 110 }}
                 refreshControl={<RefreshControl refreshing={dataLoading} onRefresh={fetchReportData} tintColor="#366c6b" />}
             >
                 {/* Header */}

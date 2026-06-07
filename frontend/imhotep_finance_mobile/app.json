@@ -2,7 +2,7 @@
   "expo": {
     "name": "Imhotep Financial Manager",
     "slug": "imhotep-finance",
-    "version": "2.2.0",
+    "version": "2.2.1",
     "orientation": "portrait",
     "icon": "./assets/images/imhotep_finance_zoomed.png",
     "scheme": "imhotep-finance",
@@ -15,7 +15,7 @@
     },
     "android": {
       "package": "com.imhoteptech.imhotep_finance",
-      "versionCode": 5,
+      "versionCode": 6,
       "permissions": [
         "INTERNET"
       ],

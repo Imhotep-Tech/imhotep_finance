@@ -228,7 +228,7 @@ export default function WishlistScreen() {
 
             {/* Add Button (Floating) */}
             <TouchableOpacity
-                style={[styles.fab, { bottom: insets.bottom + 16 }]}
+                style={[styles.fab, { bottom: Math.max(insets.bottom, 16) + 80 }]}
                 onPress={() => {
                     setEditWish(null);
                     setShowAddModal(true);
