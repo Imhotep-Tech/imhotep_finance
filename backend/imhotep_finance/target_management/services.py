@@ -69,19 +69,29 @@ def calculate_score(*, user, target_obj):
     to_date = first_day_next_month.date()
 
     # Transactions for deposits and withdrawals this month
-    score_deposit = Transactions.objects.filter(
+    score_deposit_raw = Transactions.objects.filter(
         user=user,
         date__gte=from_date,
         date__lt=to_date,
         trans_status__in=['Deposit', 'deposit']
-    ).values_list("amount", "currency")
+    ).values_list("amount", "currency", "category")
+    score_deposit = [
+        (amount, currency)
+        for amount, currency, category in score_deposit_raw
+        if not (category and str(category).strip().title() in ['Transfer', 'Conversion'])
+    ]
 
-    score_withdraw = Transactions.objects.filter(
+    score_withdraw_raw = Transactions.objects.filter(
         user=user,
         date__gte=from_date,
         date__lt=to_date,
         trans_status__in=['withdraw', 'Withdraw']
-    ).values_list("amount", "currency")
+    ).values_list("amount", "currency", "category")
+    score_withdraw = [
+        (amount, currency)
+        for amount, currency, category in score_withdraw_raw
+        if not (category and str(category).strip().title() in ['Transfer', 'Conversion'])
+    ]
 
     # Aggregate deposits
     currency_totals_deposit = {}

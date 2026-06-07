@@ -68,6 +68,8 @@ def save_user_report_with_transaction(user, start_date, transaction, parent_func
     trans_status = transaction.trans_status.lower()
     amount = float(transaction.amount)
     category = transaction.category or "Uncategorized"
+    if category.strip().title() in ["Transfer", "Conversion"]:
+        return True, None
     currency = transaction.currency
 
     # Convert to favorite currency if needed

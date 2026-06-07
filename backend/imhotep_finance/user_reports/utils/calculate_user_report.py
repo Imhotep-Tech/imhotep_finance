@@ -9,22 +9,30 @@ def calculate_user_report(start_date, end_date, user):
     
     try:
         # Get withdrawal transactions
-        user_withdraw_on_range = list(
+        raw_withdrawals = list(
             Transactions.objects.filter(
                 user=user,
                 trans_status__iexact='withdraw',
                 date__range=(start_date, end_date)
             ).values('amount', 'currency', 'category', 'place')
         )
+        user_withdraw_on_range = [
+            trans for trans in raw_withdrawals
+            if not (trans.get('category') and str(trans['category']).strip().title() in ['Transfer', 'Conversion'])
+        ]
         
         # Get deposit transactions
-        user_deposit_on_range = list(
+        raw_deposits = list(
             Transactions.objects.filter(
                 user=user,
                 trans_status__iexact='deposit',
                 date__range=(start_date, end_date)
             ).values('amount', 'currency', 'category', 'place')
         )
+        user_deposit_on_range = [
+            trans for trans in raw_deposits
+            if not (trans.get('category') and str(trans['category']).strip().title() in ['Transfer', 'Conversion'])
+        ]
 
         total_withdraw = 0.0
         # Convert withdrawals to favorite currency
