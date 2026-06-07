@@ -61,14 +61,14 @@ const WishlistItem: React.FC<WishlistItemProps> = ({
     const handleOpenLink = async () => {
         if (wish.link) {
             try {
-                const supported = await Linking.canOpenURL(wish.link);
-                if (supported) {
-                    await Linking.openURL(wish.link);
-                } else {
-                    Alert.alert("Error", "Cannot open this link: " + wish.link);
+                let url = wish.link.trim();
+                if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(url)) {
+                    url = 'https://' + url;
                 }
+                await Linking.openURL(url);
             } catch (err) {
                 console.error("An error occurred", err);
+                Alert.alert("Error", "Cannot open this link: " + wish.link);
             }
         }
     };
