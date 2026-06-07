@@ -18,6 +18,7 @@
     "axios": "^1.13.6",
     "expo": "~56.0.4",
     "expo-application": "~56.0.3",
+    "expo-blur": "~56.0.3",
     "expo-constants": "~56.0.14",
     "expo-dev-client": "~56.0.15",
     "expo-file-system": "~56.0.7",

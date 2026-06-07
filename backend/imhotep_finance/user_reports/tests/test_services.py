@@ -101,3 +101,32 @@ class RecalculateAllReportsTest(TestCase):
         result = recalculate_all_reports_for_user(user=self.user)
         self.assertTrue(result['summary']['total_months_processed'] >= 1)
         self.assertIn('processed_months', result)
+
+    def test_recalculate_excludes_transfer_and_conversion(self):
+        """Test recalculating reports excludes Transfer and Conversion categories"""
+        # Create normal transaction
+        create_transaction(user=self.user, amount=1000, currency='USD', trans_status='deposit', category='Salary', trans_details='Test Salary', transaction_date=date(2024, 1, 15), place='General')
+        # Create transfer transaction
+        create_transaction(user=self.user, amount=500, currency='USD', trans_status='withdraw', category='Transfer', trans_details='Test Transfer', transaction_date=date(2024, 1, 20), place='General')
+        # Create conversion transaction
+        create_transaction(user=self.user, amount=200, currency='USD', trans_status='deposit', category='Conversion', trans_details='Test Conversion', transaction_date=date(2024, 1, 25), place='General')
+        
+        # Recalculate
+        result = recalculate_all_reports_for_user(user=self.user)
+        self.assertTrue(result['summary']['total_months_processed'] >= 1)
+        
+        # Get the monthly report
+        report = get_monthly_report_for_user(user=self.user, month=1, year=2024)
+        report_data = report['report_data']
+        
+        # The totals should only include 'Salary'
+        self.assertEqual(report_data['total_deposit'], 1000.0)
+        self.assertEqual(report_data['total_withdraw'], 0.0)
+        
+        # Breakdown should only have 'Salary'
+        categories_deposit = [item['category'] for item in report_data['user_deposit_on_range']]
+        self.assertIn('Salary', categories_deposit)
+        self.assertNotIn('Conversion', categories_deposit)
+        
+        categories_withdraw = [item['category'] for item in report_data['user_withdraw_on_range']]
+        self.assertNotIn('Transfer', categories_withdraw)

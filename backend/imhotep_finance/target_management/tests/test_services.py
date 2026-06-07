@@ -104,3 +104,26 @@ class CalculateScoreServiceTest(TestCase):
         _, txt, score = calculate_score(user=self.user, target_obj=self.target)
         self.assertEqual(score, -500)
         self.assertIn('below target', txt.lower())
+
+    def test_calculate_score_excludes_transfer_and_conversion(self):
+        """Test that calculate_score excludes Transfer and Conversion transactions"""
+        Transactions.objects.all().delete()
+        Target.objects.all().delete()
+        self.target = create_target_for_user(user=self.user, target_value=1000.0)
+        
+        # 1. Create a normal deposit of 1500 USD (Salary) -> should be counted
+        create_transaction(user=self.user, amount=1500, currency='USD', trans_status='deposit', category='Salary', trans_details='', transaction_date=date.today(), place='General')
+        
+        # 2. Create a transfer withdrawal of 500 USD (Transfer) -> should NOT be counted as withdrawal in score
+        create_transaction(user=self.user, amount=500, currency='USD', trans_status='withdraw', category='Transfer', trans_details='', transaction_date=date.today(), place='General')
+        
+        # 3. Create a conversion deposit of 300 USD (Conversion) -> should NOT be counted as deposit in score
+        create_transaction(user=self.user, amount=300, currency='USD', trans_status='deposit', category='Conversion', trans_details='', transaction_date=date.today(), place='General')
+        
+        # Expected score:
+        # deposits = 1500 USD (Salary) (Conversion of 300 USD is ignored)
+        # target = 1000 USD
+        # withdrawals = 0 USD (Transfer of 500 USD is ignored)
+        # score = deposits - target - withdrawals = 1500 - 1000 - 0 = 500
+        _, txt, score = calculate_score(user=self.user, target_obj=self.target)
+        self.assertEqual(score, 500)
