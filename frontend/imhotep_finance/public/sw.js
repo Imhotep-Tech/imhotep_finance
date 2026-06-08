@@ -85,11 +85,22 @@ self.addEventListener('fetch', (event) => {
           // Clone response for caching
           const responseToCache = response.clone();
           
-          // Cache successful responses
-          if (response.ok) {
-            responseToCache.headers.set('sw-cache-date', Date.now().toString());
-            caches.open(API_CACHE).then(cache => {
-              cache.put(request, responseToCache);
+          // Cache successful GET responses only
+          if (response.ok && request.method === 'GET') {
+            // Reconstruct response to add custom headers (Headers are immutable on fetched responses)
+            const headers = new Headers(responseToCache.headers);
+            headers.set('sw-cache-date', Date.now().toString());
+            
+            responseToCache.blob().then(body => {
+              const cacheResponse = new Response(body, {
+                status: responseToCache.status,
+                statusText: responseToCache.statusText,
+                headers: headers
+              });
+              
+              caches.open(API_CACHE).then(cache => {
+                cache.put(request, cacheResponse);
+              });
             });
           }
           

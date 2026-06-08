@@ -165,7 +165,7 @@ DATABASE_PORT=5432
 
 ```env
 DEBUG=False                                 # ← MUST be False for production
-SECURE_SSL_REDIRECT=True                    # ← Set to False if running on HTTP without SSL
+SECURE_SSL_REDIRECT=True                    # ← MUST be False if testing locally (http://localhost) or without SSL
 SECRET_KEY=your-generated-secret-key        # ← generate a unique key
 FIELD_ENCRYPTION_KEY=your-generated-key     # ← generate a Fernet key
 ```
@@ -356,9 +356,11 @@ docker compose -f docker-compose.prod.yml restart backend
 
 ### 🔒 Local testing redirects to HTTPS or fails to load
 
-**Symptom**: Accessing `http://localhost` or your server's IP immediately redirects to `https://...` and fails with a connection error.
+**Symptom**: Accessing `http://localhost` or your server's IP immediately redirects to `https://...` and fails with a connection error. Furthermore, login attempts fail with a `503 Service Unavailable` error from the Service Worker.
 
-**Fix**: By default, production security settings redirect all HTTP traffic to HTTPS. If you are running locally or on a server without SSL (on HTTP), add the following setting to your `.env` file:
+**Fix**: By default, production security settings redirect all HTTP traffic to HTTPS. If you are running locally (on `localhost`) or on a server without an SSL certificate (on standard HTTP), this redirect breaks API `POST` requests and triggers the offline fallback. 
+
+To fix this, add or modify the following setting in your `.env` file to disable the forced HTTPS redirect:
 
 ```env
 SECURE_SSL_REDIRECT=False
