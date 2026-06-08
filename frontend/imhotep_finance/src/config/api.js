@@ -1,5 +1,5 @@
 // API configuration
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_BASE_URL = import.meta.env.VITE_API_URL !== undefined ? import.meta.env.VITE_API_URL : 'http://localhost:8010';
 
 // Remove trailing slash if present to avoid double slashes in URLs
 export const API_URL = API_BASE_URL.endsWith('/') 
