@@ -17,7 +17,9 @@
       "package": "com.imhoteptech.imhotep_finance",
       "versionCode": 6,
       "permissions": [
-        "INTERNET"
+        "INTERNET",
+        "READ_SMS",
+        "RECEIVE_SMS"
       ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/imhotep_finance_zoomed.png",

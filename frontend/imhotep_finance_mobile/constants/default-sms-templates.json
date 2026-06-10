@@ -1,0 +1,58 @@
+[
+  {
+    "id": "eg-nbe-deposit",
+    "bankName": "NBE",
+    "sender": "NBE",
+    "type": "deposit",
+    "currency": "EGP",
+    "regex": "^.*account\\s+\\d+\\s+has\\s+been\\s+credited\\s+with\\s+EGP\\s+(?<amount>[\\d,.]+).*$"
+  },
+  {
+    "id": "eg-nbe-withdraw",
+    "bankName": "NBE",
+    "sender": "NBE",
+    "type": "withdraw",
+    "currency": "EGP",
+    "regex": "^.*account\\s+\\d+\\s+has\\s+been\\s+debited\\s+with\\s+EGP\\s+(?<amount>[\\d,.]+).*$"
+  },
+  {
+    "id": "eg-nbe-purchase",
+    "bankName": "NBE",
+    "sender": "NBE",
+    "type": "withdraw",
+    "currency": "EGP",
+    "regex": "^.*purchase\\s+of\\s+EGP\\s+(?<amount>[\\d,.]+)\\s+was\\s+made.*$"
+  },
+  {
+    "id": "eg-vfcash-deposit",
+    "bankName": "Vodafone Cash",
+    "sender": "VodafoneCash",
+    "type": "deposit",
+    "currency": "EGP",
+    "regex": "^.*received\\s+(?<amount>[\\d,.]+)\\s+EGP.*$"
+  },
+  {
+    "id": "eg-vfcash-withdraw",
+    "bankName": "Vodafone Cash",
+    "sender": "VodafoneCash",
+    "type": "withdraw",
+    "currency": "EGP",
+    "regex": "^.*transferred\\s+(?<amount>[\\d,.]+)\\s+EGP.*$"
+  },
+  {
+    "id": "eg-cib-deposit",
+    "bankName": "CIB",
+    "sender": "CIB",
+    "type": "deposit",
+    "currency": "EGP",
+    "regex": "^.*credited\\s+with\\s+EGP\\s+(?<amount>[\\d,.]+).*$"
+  },
+  {
+    "id": "eg-cib-withdraw",
+    "bankName": "CIB",
+    "sender": "CIB",
+    "type": "withdraw",
+    "currency": "EGP",
+    "regex": "^.*debited\\s+with\\s+EGP\\s+(?<amount>[\\d,.]+).*$"
+  }
+]

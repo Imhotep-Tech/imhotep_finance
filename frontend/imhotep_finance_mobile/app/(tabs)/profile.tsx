@@ -756,6 +756,19 @@ export default function ProfileScreen() {
           )}
 
 
+          {/* SMS Tracker Button (Android Only) */}
+          {Platform.OS === 'android' && (
+            <Pressable 
+              style={[styles.privacyButton, { backgroundColor: colors.surface, borderColor: colors.border, marginBottom: 12 }]} 
+              onPress={() => router.push('/sms-settings')}
+            >
+              <View style={styles.privacyButtonLeft}>
+                <Ionicons name="chatbubble-ellipses-outline" size={22} color={colors.primary} />
+                <ThemedText style={styles.privacyButtonText}>SMS Auto-Tracker</ThemedText>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+            </Pressable>
+          )}
 
           {/* Privacy Policy Button */}
           <Pressable 
