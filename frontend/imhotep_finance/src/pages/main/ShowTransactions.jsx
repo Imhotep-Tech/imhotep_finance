@@ -21,6 +21,7 @@ const ShowTransactions = () => {
   const [showImportModal, setShowImportModal] = useState(false);
   const [editModal, setEditModal] = useState({ open: false, transaction: null });
   const [recalculateNetworthLoading, setRecalculateNetworthLoading] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
   
   // New filter states
   const [searchParams, setSearchParams] = useSearchParams();
@@ -271,8 +272,42 @@ const ShowTransactions = () => {
             
             {/* Mobile-first button layout - Updated with Import button */}
             <div className="flex flex-col sm:flex-row gap-3 flex-wrap">
+              <a
+                href="/show_scheduled_trans"
+                className="chef-button bg-gradient-to-r from-[#2d5a5a] to-[#122424] text-white px-4 sm:px-6 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-sm sm:text-base flex items-center justify-center"
+              >
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <span className="hidden sm:inline">Scheduled Plan</span>
+                <span className="sm:hidden">Plan</span>
+              </a>
+
               <button
-                className="chef-button bg-gradient-to-r from-[#4a7c7a] to-[#366c6b] text-white px-4 sm:px-6 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-sm sm:text-base"
+                className="chef-button-secondary px-4 sm:px-6 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-sm sm:text-base flex items-center justify-center"
+                onClick={() => setShowFilters(!showFilters)}
+              >
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+                <span>{showFilters ? 'Hide Filters' : 'Show Filters'}</span>
+              </button>
+
+              <button
+                className="chef-button bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white px-4 sm:px-6 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-sm sm:text-base flex items-center justify-center"
+                onClick={() => setShowAddModal(true)}
+              >
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 5v14m7-7H5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span className="hidden sm:inline">Add Transaction</span>
+                <span className="sm:hidden">Add</span>
+              </button>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row gap-3 flex-wrap mt-2">
+              <button
+                className="chef-button-secondary px-4 sm:px-6 py-2 rounded-xl shadow hover:shadow-md transition-all duration-300 hover:scale-105 text-sm sm:text-base flex items-center justify-center"
                 onClick={handleExportCSV}
               >
                 <svg className="w-4 h-4 sm:w-5 sm:h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -283,7 +318,7 @@ const ShowTransactions = () => {
               </button>
 
               <button
-                className="chef-button bg-gradient-to-r from-[#5a6c7a] to-[#3a4c5a] text-white px-4 sm:px-6 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-sm sm:text-base"
+                className="chef-button-secondary px-4 sm:px-6 py-2 rounded-xl shadow hover:shadow-md transition-all duration-300 hover:scale-105 text-sm sm:text-base flex items-center justify-center"
                 onClick={() => setShowImportModal(true)}
               >
                 <svg className="w-4 h-4 sm:w-5 sm:h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -294,17 +329,17 @@ const ShowTransactions = () => {
               </button>
               
               <button
-                className={`chef-button px-4 sm:px-6 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-sm sm:text-base ${
+                className={`chef-button-secondary px-4 sm:px-6 py-2 rounded-xl shadow hover:shadow-md transition-all duration-300 hover:scale-105 text-sm sm:text-base flex items-center justify-center ${
                   recalculateNetworthLoading
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-[#7c6a4a] to-[#5d4e37] text-white'
+                    ? 'opacity-50 cursor-not-allowed'
+                    : ''
                 }`}
                 onClick={handleRecalculateNetworth}
                 disabled={recalculateNetworthLoading}
               >
                 {recalculateNetworthLoading ? (
                   <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin inline-block mr-2"></div>
+                    <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin inline-block mr-2"></div>
                     <span className="hidden sm:inline">Recalculating...</span>
                     <span className="sm:hidden">Loading...</span>
                   </>
@@ -318,118 +353,109 @@ const ShowTransactions = () => {
                   </>
                 )}
               </button>
-              
-              <button
-                className="chef-button bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white px-4 sm:px-6 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-sm sm:text-base"
-                onClick={() => setShowAddModal(true)}
-              >
-                <svg className="w-4 h-4 sm:w-5 sm:h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 5v14m7-7H5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                <span className="hidden sm:inline">Add Transaction</span>
-                <span className="sm:hidden">Add</span>
-              </button>
             </div>
           </div>
           
           {/* Filters Section - Mobile First */}
-          <div className="space-y-4 mt-6">
-            {/* Date Range Filters */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {showFilters && (
+            <div className="space-y-4 mt-6 p-4 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50/50 dark:bg-gray-800/20">
+              {/* Date Range Filters */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">From Date</label>
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={handleDateChange(setStartDate)}
+                    className="chef-input w-full"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">To Date</label>
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={handleDateChange(setEndDate)}
+                    className="chef-input w-full"
+                  />
+                </div>
+              </div>
+
+              {/* Transaction Type Filter */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">From Date</label>
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={handleDateChange(setStartDate)}
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Transaction Type</label>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => handleFilterChange(setStatusFilter)(e.target.value)}
                   className="chef-input w-full"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">To Date</label>
-                <input
-                  type="date"
-                  value={endDate}
-                  onChange={handleDateChange(setEndDate)}
-                  className="chef-input w-full"
-                />
-              </div>
-            </div>
-
-            {/* Transaction Type Filter */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Transaction Type</label>
-              <select
-                value={statusFilter}
-                onChange={(e) => handleFilterChange(setStatusFilter)(e.target.value)}
-                className="chef-input w-full"
-              >
-                <option value="">All Types</option>
-                <option value="deposit">Income</option>
-                <option value="withdraw">Expense</option>
-              </select>
-            </div>
-
-            {/* Category & Place Filters */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Category Filter */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Category</label>
-                <CategorySelect
-                  value={categoryFilter}
-                  onChange={handleFilterChange(setCategoryFilter)}
-                  status={statusFilter || 'ANY'}
-                />
-              </div>
-
-              {/* Place Filter */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Place</label>
-                <PlaceSelect
-                  value={placeFilter}
-                  onChange={handleFilterChange(setPlaceFilter)}
-                  currency="ANY"
-                />
-              </div>
-            </div>
-
-            {/* Details Search */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Search Description</label>
-              <input
-                type="text"
-                value={detailsSearch}
-                onChange={(e) => handleFilterChange(setDetailsSearch)(e.target.value)}
-                className="chef-input w-full"
-                placeholder="Search in descriptions..."
-              />
-            </div>
-
-            {/* Clear Filters Button */}
-            {(categoryFilter || placeFilter || statusFilter || detailsSearch || startDate || endDate) && (
-              <div className="flex justify-end">
-                <button
-                  onClick={handleClearFilters}
-                  className="chef-button-secondary px-4 py-2 rounded-xl text-sm dark:text-gray-100 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                 >
-                  <svg className="w-4 h-4 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                  Clear Filters
-                </button>
+                  <option value="">All Types</option>
+                  <option value="deposit">Income</option>
+                  <option value="withdraw">Expense</option>
+                </select>
               </div>
-            )}
 
-            {/* Date Range Display */}
-            {dateRange.start_date && dateRange.end_date && (
-              <div className="text-sm text-gray-600 dark:text-gray-300 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <span className="font-medium">Showing: </span>
-                <span className="font-semibold">{dateRange.start_date}</span>
-                <span className="mx-2">to</span>
-                <span className="font-semibold">{dateRange.end_date}</span>
+              {/* Category & Place Filters */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Category Filter */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Category</label>
+                  <CategorySelect
+                    value={categoryFilter}
+                    onChange={handleFilterChange(setCategoryFilter)}
+                    status={statusFilter || 'ANY'}
+                  />
+                </div>
+
+                {/* Place Filter */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Place</label>
+                  <PlaceSelect
+                    value={placeFilter}
+                    onChange={handleFilterChange(setPlaceFilter)}
+                    currency="ANY"
+                  />
+                </div>
               </div>
-            )}
-          </div>
+
+              {/* Details Search */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Search Description</label>
+                <input
+                  type="text"
+                  value={detailsSearch}
+                  onChange={(e) => handleFilterChange(setDetailsSearch)(e.target.value)}
+                  className="chef-input w-full"
+                  placeholder="Search in descriptions..."
+                />
+              </div>
+
+              {/* Clear Filters Button */}
+              {(categoryFilter || placeFilter || statusFilter || detailsSearch || startDate || endDate) && (
+                <div className="flex justify-end mt-4">
+                  <button
+                    onClick={handleClearFilters}
+                    className="chef-button-secondary px-4 py-2 rounded-xl text-sm dark:text-gray-100 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    <svg className="w-4 h-4 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    Clear Filters
+                  </button>
+                </div>
+              )}
+
+              {/* Date Range Display */}
+              {dateRange.start_date && dateRange.end_date && (
+                <div className="text-sm text-gray-600 dark:text-gray-300 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg mt-4">
+                  <span className="font-medium">Showing: </span>
+                  <span className="font-semibold">{dateRange.start_date}</span>
+                  <span className="mx-2">to</span>
+                  <span className="font-semibold">{dateRange.end_date}</span>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-800 p-8">

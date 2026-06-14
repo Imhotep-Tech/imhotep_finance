@@ -62,7 +62,7 @@ const Navbar = ({ onToggle }) => {
 
       {/* Toggle Button */}
       <button 
-        className="fixed top-4 left-4 z-50 w-12 h-12 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-white/30 dark:border-gray-700 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 flex items-center justify-center group"
+        className="hidden md:flex fixed top-4 left-4 z-50 w-12 h-12 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-white/30 dark:border-gray-700 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 items-center justify-center group"
         onClick={toggleNavbar}
         aria-label="Toggle navigation"
         title={isOpen ? 'Collapse sidebar' : 'Expand sidebar'}
@@ -87,9 +87,9 @@ const Navbar = ({ onToggle }) => {
       </div>
 
       {/* Navbar Container */}
-      <nav className={`fixed left-0 top-0 h-full z-40 transition-all duration-300 ${
+      <nav className={`hidden md:block fixed left-0 top-0 h-full z-40 transition-all duration-300 ${
         isMobile 
-          ? (isOpen ? 'translate-x-0' : '-translate-x-full') 
+          ? '-translate-x-full'
           : (isOpen ? 'translate-x-0' : '-translate-x-64')
       }`}>
         <div className="h-full w-64 bg-gradient-to-b from-white/95 via-white/90 to-white/95 dark:from-gray-950/90 dark:via-gray-900/90 dark:to-gray-950/90 backdrop-blur-2xl border-r border-white/30 dark:border-gray-800 shadow-2xl">

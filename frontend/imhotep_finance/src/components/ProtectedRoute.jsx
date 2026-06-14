@@ -1,6 +1,7 @@
 import { useAuth } from '../contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
 import Navbar from './common/Navbar';
+import MobileBottomNav from './common/MobileBottomNav';
 import { useState, useEffect } from 'react';
 
 const ProtectedRoute = ({ children }) => {
@@ -82,11 +83,11 @@ const ProtectedRoute = ({ children }) => {
 
   return (
     <div
-      className="min-h-screen bg-[var(--bg)] text-[var(--text)] transition-colors"
+      className="min-h-screen bg-[var(--bg)] text-[var(--text)] transition-colors relative"
     >
       <Navbar onToggle={setNavbarOpen} />
       <div
-        className={`transition-all duration-300 ease-in-out min-h-screen ${
+        className={`transition-all duration-300 ease-in-out pb-20 md:pb-0 ${
           !isMobile && navbarOpen ? 'ml-72' : 'ml-0'
         }`}
         style={{
@@ -95,6 +96,7 @@ const ProtectedRoute = ({ children }) => {
       >
         {children}
       </div>
+      <MobileBottomNav />
     </div>
   );
 };

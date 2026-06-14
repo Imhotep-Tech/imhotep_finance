@@ -1,6 +1,7 @@
 import { AuthProvider } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { useEffect } from 'react'
 import ProtectedRoute from './components/ProtectedRoute'
 import PublicRoute from './components/PublicRoute'
 import LandingPage from './pages/main/LandingPage'
@@ -36,6 +37,25 @@ import InstallButton from './components/pwa/InstallButton';
 import DownloadApp from './pages/main/DownloadApp';
 
 function App() {
+  useEffect(() => {
+    // 24 hours in milliseconds
+    const REFRESH_INTERVAL = 24 * 60 * 60 * 1000;
+    
+    const autoRefresh = setInterval(() => {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+          registrations.forEach(registration => {
+            registration.update();
+          });
+        });
+      }
+      // Reload without clearing cache or local storage, so auth state is kept
+      window.location.reload();
+    }, REFRESH_INTERVAL);
+
+    return () => clearInterval(autoRefresh);
+  }, []);
+
   return (
     <ThemeProvider>
       <AuthProvider>

@@ -1,8 +1,21 @@
 export const versionEntries = [
   {
+    version: '8.2.0',
+    date: 'June 14, 2026',
+    badge: { label: 'LATEST', color: 'green' },
+    summary: 'Massive Mobile & UX Upgrade',
+    bullets: [
+      'New official Android App available directly on the Google Play Store.',
+      'Completely redesigned Native-Like Web UI for iOS users, featuring bottom navigation and safe areas.',
+      'Smarter Google Login automatically redirects to the native app or falls back to web smoothly.',
+      'Added the ability to filter transactions by Place natively.',
+      'Greatly simplified and expanded documentation for Self-Hosting Imhotep Finance.'
+    ]
+  },
+  {
     version: '8.1.0',
     date: 'June 5, 2026',
-    badge: { label: 'LATEST', color: 'green' },
+    badge: { label: 'UPDATE', color: 'blue' },
     summary: 'Transaction Place Filtering, Zero Net Worth Deletion, and Date Defaults',
     bullets: [
       'Updated the default transactions date range filter to the last 30 days instead of the current calendar month across both web and mobile apps.',

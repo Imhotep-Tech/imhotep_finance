@@ -1,8 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
   font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -31,7 +31,7 @@
   }
   
   .chef-button-secondary {
-    @apply w-full py-3 px-6 border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 bg-white/70 backdrop-blur-sm focus:outline-none focus:ring-4 focus:ring-orange-300 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800;
+    @apply w-full py-3 px-6 border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 bg-white/70 backdrop-blur-sm focus:outline-none focus:ring-4 focus:ring-orange-300 dark:bg-gray-800/70 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-700;
   }
 }
 
