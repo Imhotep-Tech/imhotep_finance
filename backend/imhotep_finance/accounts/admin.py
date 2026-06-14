@@ -11,6 +11,11 @@ User = get_user_model()
 class UserAdmin(ModelAdmin, BaseUserAdmin):
     list_display = ("id", "username", "email", "is_staff", "is_active", "reset_password_button")
     search_fields = ("username", "email")
+    list_filter = [
+        "last_login",
+        "date_joined",
+        "email_verify"
+    ]
     
     # Add custom fields to the detail view
     fieldsets = (
