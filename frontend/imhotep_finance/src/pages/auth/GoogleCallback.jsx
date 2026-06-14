@@ -81,7 +81,18 @@ const GoogleCallback = () => {
           setIsAndroidDevice(isAndroid);
 
           if (isAndroid) {
-            setMessage('Android device detected. Do you want to open the Imhotep Finance app?');
+            setMessage('Android device detected. Attempting to open the Imhotep Finance app...');
+            
+            // Try to open the app automatically
+            const appUrl = `imhotep-finance://login?access=${result.data.access}&refresh=${result.data.refresh}`;
+            window.location.href = appUrl;
+
+            // Fallback to web dashboard after 5 seconds if the app didn't open
+            setTimeout(() => {
+              if (!document.hidden) {
+                navigate('/dashboard');
+              }
+            }, 5000);
           } else {
             if (result.isNewUser) {
               setMessage('Welcome to Imhotep Finance! Your account has been created successfully.');
@@ -339,7 +350,7 @@ const GoogleCallback = () => {
           {status === 'success' && isAndroidDevice && (
             <div className="mt-6 p-4 bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-900 rounded-xl">
               <p className="mb-4 text-teal-800 dark:text-teal-200 font-medium text-sm">
-                You can continue in the Imhotep Finance mobile app for the best experience.
+                Attempting to open the Imhotep Finance mobile app. If it's not installed, you will be redirected to the web dashboard in 5 seconds.
               </p>
               <button 
                 onClick={handleOpenApp}
