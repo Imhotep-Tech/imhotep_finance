@@ -12,14 +12,24 @@ const features = [
     description: "Easily track your daily expenses and stay on budget."
   },
   {
+    icon: "📱",
+    title: "Cross-Platform & iOS Ready",
+    description: "Native Android app, optimized iOS web app, and accessible on any device."
+  },
+  {
     icon: "🌍",
     title: "Multi-Currency Support",
-    description: "170+ currencies supported for global finance."
+    description: "170+ currencies supported with real-time conversion."
+  },
+  {
+    icon: "📍",
+    title: "Advanced Analytics & Places",
+    description: "Filter transactions by location and gain deeper insights into your spending."
   },
   {
     icon: "🛡️",
     title: "Secure & Private",
-    description: "Your financial data is protected and open source."
+    description: "Your financial data is protected and 100% open source."
   },
   {
     icon: "⏰",
@@ -81,7 +91,7 @@ function LandingPage() {
             </span>
           </h1>
           <p className="text-xl sm:text-2xl lg:text-3xl text-[#1a3535] dark:text-gray-300 mb-8 font-medium max-w-4xl mx-auto leading-relaxed opacity-90">
-            Simplify your financial management with powerful tools for tracking expenses, managing investments, and achieving your dreams.
+            The ultimate cross-platform personal finance manager. Native on Android, perfectly optimized for iOS, and accessible from anywhere.
           </p>
           <div className="max-w-4xl mx-auto mb-10 rounded-2xl border border-[#366c6b]/20 bg-white/80 dark:bg-gray-900/70 p-5 sm:p-6 shadow-lg">
             <p className="text-base sm:text-lg text-[#1a3535] dark:text-gray-200 font-medium mb-3">
@@ -176,9 +186,9 @@ function LandingPage() {
               Powerful features designed to make financial management effortless
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, idx) => (
-              <div key={idx} className="bg-white dark:bg-gray-900 rounded-xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 text-center">
+              <div key={idx} className="bg-white dark:bg-gray-900 rounded-xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 text-center border border-gray-100 dark:border-gray-800">
                 <div className="w-16 h-16 bg-[#eaf6f6] dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">
                   {feature.icon}
                 </div>

@@ -4,6 +4,39 @@ import Footer from '../../components/common/Footer';
 
 const DownloadApp = () => {
   const navigate = useNavigate();
+  const [deferredPrompt, setDeferredPrompt] = React.useState(null);
+  const [isIOS, setIsIOS] = React.useState(false);
+
+  React.useEffect(() => {
+    const isIosDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    setIsIOS(isIosDevice);
+
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handlePwaInstall = async (e) => {
+    e.preventDefault();
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setDeferredPrompt(null);
+      }
+    } else if (isIOS) {
+      alert("To install on iOS: Tap the 'Share' button at the bottom of Safari, then select 'Add to Home Screen'.");
+    } else {
+      alert("App is already installed, or installation is not supported on this browser.");
+    }
+  };
 
   const handleBack = () => {
     if (window.history.length > 1) {
@@ -47,7 +80,7 @@ const DownloadApp = () => {
             Get the native mobile experience. Track your expenses, manage your wishlist, and achieve your financial goals anytime, anywhere.
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {/* Google Play Store - Recommended */}
             <a
               href="https://play.google.com/store/apps/details?id=com.imhoteptech.imhotep_finance"
@@ -63,14 +96,33 @@ const DownloadApp = () => {
                   <path d="M17.523 15.3414L5.49836 22.2598C4.54256 22.8097 3.33331 22.102 3.33331 21.0006V2.99951C3.33331 1.89808 4.54252 1.19036 5.49836 1.74026L17.523 8.65866C18.4988 9.22013 18.4988 10.7799 17.523 11.3414ZM22.5693 11.2319L19.7895 9.63229L16.4429 12.0001L19.7895 14.3678L22.5693 12.7682C23.1436 12.4379 23.1436 11.5622 22.5693 11.2319Z"/>
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">Google Play Store</h3>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">Android App</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-6 text-center">
-                Get the app directly from the Play Store for automatic updates and the best experience.
+                Get the native Android app directly from the Google Play Store for the best mobile experience.
               </p>
               <span className="mt-auto px-6 py-2 bg-emerald-500 text-white font-semibold rounded-lg group-hover:bg-emerald-600 transition-colors w-full text-center">
                 Get it on Google Play
               </span>
             </a>
+
+            {/* iOS & Web (PWA) */}
+            <button
+              onClick={handlePwaInstall}
+              className="group flex flex-col items-center p-8 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+            >
+              <div className="w-16 h-16 mb-4 text-[#366c6b] dark:text-emerald-400">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-full h-full">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">iOS & Web App</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6 text-center">
+                {isIOS ? "Tap Share > 'Add to Home Screen' to install as a native-feeling app." : "Install directly to your device as a Progressive Web App (PWA) for offline access."}
+              </p>
+              <span className="mt-auto px-6 py-2 bg-[#366c6b] text-white font-semibold rounded-lg group-hover:bg-[#2f7775] transition-colors w-full text-center">
+                Install Web App
+              </span>
+            </button>
 
             {/* GitHub Releases */}
             <a
