@@ -33,6 +33,7 @@ import InstallPrompt from './components/pwa/InstallPrompt';
 import OfflineIndicator from './components/pwa/OfflineIndicator';
 import UpdatePrompt from './components/pwa/UpdatePrompt';
 import InstallButton from './components/pwa/InstallButton';
+import DownloadApp from './pages/main/DownloadApp';
 
 function App() {
   return (
@@ -177,6 +178,7 @@ function App() {
                 path="/version-history"
                 element={<Version />}
               />
+              <Route path="/download-app" element={<DownloadApp />} />
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

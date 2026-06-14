@@ -77,14 +77,12 @@ function Footer() {
           >
             Update
           </button>
-          <a
-            href="https://github.com/Imhotep-Tech/imhotep_finance/releases/latest"
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            to="/download-app"
             className="bg-white text-[#366c6b] px-6 py-2 rounded-lg font-semibold shadow-md hover:shadow-lg hover:scale-105 transition-transform inline-block"
           >
-            Download
-          </a>
+            Download App
+          </Link>
         </div>
 
         <p className="text-white/60 text-xs mt-4">&copy; 2026 Imhotep Finance</p>

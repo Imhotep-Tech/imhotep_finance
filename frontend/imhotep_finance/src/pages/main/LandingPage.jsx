@@ -131,17 +131,15 @@ function LandingPage() {
             >
               🔓 Sign In
             </Link>
-            <a
-              href="https://github.com/Imhotep-Tech/imhotep_finance/releases/latest"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              to="/download-app"
               className="chef-button text-white px-8 py-4 rounded-full text-lg font-semibold shadow-lg border-2 border-white transition-all duration-300 transform hover:scale-105"
               style={{
                 background: 'linear-gradient(90deg, #366c6b 0%, #1a3535 100%)',
               }}
             >
-              📥 Download
-            </a>
+              📥 Download App
+            </Link>
           </div>
           {/* Stats */}
           <div className="mt-16 flex justify-center">

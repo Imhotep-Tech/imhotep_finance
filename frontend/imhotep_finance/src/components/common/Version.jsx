@@ -171,6 +171,12 @@ const Version = () => {
               >
                 Sign In
               </Link>
+              <Link
+                to="/download-app"
+                className="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold rounded-lg shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200"
+              >
+                Download App
+              </Link>
             </div>
           </div>
         </div>

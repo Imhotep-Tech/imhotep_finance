@@ -20,6 +20,13 @@ The **Imhotep Finance Mobile App** is a cross-platform mobile application built 
 - 🏠 **Places Asset Tracking**: Track transactions and net worth across custom places (e.g. Bank, Cash, Safe) and execute transfers or conversions
 - 🌓 **Dark Mode**: Automatic theme switching based on system preferences
 
+## 📥 Download the App
+
+For the best experience, we recommend downloading the official Imhotep Finance app directly from the Google Play Store:
+
+- **Google Play Store (Recommended):** [Download Imhotep Finance](https://play.google.com/store/apps/details?id=com.imhoteptech.imhotep_finance)
+- **GitHub Releases:** [Download Raw APK](https://github.com/Imhotep-Tech/imhotep_finance/releases/latest)
+
 ---
 
 ## 🚀 Quick Start

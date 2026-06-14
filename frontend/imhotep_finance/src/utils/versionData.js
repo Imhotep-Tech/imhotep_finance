@@ -7,7 +7,8 @@ export const versionEntries = [
     bullets: [
       'Updated the default transactions date range filter to the last 30 days instead of the current calendar month across both web and mobile apps.',
       'Added place-based transaction filtering with dropdown selectors on the web frontend and mobile platform, complete with URL query parameter synchronization.',
-      'Implemented the option to delete zero-balance net worth records from the details page, backed by backend API validation to ensure only zero-value records are deleted.'
+      'Implemented the option to delete zero-balance net worth records from the details page, backed by backend API validation to ensure only zero-value records are deleted.',
+      'We now officially recommend downloading the Imhotep Finance mobile app from the Google Play Store for the best Android experience and automatic updates.'
     ]
   },
   {

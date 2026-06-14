@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { usePWA } from '../../hooks/usePWA';
+import { useNavigate } from 'react-router-dom';
 
 const InstallPrompt = () => {
   const { isInstallable, isInstalled, installApp } = usePWA();
   const [showPrompt, setShowPrompt] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const [deviceType, setDeviceType] = useState('desktop');
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Detect device type
@@ -26,16 +28,21 @@ const InstallPrompt = () => {
     const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
     const shouldShowAgain = dismissedTime && (Date.now() - parseInt(dismissedTime)) > sevenDaysInMs;
     
-    if ((!hasBeenDismissed || shouldShowAgain) && isInstallable && !isInstalled) {
+    if ((!hasBeenDismissed || shouldShowAgain) && (!isInstalled || deviceType === 'android')) {
       const timer = setTimeout(() => {
         setShowPrompt(true);
       }, 5000); // Show after 5 seconds to give user time to explore
 
       return () => clearTimeout(timer);
     }
-  }, [isInstallable, isInstalled]);
+  }, [isInstallable, isInstalled, deviceType]);
 
   const handleInstall = async () => {
+    if (deviceType === 'android') {
+      setShowPrompt(false);
+      navigate('/download-app');
+      return;
+    }
     await installApp();
     setShowPrompt(false);
   };
@@ -52,10 +59,10 @@ const InstallPrompt = () => {
       case 'android':
         return {
           icon: '📱',
-          title: 'Install Imhotep Finance App',
-          subtitle: 'Add to your Android home screen',
-          description: 'Enjoy a native app experience with your Finances.',
-          buttonText: '📥 Add to Home Screen'
+          title: 'Download Imhotep Finance',
+          subtitle: 'Get the Native Android App',
+          description: 'For the best experience, download our native app from the Google Play Store or GitHub.',
+          buttonText: '📥 Download App'
         };
       case 'ios':
         return {

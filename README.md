@@ -61,11 +61,8 @@ Imhotep Finance also comes with a **native mobile app** built with React Native 
 
 | Platform | Link |
 |:--------:|:----:|
-| 🤖 **Android** | [**Download Latest APK** from GitHub Releases](https://github.com/Imhotep-Tech/imhotep_finance/releases/latest) |
-
-<!-- Uncomment when available on Google Play:
-| 🤖 **Google Play** | [**Get it on Google Play**](https://play.google.com/store/apps/details?id=com.imhoteptech.imhotep_finance_mobile) |
--->
+| 🤖 **Google Play (Recommended)** | [**Get it on Google Play**](https://play.google.com/store/apps/details?id=com.imhoteptech.imhotep_finance) |
+| 🤖 **Android APK** | [**Download Latest APK** from GitHub Releases](https://github.com/Imhotep-Tech/imhotep_finance/releases/latest) |
 
 </div>
 
