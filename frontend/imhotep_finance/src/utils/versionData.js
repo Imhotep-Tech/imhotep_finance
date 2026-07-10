@@ -1,8 +1,21 @@
 export const versionEntries = [
   {
+    version: '8.3.0',
+    date: 'July 10, 2026',
+    badge: { label: 'LATEST', color: 'green' },
+    summary: 'Net Worth Grouping, UI Fixes, Large Screen & Edge-to-Edge Mobile Support',
+    bullets: [
+      'Added Top Toggle Tabs on the Net Worth details page to view balances "By Place" or "By Currency" with interactive progress bars showing percentage allocations.',
+      'Moved the mobile Net Worth details page inside the Tab navigation flow to render the bottom navigation bar normally.',
+      'Resolved Google Play warning: Removed deprecated Android status and navigation bar color theme parameters to support native Android 15 edge-to-edge layout.',
+      'Resolved Google Play warning: Removed screen orientation and resizability restrictions in the mobile app to fully support large screen and foldable devices.',
+      'Added a beautiful step-by-step Interactive User Guide/Walkthrough on first start for both web and mobile platforms.'
+    ]
+  },
+  {
     version: '8.2.0',
     date: 'June 14, 2026',
-    badge: { label: 'LATEST', color: 'green' },
+    badge: { label: 'UPDATE', color: 'blue' },
     summary: 'Massive Mobile & UX Upgrade',
     bullets: [
       'New official Android App available directly on the Google Play Store.',

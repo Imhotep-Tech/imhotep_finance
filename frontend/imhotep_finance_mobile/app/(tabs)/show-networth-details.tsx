@@ -4,6 +4,7 @@ import { Stack, router } from 'expo-router';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import api from '@/constants/api';
 import { currencies as allCurrencies } from '@/constants/currencies';
 
@@ -38,10 +39,49 @@ export default function NetWorthDetailsScreen() {
     const colorScheme = useColorScheme();
     const isDark = colorScheme === 'dark';
     const colors = themes[isDark ? 'dark' : 'light'];
+    const insets = useSafeAreaInsets();
 
+    const [viewType, setViewType] = useState<'place' | 'currency'>('place');
     const [details, setDetails] = useState<Record<string, NetWorthDetail[]>>({});
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
+
+    const getCurrencyGroupedDetails = () => {
+        const currencyGroups: Record<string, { total: number; places: { place: string; amount: number; percentage: number }[] }> = {};
+        
+        Object.entries(details).forEach(([place, currencies]) => {
+            currencies.forEach((item) => {
+                const cur = item.currency;
+                const amt = Number(item.amount || 0);
+                if (!currencyGroups[cur]) {
+                    currencyGroups[cur] = {
+                        total: 0,
+                        places: []
+                    };
+                }
+                currencyGroups[cur].total += amt;
+                currencyGroups[cur].places.push({
+                    place,
+                    amount: amt,
+                    percentage: 0
+                });
+            });
+        });
+
+        Object.keys(currencyGroups).forEach((cur) => {
+            const group = currencyGroups[cur];
+            group.places = group.places.map((p) => {
+                const pct = group.total > 0 ? (p.amount / group.total) * 100 : 0;
+                return {
+                    ...p,
+                    percentage: pct
+                };
+            });
+            group.places.sort((a, b) => b.amount - a.amount);
+        });
+
+        return Object.entries(currencyGroups);
+    };
 
     // Move Money states
     const [showMoveModal, setShowMoveModal] = useState(false);
@@ -277,7 +317,43 @@ export default function NetWorthDetailsScreen() {
                 >
                     <View style={[styles.headerCard, { backgroundColor: colors.surface }]}>
                         <Text style={[styles.title, { color: colors.text }]}>Net Worth Details</Text>
-                        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Breakdown by currency</Text>
+                        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Breakdown by place & currency</Text>
+                    </View>
+
+                    {/* View Type Toggle Selector */}
+                    <View style={[styles.toggleContainer, { backgroundColor: isDark ? '#1F2937' : '#F3F4F6', borderColor: colors.border, borderWidth: 1 }]}>
+                        <TouchableOpacity
+                            activeOpacity={0.8}
+                            onPress={() => setViewType('place')}
+                            style={[
+                                styles.toggleButton,
+                                viewType === 'place' && { backgroundColor: colors.surface }
+                            ]}
+                        >
+                            <Text style={[
+                                styles.toggleButtonText,
+                                { color: colors.textSecondary },
+                                viewType === 'place' && { color: colors.text, fontWeight: '700' }
+                            ]}>
+                                By Place
+                            </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            activeOpacity={0.8}
+                            onPress={() => setViewType('currency')}
+                            style={[
+                                styles.toggleButton,
+                                viewType === 'currency' && { backgroundColor: colors.surface }
+                            ]}
+                        >
+                            <Text style={[
+                                styles.toggleButtonText,
+                                { color: colors.textSecondary },
+                                viewType === 'currency' && { color: colors.text, fontWeight: '700' }
+                            ]}>
+                                By Currency
+                            </Text>
+                        </TouchableOpacity>
                     </View>
 
                     {loading ? (
@@ -293,7 +369,7 @@ export default function NetWorthDetailsScreen() {
                                 Add some transactions to see your net worth breakdown.
                             </Text>
                         </View>
-                    ) : (
+                    ) : viewType === 'place' ? (
                         <View style={{ gap: 24, marginBottom: 24 }}>
                             {Object.entries(details).map(([place, currencies], idx) => (
                                 <View key={idx} style={[styles.placeGroupCard, { backgroundColor: colors.surface }]}>
@@ -343,6 +419,56 @@ export default function NetWorthDetailsScreen() {
                                 </View>
                             ))}
                         </View>
+                    ) : (
+                        <View style={{ gap: 24, marginBottom: 24 }}>
+                            {getCurrencyGroupedDetails().map(([currency, data], idx) => (
+                                <View key={idx} style={[styles.placeGroupCard, { backgroundColor: colors.surface }]}>
+                                    <View style={styles.currencyHeaderRow}>
+                                        <View style={[styles.currencyIconTag, { backgroundColor: colors.primaryLight }]}>
+                                            <Text style={{ color: colors.primary, fontWeight: 'bold', fontSize: 16 }}>{currency}</Text>
+                                        </View>
+                                        <View style={{ alignItems: 'flex-end', flex: 1 }}>
+                                            <Text style={[styles.currencyTotalLabel, { color: colors.textSecondary }]}>Total Allocation</Text>
+                                            <Text style={[styles.currencyTotalAmount, { color: colors.text }]}>
+                                                {data.total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                            </Text>
+                                        </View>
+                                    </View>
+                                    
+                                    <View style={{ gap: 16, marginTop: 12 }}>
+                                        {data.places.map((p, pIdx) => (
+                                            <TouchableOpacity
+                                                key={pIdx}
+                                                activeOpacity={0.7}
+                                                onPress={() => router.push({
+                                                    pathname: '/(tabs)/transactions',
+                                                    params: { place: p.place }
+                                                })}
+                                                style={{ width: '100%' }}
+                                            >
+                                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                                                        <Ionicons name="location-outline" size={16} color={colors.textSecondary} />
+                                                        <Text style={{ color: colors.text, fontWeight: '600', fontSize: 14 }}>{p.place}</Text>
+                                                    </View>
+                                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                                                        <Text style={{ color: colors.text, fontWeight: 'bold', fontSize: 14 }}>
+                                                            {p.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                        </Text>
+                                                        <Text style={{ fontSize: 11, fontWeight: 'bold', backgroundColor: isDark ? '#1e293b' : '#eaf6f6', color: colors.primary, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 }}>
+                                                            {p.percentage.toFixed(1)}%
+                                                        </Text>
+                                                    </View>
+                                                </View>
+                                                <View style={{ width: '100%', height: 8, backgroundColor: isDark ? '#1F2937' : '#E5E7EB', borderRadius: 4, overflow: 'hidden' }}>
+                                                    <View style={{ width: `${p.percentage}%`, height: '100%', backgroundColor: colors.primary, borderRadius: 4 }} />
+                                                </View>
+                                            </TouchableOpacity>
+                                        ))}
+                                    </View>
+                                </View>
+                            ))}
+                        </View>
                     )}
 
                     {/* Action Buttons */}
@@ -387,6 +513,8 @@ export default function NetWorthDetailsScreen() {
                             <Text style={[styles.backButtonText, { color: colors.primary }]}>Dashboard</Text>
                         </TouchableOpacity>
                     </View>
+
+                    <View style={{ height: insets.bottom + 100 }} />
                 </ScrollView>
             </View>
 
@@ -971,5 +1099,49 @@ const styles = StyleSheet.create({
         padding: 6,
         borderRadius: 20,
         zIndex: 10,
+    },
+    toggleContainer: {
+        flexDirection: 'row',
+        padding: 4,
+        borderRadius: 14,
+        alignSelf: 'center',
+        width: '100%',
+        maxWidth: 320,
+        marginBottom: 20,
+    },
+    toggleButton: {
+        flex: 1,
+        paddingVertical: 10,
+        borderRadius: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    toggleButtonText: {
+        fontSize: 14,
+        fontWeight: '600',
+    },
+    currencyHeaderRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderBottomWidth: 1,
+        borderBottomColor: 'rgba(0,0,0,0.05)',
+        paddingBottom: 12,
+        marginBottom: 12,
+    },
+    currencyIconTag: {
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 8,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    currencyTotalLabel: {
+        fontSize: 11,
+        fontWeight: '600',
+    },
+    currencyTotalAmount: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginTop: 2,
     },
 });

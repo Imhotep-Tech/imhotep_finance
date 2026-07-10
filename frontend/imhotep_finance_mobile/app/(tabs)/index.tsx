@@ -15,6 +15,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useAuth } from '@/contexts/AuthContext';
 import NetWorthCard from '@/components/NetWorthCard';
 import AddTransactionModal from '@/components/AddTransactionModal';
+import UserGuideModal from '@/components/UserGuideModal';
 import api from '@/constants/api';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
@@ -40,7 +41,22 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
   const [initialType, setInitialType] = useState<'deposit' | 'withdraw'>('deposit');
+
+  useEffect(() => {
+    const checkGuide = async () => {
+      try {
+        const hasSeen = await AsyncStorage.getItem('has_seen_guide');
+        if (hasSeen !== 'true') {
+          setShowGuide(true);
+        }
+      } catch (err) {
+        console.warn('AsyncStorage read error:', err);
+      }
+    };
+    checkGuide();
+  }, []);
 
   const fetchData = async () => {
     let latestNetworth = '0';
@@ -330,6 +346,12 @@ export default function Dashboard() {
           setShowAddModal(false);
           loadDashboardData();
         }}
+      />
+
+      {/* User Guide Modal */}
+      <UserGuideModal
+        visible={showGuide}
+        onClose={() => setShowGuide(false)}
       />
     </View>
   );

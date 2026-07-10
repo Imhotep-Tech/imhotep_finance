@@ -8,6 +8,42 @@ const ShowNetWorthDetails = () => {
   const navigate = useNavigate();
   const [details, setDetails] = useState({});
   const [loading, setLoading] = useState(true);
+  const [viewType, setViewType] = useState('place'); // 'place' or 'currency'
+
+  const getCurrencyGroupedDetails = () => {
+    const currencyGroups = {};
+    Object.entries(details).forEach(([place, currencies]) => {
+      currencies.forEach((item) => {
+        const cur = item.currency;
+        const amt = Number(item.amount || 0);
+        if (!currencyGroups[cur]) {
+          currencyGroups[cur] = {
+            total: 0,
+            places: []
+          };
+        }
+        currencyGroups[cur].total += amt;
+        currencyGroups[cur].places.push({
+          place,
+          amount: amt
+        });
+      });
+    });
+
+    Object.keys(currencyGroups).forEach((cur) => {
+      const group = currencyGroups[cur];
+      group.places = group.places.map((p) => {
+        const pct = group.total > 0 ? (p.amount / group.total) * 100 : 0;
+        return {
+          ...p,
+          percentage: pct
+        };
+      });
+      group.places.sort((a, b) => b.amount - a.amount);
+    });
+
+    return Object.entries(currencyGroups);
+  };
 
   // Move Money Modal states
   const [showMoveModal, setShowMoveModal] = useState(false);
@@ -265,14 +301,38 @@ const ShowNetWorthDetails = () => {
             </svg>
             Move Money
           </button>
-          </div>
+        </div>
+      </div>
+
+        {/* Toggle View Tabs */}
+        <div className="flex bg-gray-100 dark:bg-gray-800/60 p-1.5 rounded-2xl max-w-xs sm:max-w-sm mx-auto mb-6 border border-gray-250/20 dark:border-gray-850">
+          <button
+            onClick={() => setViewType('place')}
+            className={`flex-1 py-2 px-4 rounded-xl text-sm font-semibold transition-all duration-200 ${
+              viewType === 'place'
+                ? 'bg-white dark:bg-gray-800 text-[#366c6b] dark:text-teal-400 shadow-md scale-[1.02]'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+            }`}
+          >
+            By Place
+          </button>
+          <button
+            onClick={() => setViewType('currency')}
+            className={`flex-1 py-2 px-4 rounded-xl text-sm font-semibold transition-all duration-200 ${
+              viewType === 'currency'
+                ? 'bg-white dark:bg-gray-800 text-[#366c6b] dark:text-teal-400 shadow-md scale-[1.02]'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+            }`}
+          >
+            By Currency
+          </button>
         </div>
 
         {loading ? (
           <div className="text-center text-lg text-gray-600 dark:text-gray-400">Loading...</div>
         ) : Object.keys(details).length === 0 ? (
           <div className="text-center text-lg text-gray-600 dark:text-gray-400">No net worth details found.</div>
-        ) : (
+        ) : viewType === 'place' ? (
           <div className="space-y-8">
             {Object.entries(details).map(([place, currencies], idx) => (
               <div key={idx} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-6 rounded-2xl shadow-lg">
@@ -310,6 +370,54 @@ const ShowNetWorthDetails = () => {
                         {Number(item.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </div>
                       <div className="text-white/80 text-sm">Total Amount</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {getCurrencyGroupedDetails().map(([currency, data], idx) => (
+              <div key={idx} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-6 rounded-2xl shadow-lg">
+                <div className="flex justify-between items-center mb-6 pb-3 border-b border-gray-100 dark:border-gray-800">
+                  <h2 className="text-2xl font-bold font-chef text-gray-800 dark:text-gray-100 flex items-center">
+                    <span className="bg-[#366c6b] text-white px-3 py-1 rounded-xl text-lg mr-2 font-sans">{currency}</span>
+                    Total Allocation
+                  </h2>
+                  <span className="text-2xl font-extrabold text-gray-800 dark:text-gray-100">
+                    {data.total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </span>
+                </div>
+                
+                <div className="space-y-5">
+                  {data.places.map((p, pIdx) => (
+                    <div 
+                      key={pIdx} 
+                      className="space-y-2 cursor-pointer group"
+                      onClick={() => navigate(`/show_trans?place=${encodeURIComponent(p.place)}`)}
+                    >
+                      <div className="flex justify-between text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300">
+                        <span className="group-hover:text-[#366c6b] dark:group-hover:text-teal-400 transition-colors flex items-center">
+                          <svg className="w-4 h-4 mr-1.5 text-gray-400 group-hover:text-[#366c6b] dark:group-hover:text-teal-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          </svg>
+                          {p.place}
+                        </span>
+                        <span className="font-mono">
+                          {p.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          <span className="ml-2 text-xs font-semibold px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400">
+                            {p.percentage.toFixed(1)}%
+                          </span>
+                        </span>
+                      </div>
+                      
+                      <div className="w-full bg-gray-100 dark:bg-gray-800 h-3 rounded-full overflow-hidden shadow-inner">
+                        <div 
+                          className="bg-gradient-to-r from-[#51adac] to-[#428a89] h-full rounded-full transition-all duration-500 ease-out" 
+                          style={{ width: `${p.percentage}%` }}
+                        ></div>
+                      </div>
                     </div>
                   ))}
                 </div>

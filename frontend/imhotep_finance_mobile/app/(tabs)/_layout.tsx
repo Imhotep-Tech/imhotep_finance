@@ -153,6 +153,12 @@ export default function TabLayout() {
           href: null,
         }}
       />
+      <Tabs.Screen
+        name="show-networth-details"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }

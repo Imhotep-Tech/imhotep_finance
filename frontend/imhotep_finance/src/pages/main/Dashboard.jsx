@@ -6,6 +6,7 @@ import Logo from '../../assets/Logo.jpeg';
 import AddTransactionModal from '../../components/AddTransactionModal';
 import NetWorthCard from '../../components/NetWorthCard';
 import { useNavigate } from 'react-router-dom';
+import UserGuideModal from '../../components/common/UserGuideModal';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -16,8 +17,16 @@ const Dashboard = () => {
   const [target, setTarget] = useState('');
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
   const [initialType, setInitialType] = useState('deposit'); // new state
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const hasSeen = localStorage.getItem('has_seen_guide');
+    if (hasSeen !== 'true') {
+      setShowGuide(true);
+    }
+  }, []);
 
   // Fetch networth data
   useEffect(() => {
@@ -354,6 +363,12 @@ const Dashboard = () => {
           }}
         />
       )}
+
+      {/* User Guide Modal */}
+      <UserGuideModal
+        isOpen={showGuide}
+        onClose={() => setShowGuide(false)}
+      />
 
       <Footer />
     </div>
