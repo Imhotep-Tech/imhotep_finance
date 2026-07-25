@@ -1,287 +1,249 @@
 import React, { useState, useEffect } from 'react';
 import {
-    View,
-    Text,
-    StyleSheet,
-    FlatList,
-    ActivityIndicator,
-    TouchableOpacity,
-    RefreshControl,
-    Modal,
-    TextInput,
-    Alert
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  RefreshControl,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import api from '@/constants/api';
-import ScheduledTransactionItem from '@/components/ScheduledTransactionItem';
-import AddScheduledTransactionModal from '@/components/AddScheduledTransactionModal';
-import CategorySelect from '@/components/CategorySelect';
-import { updateNetworthWidget } from '@/widgets/widget-updater';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import ImhotepTheme from '@/constants/imhotepTheme';
+import api from '@/constants/api';
+import ScheduledTransactionItem, { ScheduledTransaction } from '@/components/ScheduledTransactionItem';
+import AddScheduledTransactionModal from '@/components/AddScheduledTransactionModal';
+import PressableScale from '@/components/ui/PressableScale';
+import TransactionListSkeleton from '@/components/ui/TransactionListSkeleton';
+import { EmptyState, ErrorCard } from '@/components/ui/StateViews';
+import { updateNetworthWidget } from '@/widgets/widget-updater';
+
 export default function ScheduledTransactionsScreen() {
-    const insets = useSafeAreaInsets();
-    const colorScheme = useColorScheme();
-    const isDark = colorScheme === 'dark';
+  const insets = useSafeAreaInsets();
 
-    const [transactions, setTransactions] = useState<any[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [refreshing, setRefreshing] = useState(false);
-    const [page, setPage] = useState(1);
-    const [hasMore, setHasMore] = useState(true);
-    const [error, setError] = useState('');
-    const [actionLoading, setActionLoading] = useState<{ [key: number]: boolean }>({});
+  const [transactions, setTransactions] = useState<ScheduledTransaction[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [page, setPage] = useState<number>(1);
+  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [error, setError] = useState<string>('');
+  const [actionLoading, setActionLoading] = useState<{ [key: number]: boolean }>({});
 
-    // Filters
-    const [showFilterModal, setShowFilterModal] = useState(false);
-    const [statusFilter, setStatusFilter] = useState(''); // 'deposit', 'withdraw'
-    const [categoryFilter, setCategoryFilter] = useState('');
-    const [detailsSearch, setDetailsSearch] = useState('');
+  const [showAddModal, setShowAddModal] = useState<boolean>(false);
+  const [editTransaction, setEditTransaction] = useState<ScheduledTransaction | null>(null);
 
-    // Modals
-    const [showAddModal, setShowAddModal] = useState(false);
-    const [editTransaction, setEditTransaction] = useState<any>(null);
+  const fetchTransactions = async (pageNum: number, refresh: boolean = false) => {
+    if (loading && !refresh) return;
+    setLoading(true);
+    setError('');
 
-    const themeStyles = {
-        container: {
-            backgroundColor: isDark ? '#0f172a' : '#f8fafc',
-        },
-        header: {
-            backgroundColor: isDark ? '#1e293b' : 'white',
-            borderBottomColor: isDark ? '#334155' : '#e2e8f0',
-        },
-        text: {
-            color: isDark ? '#f1f5f9' : '#1e293b',
-        },
-        subText: {
-            color: isDark ? '#94a3b8' : '#64748b',
-        },
-        filterButton: {
-            backgroundColor: isDark ? '#334155' : '#f1f5f9',
-        },
-        modalContent: {
-            backgroundColor: isDark ? '#1e293b' : 'white',
-        },
-        input: {
-            backgroundColor: isDark ? '#334155' : '#f9f9f9',
-            color: isDark ? '#f1f5f9' : '#000',
-            borderColor: isDark ? '#475569' : '#eee',
-        },
-        actionButton: {
-            backgroundColor: isDark ? '#334155' : 'white',
-            borderColor: isDark ? '#475569' : '#e2e8f0',
-        }
-    };
+    try {
+      const params = { page: pageNum };
+      const res = await api.get('/api/finance-management/scheduled-trans/get-scheduled-trans/', {
+        params,
+      });
 
-    const fetchTransactions = async (pageNum: number, refresh: boolean = false) => {
-        if (loading) return;
-        setLoading(true);
-        setError('');
+      const newTransactions: ScheduledTransaction[] = res.data.scheduled_transactions || [];
 
-        try {
-            const params: any = { page: pageNum };
-            // Note: Check backend if these filters are supported on this endpoint. 
-            // Based on ShowScheduledTransactions.jsx, it seems to strictly use page.
-            // But let's check if we can add client side filtering or if backend supports it.
-            // For now, I'll pass them, but if backend ignores them, it's fine.
-            // Update: ShowScheduledTransactions.jsx ONLY sends 'page'. 
-            // So for now, I will NOT send filters to backend to avoid errors, 
-            // unless I verified backend supports them.
-            // However, the user asked to make it "work with the same way as the web react app".
-            // The web app DOES NOT have filters on Scheduled Transactions page (only pagination).
-            // So I should arguably REMOVE filters from this screen to match web app.
-            // But having filters is nice. I will keep the UI but maybe filter client side? 
-            // No, client side filtering with server side pagination is broken.
-            // I will disable filters for now to match web app and avoid confusion.
+      if (refresh) {
+        setTransactions(newTransactions);
+      } else {
+        setTransactions((prev) => [...prev, ...newTransactions]);
+      }
 
-            const res = await api.get('/api/finance-management/scheduled-trans/get-scheduled-trans/', { params });
+      setHasMore(newTransactions.length >= 10);
+    } catch (err) {
+      console.error('Fetch scheduled transactions error:', err);
+      setError('Failed to load scheduled transactions');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
 
-            const newTransactions = res.data.scheduled_transactions || [];
+  useEffect(() => {
+    fetchTransactions(1, true);
+  }, []);
 
-            if (refresh) {
-                setTransactions(newTransactions);
-            } else {
-                setTransactions(prev => [...prev, ...newTransactions]);
-            }
+  const loadMore = () => {
+    if (!loading && hasMore) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+      fetchTransactions(nextPage);
+    }
+  };
 
-            if (newTransactions.length < 10) {
-                setHasMore(false);
-            } else {
-                setHasMore(true);
-            }
+  const onRefresh = () => {
+    setRefreshing(true);
+    setPage(1);
+    fetchTransactions(1, true);
+  };
 
-        } catch (err) {
-            console.error('Fetch error:', err);
-            setError('Failed to load scheduled transactions');
-        } finally {
-            setLoading(false);
-            setRefreshing(false);
-        }
-    };
+  const handleEdit = (transaction: ScheduledTransaction) => {
+    setEditTransaction(transaction);
+    setShowAddModal(true);
+  };
 
-    useEffect(() => {
-        fetchTransactions(1, true);
-    }, []);
+  const handleToggleStatus = async (transaction: ScheduledTransaction) => {
+    if (actionLoading[transaction.id]) return;
 
-    const loadMore = () => {
-        if (!loading && hasMore) {
-            const nextPage = page + 1;
-            setPage(nextPage);
-            fetchTransactions(nextPage);
-        }
-    };
+    const originalStatus = transaction.status;
+    const newStatus = !originalStatus;
 
-    const onRefresh = () => {
-        setRefreshing(true);
-        setPage(1);
-        fetchTransactions(1, true);
-    };
-
-    const handleEdit = (transaction: any) => {
-        setEditTransaction(transaction);
-        setShowAddModal(true);
-    };
-
-    const handleToggleStatus = async (transaction: any) => {
-        if (actionLoading[transaction.id]) return;
-
-        // 1. Optimistic Update Immediately
-        const originalStatus = transaction.status;
-        const newStatus = !originalStatus;
-
-        setTransactions(prev => prev.map(t =>
-            t.id === transaction.id ? { ...t, status: newStatus } : t
-        ));
-
-        setActionLoading(prev => ({ ...prev, [transaction.id]: true }));
-
-        try {
-            const res = await api.post(`/api/finance-management/scheduled-trans/update-scheduled-trans-status/${transaction.id}/`);
-            updateNetworthWidget();
-
-            // 3. Confirm with server data (optional, but good for consistency)
-            if (res.data.status !== undefined && res.data.status !== newStatus) {
-                setTransactions(prev => prev.map(t =>
-                    t.id === transaction.id ? { ...t, status: res.data.status } : t
-                ));
-            }
-        } catch (err: any) {
-            console.error("Status toggle error:", err);
-            Alert.alert("Error", err.response?.data?.error || "Failed to update status");
-            // Revert on error
-            setTransactions(prev => prev.map(t =>
-                t.id === transaction.id ? { ...t, status: originalStatus } : t
-            ));
-        } finally {
-            setActionLoading(prev => ({ ...prev, [transaction.id]: false }));
-        }
-    };
-
-    return (
-        <View style={[styles.container, themeStyles.container]}>
-            {/* Header */}
-            <View style={[styles.header, themeStyles.header, { paddingTop: insets.top + 12 }]}>
-                <Text style={[styles.headerTitle, themeStyles.text]}>Scheduled</Text>
-                {/* 
-                <TouchableOpacity
-                    style={[styles.filterButton, themeStyles.filterButton]}
-                    onPress={() => setShowFilterModal(true)}
-                >
-                    <Ionicons name="options" size={20} color={isDark ? '#cbd5e1' : '#475569'} />
-                </TouchableOpacity>
-                */}
-            </View>
-
-            {/* List */}
-            <FlatList
-                data={transactions}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item }) => (
-                    <ScheduledTransactionItem
-                        transaction={item}
-                        onPress={() => handleEdit(item)}
-                        onToggleStatus={() => handleToggleStatus(item)}
-                        loading={actionLoading[item.id]}
-                    />
-                )}
-                refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={isDark ? "#fff" : "#366c6b"} />
-                }
-                onEndReached={loadMore}
-                onEndReachedThreshold={0.5}
-                ListFooterComponent={loading && !refreshing ? <ActivityIndicator size="small" color="#366c6b" style={{ margin: 20 }} /> : null}
-                ListEmptyComponent={!loading ? <Text style={[styles.emptyText, themeStyles.subText]}>No scheduled transactions found.</Text> : null}
-                contentContainerStyle={{ paddingBottom: 100 }}
-            />
-
-            {/* Add Button (Floating) */}
-            <TouchableOpacity
-                style={[styles.fab, { bottom: Math.max(insets.bottom, 16) + 80 }]}
-                onPress={() => {
-                    setEditTransaction(null);
-                    setShowAddModal(true);
-                }}
-            >
-                <Ionicons name="add" size={30} color="white" />
-            </TouchableOpacity>
-
-            {/* Add/Edit Modal */}
-            <AddScheduledTransactionModal
-                visible={showAddModal}
-                editMode={!!editTransaction}
-                initialValues={editTransaction || {}}
-                initialType={editTransaction?.scheduled_trans_status?.toLowerCase() || 'deposit'}
-                onClose={() => setShowAddModal(false)}
-                onSuccess={() => {
-                    setShowAddModal(false);
-                    onRefresh();
-                }}
-            />
-        </View>
+    setTransactions((prev) =>
+      prev.map((t) => (t.id === transaction.id ? { ...t, status: newStatus } : t))
     );
+
+    setActionLoading((prev) => ({ ...prev, [transaction.id]: true }));
+
+    try {
+      const res = await api.post(
+        `/api/finance-management/scheduled-trans/update-scheduled-trans-status/${transaction.id}/`
+      );
+      updateNetworthWidget();
+
+      if (res.data.status !== undefined && res.data.status !== newStatus) {
+        setTransactions((prev) =>
+          prev.map((t) => (t.id === transaction.id ? { ...t, status: res.data.status } : t))
+        );
+      }
+    } catch (err: any) {
+      console.error('Status toggle error:', err);
+      Alert.alert('Error', err.response?.data?.error || 'Failed to update status');
+      setTransactions((prev) =>
+        prev.map((t) => (t.id === transaction.id ? { ...t, status: originalStatus } : t))
+      );
+    } finally {
+      setActionLoading((prev) => ({ ...prev, [transaction.id]: false }));
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      {/* Header */}
+      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
+        <View>
+          <Text style={styles.headerTitle}>Scheduled Transactions</Text>
+          <Text style={styles.headerSubtitle}>Automated & Recurring Monthly Rules</Text>
+        </View>
+      </View>
+
+      {/* Main List */}
+      {loading && transactions.length === 0 ? (
+        <View style={{ paddingHorizontal: 16, paddingTop: 16 }}>
+          <TransactionListSkeleton />
+        </View>
+      ) : error ? (
+        <View style={{ paddingHorizontal: 16, paddingTop: 16 }}>
+          <ErrorCard message={error} onRetry={onRefresh} />
+        </View>
+      ) : (
+        <FlatList
+          data={transactions}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <ScheduledTransactionItem
+              transaction={item}
+              onPress={() => handleEdit(item)}
+              onToggleStatus={() => handleToggleStatus(item)}
+              loading={actionLoading[item.id]}
+            />
+          )}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={ImhotepTheme.colors.primaryTealGlow}
+            />
+          }
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.5}
+          ListEmptyComponent={
+            <EmptyState
+              title="No Scheduled Transactions"
+              message="Set up recurring deposits or expenses to apply automatically on your designated day of the month."
+              actionLabel="Create Scheduled Rule"
+              onAction={() => {
+                setEditTransaction(null);
+                setShowAddModal(true);
+              }}
+            />
+          }
+          contentContainerStyle={styles.listContent}
+        />
+      )}
+
+      {/* Floating Add FAB */}
+      <PressableScale
+        style={[styles.fab, { bottom: Math.max(insets.bottom, 16) + 80 }]}
+        onPress={() => {
+          setEditTransaction(null);
+          setShowAddModal(true);
+        }}
+      >
+        <Ionicons name="add" size={28} color="#FFFFFF" />
+      </PressableScale>
+
+      {/* Add / Edit Modal */}
+      <AddScheduledTransactionModal
+        visible={showAddModal}
+        editMode={!!editTransaction}
+        initialValues={editTransaction || {}}
+        initialType={(editTransaction?.scheduled_trans_status as any)?.toLowerCase() || 'deposit'}
+        onClose={() => setShowAddModal(false)}
+        onSuccess={() => {
+          setShowAddModal(false);
+          onRefresh();
+        }}
+      />
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
-    header: {
-        paddingTop: 0,
-        paddingBottom: 20,
-        paddingHorizontal: 20,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        borderBottomWidth: 1,
-    },
-    headerTitle: {
-        fontSize: 24,
-        fontWeight: 'bold',
-    },
-    filterButton: {
-        padding: 10,
-        borderRadius: 12,
-    },
-    emptyText: {
-        textAlign: 'center',
-        marginTop: 50,
-        fontSize: 16,
-    },
-    fab: {
-        position: 'absolute',
-        bottom: 16,
-        right: 30,
-        width: 56,
-        height: 56,
-        borderRadius: 28,
-        backgroundColor: '#366c6b',
-        justifyContent: 'center',
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
-        elevation: 8,
-    },
+  container: {
+    flex: 1,
+    backgroundColor: ImhotepTheme.colors.backgroundDark,
+  },
+  header: {
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: ImhotepTheme.colors.backgroundSurface,
+    borderBottomWidth: 1,
+    borderBottomColor: ImhotepTheme.colors.glassBorder,
+  },
+  headerTitle: {
+    fontSize: 26,
+    fontWeight: '800',
+    color: ImhotepTheme.colors.textPrimary,
+  },
+  headerSubtitle: {
+    fontSize: 13,
+    color: ImhotepTheme.colors.textSecondary,
+    marginTop: 2,
+  },
+  listContent: {
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 120,
+  },
+  fab: {
+    position: 'absolute',
+    right: 24,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: ImhotepTheme.colors.primaryTeal,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: ImhotepTheme.colors.primaryTealGlow,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    elevation: 8,
+  },
 });

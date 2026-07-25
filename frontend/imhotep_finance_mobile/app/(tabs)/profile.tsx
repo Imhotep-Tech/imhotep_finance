@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   StyleSheet,
   View,
-  Pressable,
+  Text,
   Alert,
   TextInput,
   ScrollView,
@@ -10,81 +10,24 @@ import {
   Modal,
   KeyboardAvoidingView,
   Platform,
-  useColorScheme,
-  Keyboard,
   Switch,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as LocalAuthentication from 'expo-local-authentication';
-import { router } from 'expo-router';
 
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { useAuth } from '@/contexts/AuthContext';
-import { useThemeColor } from '@/hooks/use-theme-color';
+import ImhotepTheme from '@/constants/imhotepTheme';
 import api from '@/constants/api';
-import CurrencySelect from '@/components/CurrencySelect'; // Import CurrencySelect
+import { useAuth } from '@/contexts/AuthContext';
+import CurrencySelect from '@/components/CurrencySelect';
+import PressableScale from '@/components/ui/PressableScale';
 import { updateNetworthWidget } from '@/widgets/widget-updater';
 
-// Theme colors
-const themes = {
-  light: {
-    background: '#FFFFFF',
-    surface: '#f1f5f9',
-    surfaceActive: '#FFFFFF',
-    text: '#111827',
-    textSecondary: '#6B7280',
-    placeholder: '#9CA3AF',
-    border: '#D1D5DB',
-    borderLight: '#E5E7EB',
-    primary: '#366c6b',
-    primaryLight: '#eaf6f6',
-    error: '#EF4444',
-    errorLight: '#FEF2F2',
-    success: '#22C55E',
-    successLight: '#F0FDF4',
-    warning: '#F59E0B',
-    warningLight: '#FFFBEB',
-    overlay: 'rgba(0, 0, 0, 0.5)',
-  },
-  dark: {
-    background: '#1e293b',
-    surface: '#0f172a',
-    surfaceActive: '#1e293b',
-    text: '#F9FAFB',
-    textSecondary: '#9CA3AF',
-    placeholder: '#6B7280',
-    border: '#334155',
-    borderLight: '#1e293b',
-    primary: '#51adac',
-    primaryLight: '#244746',
-    error: '#F87171',
-    errorLight: '#7F1D1D',
-    success: '#4ADE80',
-    successLight: '#14532D',
-    warning: '#FBBF24',
-    warningLight: '#78350F',
-    overlay: 'rgba(0, 0, 0, 0.7)',
-  },
-};
-
 export default function ProfileScreen() {
-  const { user, logout, updateUser, token } = useAuth();
-  const colorScheme = useColorScheme();
-  const backgroundColor = colorScheme === 'dark' ? '#0f172a' : '#f8fafc';
-  const colors = themes[colorScheme === 'dark' ? 'dark' : 'light'];
+  const { user, logout, updateUser } = useAuth();
+  const insets = useSafeAreaInsets();
   const scrollViewRef = useRef<ScrollView>(null);
-
-  // Helper to scroll input into view on Android
-  const scrollToInput = (yOffset: number) => {
-    if (Platform.OS === 'android') {
-      setTimeout(() => {
-        scrollViewRef.current?.scrollTo({ y: yOffset, animated: true });
-      }, 100);
-    }
-  };
 
   const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'financial'>('profile');
   const [appLockEnabled, setAppLockEnabled] = useState(false);
@@ -92,58 +35,15 @@ export default function ProfileScreen() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // Load App Lock settings on mount
-  useEffect(() => {
-    const checkAppLockStatus = async () => {
-      try {
-        const enabled = await AsyncStorage.getItem('app_lock_enabled');
-        setAppLockEnabled(enabled === 'true');
-      } catch (e) {
-        console.error('Error loading app lock status:', e);
-      }
-    };
-    checkAppLockStatus();
-  }, []);
-
-  const handleToggleAppLock = async (value: boolean) => {
-    try {
-      const hasHardware = await LocalAuthentication.hasHardwareAsync();
-
-      if (!hasHardware) {
-        Alert.alert('Not Supported', 'Your device does not support biometric or passcode authentication.');
-        return;
-      }
-
-      // Prompt authentication to verify user permission
-      const result = await LocalAuthentication.authenticateAsync({
-        promptMessage: value ? 'Confirm to enable App Lock' : 'Confirm to disable App Lock',
-        fallbackLabel: 'Use PIN',
-      });
-
-      if (result.success) {
-        await AsyncStorage.setItem('app_lock_enabled', value ? 'true' : 'false');
-        setAppLockEnabled(value);
-        setSuccess(value ? 'App Lock enabled successfully!' : 'App Lock disabled successfully!');
-      } else {
-        // Switch will not toggle if they cancel/fail
-        Alert.alert('Authentication Failed', 'Could not verify your identity.');
-      }
-    } catch (e) {
-      console.error(e);
-      Alert.alert('Error', 'An error occurred while setting up App Lock.');
-    }
-  };
-
   // Delete account modal state
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deleteMethod, setDeleteMethod] = useState(''); // 'password' or 'otp'
+  const [deleteMethod, setDeleteMethod] = useState('');
   const [deleteCredential, setDeleteCredential] = useState('');
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteOtpSent, setDeleteOtpSent] = useState(false);
 
   // Email verification modal state
   const [showOtpModal, setShowOtpModal] = useState(false);
-  const [pendingNewEmail, setPendingNewEmail] = useState('');
   const [otp, setOtp] = useState('');
   const [otpLoading, setOtpLoading] = useState(false);
   const [otpError, setOtpError] = useState('');
@@ -174,7 +74,18 @@ export default function ProfileScreen() {
   const [currency, setCurrency] = useState('');
   const [initialCurrency, setInitialCurrency] = useState('');
 
-  // Load profile data on component mount
+  useEffect(() => {
+    const checkAppLockStatus = async () => {
+      try {
+        const enabled = await AsyncStorage.getItem('app_lock_enabled');
+        setAppLockEnabled(enabled === 'true');
+      } catch (e) {
+        console.error('Error loading app lock status:', e);
+      }
+    };
+    checkAppLockStatus();
+  }, []);
+
   useEffect(() => {
     if (user) {
       setProfileData({
@@ -186,7 +97,6 @@ export default function ProfileScreen() {
     }
   }, [user]);
 
-  // Fetch Financial Data when tab is active
   useEffect(() => {
     if (activeTab === 'financial') {
       fetchFinancialData();
@@ -196,7 +106,6 @@ export default function ProfileScreen() {
   const fetchFinancialData = async () => {
     setLoading(true);
     try {
-      // Fetch Target
       try {
         const targetRes = await api.get('/api/finance-management/target/get-target/');
         setTarget(targetRes.data.target ? String(targetRes.data.target) : '');
@@ -204,7 +113,6 @@ export default function ProfileScreen() {
         if (e.response?.status !== 404) console.warn('Fetch target error', e);
       }
 
-      // Fetch Currency
       try {
         const currRes = await api.get('/api/get-fav-currency/');
         const curr = currRes.data.favorite_currency || '';
@@ -213,7 +121,6 @@ export default function ProfileScreen() {
       } catch (e) {
         console.warn('Fetch currency error', e);
       }
-
     } catch (err) {
       console.error(err);
     } finally {
@@ -221,49 +128,32 @@ export default function ProfileScreen() {
     }
   };
 
-  const handleRequestDeleteOTP = async () => {
-    setDeleteLoading(true);
-    setError('');
-    setSuccess('');
+  const handleToggleAppLock = async (value: boolean) => {
     try {
-      const response = await api.post('/api/profile/request-delete-otp/');
-      setSuccess(response.data.message || 'OTP sent successfully');
-      setDeleteOtpSent(true);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to send OTP');
-    }
-    setDeleteLoading(false);
-  };
+      const hasHardware = await LocalAuthentication.hasHardwareAsync();
 
-  const handleConfirmDeleteAccount = async () => {
-    if (!deleteCredential) {
-      setError('Please enter your password or OTP');
-      return;
-    }
-    
-    setDeleteLoading(true);
-    setError('');
-    setSuccess('');
-    
-    try {
-      const payload = deleteMethod === 'otp' 
-        ? { otp: deleteCredential } 
-        : { password: deleteCredential };
-        
-      await api.post('/api/profile/delete-account/', payload);
-      setSuccess('Account deleted successfully');
-      setShowDeleteModal(false);
-      
-      // Logout
-      setTimeout(() => {
-        logout();
-      }, 1500);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to delete account');
-    }
-    setDeleteLoading(false);
-  };
+      if (!hasHardware) {
+        Alert.alert('Not Supported', 'Your device does not support biometric or passcode authentication.');
+        return;
+      }
 
+      const result = await LocalAuthentication.authenticateAsync({
+        promptMessage: value ? 'Confirm to enable App Lock' : 'Confirm to disable App Lock',
+        fallbackLabel: 'Use PIN',
+      });
+
+      if (result.success) {
+        await AsyncStorage.setItem('app_lock_enabled', value ? 'true' : 'false');
+        setAppLockEnabled(value);
+        setSuccess(value ? 'App Lock enabled successfully!' : 'App Lock disabled successfully!');
+      } else {
+        Alert.alert('Authentication Failed', 'Could not verify your identity.');
+      }
+    } catch (e) {
+      console.error(e);
+      Alert.alert('Error', 'An error occurred while setting up App Lock.');
+    }
+  };
 
   const handleProfileSubmit = async () => {
     setLoading(true);
@@ -273,16 +163,13 @@ export default function ProfileScreen() {
     try {
       const response = await api.put('/api/profile/update/', profileData);
 
-      // Check if email verification is required
       if (response.data.email_verification_required) {
-        setPendingNewEmail(response.data.pending_new_email);
         setShowOtpModal(true);
         setSuccess('A verification code has been sent to your new email address.');
       } else {
         setSuccess(response.data.message || 'Profile updated successfully!');
       }
 
-      // Update user context with new data
       if (response.data.user) {
         updateUser(response.data.user);
       }
@@ -304,12 +191,10 @@ export default function ProfileScreen() {
 
     try {
       await api.post('/api/profile/verify-email-change/', { otp });
-
       setShowOtpModal(false);
       setOtp('');
-      setSuccess('Email changed successfully! Please log in again with your new email.');
+      setSuccess('Email changed successfully! Please log in again.');
 
-      // Log out user after email change
       setTimeout(() => {
         logout();
       }, 2000);
@@ -318,14 +203,6 @@ export default function ProfileScreen() {
     }
 
     setOtpLoading(false);
-  };
-
-  const closeOtpModal = () => {
-    setShowOtpModal(false);
-    setOtp('');
-    setOtpError('');
-    // Reset email to current value since verification was cancelled
-    setProfileData(prev => ({ ...prev, email: user?.email || '' }));
   };
 
   const handlePasswordSubmit = async () => {
@@ -348,11 +225,7 @@ export default function ProfileScreen() {
     try {
       const response = await api.post('/api/profile/change-password/', passwordData);
       setSuccess(response.data.message || 'Password changed successfully!');
-      setPasswordData({
-        current_password: '',
-        new_password: '',
-        confirm_password: '',
-      });
+      setPasswordData({ current_password: '', new_password: '', confirm_password: '' });
     } catch (err: any) {
       setError(err.response?.data?.error || 'Failed to change password');
     }
@@ -366,7 +239,6 @@ export default function ProfileScreen() {
     setSuccess('');
 
     try {
-      // Update Target
       if (target !== '') {
         if (isNaN(Number(target)) || Number(target) < 0) {
           setError('Target must be a non-negative number');
@@ -376,7 +248,6 @@ export default function ProfileScreen() {
         await api.post('/api/finance-management/target/manage-target/', { target });
       }
 
-      // Update Currency if changed
       if (currency && currency !== initialCurrency) {
         const res = await api.post('/api/change-fav-currency/', { fav_currency: currency });
         if (!res.data.success) {
@@ -387,7 +258,6 @@ export default function ProfileScreen() {
 
       setSuccess('Financial settings updated successfully!');
       updateNetworthWidget();
-
     } catch (err: any) {
       setError(err.response?.data?.error || err.message || 'Failed to update settings');
     } finally {
@@ -396,855 +266,444 @@ export default function ProfileScreen() {
   };
 
   const handleLogout = () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await logout();
-            } catch (err) {
-              console.error('Logout error:', err);
-              Alert.alert('Error', 'Failed to logout. Please try again.');
-            }
-          },
+    Alert.alert('Logout', 'Are you sure you want to logout of Imhotep Finance?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Logout',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await logout();
+          } catch (err) {
+            console.error('Logout error:', err);
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor }]} edges={['top']}>
-      <KeyboardAvoidingView
-        style={styles.keyboardAvoid}
-        behavior="padding"
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
-      >
-        <ScrollView
-          ref={scrollViewRef}
-          style={styles.scrollView}
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          <ThemedView style={styles.header} lightColor="#f8fafc" darkColor="#0f172a">
-            <ThemedText type="title" style={styles.title}>My Profile</ThemedText>
-            <ThemedText style={[styles.subtitle, { color: colors.textSecondary }]}>
-              Manage your account and preferences
-            </ThemedText>
-          </ThemedView>
+    <View style={styles.container}>
+      {/* Header */}
+      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
+        <View>
+          <Text style={styles.headerTitle}>Account & Settings</Text>
+          <Text style={styles.headerSubtitle}>Personal Security & Vault Preferences</Text>
+        </View>
+        <PressableScale style={styles.logoutIconButton} onPress={handleLogout}>
+          <Ionicons name="log-out-outline" size={20} color={ImhotepTheme.colors.withdrawRed} />
+        </PressableScale>
+      </View>
 
-          {/* User Avatar */}
-          <View style={styles.avatarContainer}>
-            <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
-              <Ionicons name="person" size={40} color="#fff" />
-            </View>
-            <ThemedText type="subtitle" style={styles.userName}>
-              {user?.username || 'User'}
-            </ThemedText>
+      <ScrollView ref={scrollViewRef} contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+        {/* User Card */}
+        <View style={styles.userCard}>
+          <View style={styles.avatarCircle}>
+            <Ionicons name="person" size={28} color={ImhotepTheme.colors.primaryTealGlow} />
           </View>
-
-          {/* Tabs */}
-          <View style={[styles.tabContainer, { backgroundColor: colors.surface }]}>
-            <Pressable
-              style={[
-                styles.tab,
-                activeTab === 'profile' && [styles.activeTab, { backgroundColor: colors.surfaceActive }],
-              ]}
-              onPress={() => { setActiveTab('profile'); setError(''); setSuccess(''); }}
-            >
-              <ThemedText style={[styles.tabText, activeTab === 'profile' && { color: colors.primary }]}>
-                Profile
-              </ThemedText>
-            </Pressable>
-            <Pressable
-              style={[
-                styles.tab,
-                activeTab === 'security' && [styles.activeTab, { backgroundColor: colors.surfaceActive }],
-              ]}
-              onPress={() => { setActiveTab('security'); setError(''); setSuccess(''); }}
-            >
-              <ThemedText style={[styles.tabText, activeTab === 'security' && { color: colors.primary }]}>
-                Security
-              </ThemedText>
-            </Pressable>
-            <Pressable
-              style={[
-                styles.tab,
-                activeTab === 'financial' && [styles.activeTab, { backgroundColor: colors.surfaceActive }],
-              ]}
-              onPress={() => { setActiveTab('financial'); setError(''); setSuccess(''); }}
-            >
-              <ThemedText style={[styles.tabText, activeTab === 'financial' && { color: colors.primary }]}>
-                Financial
-              </ThemedText>
-            </Pressable>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.userName}>{user?.first_name ? `${user.first_name} ${user.last_name || ''}` : user?.username || 'Trader'}</Text>
+            <Text style={styles.userEmail}>{user?.email || 'No email attached'}</Text>
           </View>
+        </View>
 
-          {/* Messages */}
-          {error ? (
-            <View style={[styles.messageBox, { backgroundColor: colors.errorLight, borderColor: colors.error }]}>
-              <ThemedText style={{ color: colors.error }}>{error}</ThemedText>
-            </View>
-          ) : null}
-          {success ? (
-            <View style={[styles.messageBox, { backgroundColor: colors.successLight, borderColor: colors.success }]}>
-              <ThemedText style={{ color: colors.success }}>{success}</ThemedText>
-            </View>
-          ) : null}
+        {/* Tab Segment Selector */}
+        <View style={styles.tabContainer}>
+          {(['profile', 'security', 'financial'] as const).map((tab) => (
+            <PressableScale
+              key={tab}
+              style={[styles.tabButton, activeTab === tab && styles.tabButtonActive]}
+              onPress={() => {
+                setActiveTab(tab);
+                setError('');
+                setSuccess('');
+              }}
+            >
+              <Text style={[styles.tabText, activeTab === tab && styles.tabTextActive]}>
+                {tab === 'profile' ? 'Profile' : tab === 'security' ? 'Security' : 'Goals'}
+              </Text>
+            </PressableScale>
+          ))}
+        </View>
 
-          {/* Profile Form */}
-          {activeTab === 'profile' && (
-            <View style={styles.form}>
-              <View style={styles.row}>
-                <View style={styles.halfInput}>
-                  <ThemedText style={[styles.label, { color: colors.textSecondary }]}>First Name</ThemedText>
-                  <TextInput
-                    style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
-                    value={profileData.first_name}
-                    onChangeText={(text) => setProfileData({ ...profileData, first_name: text })}
-                    placeholder="First name"
-                    placeholderTextColor={colors.placeholder}
-                  />
-                </View>
-                <View style={styles.halfInput}>
-                  <ThemedText style={[styles.label, { color: colors.textSecondary }]}>Last Name</ThemedText>
-                  <TextInput
-                    style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
-                    value={profileData.last_name}
-                    onChangeText={(text) => setProfileData({ ...profileData, last_name: text })}
-                    placeholder="Last name"
-                    placeholderTextColor={colors.placeholder}
-                  />
-                </View>
+        {/* Status Messages */}
+        {error ? (
+          <View style={styles.errorBox}>
+            <Ionicons name="alert-circle" size={18} color={ImhotepTheme.colors.withdrawRed} />
+            <Text style={styles.errorText}>{error}</Text>
+          </View>
+        ) : null}
+
+        {success ? (
+          <View style={styles.successBox}>
+            <Ionicons name="checkmark-circle" size={18} color={ImhotepTheme.colors.depositGreen} />
+            <Text style={styles.successText}>{success}</Text>
+          </View>
+        ) : null}
+
+        {/* Tab 1: Profile Info */}
+        {activeTab === 'profile' && (
+          <View style={styles.bentoCard}>
+            <Text style={styles.cardTitle}>Personal Information</Text>
+
+            <Text style={styles.label}>First Name</Text>
+            <TextInput
+              style={styles.input}
+              value={profileData.first_name}
+              onChangeText={(text) => setProfileData((p) => ({ ...p, first_name: text }))}
+              placeholder="First Name"
+              placeholderTextColor={ImhotepTheme.colors.textMuted}
+            />
+
+            <Text style={styles.label}>Last Name</Text>
+            <TextInput
+              style={styles.input}
+              value={profileData.last_name}
+              onChangeText={(text) => setProfileData((p) => ({ ...p, last_name: text }))}
+              placeholder="Last Name"
+              placeholderTextColor={ImhotepTheme.colors.textMuted}
+            />
+
+            <Text style={styles.label}>Username</Text>
+            <TextInput
+              style={styles.input}
+              value={profileData.username}
+              onChangeText={(text) => setProfileData((p) => ({ ...p, username: text }))}
+              placeholder="Username"
+              placeholderTextColor={ImhotepTheme.colors.textMuted}
+            />
+
+            <Text style={styles.label}>Email Address</Text>
+            <TextInput
+              style={styles.input}
+              value={profileData.email}
+              onChangeText={(text) => setProfileData((p) => ({ ...p, email: text }))}
+              placeholder="Email Address"
+              placeholderTextColor={ImhotepTheme.colors.textMuted}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+
+            <PressableScale style={styles.submitBtn} onPress={handleProfileSubmit} disabled={loading}>
+              {loading ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.submitBtnText}>Save Profile</Text>}
+            </PressableScale>
+          </View>
+        )}
+
+        {/* Tab 2: Security & App Lock */}
+        {activeTab === 'security' && (
+          <View style={styles.bentoCard}>
+            <Text style={styles.cardTitle}>App Lock & Security</Text>
+
+            {/* App Lock Switch Card */}
+            <View style={styles.switchRow}>
+              <View style={{ flex: 1, paddingRight: 12 }}>
+                <Text style={styles.switchTitle}>Biometric & PIN App Lock</Text>
+                <Text style={styles.switchSubtitle}>Require Face ID / Fingerprint when opening Imhotep Finance.</Text>
               </View>
-
-              <View style={styles.inputGroup}>
-                <ThemedText style={[styles.label, { color: colors.textSecondary }]}>
-                  Username <ThemedText style={{ color: colors.error }}>*</ThemedText>
-                </ThemedText>
-                <TextInput
-                  style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
-                  value={profileData.username}
-                  onChangeText={(text) => setProfileData({ ...profileData, username: text })}
-                  placeholder="Username"
-                  placeholderTextColor={colors.placeholder}
-                  autoCapitalize="none"
-                />
-              </View>
-
-              <View style={styles.inputGroup}>
-                <ThemedText style={[styles.label, { color: colors.textSecondary }]}>
-                  Email <ThemedText style={{ color: colors.error }}>*</ThemedText>
-                </ThemedText>
-                <TextInput
-                  style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
-                  value={profileData.email}
-                  onChangeText={(text) => setProfileData({ ...profileData, email: text })}
-                  placeholder="you@example.com"
-                  placeholderTextColor={colors.placeholder}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  onFocus={() => scrollToInput(350)}
-                />
-              </View>
-
-              <Pressable
-                style={[styles.primaryButton, { backgroundColor: colors.primary }, loading && styles.buttonDisabled]}
-                onPress={handleProfileSubmit}
-                disabled={loading}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <ThemedText style={styles.buttonText}>Update Profile</ThemedText>
-                )}
-              </Pressable>
-
-              {/* Danger Zone */}
-              {user?.username !== 'demo' && (
-                <View style={[styles.dangerZone, { borderTopColor: colors.error }]}>
-                  <ThemedText style={[styles.dangerZoneTitle, { color: colors.error }]}>Danger Zone</ThemedText>
-                  <ThemedText style={[styles.dangerZoneText, { color: colors.textSecondary }]}>
-                    Once you delete your account, there is no going back. Please be certain.
-                  </ThemedText>
-                  <Pressable
-                    style={[styles.dangerButton, { backgroundColor: colors.errorLight, borderColor: colors.error }]}
-                    onPress={() => {
-                      setShowDeleteModal(true);
-                      setDeleteMethod('');
-                      setDeleteCredential('');
-                      setDeleteOtpSent(false);
-                      setError('');
-                      setSuccess('');
-                    }}
-                  >
-                    <ThemedText style={{ color: colors.error, fontWeight: 'bold' }}>Delete Account</ThemedText>
-                  </Pressable>
-                </View>
-              )}
-            </View>
-          )}
-
-          {/* Security Tab (App Lock & Password Change) */}
-          {activeTab === 'security' && (
-            <View style={styles.form}>
-              {/* App Lock Settings Card */}
-              <View style={[styles.securityCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-                <View style={styles.securityRow}>
-                  <View style={styles.securityTextContainer}>
-                    <ThemedText style={[styles.securityTitle, { color: colors.text }]} type="defaultSemiBold">
-                      App Lock
-                    </ThemedText>
-                    <ThemedText style={[styles.securityDescription, { color: colors.textSecondary }]}>
-                      Require Face ID/Fingerprint or your device PIN to unlock the app when opening or returning.
-                    </ThemedText>
-                  </View>
-                  <Switch
-                    value={appLockEnabled}
-                    onValueChange={handleToggleAppLock}
-                    trackColor={{ false: colors.border, true: colors.primary }}
-                    thumbColor={Platform.OS === 'android' ? '#ffffff' : undefined}
-                  />
-                </View>
-              </View>
-
-              <View style={[styles.divider, { backgroundColor: colors.borderLight }]} />
-
-              <ThemedText style={[styles.sectionTitle, { color: colors.text }]} type="defaultSemiBold">
-                Change Password
-              </ThemedText>
-              <View style={styles.inputGroup}>
-                <ThemedText style={[styles.label, { color: colors.textSecondary }]}>
-                  Current Password <ThemedText style={{ color: colors.error }}>*</ThemedText>
-                </ThemedText>
-                <View style={styles.passwordContainer}>
-                  <TextInput
-                    style={[styles.passwordInput, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
-                    value={passwordData.current_password}
-                    onChangeText={(text) => setPasswordData({ ...passwordData, current_password: text })}
-                    placeholder="Current password"
-                    placeholderTextColor={colors.placeholder}
-                    secureTextEntry={!showPasswords.current}
-                  />
-                  <Pressable
-                    style={styles.eyeButton}
-                    onPress={() => setShowPasswords({ ...showPasswords, current: !showPasswords.current })}
-                  >
-                    <Ionicons
-                      name={showPasswords.current ? 'eye-off-outline' : 'eye-outline'}
-                      size={20}
-                      color={colors.primary}
-                    />
-                  </Pressable>
-                </View>
-              </View>
-
-              <View style={styles.inputGroup}>
-                <ThemedText style={[styles.label, { color: colors.textSecondary }]}>
-                  New Password <ThemedText style={{ color: colors.error }}>*</ThemedText>
-                </ThemedText>
-                <View style={styles.passwordContainer}>
-                  <TextInput
-                    style={[styles.passwordInput, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
-                    value={passwordData.new_password}
-                    onChangeText={(text) => setPasswordData({ ...passwordData, new_password: text })}
-                    placeholder="New password (min 8 characters)"
-                    placeholderTextColor={colors.placeholder}
-                    secureTextEntry={!showPasswords.new}
-                  />
-                  <Pressable
-                    style={styles.eyeButton}
-                    onPress={() => setShowPasswords({ ...showPasswords, new: !showPasswords.new })}
-                  >
-                    <Ionicons
-                      name={showPasswords.new ? 'eye-off-outline' : 'eye-outline'}
-                      size={20}
-                      color={colors.primary}
-                    />
-                  </Pressable>
-                </View>
-              </View>
-
-              <View style={styles.inputGroup}>
-                <ThemedText style={[styles.label, { color: colors.textSecondary }]}>
-                  Confirm Password <ThemedText style={{ color: colors.error }}>*</ThemedText>
-                </ThemedText>
-                <View style={styles.passwordContainer}>
-                  <TextInput
-                    style={[styles.passwordInput, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
-                    value={passwordData.confirm_password}
-                    onChangeText={(text) => setPasswordData({ ...passwordData, confirm_password: text })}
-                    placeholder="Confirm new password"
-                    placeholderTextColor={colors.placeholder}
-                    secureTextEntry={!showPasswords.confirm}
-                    onFocus={() => scrollToInput(450)}
-                  />
-                  <Pressable
-                    style={styles.eyeButton}
-                    onPress={() => setShowPasswords({ ...showPasswords, confirm: !showPasswords.confirm })}
-                  >
-                    <Ionicons
-                      name={showPasswords.confirm ? 'eye-off-outline' : 'eye-outline'}
-                      size={20}
-                      color={colors.primary}
-                    />
-                  </Pressable>
-                </View>
-              </View>
-
-              <Pressable
-                style={[styles.primaryButton, { backgroundColor: colors.primary }, loading && styles.buttonDisabled]}
-                onPress={handlePasswordSubmit}
-                disabled={loading}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <ThemedText style={styles.buttonText}>Change Password</ThemedText>
-                )}
-              </Pressable>
-            </View>
-          )}
-
-          {/* Financial Settings Form */}
-          {activeTab === 'financial' && (
-            <View style={styles.form}>
-              <View style={styles.inputGroup}>
-                <ThemedText style={[styles.label, { color: colors.textSecondary }]}>
-                  Monthly Target Amount
-                </ThemedText>
-                <TextInput
-                  style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
-                  value={target}
-                  onChangeText={(text) => setTarget(text.replace(/[^0-9.]/g, ''))}
-                  placeholder="0.00"
-                  placeholderTextColor={colors.placeholder}
-                  keyboardType="numeric"
-                />
-                <ThemedText style={{ fontSize: 12, color: colors.textSecondary, marginTop: 4 }}>
-                  Set your monthly financial goal to track progress on the dashboard.
-                </ThemedText>
-              </View>
-
-              <View style={styles.inputGroup}>
-                <ThemedText style={[styles.label, { color: colors.textSecondary }]}>
-                  Favorite Currency
-                </ThemedText>
-                <CurrencySelect
-                  value={currency}
-                  onChange={setCurrency}
-                />
-              </View>
-
-              <Pressable
-                style={[styles.primaryButton, { backgroundColor: colors.primary }, loading && styles.buttonDisabled]}
-                onPress={handleFinancialSubmit}
-                disabled={loading}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <ThemedText style={styles.buttonText}>Save Financial Settings</ThemedText>
-                )}
-              </Pressable>
-            </View>
-          )}
-
-
-
-          {/* Privacy Policy Button */}
-          <Pressable 
-            style={[styles.privacyButton, { backgroundColor: colors.surface, borderColor: colors.border }]} 
-            onPress={() => router.push('/privacy-policy')}
-          >
-            <View style={styles.privacyButtonLeft}>
-              <Ionicons name="shield-checkmark-outline" size={22} color={colors.primary} />
-              <ThemedText style={styles.privacyButtonText}>Privacy Policy</ThemedText>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
-          </Pressable>
-
-          {/* Logout Button */}
-          <Pressable style={styles.logoutButton} onPress={handleLogout}>
-            <Ionicons name="log-out-outline" size={24} color="#fff" />
-            <ThemedText style={styles.logoutButtonText}>Logout</ThemedText>
-          </Pressable>
-        </ScrollView>
-      </KeyboardAvoidingView>
-
-      {/* OTP Verification Modal */}
-      <Modal
-        visible={showOtpModal}
-        animationType="slide"
-        transparent
-        onRequestClose={closeOtpModal}
-      >
-        <KeyboardAvoidingView
-          style={[styles.modalOverlay, { backgroundColor: colors.overlay }]}
-          behavior="padding"
-        >
-          <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
-            <View style={[styles.modalHeader, { borderBottomColor: colors.borderLight }]}>
-              <ThemedText type="subtitle" style={{ color: colors.text }}>Verify Email Change</ThemedText>
-              <Pressable onPress={closeOtpModal}>
-                <Ionicons name="close" size={24} color={colors.textSecondary} />
-              </Pressable>
-            </View>
-
-            <View style={styles.modalContent}>
-              <ThemedText style={[styles.modalDescription, { color: colors.textSecondary }]}>
-                Enter the 6-digit OTP code sent to your new email address ({pendingNewEmail}). The code expires in 10 minutes.
-              </ThemedText>
-
-              {otpError ? (
-                <View style={[styles.messageBox, { backgroundColor: colors.errorLight, borderColor: colors.error }]}>
-                  <ThemedText style={{ color: colors.error }}>{otpError}</ThemedText>
-                </View>
-              ) : null}
-
-              <TextInput
-                style={[styles.otpInput, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
-                value={otp}
-                onChangeText={(text) => {
-                  setOtp(text.replace(/\D/g, ''));
-                  if (otpError) setOtpError('');
-                }}
-                placeholder="000000"
-                placeholderTextColor={colors.placeholder}
-                keyboardType="numeric"
-                maxLength={6}
-                textAlign="center"
+              <Switch
+                value={appLockEnabled}
+                onValueChange={handleToggleAppLock}
+                trackColor={{ false: 'rgba(51, 65, 85, 0.5)', true: ImhotepTheme.colors.primaryTeal }}
+                thumbColor="#FFFFFF"
               />
-
-              <View style={styles.modalActions}>
-                <Pressable
-                  style={[styles.cancelButton, { borderColor: colors.border }]}
-                  onPress={closeOtpModal}
-                >
-                  <ThemedText style={{ color: colors.textSecondary }}>Cancel</ThemedText>
-                </Pressable>
-                <Pressable
-                  style={[
-                    styles.verifyButton,
-                    { backgroundColor: colors.primary },
-                    (otpLoading || otp.length !== 6) && styles.buttonDisabled,
-                  ]}
-                  onPress={handleOtpSubmit}
-                  disabled={otpLoading || otp.length !== 6}
-                >
-                  {otpLoading ? (
-                    <ActivityIndicator color="#fff" />
-                  ) : (
-                    <ThemedText style={styles.buttonText}>Verify</ThemedText>
-                  )}
-                </Pressable>
-              </View>
             </View>
+
+            <View style={styles.divider} />
+
+            <Text style={styles.cardTitle}>Change Password</Text>
+
+            <Text style={styles.label}>Current Password</Text>
+            <TextInput
+              style={styles.input}
+              secureTextEntry={!showPasswords.current}
+              value={passwordData.current_password}
+              onChangeText={(text) => setPasswordData((p) => ({ ...p, current_password: text }))}
+              placeholder="Current Password"
+              placeholderTextColor={ImhotepTheme.colors.textMuted}
+            />
+
+            <Text style={styles.label}>New Password</Text>
+            <TextInput
+              style={styles.input}
+              secureTextEntry={!showPasswords.new}
+              value={passwordData.new_password}
+              onChangeText={(text) => setPasswordData((p) => ({ ...p, new_password: text }))}
+              placeholder="New Password (min 8 chars)"
+              placeholderTextColor={ImhotepTheme.colors.textMuted}
+            />
+
+            <Text style={styles.label}>Confirm New Password</Text>
+            <TextInput
+              style={styles.input}
+              secureTextEntry={!showPasswords.confirm}
+              value={passwordData.confirm_password}
+              onChangeText={(text) => setPasswordData((p) => ({ ...p, confirm_password: text }))}
+              placeholder="Confirm New Password"
+              placeholderTextColor={ImhotepTheme.colors.textMuted}
+            />
+
+            <PressableScale style={styles.submitBtn} onPress={handlePasswordSubmit} disabled={loading}>
+              {loading ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.submitBtnText}>Update Password</Text>}
+            </PressableScale>
           </View>
-        </KeyboardAvoidingView>
-      </Modal>
+        )}
 
-      {/* Delete Account Modal */}
-      <Modal
-        visible={showDeleteModal}
-        animationType="slide"
-        transparent
-        onRequestClose={() => setShowDeleteModal(false)}
-      >
-        <KeyboardAvoidingView
-          style={[styles.modalOverlay, { backgroundColor: colors.overlay }]}
-          behavior="padding"
-        >
-          <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
-            <View style={[styles.modalHeader, { borderBottomColor: colors.borderLight }]}>
-              <ThemedText type="subtitle" style={{ color: colors.error }}>Delete Account</ThemedText>
-              <Pressable onPress={() => setShowDeleteModal(false)}>
-                <Ionicons name="close" size={24} color={colors.textSecondary} />
-              </Pressable>
-            </View>
+        {/* Tab 3: Financial Goals */}
+        {activeTab === 'financial' && (
+          <View style={styles.bentoCard}>
+            <Text style={styles.cardTitle}>Monthly Financial Target</Text>
+            <Text style={styles.switchSubtitle}>Set your savings or earnings target to track progress on your Dashboard.</Text>
 
-            <View style={styles.modalContent}>
-              <ThemedText style={[styles.modalDescription, { color: colors.textSecondary }]}>
-                This action cannot be undone. How would you like to verify your identity to proceed?
-              </ThemedText>
+            <Text style={styles.label}>Monthly Target Amount</Text>
+            <TextInput
+              style={styles.input}
+              value={target}
+              onChangeText={setTarget}
+              placeholder="e.g. 5000"
+              placeholderTextColor={ImhotepTheme.colors.textMuted}
+              keyboardType="numeric"
+            />
 
-              {!deleteMethod ? (
-                <View style={{ gap: 12 }}>
-                  <Pressable
-                    style={[styles.dangerButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
-                    onPress={() => setDeleteMethod('password')}
-                  >
-                    <ThemedText style={{ color: colors.text }}>Verify with Password</ThemedText>
-                  </Pressable>
-                  <Pressable
-                    style={[styles.dangerButton, { backgroundColor: colors.surface, borderColor: colors.border }, deleteLoading && styles.buttonDisabled]}
-                    onPress={() => {
-                      setDeleteMethod('otp');
-                      handleRequestDeleteOTP();
-                    }}
-                    disabled={deleteLoading}
-                  >
-                    {deleteLoading ? (
-                      <ActivityIndicator color={colors.text} />
-                    ) : (
-                      <ThemedText style={{ color: colors.text }}>Verify with Email OTP</ThemedText>
-                    )}
-                  </Pressable>
-                </View>
-              ) : (
-                <View style={{ gap: 16 }}>
-                  {deleteMethod === 'otp' && deleteOtpSent && (
-                    <ThemedText style={{ color: colors.success, fontSize: 14 }}>
-                      An OTP has been sent to your email address.
-                    </ThemedText>
-                  )}
-                  <View>
-                    <ThemedText style={[styles.label, { color: colors.textSecondary }]}>
-                      {deleteMethod === 'otp' ? 'Enter 6-digit OTP' : 'Enter your password'}
-                    </ThemedText>
-                    <TextInput
-                      style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
-                      value={deleteCredential}
-                      onChangeText={setDeleteCredential}
-                      placeholder={deleteMethod === 'otp' ? '123456' : '••••••••'}
-                      placeholderTextColor={colors.placeholder}
-                      secureTextEntry={deleteMethod === 'password'}
-                      keyboardType={deleteMethod === 'otp' ? 'numeric' : 'default'}
-                    />
-                  </View>
+            <Text style={styles.label}>Preferred Currency</Text>
+            <CurrencySelect value={currency} onChange={setCurrency} />
 
-                  <View style={styles.modalActions}>
-                    <Pressable
-                      style={[styles.cancelButton, { borderColor: colors.border }]}
-                      onPress={() => {
-                        setDeleteMethod('');
-                        setDeleteCredential('');
-                        setError('');
-                        setSuccess('');
-                      }}
-                    >
-                      <ThemedText style={{ color: colors.textSecondary }}>Back</ThemedText>
-                    </Pressable>
-                    <Pressable
-                      style={[
-                        styles.verifyButton,
-                        { backgroundColor: colors.error },
-                        (deleteLoading || !deleteCredential) && styles.buttonDisabled,
-                      ]}
-                      onPress={handleConfirmDeleteAccount}
-                      disabled={deleteLoading || !deleteCredential}
-                    >
-                      {deleteLoading ? (
-                        <ActivityIndicator color="#fff" />
-                      ) : (
-                        <ThemedText style={styles.buttonText}>Confirm Delete</ThemedText>
-                      )}
-                    </Pressable>
-                  </View>
-                </View>
-              )}
-            </View>
+            <PressableScale style={styles.submitBtn} onPress={handleFinancialSubmit} disabled={loading}>
+              {loading ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.submitBtnText}>Save Financial Goals</Text>}
+            </PressableScale>
           </View>
-        </KeyboardAvoidingView>
-      </Modal>
+        )}
 
-    </SafeAreaView>
+        {/* Danger Zone */}
+        <View style={styles.dangerCard}>
+          <Text style={styles.dangerTitle}>Account Actions</Text>
+          <PressableScale style={styles.logoutBtn} onPress={handleLogout}>
+            <Ionicons name="log-out-outline" size={18} color="#FFFFFF" style={{ marginRight: 6 }} />
+            <Text style={styles.logoutBtnText}>Logout Account</Text>
+          </PressableScale>
+        </View>
+
+        <View style={{ height: insets.bottom + 100 }} />
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  keyboardAvoid: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingBottom: 110,
+    backgroundColor: ImhotepTheme.colors.backgroundDark,
   },
   header: {
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 8,
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    backgroundColor: ImhotepTheme.colors.backgroundSurface,
+    borderBottomWidth: 1,
+    borderBottomColor: ImhotepTheme.colors.glassBorder,
   },
-  title: {
-    fontSize: 28,
+  headerTitle: {
+    fontSize: 26,
+    fontWeight: '800',
+    color: ImhotepTheme.colors.textPrimary,
   },
-  subtitle: {
-    fontSize: 14,
-    marginTop: 4,
+  headerSubtitle: {
+    fontSize: 13,
+    color: ImhotepTheme.colors.textSecondary,
+    marginTop: 2,
   },
-  avatarContainer: {
-    alignItems: 'center',
-    marginVertical: 20,
-  },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+  logoutIconButton: {
+    width: 42,
+    height: 42,
+    borderRadius: 14,
+    backgroundColor: ImhotepTheme.colors.withdrawRedLight,
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.3)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
+  },
+  scrollContent: {
+    padding: 16,
+  },
+  userCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: ImhotepTheme.colors.glassCard,
+    borderWidth: 1,
+    borderColor: ImhotepTheme.colors.glassBorder,
+    borderRadius: 24,
+    padding: 18,
+    marginBottom: 16,
+    gap: 14,
+  },
+  avatarCircle: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: ImhotepTheme.colors.primaryTealLight,
+    borderWidth: 1,
+    borderColor: 'rgba(20, 184, 166, 0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   userName: {
     fontSize: 18,
+    fontWeight: '800',
+    color: ImhotepTheme.colors.textPrimary,
+  },
+  userEmail: {
+    fontSize: 13,
+    color: ImhotepTheme.colors.textSecondary,
+    marginTop: 2,
   },
   tabContainer: {
     flexDirection: 'row',
-    marginHorizontal: 16,
-    borderRadius: 8,
+    backgroundColor: ImhotepTheme.colors.glassCard,
+    borderRadius: 16,
     padding: 4,
+    borderWidth: 1,
+    borderColor: ImhotepTheme.colors.glassBorder,
     marginBottom: 16,
   },
-  tab: {
+  tabButton: {
     flex: 1,
     paddingVertical: 10,
     alignItems: 'center',
-    borderRadius: 6,
+    borderRadius: 12,
   },
-  activeTab: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+  tabButtonActive: {
+    backgroundColor: ImhotepTheme.colors.primaryTeal,
   },
   tabText: {
     fontSize: 14,
-    fontWeight: '500',
-  },
-  messageBox: {
-    marginHorizontal: 16,
-    marginBottom: 16,
-    padding: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-  },
-  form: {
-    paddingHorizontal: 16,
-  },
-  row: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  halfInput: {
-    flex: 1,
-    marginBottom: 16,
-  },
-  inputGroup: {
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '500',
-    marginBottom: 6,
-  },
-  input: {
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 16,
-  },
-  passwordContainer: {
-    position: 'relative',
-  },
-  passwordInput: {
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    paddingRight: 48,
-    fontSize: 16,
-  },
-  eyeButton: {
-    position: 'absolute',
-    right: 12,
-    top: 0,
-    bottom: 0,
-    justifyContent: 'center',
-  },
-  warningBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginTop: 8,
-    padding: 8,
-    borderRadius: 6,
-  },
-  warningText: {
-    fontSize: 12,
-  },
-  primaryButton: {
-    paddingVertical: 14,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
     fontWeight: '600',
+    color: ImhotepTheme.colors.textSecondary,
   },
-
-  privacyButton: {
+  tabTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+  },
+  errorBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    marginHorizontal: 16,
-    marginTop: 24,
-    borderRadius: 8,
+    backgroundColor: ImhotepTheme.colors.withdrawRedLight,
     borderWidth: 1,
-  },
-  privacyButtonLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  privacyButtonText: {
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  logoutButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#EF4444',
-    paddingVertical: 14,
-    marginHorizontal: 16,
-    marginTop: 12,
-    marginBottom: 32,
-    borderRadius: 8,
+    borderColor: 'rgba(239, 68, 68, 0.3)',
+    borderRadius: 14,
+    padding: 12,
+    marginBottom: 14,
     gap: 8,
   },
-  logoutButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  modalOverlay: {
+  errorText: {
+    fontSize: 13,
+    color: ImhotepTheme.colors.withdrawRed,
     flex: 1,
-    justifyContent: 'center',
-    padding: 16,
   },
-  modalContainer: {
-    borderRadius: 16,
-    overflow: 'hidden',
+  successBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: ImhotepTheme.colors.depositGreenLight,
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.3)',
+    borderRadius: 14,
+    padding: 12,
+    marginBottom: 14,
+    gap: 8,
   },
-  modalHeader: {
+  successText: {
+    fontSize: 13,
+    color: ImhotepTheme.colors.depositGreen,
+    flex: 1,
+  },
+  bentoCard: {
+    backgroundColor: ImhotepTheme.colors.glassCard,
+    borderWidth: 1,
+    borderColor: ImhotepTheme.colors.glassBorder,
+    borderRadius: 24,
+    padding: 20,
+    marginBottom: 16,
+  },
+  cardTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: ImhotepTheme.colors.textPrimary,
+    marginBottom: 14,
+  },
+  switchRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
   },
-  modalContent: {
-    padding: 16,
+  switchTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: ImhotepTheme.colors.textPrimary,
   },
-  modalDescription: {
-    fontSize: 14,
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  otpInput: {
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 16,
-    fontSize: 24,
-    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
-    letterSpacing: 8,
-  },
-  modalActions: {
-    flexDirection: 'row',
-    gap: 12,
-    marginTop: 16,
-  },
-  cancelButton: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    alignItems: 'center',
-  },
-  verifyButton: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  dangerZone: {
-    marginTop: 24,
-    paddingTop: 16,
-    borderTopWidth: 1,
-  },
-  dangerZoneTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  dangerZoneText: {
-    fontSize: 14,
-    marginBottom: 16,
-  },
-  dangerButton: {
-    padding: 14,
-    borderRadius: 8,
-    borderWidth: 1,
-    alignItems: 'center',
-  },
-  securityCard: {
-    borderWidth: 1,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  securityRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 16,
-  },
-  securityTextContainer: {
-    flex: 1,
-  },
-  securityTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  securityDescription: {
+  switchSubtitle: {
     fontSize: 12,
+    color: ImhotepTheme.colors.textSecondary,
+    marginTop: 2,
     lineHeight: 16,
   },
   divider: {
     height: 1,
-    width: '100%',
-    marginVertical: 20,
+    backgroundColor: ImhotepTheme.colors.glassBorder,
+    marginVertical: 18,
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 16,
+  label: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: ImhotepTheme.colors.textSecondary,
+    marginTop: 12,
+    marginBottom: 6,
+  },
+  input: {
+    backgroundColor: ImhotepTheme.colors.inputBackground,
+    borderWidth: 1,
+    borderColor: ImhotepTheme.colors.inputBorder,
+    borderRadius: 14,
+    padding: 14,
+    fontSize: 15,
+    color: ImhotepTheme.colors.textPrimary,
+  },
+  submitBtn: {
+    backgroundColor: ImhotepTheme.colors.primaryTeal,
+    paddingVertical: 14,
+    borderRadius: 16,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  submitBtnText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 15,
+  },
+  dangerCard: {
+    backgroundColor: ImhotepTheme.colors.glassCard,
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.25)',
+    borderRadius: 24,
+    padding: 20,
+  },
+  dangerTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: ImhotepTheme.colors.withdrawRed,
+    marginBottom: 12,
+  },
+  logoutBtn: {
+    flexDirection: 'row',
+    backgroundColor: ImhotepTheme.colors.withdrawRed,
+    paddingVertical: 14,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logoutBtnText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 15,
   },
 });

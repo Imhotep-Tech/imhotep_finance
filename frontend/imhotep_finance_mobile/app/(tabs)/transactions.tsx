@@ -1,840 +1,688 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import {
-    View,
-    Text,
-    StyleSheet,
-    FlatList,
-    ActivityIndicator,
-    TouchableOpacity,
-    RefreshControl,
-    Modal,
-    Platform,
-    TextInput,
-    Alert,
-    ScrollView,
-    KeyboardAvoidingView
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  RefreshControl,
+  Modal,
+  Platform,
+  TextInput,
+  Alert,
+  ScrollView,
+  KeyboardAvoidingView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import DateTimePicker from '@react-native-community/datetimepicker';
+
+import ImhotepTheme from '@/constants/imhotepTheme';
 import api from '@/constants/api';
+import { updateNetworthWidget } from '@/widgets/widget-updater';
 import TransactionItem from '@/components/TransactionItem';
 import AddTransactionModal from '@/components/AddTransactionModal';
 import CategorySelect from '@/components/CategorySelect';
 import PlaceSelect from '@/components/PlaceSelect';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { updateNetworthWidget } from '@/widgets/widget-updater';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import PressableScale from '@/components/ui/PressableScale';
+import TransactionListSkeleton from '@/components/ui/TransactionListSkeleton';
+import { EmptyState, ErrorCard } from '@/components/ui/StateViews';
+import useTransactionList from '@/hooks/useTransactionList';
+import { Transaction } from '@/types/finance';
 
 export default function TransactionsScreen() {
-    const colorScheme = useColorScheme();
-    const isDark = colorScheme === 'dark';
-    const router = useRouter();
-    const insets = useSafeAreaInsets();
-    const params = useLocalSearchParams<{ place?: string }>();
-    const placeParam = params.place || '';
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const params = useLocalSearchParams<{ place?: string }>();
+  const placeParam = params.place || '';
 
-    const [transactions, setTransactions] = useState<any[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [refreshing, setRefreshing] = useState(false);
-    const [page, setPage] = useState(1);
-    const [hasMore, setHasMore] = useState(true);
-    const [error, setError] = useState('');
+  const {
+    transactions,
+    loading,
+    refreshing,
+    hasMore,
+    error,
+    filters,
+    refreshList,
+    loadMore,
+    updateFilters,
+    clearFilters,
+    fetchTransactions,
+  } = useTransactionList(placeParam);
 
-    // Filters
-    const [showFilterModal, setShowFilterModal] = useState(false);
-    const [startDate, setStartDate] = useState<Date | null>(null);
-    const [endDate, setEndDate] = useState<Date | null>(null);
-    const [statusFilter, setStatusFilter] = useState(''); // 'deposit', 'withdraw', ''
-    const [categoryFilter, setCategoryFilter] = useState('');
-    const [placeFilter, setPlaceFilter] = useState(placeParam);
-    const [detailsSearch, setDetailsSearch] = useState('');
-    const [showStartPicker, setShowStartPicker] = useState(false);
-    const [showEndPicker, setShowEndPicker] = useState(false);
+  // Modals & UI Controls
+  const [showFilterModal, setShowFilterModal] = useState<boolean>(false);
+  const [showAddModal, setShowAddModal] = useState<boolean>(false);
+  const [editTransaction, setEditTransaction] = useState<Transaction | null>(null);
 
-    // Modals
-    const [showAddModal, setShowAddModal] = useState(false);
-    const [editTransaction, setEditTransaction] = useState<any>(null);
+  // Date Pickers state inside filter modal
+  const [showStartPicker, setShowStartPicker] = useState<boolean>(false);
+  const [showEndPicker, setShowEndPicker] = useState<boolean>(false);
 
-    const hasActiveFilters = !!(startDate || endDate || statusFilter || categoryFilter || placeFilter || detailsSearch);
+  // Temporary local filter states before "Apply" is tapped
+  const [tempStatus, setTempStatus] = useState<string>(filters.statusFilter || '');
+  const [tempCategory, setTempCategory] = useState<string>(filters.categoryFilter || '');
+  const [tempPlace, setTempPlace] = useState<string>(filters.placeFilter || '');
+  const [tempSearch, setTempSearch] = useState<string>(filters.detailsSearch || '');
+  const [tempStartDate, setTempStartDate] = useState<Date | null>(filters.startDate || null);
+  const [tempEndDate, setTempEndDate] = useState<Date | null>(filters.endDate || null);
 
-    const handleRemoveFilter = (filterKey: string) => {
-        let updatedOverrides: any = {};
+  const hasActiveFilters = !!(
+    filters.startDate ||
+    filters.endDate ||
+    filters.statusFilter ||
+    filters.categoryFilter ||
+    filters.placeFilter ||
+    filters.detailsSearch
+  );
 
-        if (filterKey === 'startDate') {
-            setStartDate(null);
-            updatedOverrides.startDate = null;
-        } else if (filterKey === 'endDate') {
-            setEndDate(null);
-            updatedOverrides.endDate = null;
-        } else if (filterKey === 'statusFilter') {
-            setStatusFilter('');
-            updatedOverrides.statusFilter = '';
-        } else if (filterKey === 'categoryFilter') {
-            setCategoryFilter('');
-            updatedOverrides.categoryFilter = '';
-        } else if (filterKey === 'placeFilter') {
-            setPlaceFilter('');
-            updatedOverrides.placeFilter = '';
-            router.setParams({ place: '' });
-        } else if (filterKey === 'detailsSearch') {
-            setDetailsSearch('');
-            updatedOverrides.detailsSearch = '';
-        }
+  const handleOpenFilterModal = () => {
+    setTempStatus(filters.statusFilter || '');
+    setTempCategory(filters.categoryFilter || '');
+    setTempPlace(filters.placeFilter || '');
+    setTempSearch(filters.detailsSearch || '');
+    setTempStartDate(filters.startDate || null);
+    setTempEndDate(filters.endDate || null);
+    setShowFilterModal(true);
+  };
 
-        setPage(1);
-        setHasMore(true);
-        fetchTransactions(1, true, updatedOverrides);
-    };
+  const handleApplyFilters = () => {
+    setShowFilterModal(false);
+    updateFilters({
+      statusFilter: tempStatus,
+      categoryFilter: tempCategory,
+      placeFilter: tempPlace,
+      detailsSearch: tempSearch,
+      startDate: tempStartDate,
+      endDate: tempEndDate,
+    });
+  };
 
-    const themeStyles = {
-        container: {
-            backgroundColor: isDark ? '#0f172a' : '#f8fafc',
-        },
-        header: {
-            backgroundColor: isDark ? '#1e293b' : 'white',
-            borderBottomColor: isDark ? '#334155' : '#e2e8f0',
-        },
-        text: {
-            color: isDark ? '#f1f5f9' : '#1e293b',
-        },
-        subText: {
-            color: isDark ? '#94a3b8' : '#64748b',
-        },
-        filterButton: {
-            backgroundColor: isDark ? '#334155' : '#f1f5f9',
-        },
-        modalContent: {
-            backgroundColor: isDark ? '#1e293b' : 'white',
-        },
-        input: {
-            backgroundColor: isDark ? '#334155' : '#f9f9f9',
-            color: isDark ? '#f1f5f9' : '#000',
-            borderColor: isDark ? '#475569' : '#eee',
-        },
-        actionButton: {
-            backgroundColor: isDark ? '#334155' : 'white',
-            borderColor: isDark ? '#475569' : '#e2e8f0',
-        },
-        filterChipActiveStyle: {
-            backgroundColor: isDark ? 'rgba(54, 108, 107, 0.25)' : '#eaf6f6',
-            borderColor: isDark ? '#2dd4bf' : '#366c6b',
-        },
-        filterChipTextActiveStyle: {
-            color: isDark ? '#5eead4' : '#366c6b',
-        }
-    };
+  const handleClearAllFilters = () => {
+    setTempStatus('');
+    setTempCategory('');
+    setTempPlace('');
+    setTempSearch('');
+    setTempStartDate(null);
+    setTempEndDate(null);
+    setShowFilterModal(false);
+    router.setParams({ place: '' });
+    clearFilters();
+  };
 
-    const fetchTransactions = async (
-        pageNum: number, 
-        refresh: boolean = false, 
-        overrides?: {
-            startDate?: Date | null;
-            endDate?: Date | null;
-            statusFilter?: string;
-            categoryFilter?: string;
-            placeFilter?: string;
-            detailsSearch?: string;
-        }
-    ) => {
-        if (loading) return;
-        setLoading(true);
-        setError('');
+  const handleRemoveSingleFilter = (key: keyof typeof filters) => {
+    if (key === 'placeFilter') {
+      router.setParams({ place: '' });
+    }
+    updateFilters({ [key]: key === 'startDate' || key === 'endDate' ? null : '' });
+  };
 
-        try {
-            const params: any = { page: pageNum };
-            
-            const resolvedStart = overrides && overrides.startDate !== undefined ? overrides.startDate : startDate;
-            const resolvedEnd = overrides && overrides.endDate !== undefined ? overrides.endDate : endDate;
-            const resolvedStatus = overrides && overrides.statusFilter !== undefined ? overrides.statusFilter : statusFilter;
-            const resolvedCategory = overrides && overrides.categoryFilter !== undefined ? overrides.categoryFilter : categoryFilter;
-            const resolvedPlace = overrides && overrides.placeFilter !== undefined ? overrides.placeFilter : placeFilter;
-            const resolvedDetails = overrides && overrides.detailsSearch !== undefined ? overrides.detailsSearch : detailsSearch;
-
-            if (resolvedStart) params.start_date = resolvedStart.toISOString().split('T')[0];
-            if (resolvedEnd) params.end_date = resolvedEnd.toISOString().split('T')[0];
-            if (resolvedStatus) params.trans_status = resolvedStatus;
-            if (resolvedCategory) params.category = resolvedCategory;
-            if (resolvedPlace) params.place = resolvedPlace;
-            if (resolvedDetails) params.details_search = resolvedDetails;
-
-            const res = await api.get('/api/finance-management/transaction/get-transactions/', { params });
-
-            const newTransactions = res.data.transactions || [];
-            let actuallyAddedCount = 0;
-
-            if (refresh) {
-                setTransactions(newTransactions);
-                actuallyAddedCount = newTransactions.length;
-            } else {
-                // Filter out duplicates by checking existing transaction IDs
-                setTransactions(prev => {
-                    const existingIds = new Set(prev.map(t => t.id));
-                    const uniqueNewTransactions = newTransactions.filter((t: any) => !existingIds.has(t.id));
-                    actuallyAddedCount = uniqueNewTransactions.length;
-                    return [...prev, ...uniqueNewTransactions];
-                });
+  const handleRecalculateNetworth = async () => {
+    Alert.alert(
+      'Recalculate Networth',
+      'This will recalculate your networth from all transactions. This may take a moment. Continue?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Continue',
+          onPress: async () => {
+            try {
+              await api.post('/api/finance-management/recalculate-networth/');
+              Alert.alert('Success', 'Networth recalculated successfully!');
+              updateNetworthWidget();
+            } catch (e: any) {
+              Alert.alert('Error', e.response?.data?.error || 'Failed to recalculate networth');
             }
-
-            // Determine if there are more pages
-            // If API provides has_more, use it. Otherwise, check if we got a full page of results
-            // Also check if we actually added any new unique transactions
-            let hasMoreFromAPI;
-            if (res.data.has_more !== undefined) {
-                hasMoreFromAPI = res.data.has_more;
-            } else {
-                // If we got fewer than 10 transactions, or all were duplicates, no more pages
-                hasMoreFromAPI = newTransactions.length >= 10 && actuallyAddedCount > 0;
-            }
-            setPage(pageNum);
-            setHasMore(hasMoreFromAPI);
-
-        } catch (err) {
-            console.error('Fetch error:', err);
-            setError('Failed to load transactions');
-            setHasMore(false); // Stop pagination on error
-        } finally {
-            setLoading(false);
-            setRefreshing(false);
-        }
-    };
-
-    // Load when placeParam changes (handles initial mount and param updates)
-    useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setPlaceFilter(placeParam);
-        setPage(1);
-        setHasMore(true);
-        fetchTransactions(1, true, { placeFilter: placeParam });
-    }, [placeParam]);
-
-    // Apply filters triggers reload
-    const applyFilters = () => {
-        setPage(1);
-        setHasMore(true); // Reset hasMore when applying new filters
-        setShowFilterModal(false);
-        fetchTransactions(1, true);
-    };
-
-    const clearFilters = () => {
-        setStartDate(null);
-        setEndDate(null);
-        setStatusFilter('');
-        setCategoryFilter('');
-        setPlaceFilter('');
-        setDetailsSearch('');
-        setPage(1);
-        setHasMore(true); // Reset hasMore when clearing filters
-        setShowFilterModal(false);
-        router.setParams({ place: '' });
-        fetchTransactions(1, true, {
-            startDate: null,
-            endDate: null,
-            statusFilter: '',
-            categoryFilter: '',
-            placeFilter: '',
-            detailsSearch: ''
-        });
-    };
-
-    // Pagination
-    const loadMore = () => {
-        if (!loading && hasMore) {
-            const nextPage = page + 1;
-            setPage(nextPage);
-            fetchTransactions(nextPage);
-        }
-    };
-
-    const onRefresh = () => {
-        setRefreshing(true);
-        setPage(1);
-        setHasMore(true); // Reset hasMore when refreshing
-        fetchTransactions(1, true);
-    };
-
-    const handleEdit = (transaction: any) => {
-        setEditTransaction(transaction);
-        setShowAddModal(true);
-    };
-
-    // Actions
-    const handleRecalculateNetworth = async () => {
-        Alert.alert(
-            "Recalculate Networth",
-            "This will recalculate your networth from all transactions. This may take a moment. Continue?",
-            [
-                { text: "Cancel", style: "cancel" },
-                {
-                    text: "Continue",
-                    onPress: async () => {
-                        try {
-                            setLoading(true);
-                            await api.post('/api/finance-management/recalculate-networth/');
-                            Alert.alert("Success", "Networth recalculated successfully!");
-                            updateNetworthWidget();
-                        } catch (e: any) {
-                            Alert.alert("Error", e.response?.data?.error || "Failed to recalculate networth");
-                        } finally {
-                            setLoading(false);
-                        }
-                    }
-                }
-            ]
-        );
-    };
-
-
-    return (
-        <View style={[styles.container, themeStyles.container]}>
-            {/* Header */}
-            <View style={[styles.header, themeStyles.header, { paddingTop: insets.top + 12 }]}>
-                <View>
-                    <Text style={[styles.headerTitle, themeStyles.text]}>Transactions</Text>
-                    <Text style={[styles.headerSubtitle, themeStyles.subText]}>Manage your financial activity</Text>
-                </View>
-                <TouchableOpacity
-                    style={[styles.filterButton, themeStyles.filterButton]}
-                    onPress={() => setShowFilterModal(true)}
-                >
-                    <Ionicons name="options" size={24} color={isDark ? '#cbd5e1' : '#475569'} />
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={[styles.filterButton, themeStyles.filterButton, { marginLeft: 8 }]}
-                    onPress={() => router.push('/(tabs)/scheduled')}
-                >
-                    <Ionicons name="repeat" size={24} color={isDark ? '#cbd5e1' : '#475569'} />
-                </TouchableOpacity>
-            </View>
-
-            {/* Action Buttons */}
-            <View style={styles.actionsContainer}>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.actionsScroll}>
-                    <TouchableOpacity style={[styles.actionChip, themeStyles.actionButton]} onPress={handleRecalculateNetworth}>
-                        <Ionicons name="refresh-outline" size={16} color={isDark ? '#94a3b8' : '#475569'} />
-                        <Text style={[styles.actionText, themeStyles.subText]}>Recalculate</Text>
-                    </TouchableOpacity>
-                </ScrollView>
-            </View>
-
-            {/* Active Filters */}
-            {hasActiveFilters && (
-                <View style={[styles.activeFiltersContainer, { borderBottomColor: isDark ? '#334155' : '#e2e8f0' }]}>
-                    <ScrollView
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={styles.activeFiltersScroll}
-                    >
-                        <Text style={[styles.activeFiltersLabel, themeStyles.subText]}>Filters:</Text>
-                        {startDate && (
-                            <TouchableOpacity
-                                style={[styles.activeFilterChip, themeStyles.filterChipActiveStyle]}
-                                onPress={() => handleRemoveFilter('startDate')}
-                            >
-                                <Text style={[styles.activeFilterText, themeStyles.filterChipTextActiveStyle]}>
-                                    From: {startDate.toISOString().split('T')[0]}
-                                </Text>
-                                <Ionicons name="close-circle" size={16} color={isDark ? '#5eead4' : '#366c6b'} />
-                            </TouchableOpacity>
-                        )}
-                        {endDate && (
-                            <TouchableOpacity
-                                style={[styles.activeFilterChip, themeStyles.filterChipActiveStyle]}
-                                onPress={() => handleRemoveFilter('endDate')}
-                            >
-                                <Text style={[styles.activeFilterText, themeStyles.filterChipTextActiveStyle]}>
-                                    To: {endDate.toISOString().split('T')[0]}
-                                </Text>
-                                <Ionicons name="close-circle" size={16} color={isDark ? '#5eead4' : '#366c6b'} />
-                            </TouchableOpacity>
-                        )}
-                        {statusFilter && (
-                            <TouchableOpacity
-                                style={[styles.activeFilterChip, themeStyles.filterChipActiveStyle]}
-                                onPress={() => handleRemoveFilter('statusFilter')}
-                            >
-                                <Text style={[styles.activeFilterText, themeStyles.filterChipTextActiveStyle]}>
-                                    Type: {statusFilter === 'deposit' ? 'Income' : 'Expense'}
-                                </Text>
-                                <Ionicons name="close-circle" size={16} color={isDark ? '#5eead4' : '#366c6b'} />
-                            </TouchableOpacity>
-                        )}
-                        {categoryFilter && (
-                            <TouchableOpacity
-                                style={[styles.activeFilterChip, themeStyles.filterChipActiveStyle]}
-                                onPress={() => handleRemoveFilter('categoryFilter')}
-                            >
-                                <Text style={[styles.activeFilterText, themeStyles.filterChipTextActiveStyle]}>
-                                    Category: {categoryFilter}
-                                </Text>
-                                <Ionicons name="close-circle" size={16} color={isDark ? '#5eead4' : '#366c6b'} />
-                            </TouchableOpacity>
-                        )}
-                        {placeFilter && (
-                            <TouchableOpacity
-                                style={[styles.activeFilterChip, themeStyles.filterChipActiveStyle]}
-                                onPress={() => handleRemoveFilter('placeFilter')}
-                            >
-                                <Text style={[styles.activeFilterText, themeStyles.filterChipTextActiveStyle]}>
-                                    Place: {placeFilter}
-                                </Text>
-                                <Ionicons name="close-circle" size={16} color={isDark ? '#5eead4' : '#366c6b'} />
-                            </TouchableOpacity>
-                        )}
-                        {detailsSearch && (
-                            <TouchableOpacity
-                                style={[styles.activeFilterChip, themeStyles.filterChipActiveStyle]}
-                                onPress={() => handleRemoveFilter('detailsSearch')}
-                            >
-                                <Text style={[styles.activeFilterText, themeStyles.filterChipTextActiveStyle]}>
-                                    {`Search: "${detailsSearch}"`}
-                                </Text>
-                                <Ionicons name="close-circle" size={16} color={isDark ? '#5eead4' : '#366c6b'} />
-                            </TouchableOpacity>
-                        )}
-                        <TouchableOpacity
-                            style={styles.clearAllTextButton}
-                            onPress={clearFilters}
-                        >
-                            <Text style={styles.clearAllText}>Clear All</Text>
-                        </TouchableOpacity>
-                    </ScrollView>
-                </View>
-            )}
-
-            {/* List */}
-            <FlatList
-                data={transactions}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item }) => (
-                    <TransactionItem
-                        transaction={item}
-                        onPress={() => handleEdit(item)}
-                    />
-                )}
-                refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={isDark ? "#fff" : "#366c6b"} />
-                }
-                onEndReached={loadMore}
-                onEndReachedThreshold={0.3}
-                keyboardShouldPersistTaps="handled"
-                keyboardDismissMode="on-drag"
-                ListFooterComponent={() => {
-                    if (loading && !refreshing && transactions.length > 0) {
-                        return (
-                            <View style={styles.footerLoading}>
-                                <ActivityIndicator size="small" color="#366c6b" />
-                                <Text style={[styles.footerText, themeStyles.subText]}>Loading more...</Text>
-                            </View>
-                        );
-                    }
-                    if (!loading && !hasMore && transactions.length > 0) {
-                        return (
-                            <View style={styles.footerEnd}>
-                                <Ionicons name="checkmark-circle" size={20} color={isDark ? '#475569' : '#94a3b8'} />
-                                <Text style={[styles.footerText, themeStyles.subText]}>No more transactions</Text>
-                            </View>
-                        );
-                    }
-                    return null;
-                }}
-                ListEmptyComponent={
-                    !loading ? (
-                        <View style={styles.emptyContainer}>
-                            <Ionicons name="receipt-outline" size={64} color={isDark ? '#475569' : '#cbd5e1'} />
-                            <Text style={[styles.emptyText, themeStyles.text]}>No transactions found</Text>
-                             <Text style={[styles.emptySubtext, themeStyles.subText]}>
-                                {startDate || endDate || categoryFilter || placeFilter || detailsSearch
-                                    ? 'Try adjusting your filters'
-                                    : 'Add your first transaction to get started'}
-                            </Text>
-                        </View>
-                    ) : null
-                }
-                contentContainerStyle={transactions.length === 0 ? styles.emptyListContent : { paddingBottom: 100 }}
-            />
-
-            {/* Add Button (Floating) */}
-            <TouchableOpacity
-                style={[styles.fab, { bottom: Math.max(insets.bottom, 16) + 80 }]}
-                onPress={() => {
-                    setEditTransaction(null);
-                    setShowAddModal(true);
-                }}
-            >
-                <Ionicons name="add" size={30} color="white" />
-            </TouchableOpacity>
-
-            {/* Add/Edit Modal */}
-            <AddTransactionModal
-                visible={showAddModal}
-                editMode={!!editTransaction}
-                initialValues={editTransaction || {}}
-                initialType={editTransaction?.trans_status?.toLowerCase() || 'deposit'}
-                onClose={() => setShowAddModal(false)}
-                onSuccess={() => {
-                    setShowAddModal(false);
-                    onRefresh();
-                }}
-            />
-
-            {/* Filter Modal */}
-            <Modal
-                visible={showFilterModal}
-                animationType="slide"
-                transparent={true}
-                onRequestClose={() => setShowFilterModal(false)}
-            >
-                <KeyboardAvoidingView
-                    style={{ flex: 1 }}
-                    behavior="padding"
-                >
-                    <View style={styles.modalOverlay}>
-                        <View style={[styles.modalContent, themeStyles.modalContent]}>
-                            <ScrollView keyboardShouldPersistTaps="handled">
-                                <View style={styles.modalHeader}>
-                                    <Text style={[styles.modalTitle, themeStyles.text]}>Filter Transactions</Text>
-                                    <TouchableOpacity onPress={() => setShowFilterModal(false)}>
-                                        <Ionicons name="close" size={24} color={themeStyles.text.color} />
-                                    </TouchableOpacity>
-                                </View>
-                                
-                                <Text style={[styles.label, themeStyles.text]}>Search</Text>
-                                <TextInput
-                                    style={[styles.input, themeStyles.input]}
-                                    placeholder="Search description..."
-                                    placeholderTextColor={isDark ? '#94a3b8' : '#999'}
-                                    value={detailsSearch}
-                                    onChangeText={setDetailsSearch}
-                                />
-
-                                {/* Category Filter */}
-                                <Text style={[styles.label, themeStyles.text]}>Category</Text>
-                                <CategorySelect
-                                    value={categoryFilter}
-                                    onChange={setCategoryFilter}
-                                    status={statusFilter || 'ANY'}
-                                />
-
-                                {/* Place Filter */}
-                                <Text style={[styles.label, themeStyles.text]}>Place</Text>
-                                <PlaceSelect
-                                    value={placeFilter}
-                                    onChange={setPlaceFilter}
-                                    currency="ANY"
-                                />
-
-                                {/* Date Filters */}
-                                <Text style={[styles.label, themeStyles.text]}>Date Range</Text>
-                                <View style={styles.dateRow}>
-                                    <TouchableOpacity
-                                        style={[styles.dateInput, themeStyles.input]}
-                                        onPress={() => setShowStartPicker(true)}
-                                    >
-                                        <Text style={themeStyles.text}>{startDate ? startDate.toISOString().split('T')[0] : 'Start Date'}</Text>
-                                        <Ionicons name="calendar-outline" size={20} color={themeStyles.subText.color} />
-                                    </TouchableOpacity>
-                                    <TouchableOpacity
-                                        style={[styles.dateInput, themeStyles.input]}
-                                        onPress={() => setShowEndPicker(true)}
-                                    >
-                                        <Text style={themeStyles.text}>{endDate ? endDate.toISOString().split('T')[0] : 'End Date'}</Text>
-                                        <Ionicons name="calendar-outline" size={20} color={themeStyles.subText.color} />
-                                    </TouchableOpacity>
-                                </View>
-
-                                {showStartPicker && (
-                                    <DateTimePicker
-                                        value={startDate || new Date()}
-                                        mode="date"
-                                        display="default"
-                                        onChange={(e, d) => {
-                                            setShowStartPicker(Platform.OS === 'ios');
-                                            if (d) setStartDate(d);
-                                        }}
-                                    />
-                                )}
-                                {showEndPicker && (
-                                    <DateTimePicker
-                                        value={endDate || new Date()}
-                                        mode="date"
-                                        display="default"
-                                        onChange={(e, d) => {
-                                            setShowEndPicker(Platform.OS === 'ios');
-                                            if (d) setEndDate(d);
-                                        }}
-                                    />
-                                )}
-
-                                {/* Actions */}
-                                <View style={styles.modalActions}>
-                                    <TouchableOpacity
-                                        style={[styles.modalButton, styles.clearButton]}
-                                        onPress={() => {
-                                            clearFilters();
-                                        }}
-                                    >
-                                        <Text style={styles.clearButtonText}>Clear</Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity
-                                        style={[styles.modalButton, styles.applyButton]}
-                                        onPress={applyFilters}
-                                    >
-                                        <Text style={styles.applyButtonText}>Apply Filters</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            </ScrollView>
-                        </View>
-                    </View>
-                </KeyboardAvoidingView>
-            </Modal>
-        </View>
+          },
+        },
+      ]
     );
+  };
+
+  return (
+    <View style={styles.container}>
+      {/* Sleek Header */}
+      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
+        <View>
+          <Text style={styles.headerTitle}>Transactions</Text>
+          <Text style={styles.headerSubtitle}>Manage & Track Your Financial History</Text>
+        </View>
+        <View style={styles.headerActions}>
+          <PressableScale style={styles.iconButton} onPress={handleOpenFilterModal}>
+            <Ionicons name="options" size={20} color={ImhotepTheme.colors.textPrimary} />
+          </PressableScale>
+          <PressableScale
+            style={[styles.iconButton, { marginLeft: 8 }]}
+            onPress={() => router.push('/(tabs)/scheduled')}
+          >
+            <Ionicons name="repeat" size={20} color={ImhotepTheme.colors.textPrimary} />
+          </PressableScale>
+        </View>
+      </View>
+
+      {/* Recalculate & Action Bar */}
+      <View style={styles.actionsContainer}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.actionsScroll}>
+          <PressableScale style={styles.actionChip} onPress={handleRecalculateNetworth}>
+            <Ionicons name="refresh-outline" size={16} color={ImhotepTheme.colors.primaryTealGlow} />
+            <Text style={styles.actionText}>Recalculate Balance</Text>
+          </PressableScale>
+        </ScrollView>
+      </View>
+
+      {/* Active Filter Chips */}
+      {hasActiveFilters && (
+        <View style={styles.activeFiltersContainer}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.activeFiltersScroll}>
+            <Text style={styles.activeFiltersLabel}>Filters:</Text>
+            {filters.startDate && (
+              <PressableScale
+                style={styles.activeFilterChip}
+                onPress={() => handleRemoveSingleFilter('startDate')}
+              >
+                <Text style={styles.activeFilterText}>
+                  From: {filters.startDate.toISOString().split('T')[0]}
+                </Text>
+                <Ionicons name="close-circle" size={14} color={ImhotepTheme.colors.primaryTealGlow} />
+              </PressableScale>
+            )}
+            {filters.endDate && (
+              <PressableScale
+                style={styles.activeFilterChip}
+                onPress={() => handleRemoveSingleFilter('endDate')}
+              >
+                <Text style={styles.activeFilterText}>
+                  To: {filters.endDate.toISOString().split('T')[0]}
+                </Text>
+                <Ionicons name="close-circle" size={14} color={ImhotepTheme.colors.primaryTealGlow} />
+              </PressableScale>
+            )}
+            {filters.statusFilter && (
+              <PressableScale
+                style={styles.activeFilterChip}
+                onPress={() => handleRemoveSingleFilter('statusFilter')}
+              >
+                <Text style={styles.activeFilterText}>
+                  {filters.statusFilter === 'deposit' ? 'Deposits' : 'Withdrawals'}
+                </Text>
+                <Ionicons name="close-circle" size={14} color={ImhotepTheme.colors.primaryTealGlow} />
+              </PressableScale>
+            )}
+            {filters.categoryFilter && (
+              <PressableScale
+                style={styles.activeFilterChip}
+                onPress={() => handleRemoveSingleFilter('categoryFilter')}
+              >
+                <Text style={styles.activeFilterText}>Category: {filters.categoryFilter}</Text>
+                <Ionicons name="close-circle" size={14} color={ImhotepTheme.colors.primaryTealGlow} />
+              </PressableScale>
+            )}
+            {filters.placeFilter && (
+              <PressableScale
+                style={styles.activeFilterChip}
+                onPress={() => handleRemoveSingleFilter('placeFilter')}
+              >
+                <Text style={styles.activeFilterText}>Place: {filters.placeFilter}</Text>
+                <Ionicons name="close-circle" size={14} color={ImhotepTheme.colors.primaryTealGlow} />
+              </PressableScale>
+            )}
+            {filters.detailsSearch && (
+              <PressableScale
+                style={styles.activeFilterChip}
+                onPress={() => handleRemoveSingleFilter('detailsSearch')}
+              >
+                <Text style={styles.activeFilterText}>Search: "{filters.detailsSearch}"</Text>
+                <Ionicons name="close-circle" size={14} color={ImhotepTheme.colors.primaryTealGlow} />
+              </PressableScale>
+            )}
+            <PressableScale onPress={handleClearAllFilters} style={styles.clearAllBtn}>
+              <Text style={styles.clearAllText}>Clear All</Text>
+            </PressableScale>
+          </ScrollView>
+        </View>
+      )}
+
+      {/* Main List / Skeleton / State Views */}
+      {loading && transactions.length === 0 ? (
+        <View style={{ paddingHorizontal: 16 }}>
+          <TransactionListSkeleton />
+        </View>
+      ) : error ? (
+        <View style={{ paddingHorizontal: 16 }}>
+          <ErrorCard message={error} onRetry={() => refreshList()} />
+        </View>
+      ) : (
+        <FlatList
+          data={transactions}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <TransactionItem
+              transaction={item}
+              onPress={() => {
+                setEditTransaction(item);
+                setShowAddModal(true);
+              }}
+            />
+          )}
+          contentContainerStyle={styles.listContent}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={() => refreshList()}
+              tintColor={ImhotepTheme.colors.primaryTealGlow}
+            />
+          }
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.3}
+          ListEmptyComponent={
+            <EmptyState
+              title="No Transactions Found"
+              message={
+                hasActiveFilters
+                  ? 'No activity matches your active search and filter criteria.'
+                  : 'Get started by logging your first transaction.'
+              }
+              actionLabel={hasActiveFilters ? 'Clear Filters' : 'Add Transaction'}
+              onAction={
+                hasActiveFilters
+                  ? handleClearAllFilters
+                  : () => {
+                      setEditTransaction(null);
+                      setShowAddModal(true);
+                    }
+              }
+            />
+          }
+        />
+      )}
+
+      {/* Floating Add Transaction FAB Button */}
+      <PressableScale
+        style={[styles.fab, { bottom: Math.max(insets.bottom, 16) + 80 }]}
+        onPress={() => {
+          setEditTransaction(null);
+          setShowAddModal(true);
+        }}
+      >
+        <Ionicons name="add" size={28} color="#FFFFFF" />
+      </PressableScale>
+
+      {/* Add / Edit Transaction Modal */}
+      <AddTransactionModal
+        visible={showAddModal}
+        editMode={!!editTransaction}
+        initialValues={editTransaction || {}}
+        initialType={(editTransaction?.trans_status as any)?.toLowerCase() || 'deposit'}
+        onClose={() => setShowAddModal(false)}
+        onSuccess={() => {
+          setShowAddModal(false);
+          refreshList();
+        }}
+      />
+
+      {/* Filter Modal */}
+      <Modal
+        visible={showFilterModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowFilterModal(false)}
+      >
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <ScrollView keyboardShouldPersistTaps="handled">
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>Filter Transactions</Text>
+                  <PressableScale onPress={() => setShowFilterModal(false)}>
+                    <Ionicons name="close" size={24} color={ImhotepTheme.colors.textPrimary} />
+                  </PressableScale>
+                </View>
+
+                {/* Status Toggle */}
+                <Text style={styles.inputLabel}>Type</Text>
+                <View style={styles.filterChipRow}>
+                  {['', 'deposit', 'withdraw'].map((type) => (
+                    <PressableScale
+                      key={type}
+                      style={[
+                        styles.modalChip,
+                        tempStatus === type && styles.modalChipActive,
+                      ]}
+                      onPress={() => setTempStatus(type)}
+                    >
+                      <Text
+                        style={[
+                          styles.modalChipText,
+                          tempStatus === type && styles.modalChipTextActive,
+                        ]}
+                      >
+                        {type === '' ? 'All' : type === 'deposit' ? 'Income' : 'Expense'}
+                      </Text>
+                    </PressableScale>
+                  ))}
+                </View>
+
+                {/* Details Search */}
+                <Text style={styles.inputLabel}>Search Description</Text>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Search description..."
+                  placeholderTextColor={ImhotepTheme.colors.textMuted}
+                  value={tempSearch}
+                  onChangeText={setTempSearch}
+                />
+
+                {/* Category Select */}
+                <Text style={styles.inputLabel}>Category</Text>
+                <CategorySelect
+                  value={tempCategory}
+                  onChange={setTempCategory}
+                  status={tempStatus || 'ANY'}
+                />
+
+                {/* Place Select */}
+                <Text style={styles.inputLabel}>Place</Text>
+                <PlaceSelect
+                  value={tempPlace}
+                  onChange={setTempPlace}
+                  currency="ANY"
+                />
+
+                {/* Date Filters */}
+                <Text style={styles.inputLabel}>Date Range</Text>
+                <View style={styles.dateRow}>
+                  <PressableScale style={styles.datePickerBtn} onPress={() => setShowStartPicker(true)}>
+                    <Text style={styles.datePickerText}>
+                      {tempStartDate ? tempStartDate.toISOString().split('T')[0] : 'Start Date'}
+                    </Text>
+                    <Ionicons name="calendar-outline" size={18} color={ImhotepTheme.colors.textSecondary} />
+                  </PressableScale>
+                  <PressableScale style={styles.datePickerBtn} onPress={() => setShowEndPicker(true)}>
+                    <Text style={styles.datePickerText}>
+                      {tempEndDate ? tempEndDate.toISOString().split('T')[0] : 'End Date'}
+                    </Text>
+                    <Ionicons name="calendar-outline" size={18} color={ImhotepTheme.colors.textSecondary} />
+                  </PressableScale>
+                </View>
+
+                {showStartPicker && (
+                  <DateTimePicker
+                    value={tempStartDate || new Date()}
+                    mode="date"
+                    display="default"
+                    onChange={(e, d) => {
+                      setShowStartPicker(Platform.OS === 'ios');
+                      if (d) setTempStartDate(d);
+                    }}
+                  />
+                )}
+                {showEndPicker && (
+                  <DateTimePicker
+                    value={tempEndDate || new Date()}
+                    mode="date"
+                    display="default"
+                    onChange={(e, d) => {
+                      setShowEndPicker(Platform.OS === 'ios');
+                      if (d) setTempEndDate(d);
+                    }}
+                  />
+                )}
+
+                {/* Modal Action Buttons */}
+                <View style={styles.modalActions}>
+                  <PressableScale style={styles.clearBtn} onPress={handleClearAllFilters}>
+                    <Text style={styles.clearBtnText}>Clear All</Text>
+                  </PressableScale>
+                  <PressableScale style={styles.applyBtn} onPress={handleApplyFilters}>
+                    <Text style={styles.applyBtnText}>Apply Filters</Text>
+                  </PressableScale>
+                </View>
+              </ScrollView>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+    </View>
+  );
 }
 
-
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
-    header: {
-        paddingBottom: 20,
-        paddingHorizontal: 20,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        borderBottomWidth: 1,
-    },
-    headerTitle: {
-        fontSize: 32,
-        fontWeight: 'bold',
-        marginBottom: 4,
-    },
-    headerSubtitle: {
-        fontSize: 14,
-        marginTop: 2,
-    },
-    filterButton: {
-        padding: 8,
-        borderRadius: 12,
-    },
-    actionsContainer: {
-        marginBottom: 10,
-    },
-    actionsScroll: {
-        paddingHorizontal: 20,
-        paddingVertical: 10,
-        gap: 10,
-    },
-    actionChip: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 14,
-        paddingVertical: 10,
-        borderRadius: 20,
-        borderWidth: 1,
-        gap: 6,
-    },
-    actionText: {
-        fontSize: 14,
-        fontWeight: '600',
-    },
-    footerLoading: {
-        paddingVertical: 20,
-        alignItems: 'center',
-        gap: 8,
-    },
-    footerEnd: {
-        paddingVertical: 20,
-        alignItems: 'center',
-        flexDirection: 'row',
-        justifyContent: 'center',
-        gap: 8,
-    },
-    footerText: {
-        fontSize: 14,
-    },
-    emptyContainer: {
-        paddingVertical: 80,
-        paddingHorizontal: 40,
-        alignItems: 'center',
-        gap: 16,
-    },
-    emptyListContent: {
-        flexGrow: 1,
-    },
-    emptyText: {
-        textAlign: 'center',
-        fontSize: 18,
-        fontWeight: '600',
-    },
-    emptySubtext: {
-        textAlign: 'center',
-        fontSize: 14,
-    },
-    fab: {
-        position: 'absolute',
-        bottom: 30,
-        right: 30,
-        width: 60,
-        height: 60,
-        borderRadius: 30,
-        backgroundColor: '#366c6b',
-        justifyContent: 'center',
-        alignItems: 'center',
-        shadowColor: '#366c6b',
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.4,
-        shadowRadius: 8,
-        elevation: 10,
-    },
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        justifyContent: 'flex-end',
-    },
-    modalContent: {
-        borderTopLeftRadius: 24,
-        borderTopRightRadius: 24,
-        padding: 24,
-        maxHeight: '90%',
-    },
-    modalHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 24,
-    },
-    modalTitle: {
-        fontSize: 22,
-        fontWeight: 'bold',
-    },
-    label: {
-        fontSize: 16,
-        fontWeight: '600',
-        marginBottom: 8,
-        marginTop: 16,
-    },
-    input: {
-        borderRadius: 12,
-        padding: 14,
-        borderWidth: 1,
-        fontSize: 16,
-    },
-    filterRow: {
-        flexDirection: 'row',
-        gap: 12,
-        marginBottom: 8,
-        flexWrap: 'wrap',
-    },
-    filterChip: {
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        borderRadius: 20,
-        backgroundColor: '#f1f5f9',
-        borderWidth: 1,
-        borderColor: 'transparent',
-    },
-    filterChipDark: {
-        backgroundColor: '#334155',
-    },
-    filterChipActive: {
-        backgroundColor: '#366c6b',
-    },
-    filterChipText: {
-        color: '#64748b',
-        fontWeight: '500',
-    },
-    filterChipTextActive: {
-        color: 'white',
-    },
-    dateRow: {
-        flexDirection: 'row',
-        gap: 12,
-        marginBottom: 32,
-    },
-    dateInput: {
-        flex: 1,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: 14,
-        borderRadius: 12,
-        borderWidth: 1,
-    },
-    modalActions: {
-        flexDirection: 'row',
-        gap: 16,
-        marginTop: 24,
-    },
-    modalButton: {
-        flex: 1,
-        padding: 16,
-        borderRadius: 16,
-        alignItems: 'center',
-    },
-    clearButton: {
-        backgroundColor: 'transparent',
-        borderWidth: 2,
-        borderColor: '#ef4444',
-    },
-    applyButton: {
-        backgroundColor: '#366c6b',
-        shadowColor: '#366c6b',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 6,
-        elevation: 4,
-    },
-    clearButtonText: {
-        color: '#ef4444',
-        fontWeight: 'bold',
-        fontSize: 16,
-    },
-    applyButtonText: {
-        color: 'white',
-        fontWeight: 'bold',
-        fontSize: 16,
-    },
-    activeFiltersContainer: {
-        paddingVertical: 10,
-        paddingBottom: 12,
-        borderBottomWidth: 1,
-    },
-    activeFiltersScroll: {
-        paddingHorizontal: 20,
-        alignItems: 'center',
-        flexDirection: 'row',
-        gap: 8,
-    },
-    activeFiltersLabel: {
-        fontSize: 14,
-        fontWeight: '600',
-        marginRight: 4,
-    },
-    activeFilterChip: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 16,
-        borderWidth: 1,
-        gap: 4,
-    },
-    activeFilterText: {
-        fontSize: 13,
-        fontWeight: '600',
-    },
-    clearAllTextButton: {
-        paddingVertical: 6,
-        paddingHorizontal: 8,
-        marginLeft: 4,
-    },
-    clearAllText: {
-        fontSize: 13,
-        fontWeight: '700',
-        color: '#ef4444',
-        textDecorationLine: 'underline',
-    }
+  container: {
+    flex: 1,
+    backgroundColor: ImhotepTheme.colors.backgroundDark,
+  },
+  header: {
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: ImhotepTheme.colors.backgroundSurface,
+    borderBottomWidth: 1,
+    borderBottomColor: ImhotepTheme.colors.glassBorder,
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: ImhotepTheme.colors.textPrimary,
+  },
+  headerSubtitle: {
+    fontSize: 13,
+    color: ImhotepTheme.colors.textSecondary,
+    marginTop: 2,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  iconButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: ImhotepTheme.colors.glassCard,
+    borderWidth: 1,
+    borderColor: ImhotepTheme.colors.glassBorder,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  actionsContainer: {
+    paddingVertical: 8,
+  },
+  actionsScroll: {
+    paddingHorizontal: 20,
+    gap: 10,
+  },
+  actionChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 16,
+    backgroundColor: ImhotepTheme.colors.glassCard,
+    borderWidth: 1,
+    borderColor: ImhotepTheme.colors.glassBorder,
+    gap: 8,
+  },
+  actionText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: ImhotepTheme.colors.textPrimary,
+  },
+  activeFiltersContainer: {
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: ImhotepTheme.colors.glassBorder,
+  },
+  activeFiltersScroll: {
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    gap: 8,
+  },
+  activeFiltersLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: ImhotepTheme.colors.textSecondary,
+  },
+  activeFilterChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 14,
+    backgroundColor: ImhotepTheme.colors.primaryTealLight,
+    borderWidth: 1,
+    borderColor: 'rgba(20, 184, 166, 0.3)',
+    gap: 6,
+  },
+  activeFilterText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: ImhotepTheme.colors.primaryTealGlow,
+  },
+  clearAllBtn: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  clearAllText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: ImhotepTheme.colors.withdrawRed,
+    textDecorationLine: 'underline',
+  },
+  listContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 120,
+  },
+  fab: {
+    position: 'absolute',
+    right: 24,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: ImhotepTheme.colors.primaryTeal,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: ImhotepTheme.colors.primaryTealGlow,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    elevation: 8,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: ImhotepTheme.colors.backgroundSurface,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    padding: 24,
+    maxHeight: '85%',
+    borderTopWidth: 1,
+    borderColor: ImhotepTheme.colors.glassBorder,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: ImhotepTheme.colors.textPrimary,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: ImhotepTheme.colors.textSecondary,
+    marginTop: 14,
+    marginBottom: 8,
+  },
+  filterChipRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 8,
+  },
+  modalChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 14,
+    backgroundColor: ImhotepTheme.colors.glassCard,
+    borderWidth: 1,
+    borderColor: ImhotepTheme.colors.glassBorder,
+  },
+  modalChipActive: {
+    backgroundColor: ImhotepTheme.colors.primaryTealLight,
+    borderColor: ImhotepTheme.colors.primaryTealGlow,
+  },
+  modalChipText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: ImhotepTheme.colors.textSecondary,
+  },
+  modalChipTextActive: {
+    color: ImhotepTheme.colors.primaryTealGlow,
+  },
+  textInput: {
+    backgroundColor: ImhotepTheme.colors.inputBackground,
+    borderWidth: 1,
+    borderColor: ImhotepTheme.colors.inputBorder,
+    borderRadius: 14,
+    padding: 14,
+    fontSize: 15,
+    color: ImhotepTheme.colors.textPrimary,
+  },
+  dateRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 16,
+  },
+  datePickerBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: ImhotepTheme.colors.inputBackground,
+    borderWidth: 1,
+    borderColor: ImhotepTheme.colors.inputBorder,
+    borderRadius: 14,
+    padding: 14,
+  },
+  datePickerText: {
+    fontSize: 14,
+    color: ImhotepTheme.colors.textPrimary,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 24,
+    marginBottom: 16,
+  },
+  clearBtn: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: ImhotepTheme.colors.withdrawRed,
+    alignItems: 'center',
+  },
+  clearBtnText: {
+    color: ImhotepTheme.colors.withdrawRed,
+    fontWeight: '700',
+    fontSize: 15,
+  },
+  applyBtn: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 16,
+    backgroundColor: ImhotepTheme.colors.primaryTeal,
+    alignItems: 'center',
+  },
+  applyBtnText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 15,
+  },
 });
-

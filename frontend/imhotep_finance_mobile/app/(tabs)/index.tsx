@@ -5,40 +5,40 @@ import {
   StyleSheet,
   ScrollView,
   RefreshControl,
-  TouchableOpacity,
-  Image,
   Dimensions,
-  Platform,
-  Alert
+  Alert,
 } from 'react-native';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useAuth } from '@/contexts/AuthContext';
-import NetWorthCard from '@/components/NetWorthCard';
-import AddTransactionModal from '@/components/AddTransactionModal';
-import UserGuideModal from '@/components/UserGuideModal';
-import api from '@/constants/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import ImhotepTheme from '@/constants/imhotepTheme';
+import api from '@/constants/api';
+import { useAuth } from '@/contexts/AuthContext';
+import NetWorthCard from '@/components/NetWorthCard';
+import AddTransactionModal from '@/components/AddTransactionModal';
+import UserGuideModal from '@/components/UserGuideModal';
+import PressableScale from '@/components/ui/PressableScale';
+import useFinanceSummary from '@/hooks/useFinanceSummary';
+
 const { width } = Dimensions.get('window');
-
-
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
-import { updateNetworthWidget } from '@/widgets/widget-updater';
 
 export default function Dashboard() {
   const { user } = useAuth();
   const insets = useSafeAreaInsets();
-  // ... existing state ...
-  const [networth, setNetworth] = useState('0');
-  const [favoriteCurrency, setFavoriteCurrency] = useState('USD');
-  const [score, setScore] = useState<number | null>(null);
-  const [scoreTxt, setScoreTxt] = useState('');
-  const [target, setTarget] = useState('');
-  const [loading, setLoading] = useState(true);
+
+  const {
+    networth,
+    favoriteCurrency,
+    score,
+    scoreTxt,
+    target,
+    loading,
+    refetch,
+  } = useFinanceSummary();
+
   const [refreshing, setRefreshing] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
@@ -58,90 +58,16 @@ export default function Dashboard() {
     checkGuide();
   }, []);
 
-  const fetchData = async () => {
-    let latestNetworth = '0';
-    let latestCurrency = 'USD';
-    let latestScore: number | null = null;
-    let hasError = false;
-
-    try {
-      // 1. Fetch Networth
-      const networthRes = await api.get('/api/finance-management/get-networth/');
-      latestNetworth = networthRes.data.networth || '0';
-      setNetworth(latestNetworth);
-      if (networthRes.data.favorite_currency) {
-        latestCurrency = networthRes.data.favorite_currency;
-        setFavoriteCurrency(latestCurrency);
-      }
-    } catch (err: any) {
-      if (err.response?.status === 404) {
-        setNetworth('0');
-      } else {
-        console.warn('Networth fetch error:', err);
-        hasError = true;
-      }
-    }
-
-    try {
-      // 2. Fetch Favorite Currency (redundant but good backup)
-      const favRes = await axios.get('/api/get-fav-currency/');
-      latestCurrency = favRes.data.favorite_currency || latestCurrency || 'USD';
-      setFavoriteCurrency(latestCurrency);
-    } catch (err: any) {
-      if (err.response?.status !== 404) {
-        console.warn('Favorite currency fetch error:', err);
-      }
-    }
-
-    try {
-      // 3. Fetch Target Score
-      const scoreRes = await api.get('/api/finance-management/target/get-score/');
-      if (scoreRes.data.score_txt) {
-        latestScore = scoreRes.data.score;
-        setScore(latestScore);
-        setScoreTxt(scoreRes.data.score_txt);
-        setTarget(scoreRes.data.target);
-      }
-    } catch (err: any) {
-      if (err.response?.status === 404) {
-        setScore(null);
-        setScoreTxt('');
-        setTarget('');
-      } else {
-        console.warn('Target score fetch error:', err);
-      }
-    }
-
-    // 4. Update Last Login (fire and forget)
-    api.post('/api/update-last-login/').catch(() => { });
-
-    setLoading(false);
-    setRefreshing(false);
-
-    // Update the Android widget with the fetched values
-    updateNetworthWidget({
-      isLoggedIn: true,
-      favoriteCurrency: latestCurrency,
-      networth: latestNetworth,
-      score: latestScore,
-      hasError,
-      isRefreshing: false,
-    });
-  };
-
   const runApplyScheduledIfNeeded = async () => {
     try {
       const key = 'lastApplyScheduledDate';
-      const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+      const today = new Date().toISOString().slice(0, 10);
       const last = await AsyncStorage.getItem(key);
 
       if (last === today) return;
 
       await api.post('/api/finance-management/scheduled-trans/apply-scheduled-trans/');
-
-      // mark as done for today
       await AsyncStorage.setItem(key, today);
-      console.log('Applied scheduled transactions for today');
     } catch (err) {
       console.warn('apply_scheduled_trans failed', err);
     }
@@ -149,136 +75,125 @@ export default function Dashboard() {
 
   const loadDashboardData = async () => {
     await runApplyScheduledIfNeeded();
-    await fetchData();
+    await refetch();
   };
 
-  useEffect(() => {
-    loadDashboardData();
-  }, []);
-
-  // Reload when screen comes into focus
   useFocusEffect(
     useCallback(() => {
       loadDashboardData();
     }, [])
   );
 
-  const onRefresh = () => {
+  const onRefresh = async () => {
     setRefreshing(true);
-    loadDashboardData();
+    await loadDashboardData();
+    setRefreshing(false);
   };
 
   const getScoreColor = () => {
-    if (score === null) return ['#f59e0b', '#d97706'] as const; // Default/Neutral
-    if (score > 0) return ['#10b981', '#059669'] as const; // Positive
-    if (score < 0) return ['#ef4444', '#dc2626'] as const; // Negative
-    return ['#f59e0b', '#d97706'] as const; // Neutral
+    if (score == null) return ['#D97706', '#B45309'] as const;
+    if (score > 0) return ['#10B981', '#059669'] as const;
+    if (score < 0) return ['#EF4444', '#DC2626'] as const;
+    return ['#D97706', '#B45309'] as const;
   };
 
   const scoreColors = getScoreColor();
 
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
-
-  const themeStyles = {
-    container: {
-      backgroundColor: isDark ? '#0f172a' : '#f8fafc',
-    },
-    text: {
-      color: isDark ? '#f1f5f9' : '#1e293b',
-    },
-    subText: {
-      color: isDark ? '#94a3b8' : '#64748b',
-    },
-    card: {
-      backgroundColor: isDark ? '#1e293b' : 'white',
-    },
-    headerCard: {
-      backgroundColor: isDark ? 'rgba(30, 41, 59, 0.9)' : 'rgba(255,255,255,0.8)',
-    },
-    iconBg: {
-      backgroundColor: isDark ? '#334155' : '#eaf6f6'
-    }
-  };
-
   return (
-    <View style={[styles.container, themeStyles.container]}>
-      {/* Background Decorative Elements */}
-      <View style={[styles.orb, { top: 50, left: -50, backgroundColor: isDark ? 'rgba(54, 108, 107, 0.1)' : 'rgba(54, 108, 107, 0.2)' }]} />
-      <View style={[styles.orb, { top: 100, right: -50, backgroundColor: isDark ? 'rgba(54, 108, 107, 0.1)' : 'rgba(54, 108, 107, 0.2)' }]} />
+    <View style={styles.container}>
+      {/* Background Glowing Orbs */}
+      <View style={[styles.orb, styles.orbTeal]} />
+      <View style={[styles.orb, styles.orbGold]} />
 
       <ScrollView
-        contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 8 }]}
+        contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 12 }]}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={isDark ? "#fff" : "#366c6b"} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={ImhotepTheme.colors.primaryTealGlow}
+          />
         }
       >
-        {/* Header */}
-        <View style={[styles.headerCard, themeStyles.headerCard]}>
+        {/* Header Card (Archetype A Glassmorphism) */}
+        <View style={styles.headerCard}>
           <View style={styles.headerRow}>
             <View style={styles.logoContainer}>
-              <Ionicons name="pie-chart" size={30} color="#fff" />
+              <Ionicons name="pie-chart" size={26} color="#FFFFFF" />
             </View>
             <View>
-              <Text style={[styles.brandName, { color: '#366c6b' }]}>Imhotep Finance</Text>
-              <Text style={[styles.brandSubtitle, themeStyles.subText]}>Manage your finances</Text>
+              <Text style={styles.brandName}>Imhotep Finance</Text>
+              <Text style={styles.brandSubtitle}>Secure Financial Command Center</Text>
             </View>
           </View>
-          <Text style={[styles.welcomeText, themeStyles.text]}>Welcome, {user?.first_name || user?.username}!</Text>
+          <Text style={styles.welcomeText}>
+            Welcome, {user?.first_name || user?.username || 'Trader'}
+          </Text>
         </View>
 
-        {/* Net Worth */}
+        {/* Net Worth Bento Card */}
         <NetWorthCard
           networth={networth}
           favoriteCurrency={favoriteCurrency}
-          loading={loading && !refreshing && networth === '0'}
+          loading={loading && networth === '0'}
+          score={score}
+          scoreTxt={scoreTxt}
           onPress={() => router.push('/show-networth-details')}
         />
 
-        {/* Quick Actions */}
+        {/* Quick Deposit / Withdraw Actions */}
         <View style={styles.actionsGrid}>
-          <TouchableOpacity
-            style={[styles.actionButton, themeStyles.card]}
+          <PressableScale
+            style={styles.actionButton}
             onPress={() => {
               setInitialType('deposit');
               setShowAddModal(true);
             }}
           >
-            <View style={[styles.iconCircle, { backgroundColor: isDark ? 'rgba(54, 108, 107, 0.2)' : '#e0f2f1' }]}>
-              <Ionicons name="add-circle" size={32} color="#366c6b" />
+            <View style={[styles.iconCircle, styles.depositBg]}>
+              <Ionicons name="add-circle" size={26} color={ImhotepTheme.colors.depositGreen} />
             </View>
             <View>
-              <Text style={[styles.actionTitle, themeStyles.text]}>Deposit</Text>
-            </View>
-          </TouchableOpacity>
+              <Text style={styles.actionTitle}>Deposit</Text>
 
-          <TouchableOpacity
-            style={[styles.actionButton, themeStyles.card]}
+            </View>
+          </PressableScale>
+
+          <PressableScale
+            style={styles.actionButton}
             onPress={() => {
               setInitialType('withdraw');
               setShowAddModal(true);
             }}
           >
-            <View style={[styles.iconCircle, { backgroundColor: isDark ? 'rgba(239, 68, 68, 0.2)' : '#fee2e2' }]}>
-              <Ionicons name="remove-circle" size={32} color="#dc2626" />
+            <View style={[styles.iconCircle, styles.withdrawBg]}>
+              <Ionicons name="remove-circle" size={26} color={ImhotepTheme.colors.withdrawRed} />
             </View>
             <View>
-              <Text style={[styles.actionTitle, themeStyles.text]}>Withdraw</Text>
+              <Text style={styles.actionTitle}>Withdraw</Text>
+
             </View>
-          </TouchableOpacity>
+          </PressableScale>
         </View>
 
-        {/* Monthly Target Status */}
+        {/* Monthly Target Status Card */}
         {scoreTxt ? (
           <LinearGradient
             colors={scoreColors}
-            start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
             style={styles.scoreCard}
           >
             <View style={styles.scoreHeader}>
               <Ionicons
-                name={score && score > 0 ? "trending-up" : score && score < 0 ? "trending-down" : "remove-circle"}
-                size={32}
+                name={
+                  score && score > 0
+                    ? 'trending-up'
+                    : score && score < 0
+                    ? 'trending-down'
+                    : 'remove-circle'
+                }
+                size={28}
                 color="white"
               />
               <Text style={styles.scoreTitle}>Monthly Target Status</Text>
@@ -288,50 +203,89 @@ export default function Dashboard() {
             <View style={styles.scoreStats}>
               <View style={styles.statItem}>
                 <Text style={styles.statLabel}>Target</Text>
-                <Text style={styles.statValue}>{target} {favoriteCurrency}</Text>
+                <Text style={styles.statValue}>
+                  {target} {favoriteCurrency}
+                </Text>
               </View>
               <View style={styles.statItem}>
                 <Text style={styles.statLabel}>Score</Text>
-                <Text style={styles.statValue}>{score && score > 0 ? '+' : ''}{score?.toFixed(0)} {favoriteCurrency}</Text>
+                <Text style={styles.statValue}>
+                  {score != null && score > 0 ? '+' : ''}
+                  {score != null ? score.toFixed(0) : '0'} {favoriteCurrency}
+                </Text>
               </View>
               <View style={styles.statItem}>
                 <Text style={styles.statLabel}>Status</Text>
-                <Text style={styles.statValue}>{score && score > 0 ? 'Above' : score && score < 0 ? 'Below' : 'On Target'}</Text>
+                <Text style={styles.statValue}>
+                  {score != null && score > 0
+                    ? 'Above'
+                    : score != null && score < 0
+                    ? 'Below'
+                    : 'On Target'}
+                </Text>
               </View>
             </View>
           </LinearGradient>
         ) : (
-          <View style={[styles.getStartedCard, themeStyles.card]}>
-            <View style={[styles.getStartedIcon, themeStyles.iconBg]}>
-              <Ionicons name="rocket-outline" size={32} color="#366c6b" />
+          <View style={styles.getStartedCard}>
+            <View style={styles.getStartedIcon}>
+              <Ionicons name="rocket-outline" size={28} color={ImhotepTheme.colors.primaryTealGlow} />
             </View>
-            <Text style={[styles.getStartedTitle, themeStyles.text]}>Get Started</Text>
-            <Text style={[styles.getStartedText, themeStyles.subText]}>Set a monthly target in your profile to track your progress.</Text>
-            <TouchableOpacity
+            <Text style={styles.getStartedTitle}>Set Financial Goals</Text>
+            <Text style={styles.getStartedText}>
+              Set a monthly target in your profile to track your progress effortlessly.
+            </Text>
+            <PressableScale
               style={styles.getStartedButton}
               onPress={() => router.push('/profile')}
             >
               <Text style={styles.getStartedButtonText}>Set Target</Text>
-            </TouchableOpacity>
+            </PressableScale>
           </View>
         )}
 
-        {/* Quick Links Grid */}
+        {/* Quick Links Grid (Bento Grid Style) */}
         <View style={styles.linksGrid}>
-          <QuickLink icon="list" title="Transactions" subtitle="View All" color="blue" href="/show_trans" isDark={isDark} />
-          <QuickLink icon="calendar" title="Scheduled" subtitle="Recurring" color="indigo" href="/show_scheduled_trans" isDark={isDark} />
-          <QuickLink icon="pie-chart" title="Net Worth" subtitle="Details" color="purple" href="/show_networth_details" isDark={isDark} />
-          <QuickLink icon="bar-chart" title="Reports" subtitle="Analysis" color="emerald" href="/reports" isDark={isDark} />
-          <QuickLink icon="person" title="Manage Target" subtitle="Goals" color="green" href="/profile" isDark={isDark} />
-          {/* TEMP: Widget test entry (comment out before production release) */}
-          {/* <QuickLink
-            icon="bug"
-            title="Widget Test"
-            subtitle="Networth layout"
-            color="indigo"
-            href="/networth-widget-test"
-            isDark={isDark}
-          /> */}
+          <QuickLink
+            icon="list"
+            title="Transactions"
+            subtitle="View History"
+            color={ImhotepTheme.colors.primaryTealGlow}
+            bg="rgba(20, 184, 166, 0.15)"
+            href="/show_trans"
+          />
+          <QuickLink
+            icon="calendar"
+            title="Scheduled"
+            subtitle="Recurring"
+            color={ImhotepTheme.colors.accentGoldGlow}
+            bg="rgba(245, 158, 11, 0.15)"
+            href="/show_scheduled_trans"
+          />
+          <QuickLink
+            icon="pie-chart"
+            title="Net Worth"
+            subtitle="Vault Details"
+            color="#A855F7"
+            bg="rgba(168, 85, 247, 0.15)"
+            href="/show_networth_details"
+          />
+          <QuickLink
+            icon="bar-chart"
+            title="Reports"
+            subtitle="Analytics"
+            color="#3B82F6"
+            bg="rgba(59, 130, 246, 0.15)"
+            href="/reports"
+          />
+          <QuickLink
+            icon="person"
+            title="Manage Target"
+            subtitle="Profile Goals"
+            color="#10B981"
+            bg="rgba(16, 185, 129, 0.15)"
+            href="/profile"
+          />
         </View>
 
         <View style={{ height: insets.bottom + 100 }} />
@@ -349,41 +303,19 @@ export default function Dashboard() {
       />
 
       {/* User Guide Modal */}
-      <UserGuideModal
-        visible={showGuide}
-        onClose={() => setShowGuide(false)}
-      />
+      <UserGuideModal visible={showGuide} onClose={() => setShowGuide(false)} />
     </View>
   );
 }
 
-const QuickLink = ({ icon, title, subtitle, color, href, isDark }: any) => {
-  // Mapping colors to hex
-  const colorMap: any = {
-    blue: '#2563eb',
-    indigo: '#4f46e5',
-    purple: '#9333ea',
-    emerald: '#059669',
-    green: '#16a34a'
-  };
-  const bgMap: any = {
-    blue: isDark ? 'rgba(37, 99, 235, 0.2)' : '#dbeafe',
-    indigo: isDark ? 'rgba(79, 70, 229, 0.2)' : '#e0e7ff',
-    purple: isDark ? 'rgba(147, 51, 234, 0.2)' : '#f3e8ff',
-    emerald: isDark ? 'rgba(5, 150, 105, 0.2)' : '#d1fae5',
-    green: isDark ? 'rgba(22, 163, 74, 0.2)' : '#dcfce7'
-  };
-
+const QuickLink = ({ icon, title, subtitle, color, bg, href }: any) => {
   const handlePress = () => {
-    // Map hrefs to actual routes
-    const routeMap: any = {
+    const routeMap: Record<string, string> = {
       '/show_trans': '/(tabs)/transactions',
       '/show_scheduled_trans': '/(tabs)/scheduled',
       '/show_networth_details': '/show-networth-details',
       '/reports': '/(tabs)/reports',
       '/profile': '/(tabs)/profile',
-      // TEMP: direct route for widget test. Comment out when deploying.
-      '/networth-widget-test': '/networth-widget-test',
     };
 
     const route = routeMap[href];
@@ -395,137 +327,133 @@ const QuickLink = ({ icon, title, subtitle, color, href, isDark }: any) => {
   };
 
   return (
-    <TouchableOpacity
-      style={[styles.linkCard, { backgroundColor: isDark ? '#1e293b' : 'white' }]}
-      onPress={handlePress}
-    >
-      <View style={[styles.linkIcon, { backgroundColor: bgMap[color] }]}>
-        <Ionicons name={icon} size={24} color={colorMap[color]} />
+    <PressableScale style={styles.linkCard} onPress={handlePress}>
+      <View style={[styles.linkIcon, { backgroundColor: bg }]}>
+        <Ionicons name={icon} size={22} color={color} />
       </View>
-      <Text style={[styles.linkTitle, { color: isDark ? '#f1f5f9' : '#1e293b' }]}>{title}</Text>
-      <Text style={[styles.linkSubtitle, { color: isDark ? '#94a3b8' : '#64748b' }]}>{subtitle}</Text>
-    </TouchableOpacity>
+      <Text style={styles.linkTitle}>{title}</Text>
+      <Text style={styles.linkSubtitle}>{subtitle}</Text>
+    </PressableScale>
   );
 };
-
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // Background color handled dynamically
+    backgroundColor: ImhotepTheme.colors.backgroundDark,
   },
   scrollContent: {
     padding: 16,
-    // paddingTop is set dynamically via insets.top in the ScrollView
   },
   orb: {
     position: 'absolute',
-    width: 200,
-    height: 200,
-    borderRadius: 100,
+    width: 220,
+    height: 220,
+    borderRadius: 110,
     zIndex: -1,
   },
+  orbTeal: {
+    top: 20,
+    left: -60,
+    backgroundColor: ImhotepTheme.colors.primaryTealLight,
+  },
+  orbGold: {
+    top: 180,
+    right: -60,
+    backgroundColor: ImhotepTheme.colors.accentGoldLight,
+  },
   headerCard: {
-    // Background color handled dynamically
+    backgroundColor: ImhotepTheme.colors.glassCard,
+    borderWidth: 1,
+    borderColor: ImhotepTheme.colors.glassBorder,
     borderRadius: 24,
     padding: 20,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 3,
+    marginBottom: 16,
   },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 14,
   },
   logoContainer: {
-    width: 50,
-    height: 50,
-    backgroundColor: '#366c6b',
-    borderRadius: 25,
+    width: 46,
+    height: 46,
+    backgroundColor: ImhotepTheme.colors.primaryTeal,
+    borderRadius: 23,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
   },
   brandName: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    // Color handled dynamically or fixed
+    fontSize: 18,
+    fontWeight: '800',
+    color: ImhotepTheme.colors.primaryTealGlow,
   },
   brandSubtitle: {
     fontSize: 12,
-    // Color handled dynamically
+    color: ImhotepTheme.colors.textSecondary,
   },
   welcomeText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    // Color handled dynamically
+    fontSize: 22,
+    fontWeight: '800',
+    color: ImhotepTheme.colors.textPrimary,
   },
   actionsGrid: {
     flexDirection: 'row',
-    gap: 16,
-    marginBottom: 20,
+    gap: 12,
+    marginVertical: 12,
   },
   actionButton: {
     flex: 1,
-    // Background color handled dynamically
-    borderRadius: 16,
+    backgroundColor: ImhotepTheme.colors.glassCard,
+    borderWidth: 1,
+    borderColor: ImhotepTheme.colors.glassBorder,
+    borderRadius: 20,
     padding: 16,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
-    elevation: 2,
   },
   iconCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  actionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    // Color handled dynamically
+  depositBg: {
+    backgroundColor: ImhotepTheme.colors.depositGreenLight,
   },
-  actionSubtitle: {
-    fontSize: 12,
-    // Color handled dynamically
+  withdrawBg: {
+    backgroundColor: ImhotepTheme.colors.withdrawRedLight,
+  },
+  actionTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: ImhotepTheme.colors.textPrimary,
   },
   scoreCard: {
-    borderRadius: 20,
+    borderRadius: 24,
     padding: 20,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    elevation: 5,
+    marginVertical: 12,
   },
   scoreHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    marginBottom: 10,
+    marginBottom: 8,
   },
   scoreTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: 'white',
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#FFFFFF',
   },
   scoreText: {
-    fontSize: 16,
-    color: 'rgba(255,255,255,0.9)',
+    fontSize: 15,
+    color: 'rgba(255, 255, 255, 0.95)',
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: 16,
   },
   scoreStats: {
     flexDirection: 'row',
@@ -536,83 +464,88 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   statLabel: {
-    color: 'rgba(255,255,255,0.7)',
-    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.75)',
+    fontSize: 11,
     marginBottom: 4,
   },
   statValue: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '700',
   },
   getStartedCard: {
-    // Background color handled dynamically
-    borderRadius: 20,
-    padding: 24,
+    backgroundColor: ImhotepTheme.colors.glassCard,
+    borderWidth: 1,
+    borderColor: ImhotepTheme.colors.glassBorder,
+    borderRadius: 24,
+    padding: 22,
     alignItems: 'center',
+    marginVertical: 12,
   },
   getStartedIcon: {
-    width: 64,
-    height: 64,
-    // Background color handled dynamically
-    borderRadius: 32,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  getStartedTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    // Color handled dynamically
-    marginBottom: 8,
-  },
-  getStartedText: {
-    textAlign: 'center',
-    // Color handled dynamically
-    marginBottom: 20,
-  },
-  getStartedButton: {
-    backgroundColor: '#366c6b',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 12,
-  },
-  getStartedButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
-  linksGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 16,
-  },
-  linkCard: {
-    width: (width - 48) / 2, // 2 columns with gaps
-    // Background color handled dynamically
-    borderRadius: 16,
-    padding: 16,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
-    elevation: 2,
-  },
-  linkIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: ImhotepTheme.colors.primaryTealLight,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
   },
+  getStartedTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: ImhotepTheme.colors.textPrimary,
+    marginBottom: 6,
+  },
+  getStartedText: {
+    textAlign: 'center',
+    color: ImhotepTheme.colors.textSecondary,
+    fontSize: 13,
+    lineHeight: 18,
+    marginBottom: 16,
+  },
+  getStartedButton: {
+    backgroundColor: ImhotepTheme.colors.primaryTeal,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 14,
+  },
+  getStartedButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  linksGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+    marginVertical: 12,
+  },
+  linkCard: {
+    width: (width - 44) / 2,
+    backgroundColor: ImhotepTheme.colors.glassCard,
+    borderWidth: 1,
+    borderColor: ImhotepTheme.colors.glassBorder,
+    borderRadius: 20,
+    padding: 16,
+    alignItems: 'center',
+  },
+  linkIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
   linkTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    // Color handled dynamically
+    fontSize: 14,
+    fontWeight: '700',
+    color: ImhotepTheme.colors.textPrimary,
   },
   linkSubtitle: {
     fontSize: 12,
-    // Color handled dynamically
+    color: ImhotepTheme.colors.textMuted,
+    marginTop: 2,
   },
 });
