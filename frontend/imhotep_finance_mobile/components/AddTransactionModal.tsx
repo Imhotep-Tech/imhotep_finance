@@ -1,443 +1,431 @@
 import React, { useState, useEffect } from 'react';
 import {
-  View,
-  Text,
-  Modal,
-  StyleSheet,
-  TextInput,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-  Alert,
-  ActivityIndicator,
+    View,
+    Text,
+    Modal,
+    StyleSheet,
+    TouchableOpacity,
+    TextInput,
+    ScrollView,
+    KeyboardAvoidingView,
+    Platform,
+    Alert,
+    ActivityIndicator
 } from 'react-native';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
-
-import ImhotepTheme from '@/constants/imhotepTheme';
-import api from '@/constants/api';
+import api from '../constants/api';
 import CurrencySelect from './CurrencySelect';
 import CategorySelect from './CategorySelect';
 import PlaceSelect from './PlaceSelect';
-import PressableScale from './ui/PressableScale';
-import { updateNetworthWidget } from '@/widgets/widget-updater';
+import { updateNetworthWidget } from '../widgets/widget-updater';
 
 interface AddTransactionModalProps {
-  onClose: () => void;
-  onSuccess: () => void;
-  initialType?: 'deposit' | 'withdraw';
-  initialValues?: any;
-  editMode?: boolean;
-  visible: boolean;
+    onClose: () => void;
+    onSuccess: () => void;
+    initialType?: 'deposit' | 'withdraw';
+    initialValues?: any;
+    editMode?: boolean;
+    visible: boolean;
 }
 
 const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
-  onClose,
-  onSuccess,
-  initialType = 'deposit',
-  initialValues = {},
-  editMode = false,
-  visible,
+    onClose,
+    onSuccess,
+    initialType = 'deposit',
+    initialValues = {},
+    editMode = false,
+    visible,
 }) => {
-  const [status, setStatus] = useState<'deposit' | 'withdraw'>(initialType);
-  const [amount, setAmount] = useState<string>(initialValues.amount ? String(initialValues.amount) : '');
-  const [desc, setDesc] = useState<string>(initialValues.trans_details || initialValues.desc || '');
-  const [category, setCategory] = useState<string>(initialValues.category || '');
-  const [place, setPlace] = useState<string>(initialValues.place || '');
-  const [currency, setCurrency] = useState<string>(initialValues.currency || '');
-  const [date, setDate] = useState<Date>(
-    initialValues.date ? new Date(initialValues.date) : new Date()
-  );
-  const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
+    const [status, setStatus] = useState<'deposit' | 'withdraw'>(initialType);
+    const [amount, setAmount] = useState(initialValues.amount || '');
+    const [desc, setDesc] = useState(initialValues.desc || '');
+    const [category, setCategory] = useState(initialValues.category || '');
+    const [place, setPlace] = useState(initialValues.place || '');
+    const [currency, setCurrency] = useState(initialValues.currency || '');
+    const [date, setDate] = useState(initialValues.date ? new Date(initialValues.date) : new Date());
+    const [showDatePicker, setShowDatePicker] = useState(false);
+    const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (visible) {
-      setStatus(initialValues.trans_status || initialType);
-      setAmount(initialValues.amount ? String(initialValues.amount) : '');
-      setDesc(initialValues.trans_details || initialValues.desc || '');
-      setCategory(initialValues.category || '');
-      setPlace(initialValues.place || '');
-      setCurrency(initialValues.currency || '');
-      setDate(initialValues.date ? new Date(initialValues.date) : new Date());
-    }
-  }, [visible, initialValues, initialType]);
+    useEffect(() => {
+        if (visible) {
+            setStatus(initialValues.trans_status || initialType);
+            setAmount(initialValues.amount ? String(initialValues.amount) : '');
+            setDesc(initialValues.trans_details || '');
+            setCategory(initialValues.category || '');
+            setPlace(initialValues.place || '');
+            setCurrency(initialValues.currency || '');
+            setDate(initialValues.date ? new Date(initialValues.date) : new Date());
+        }
+    }, [visible]);
 
-  const handleSubmit = async () => {
-    setLoading(true);
-    if (!amount || !currency) {
-      Alert.alert('Error', 'Amount and currency are required.');
-      setLoading(false);
-      return;
-    }
+    const handleSubmit = async () => {
+        setLoading(true);
+        if (!amount || !currency) {
+            Alert.alert('Error', 'Amount and currency are required.');
+            setLoading(false);
+            return;
+        }
 
-    try {
-      const payload = {
-        amount,
-        currency,
-        trans_status: status,
-        category,
-        place,
-        trans_details: desc,
-        date: date.toISOString().split('T')[0],
-      };
+        try {
+            const payload = {
+                amount,
+                currency,
+                trans_status: status,
+                category,
+                place,
+                trans_details: desc,
+                date: date.toISOString().split('T')[0],
+            };
 
-      if (editMode && initialValues.id) {
-        await api.post(
-          `/api/finance-management/transaction/update-transactions/${initialValues.id}/`,
-          payload
-        );
-        Alert.alert('Success', 'Transaction updated successfully!');
-      } else {
-        await api.post('/api/finance-management/transaction/add-transactions/', payload);
-        Alert.alert('Success', 'Transaction added successfully!');
-      }
-      updateNetworthWidget();
-      onSuccess();
-    } catch (err: any) {
-      const errorMessage =
-        err.response?.data?.error ||
-        (editMode ? 'Failed to update transaction.' : 'Failed to add transaction.');
-      Alert.alert('Error', errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const onDateChange = (event: any, selectedDate?: Date) => {
-    setShowDatePicker(Platform.OS === 'ios');
-    if (selectedDate) {
-      setDate(selectedDate);
-    }
-  };
-
-  const handleDelete = async () => {
-    Alert.alert(
-      'Delete Transaction',
-      'Are you sure you want to delete this transaction permanently?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            setLoading(true);
-            try {
-              if (initialValues.id) {
-                await api.delete(
-                  `/api/finance-management/transaction/delete-transactions/${initialValues.id}/`
+            if (editMode && initialValues.id) {
+                await api.post(
+                    `/api/finance-management/transaction/update-transactions/${initialValues.id}/`,
+                    payload
                 );
-                Alert.alert('Success', 'Transaction deleted successfully!');
-                updateNetworthWidget();
-                onSuccess();
-              }
-            } catch (err: any) {
-              Alert.alert('Error', err.response?.data?.error || 'Failed to delete transaction.');
-            } finally {
-              setLoading(false);
+                Alert.alert('Success', 'Transaction updated successfully!');
+            } else {
+                await api.post('/api/finance-management/transaction/add-transactions/', payload);
+                Alert.alert('Success', 'Transaction added successfully!');
             }
-          },
-        },
-      ]
-    );
-  };
+            updateNetworthWidget();
+            onSuccess();
+        } catch (err: any) {
+            const errorMessage = err.response?.data?.error || (editMode ? 'Failed to update transaction.' : 'Failed to add transaction.');
+            Alert.alert('Error', errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      transparent={true}
-      onRequestClose={onClose}
-    >
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.overlay}
-      >
-        <View style={styles.modalView}>
-          <View style={styles.header}>
-            <Text style={styles.title}>
-              {editMode ? 'Edit Transaction' : 'Add Transaction'}
-            </Text>
-            <PressableScale onPress={onClose} style={styles.closeBtn}>
-              <Ionicons name="close" size={22} color={ImhotepTheme.colors.textPrimary} />
-            </PressableScale>
-          </View>
+    const onDateChange = (event: any, selectedDate?: Date) => {
+        setShowDatePicker(Platform.OS === 'ios'); // Keep open on iOS, close on Android
+        if (selectedDate) {
+            setDate(selectedDate);
+        }
+        if (Platform.OS === 'android') {
+            setShowDatePicker(false);
+        }
+    };
 
-          <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
-            {/* Income / Expense Toggle */}
-            <View style={[styles.typeContainer, editMode && styles.disabledType]}>
-              <PressableScale
-                style={[
-                  styles.typeButton,
-                  status === 'deposit' && styles.typeButtonIncome,
-                ]}
-                onPress={() => !editMode && setStatus('deposit')}
-                disabled={editMode}
-              >
-                <Text
-                  style={[
-                    styles.typeText,
-                    status === 'deposit' && styles.typeTextIncome,
-                  ]}
-                >
-                  Income
-                </Text>
-              </PressableScale>
 
-              <PressableScale
-                style={[
-                  styles.typeButton,
-                  status === 'withdraw' && styles.typeButtonExpense,
-                ]}
-                onPress={() => !editMode && setStatus('withdraw')}
-                disabled={editMode}
-              >
-                <Text
-                  style={[
-                    styles.typeText,
-                    status === 'withdraw' && styles.typeTextExpense,
-                  ]}
-                >
-                  Expense
-                </Text>
-              </PressableScale>
-            </View>
 
-            {/* Amount */}
-            <Text style={styles.label}>Amount</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="0.00"
-              placeholderTextColor={ImhotepTheme.colors.textMuted}
-              keyboardType="numeric"
-              value={amount}
-              onChangeText={setAmount}
-            />
-
-            {/* Currency */}
-            <Text style={styles.label}>Currency</Text>
-            <CurrencySelect
-              value={currency}
-              onChange={setCurrency}
-              required
-              disabled={editMode}
-            />
-
-            {/* Category */}
-            <Text style={styles.label}>Category</Text>
-            <CategorySelect
-              value={category}
-              onChange={setCategory}
-              status={status}
-            />
-
-            {/* Place */}
-            <Text style={styles.label}>Place</Text>
-            <PlaceSelect
-              value={place}
-              onChange={setPlace}
-              currency={currency}
-            />
-
-            {/* Description */}
-            <Text style={styles.label}>Description</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Transaction description (optional)"
-              placeholderTextColor={ImhotepTheme.colors.textMuted}
-              value={desc}
-              onChangeText={setDesc}
-            />
-
-            {/* Date */}
-            <Text style={styles.label}>Date</Text>
-            <PressableScale
-              style={styles.dateButton}
-              onPress={() => setShowDatePicker(true)}
-            >
-              <Text style={styles.dateText}>{date.toISOString().split('T')[0]}</Text>
-              <Ionicons name="calendar-outline" size={20} color={ImhotepTheme.colors.textSecondary} />
-            </PressableScale>
-
-            {showDatePicker && (
-              <DateTimePicker
-                value={date}
-                mode="date"
-                display="default"
-                onChange={onDateChange}
-              />
-            )}
-
-            {/* Submit Action */}
-            <PressableScale
-              style={[
-                styles.submitButton,
+    const handleDelete = async () => {
+        Alert.alert(
+            'Delete Transaction',
+            'Are you sure you want to delete this transaction?',
+            [
+                { text: 'Cancel', style: 'cancel' },
                 {
-                  backgroundColor:
-                    status === 'deposit'
-                      ? ImhotepTheme.colors.depositGreen
-                      : ImhotepTheme.colors.withdrawRed,
-                },
-              ]}
-              onPress={handleSubmit}
-              disabled={loading}
-            >
-              {loading ? (
-                <ActivityIndicator color="#FFFFFF" />
-              ) : (
-                <Text style={styles.submitButtonText}>
-                  {editMode ? 'Save Changes' : 'Confirm Transaction'}
-                </Text>
-              )}
-            </PressableScale>
+                    text: 'Delete',
+                    style: 'destructive',
+                    onPress: async () => {
+                        setLoading(true);
+                        try {
+                            if (initialValues.id) {
+                                await api.delete(`/api/finance-management/transaction/delete-transactions/${initialValues.id}/`);
+                                Alert.alert('Success', 'Transaction deleted successfully!');
+                                updateNetworthWidget();
+                                onSuccess();
+                            }
+                        } catch (err: any) {
+                            Alert.alert('Error', err.response?.data?.error || 'Failed to delete transaction.');
+                        } finally {
+                            setLoading(false);
+                        }
+                    }
+                }
+            ]
+        );
+    };
 
-            {/* Delete Option if Editing */}
-            {editMode && (
-              <PressableScale
-                style={styles.deleteButton}
-                onPress={handleDelete}
-                disabled={loading}
-              >
-                <Text style={styles.deleteButtonText}>Delete Transaction</Text>
-              </PressableScale>
-            )}
-          </ScrollView>
-        </View>
-      </KeyboardAvoidingView>
-    </Modal>
-  );
+    const colorScheme = useColorScheme();
+    const isDark = colorScheme === 'dark';
+
+    const themeStyles = {
+        container: {
+            backgroundColor: isDark ? '#1e293b' : 'white',
+        },
+        text: {
+            color: isDark ? '#f1f5f9' : '#333',
+        },
+        subText: {
+            color: isDark ? '#94a3b8' : '#666',
+        },
+        input: {
+            backgroundColor: isDark ? '#334155' : '#f9f9f9',
+            color: isDark ? '#f1f5f9' : '#000',
+            borderColor: isDark ? '#475569' : '#eee',
+        },
+        typeButton: {
+            backgroundColor: isDark ? '#334155' : '#f5f5f5',
+        },
+        closeIcon: isDark ? '#fff' : '#333',
+        disabledType: {
+            opacity: 0.5,
+        }
+    };
+
+    return (
+        <Modal
+            visible={visible}
+            animationType="slide"
+            transparent={true}
+            onRequestClose={onClose}
+        >
+            <KeyboardAvoidingView
+                behavior="padding"
+                style={styles.container}
+            >
+                <View style={[styles.modalView, themeStyles.container]}>
+                    <View style={styles.header}>
+                        <Text style={[styles.title, themeStyles.text]}>{editMode ? 'Edit Transaction' : 'Add Transaction'}</Text>
+                        <TouchableOpacity onPress={onClose}>
+                            <Ionicons name="close" size={24} color={themeStyles.closeIcon} />
+                        </TouchableOpacity>
+                    </View>
+
+                    <ScrollView contentContainerStyle={styles.form}>
+                        {/* Type Selector */}
+                        <View style={[styles.typeContainer, themeStyles.typeButton, editMode && themeStyles.disabledType]}>
+                            <TouchableOpacity
+                                style={[
+                                    styles.typeButton,
+                                    status === 'deposit' && (isDark ? { backgroundColor: 'rgba(16, 185, 129, 0.2)' } : styles.typeButtonIncome)
+                                ]}
+                                onPress={() => !editMode && setStatus('deposit')}
+                                activeOpacity={editMode ? 1 : 0.7}
+                            >
+                                <Text style={[styles.typeText, themeStyles.subText, status === 'deposit' && (isDark ? { color: '#10b981' } : styles.typeTextActive)]}>Income</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[
+                                    styles.typeButton,
+                                    status === 'withdraw' && (isDark ? { backgroundColor: 'rgba(239, 68, 68, 0.2)' } : styles.typeButtonExpense)
+                                ]}
+                                onPress={() => !editMode && setStatus('withdraw')}
+                                activeOpacity={editMode ? 1 : 0.7}
+                            >
+                                <Text style={[styles.typeText, themeStyles.subText, status === 'withdraw' && (isDark ? { color: '#ef4444' } : styles.typeTextActive)]}>Expense</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        {/* Amount */}
+                        <Text style={[styles.label, themeStyles.subText]}>Amount</Text>
+                        <TextInput
+                            style={[styles.input, themeStyles.input]}
+                            placeholder="0.00"
+                            placeholderTextColor={isDark ? '#94a3b8' : '#aaa'}
+                            keyboardType="numeric"
+                            value={amount}
+                            onChangeText={setAmount}
+                        />
+
+                        {/* Currency */}
+                        <Text style={[styles.label, themeStyles.subText]}>Currency</Text>
+                        <CurrencySelect
+                            value={currency}
+                            onChange={setCurrency}
+                            required
+                            disabled={editMode}
+                        />
+
+                        {/* Category */}
+                        <Text style={[styles.label, themeStyles.subText]}>Category</Text>
+                        <CategorySelect
+                            value={category}
+                            onChange={setCategory}
+                            status={status}
+                        />
+
+                        {/* Place */}
+                        <Text style={[styles.label, themeStyles.subText]}>Place</Text>
+                        <PlaceSelect
+                            value={place}
+                            onChange={setPlace}
+                            currency={currency}
+                        />
+
+                        {/* Description */}
+                        <Text style={[styles.label, themeStyles.subText]}>Description</Text>
+                        <TextInput
+                            style={[styles.input, themeStyles.input]}
+                            placeholder="Description (optional)"
+                            placeholderTextColor={isDark ? '#94a3b8' : '#aaa'}
+                            value={desc}
+                            onChangeText={setDesc}
+                        />
+
+                        {/* Date */}
+                        <Text style={[styles.label, themeStyles.subText]}>Date</Text>
+                        <TouchableOpacity
+                            style={[styles.dateButton, themeStyles.input]}
+                            onPress={() => setShowDatePicker(true)}
+                        >
+                            <Text style={[styles.dateText, themeStyles.text]}>{date.toISOString().split('T')[0]}</Text>
+                            <Ionicons name="calendar-outline" size={20} color={isDark ? '#94a3b8' : '#666'} />
+                        </TouchableOpacity>
+
+                        {showDatePicker && (
+                            <DateTimePicker
+                                value={date}
+                                mode="date"
+                                display="default"
+                                onChange={onDateChange}
+                                themeVariant={isDark ? 'dark' : 'light'}
+                            />
+                        )}
+
+                        {/* Submit Button */}
+                        <TouchableOpacity
+                            style={[
+                                styles.submitButton,
+                                { backgroundColor: status === 'deposit' ? '#10b981' : '#ef4444' }
+                            ]}
+                            onPress={handleSubmit}
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <ActivityIndicator color="white" />
+                            ) : (
+                                <Text style={styles.submitButtonText}>{editMode ? 'Save' : 'Add'}</Text>
+                            )}
+                        </TouchableOpacity>
+
+                        {/* Delete Button */}
+                        {editMode && (
+                            <TouchableOpacity
+                                style={[styles.deleteButton]}
+                                onPress={handleDelete}
+                                disabled={loading}
+                            >
+                                <Text style={styles.deleteButtonText}>Delete Transaction</Text>
+                            </TouchableOpacity>
+                        )}
+                    </ScrollView>
+                </View>
+            </KeyboardAvoidingView>
+        </Modal>
+    );
 };
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.80)',
-    justifyContent: 'flex-end',
-  },
-  modalView: {
-    backgroundColor: ImhotepTheme.colors.backgroundSurface,
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    padding: 24,
-    maxHeight: '90%',
-    borderTopWidth: 1,
-    borderColor: ImhotepTheme.colors.glassBorder,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 18,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: ImhotepTheme.colors.textPrimary,
-  },
-  closeBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: ImhotepTheme.colors.glassCard,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  form: {
-    paddingBottom: 40,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: ImhotepTheme.colors.textSecondary,
-    marginBottom: 8,
-    marginTop: 16,
-  },
-  input: {
-    backgroundColor: ImhotepTheme.colors.inputBackground,
-    borderWidth: 1,
-    borderColor: ImhotepTheme.colors.inputBorder,
-    borderRadius: 14,
-    padding: 14,
-    fontSize: 15,
-    color: ImhotepTheme.colors.textPrimary,
-  },
-  typeContainer: {
-    flexDirection: 'row',
-    marginBottom: 16,
-    backgroundColor: ImhotepTheme.colors.glassCard,
-    borderRadius: 16,
-    padding: 4,
-    borderWidth: 1,
-    borderColor: ImhotepTheme.colors.glassBorder,
-  },
-  disabledType: {
-    opacity: 0.6,
-  },
-  typeButton: {
-    flex: 1,
-    paddingVertical: 12,
-    alignItems: 'center',
-    borderRadius: 12,
-  },
-  typeButtonIncome: {
-    backgroundColor: ImhotepTheme.colors.depositGreenLight,
-    borderWidth: 1,
-    borderColor: 'rgba(16, 185, 129, 0.4)',
-  },
-  typeButtonExpense: {
-    backgroundColor: ImhotepTheme.colors.withdrawRedLight,
-    borderWidth: 1,
-    borderColor: 'rgba(239, 68, 68, 0.4)',
-  },
-  typeText: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: ImhotepTheme.colors.textSecondary,
-  },
-  typeTextIncome: {
-    color: ImhotepTheme.colors.depositGreen,
-  },
-  typeTextExpense: {
-    color: ImhotepTheme.colors.withdrawRed,
-  },
-  dateButton: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: ImhotepTheme.colors.inputBackground,
-    borderWidth: 1,
-    borderColor: ImhotepTheme.colors.inputBorder,
-    borderRadius: 14,
-    padding: 14,
-  },
-  dateText: {
-    fontSize: 15,
-    color: ImhotepTheme.colors.textPrimary,
-  },
-  submitButton: {
-    marginTop: 28,
-    paddingVertical: 16,
-    borderRadius: 16,
-    alignItems: 'center',
-  },
-  submitButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  deleteButton: {
-    marginTop: 14,
-    paddingVertical: 14,
-    borderRadius: 16,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: ImhotepTheme.colors.withdrawRed,
-  },
-  deleteButtonText: {
-    color: ImhotepTheme.colors.withdrawRed,
-    fontSize: 15,
-    fontWeight: '600',
-  },
+    container: {
+        flex: 1,
+        justifyContent: 'flex-end',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+    },
+    modalView: {
+        backgroundColor: 'white',
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        padding: 20,
+        height: '90%',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5
+    },
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    title: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#333',
+    },
+    form: {
+        paddingBottom: 40,
+    },
+    label: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#444',
+        marginBottom: 8,
+        marginTop: 16,
+    },
+    input: {
+        backgroundColor: '#f9f9f9',
+        borderRadius: 12,
+        padding: 16,
+        fontSize: 16,
+        borderWidth: 1,
+        borderColor: '#eee',
+    },
+    typeContainer: {
+        flexDirection: 'row',
+        marginBottom: 20,
+        backgroundColor: '#f5f5f5',
+        borderRadius: 12,
+        padding: 4,
+    },
+    typeButton: {
+        flex: 1,
+        paddingVertical: 12,
+        alignItems: 'center',
+        borderRadius: 10,
+    },
+    typeButtonIncome: {
+        backgroundColor: '#d1fae5',
+    },
+    typeButtonExpense: {
+        backgroundColor: '#fee2e2',
+    },
+    typeText: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#666',
+    },
+    typeTextActive: {
+        color: '#000',
+    },
+    dateButton: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: '#f9f9f9',
+        borderRadius: 12,
+        padding: 16,
+        borderWidth: 1,
+        borderColor: '#eee',
+    },
+    dateText: {
+        fontSize: 16,
+        color: '#333',
+    },
+    submitButton: {
+        marginTop: 32,
+        padding: 16,
+        borderRadius: 12,
+        alignItems: 'center',
+    },
+    submitButtonText: {
+        color: 'white',
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
+    deleteButton: {
+        marginTop: 16,
+        padding: 16,
+        borderRadius: 12,
+        alignItems: 'center',
+        backgroundColor: 'transparent',
+        borderWidth: 1,
+        borderColor: '#ef4444',
+    },
+    deleteButtonText: {
+        color: '#ef4444',
+        fontSize: 16,
+        fontWeight: '600',
+    }
 });
 
 export default AddTransactionModal;

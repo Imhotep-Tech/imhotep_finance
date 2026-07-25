@@ -1,184 +1,105 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
-import ImhotepTheme from '@/constants/imhotepTheme';
-import PressableScale from '@/components/ui/PressableScale';
-import SkeletonShimmer from '@/components/ui/SkeletonShimmer';
 
 interface NetWorthCardProps {
-  networth: string | number;
-  favoriteCurrency: string;
-  loading: boolean;
-  score?: number | null;
-  scoreTxt?: string;
-  mode?: 'dashboard' | 'navbar';
-  onPress?: () => void;
+    networth: string | number;
+    favoriteCurrency: string;
+    loading: boolean;
+    mode?: 'dashboard' | 'navbar';
+    onPress?: () => void;
 }
 
-const calculateFontSize = (value: string | number, mode: string): number => {
-  if (mode === 'navbar') return 22;
-  const digitsCount = String(value).replace(/[^0-9]/g, '').length;
-  if (digitsCount > 15) return 24;
-  if (digitsCount > 12) return 28;
-  if (digitsCount > 9) return 32;
-  if (digitsCount > 6) return 36;
-  return 42;
+const getFontSize = (networth: string | number, mode: string) => {
+    const length = String(networth).replace(/[^0-9]/g, '').length;
+    if (mode === 'navbar') return 24;
+    if (length > 15) return 24;
+    if (length > 12) return 28;
+    if (length > 9) return 32;
+    if (length > 6) return 36;
+    return 48;
 };
 
-export const NetWorthCard: React.FC<NetWorthCardProps> = ({
-  networth,
-  favoriteCurrency,
-  loading,
-  score,
-  scoreTxt,
-  mode = 'dashboard',
-  onPress,
+const NetWorthCard: React.FC<NetWorthCardProps> = ({
+    networth,
+    favoriteCurrency,
+    loading,
+    mode = 'dashboard',
+    onPress
 }) => {
-  const formattedAmount = loading
-    ? '0.00'
-    : Number(networth || 0).toLocaleString(undefined, {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      });
+    const formattedNetworth = loading
+        ? '...'
+        : Number(networth || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-  const fontSize = calculateFontSize(formattedAmount, mode);
+    const fontSize = getFontSize(formattedNetworth, mode);
 
-  return (
-    <PressableScale onPress={onPress} style={styles.cardContainer}>
-      <LinearGradient
-        colors={['rgba(15, 23, 42, 0.92)', 'rgba(11, 15, 25, 0.96)']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.cardGradient}
-      >
-        {/* Subtle Ambient Glowing Accents (Egyptian Teal & Gold) */}
-        <View style={styles.ambientGlowTeal} />
-        <View style={styles.ambientGlowGold} />
-
-        <View style={styles.headerRow}>
-          <View style={styles.badgeContainer}>
-            <Ionicons name="shield-checkmark" size={14} color={ImhotepTheme.colors.primaryTealGlow} />
-            <Text style={styles.badgeText}>TOTAL NET WORTH</Text>
-          </View>
-          {scoreTxt ? (
-            <View style={styles.scorePill}>
-              <Text style={styles.scoreText}>{scoreTxt}</Text>
-            </View>
-          ) : null}
-        </View>
-
-        {loading ? (
-          <View style={styles.skeletonBox}>
-            <SkeletonShimmer width={180} height={36} borderRadius={10} />
-          </View>
-        ) : (
-          <View style={styles.balanceRow}>
-            <Text style={[styles.balanceAmount, { fontSize }]}>{formattedAmount}</Text>
-            <Text style={styles.currencyBadge}>{favoriteCurrency}</Text>
-          </View>
-        )}
-
-        <View style={styles.footerRow}>
-          <Text style={styles.subtext}>Imhotep Vault Encrypted • Real-time</Text>
-          <Ionicons name="chevron-forward" size={16} color={ImhotepTheme.colors.textMuted} />
-        </View>
-      </LinearGradient>
-    </PressableScale>
-  );
+    return (
+        <TouchableOpacity activeOpacity={0.9} onPress={onPress}>
+            <LinearGradient
+                colors={['#51adac', '#428a89']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.card}
+            >
+                <View style={styles.content}>
+                    <Text style={styles.label}>Total Net Worth</Text>
+                    {loading ? (
+                        <ActivityIndicator color="white" size="large" />
+                    ) : (
+                        <View style={styles.amountContainer}>
+                            <Text style={[styles.amount, { fontSize }]}>{formattedNetworth}</Text>
+                            <Text style={styles.currency}>{favoriteCurrency}</Text>
+                        </View>
+                    )}
+                </View>
+            </LinearGradient>
+        </TouchableOpacity>
+    );
 };
 
 const styles = StyleSheet.create({
-  cardContainer: {
-    marginVertical: 10,
-    borderRadius: 24,
-    overflow: 'hidden',
-  },
-  cardGradient: {
-    padding: 22,
-    minHeight: 160,
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: ImhotepTheme.colors.glassBorder,
-    justifyContent: 'space-between',
-    position: 'relative',
-  },
-  ambientGlowTeal: {
-    position: 'absolute',
-    top: -20,
-    right: -20,
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: ImhotepTheme.colors.primaryTealLight,
-  },
-  ambientGlowGold: {
-    position: 'absolute',
-    bottom: -30,
-    left: -20,
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: ImhotepTheme.colors.accentGoldLight,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  badgeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  badgeText: {
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 1.2,
-    color: ImhotepTheme.colors.textSecondary,
-  },
-  scorePill: {
-    backgroundColor: ImhotepTheme.colors.primaryTealLight,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(20, 184, 166, 0.3)',
-  },
-  scoreText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: ImhotepTheme.colors.primaryTealGlow,
-  },
-  skeletonBox: {
-    paddingVertical: 10,
-  },
-  balanceRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    flexWrap: 'wrap',
-    marginVertical: 8,
-  },
-  balanceAmount: {
-    color: ImhotepTheme.colors.textPrimary,
-    fontWeight: '800',
-    letterSpacing: -0.5,
-  },
-  currencyBadge: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: ImhotepTheme.colors.primaryTealGlow,
-    marginLeft: 8,
-  },
-  footerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  subtext: {
-    fontSize: 12,
-    color: ImhotepTheme.colors.textMuted,
-  },
+    card: {
+        borderRadius: 20,
+        padding: 24,
+        minHeight: 160,
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 4,
+        },
+        shadowOpacity: 0.2,
+        shadowRadius: 5,
+        elevation: 8,
+        marginVertical: 10,
+    },
+    content: {
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    label: {
+        fontSize: 16,
+        color: 'rgba(255, 255, 255, 0.9)',
+        marginBottom: 8,
+        fontWeight: '500',
+    },
+    amountContainer: {
+        flexDirection: 'row',
+        alignItems: 'baseline',
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+    },
+    amount: {
+        color: 'white',
+        fontWeight: 'bold',
+    },
+    currency: {
+        fontSize: 20,
+        color: 'white',
+        marginLeft: 4,
+        fontWeight: '500',
+    },
 });
 
 export default NetWorthCard;

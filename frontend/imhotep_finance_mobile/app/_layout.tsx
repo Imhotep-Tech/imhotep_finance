@@ -7,7 +7,6 @@ import { AppState } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as LocalAuthentication from 'expo-local-authentication';
 import AppLockOverlay from '@/components/AppLockOverlay';
-import AppLockSetupPromptModal from '@/components/AppLockSetupPromptModal';
 
 import 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -21,7 +20,6 @@ function RootLayoutContent() {
   const colorScheme = useColorScheme();
   const { isAuthenticated } = useAuth();
   const [isLocked, setIsLocked] = useState(false);
-  const [showSetupPrompt, setShowSetupPrompt] = useState(false);
   const isLockedRef = useRef(false);
   const isAuthenticating = useRef(false);
   const appState = useRef(AppState.currentState);
@@ -57,47 +55,30 @@ function RootLayoutContent() {
     }
   };
 
-  // Handle auth state changes (load lock or prompt on app start / login)
+  // Handle auth state changes (load lock on app start / login)
   useEffect(() => {
     const checkLockOnAuthChange = async () => {
       if (isAuthenticated) {
         const enabled = await AsyncStorage.getItem('app_lock_enabled');
-        const hasPrompted = await AsyncStorage.getItem('has_prompted_app_lock_setup');
-
         if (enabled === 'true') {
           updateLockState(true);
+          // Wait a moment to allow app rendering and avoid showing system dialog immediately
           setTimeout(() => {
             authenticateUser();
           }, 300);
-        } else if (hasPrompted !== 'true') {
-          // Show setup prompt if App Lock is not enabled and hasn't been prompted yet
-          setShowSetupPrompt(true);
         }
       } else {
         updateLockState(false);
-        setShowSetupPrompt(false);
       }
     };
     checkLockOnAuthChange();
   }, [isAuthenticated]);
 
-  const handleEnableAppLockFromPrompt = async () => {
-    await AsyncStorage.setItem('app_lock_enabled', 'true');
-    await AsyncStorage.setItem('has_prompted_app_lock_setup', 'true');
-    setShowSetupPrompt(false);
-    updateLockState(true);
-    authenticateUser();
-  };
-
-  const handleSkipAppLockFromPrompt = async () => {
-    await AsyncStorage.setItem('has_prompted_app_lock_setup', 'true');
-    setShowSetupPrompt(false);
-  };
-
   // Handle app background / foreground transitions
   useEffect(() => {
     const subscription = AppState.addEventListener('change', async (nextAppState) => {
       if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+        // App comes to foreground
         if (isAuthenticated) {
           const enabled = await AsyncStorage.getItem('app_lock_enabled');
           if (enabled === 'true' && isLockedRef.current) {
@@ -105,8 +86,10 @@ function RootLayoutContent() {
           }
         }
       } else if (nextAppState === 'background' || nextAppState === 'inactive') {
+        // App goes to background
         if (isAuthenticated) {
           const enabled = await AsyncStorage.getItem('app_lock_enabled');
+          // Only lock if enabled and we are not currently showing the system auth dialog
           if (enabled === 'true' && !isAuthenticating.current) {
             updateLockState(true);
           }
@@ -133,12 +116,6 @@ function RootLayoutContent() {
       {isLocked && isAuthenticated && (
         <AppLockOverlay onUnlock={authenticateUser} />
       )}
-
-      <AppLockSetupPromptModal
-        visible={showSetupPrompt}
-        onEnable={handleEnableAppLockFromPrompt}
-        onSkip={handleSkipAppLockFromPrompt}
-      />
     </ThemeProvider>
   );
 }
