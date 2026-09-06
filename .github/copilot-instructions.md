@@ -23,9 +23,9 @@ docker compose up --build
 
 # Access points:
 # - Frontend: http://localhost:3000
-# - Backend API: http://localhost:8010
-# - Swagger UI: http://localhost:8010/swagger/
-# - Django Admin: http://localhost:8010/admin/
+# - Backend API: http://localhost:8000
+# - Swagger UI: http://localhost:8000/swagger/
+# - Django Admin: http://localhost:8000/admin/
 ```
 
 ### Frontend Development
@@ -49,7 +49,7 @@ npm run preview
 cd backend/imhotep_finance
 
 # Run development server (local)
-python manage.py runserver 8010
+python manage.py runserver 8000
 
 # Apply database migrations
 python manage.py migrate
@@ -218,7 +218,7 @@ Key variables (from `.env.example`):
 ### Frontend (.env)
 
 Key variables:
-- `VITE_API_URL` - Backend API URL (e.g., `http://localhost:8010`)
+- `VITE_API_URL` - Backend API URL (e.g., `http://localhost:8000`)
 
 ## Common Tasks
 
@@ -319,7 +319,7 @@ Comprehensive docs in `.docs/`:
 # Backend setup
 python manage.py migrate
 python manage.py createsuperuser
-python manage.py runserver 8010
+python manage.py runserver 8000
 
 # Testing
 python manage.py test accounts --verbosity=2
