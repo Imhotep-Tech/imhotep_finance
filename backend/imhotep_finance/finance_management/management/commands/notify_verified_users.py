@@ -74,7 +74,7 @@ class Command(BaseCommand):
                 <h1>Welcome, {{ username }}!</h1>
             </div>
             <p>We’ve upgraded Imhotep Finance 🚀 to a faster and more modern version! 🎉</p>
-            <p>You can access the new app at <strong>https://imhotep-finance.vercel.app/</strong>, and the old link will also redirect you there.</p>
+            <p>You can access the new app at <strong>https://finance.imhotep-tech.com/</strong>, and the old link will also redirect you there.</p>
             <p><strong>Important:</strong> For security reasons, you’ll need to reset your password before logging in.</p>
             <div style="text-align:center; margin:1.5rem 0;">
                 <a href="{{ frontend_url }}/password-reset" class="button">🔑 Reset Password</a>
@@ -89,7 +89,7 @@ class Command(BaseCommand):
         </body>
         </html>""")
 
-        frontend_url = "https://imhotep-finance.vercel.app"
+        frontend_url = "https://finance.imhotep-tech.com"
 
         # Loop through and send emails
         for username, email in verified_users:

@@ -83,7 +83,7 @@ class Command(BaseCommand):
                     'version': updates_data.get('version', '1.0.0'),
                     'updates': updates_data.get('updates', []),
                     'cta_text': updates_data.get('cta_text', 'Learn More'),
-                    'cta_url': updates_data.get('cta_url', 'https://imhotep-finance.vercel.app'),
+                    'cta_url': updates_data.get('cta_url', 'https://finance.imhotep-tech.com/'),
                     'footer_note': updates_data.get('footer_note', 'Thank you!'),
                 })
                 self.stdout.write(self.style.SUCCESS("\n📧 Preview of email content:"))
@@ -111,7 +111,7 @@ class Command(BaseCommand):
                     'version': updates_data.get('version', '1.0.0'),
                     'updates': updates_data.get('updates', []),
                     'cta_text': updates_data.get('cta_text', 'Learn More'),
-                    'cta_url': updates_data.get('cta_url', 'https://imhotep-finance.vercel.app'),
+                    'cta_url': updates_data.get('cta_url', 'https://finance.imhotep-tech.com/'),
                     'footer_note': updates_data.get('footer_note', 'Thank you!'),
                 })
 

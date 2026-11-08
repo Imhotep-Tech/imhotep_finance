@@ -15,4 +15,4 @@ Disallow: /wishlist
 Disallow: /monthly-reports
 Disallow: /profile
 
-Sitemap: https://imhotep-finance.vercel.app/sitemap.xml
+Sitemap: https://finance.imhotep-tech.com/sitemap.xml
