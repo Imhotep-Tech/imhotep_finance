@@ -18,7 +18,7 @@ def calculate_user_report(start_date, end_date, user):
         )
         user_withdraw_on_range = [
             trans for trans in raw_withdrawals
-            if not (trans.get('category') and str(trans['category']).strip().title() in ['Transfer', 'Conversion'])
+            if not (trans.get('category') and str(trans['category']).strip().lower() in ['transfer', 'conversion'])
         ]
         
         # Get deposit transactions
@@ -31,7 +31,7 @@ def calculate_user_report(start_date, end_date, user):
         )
         user_deposit_on_range = [
             trans for trans in raw_deposits
-            if not (trans.get('category') and str(trans['category']).strip().title() in ['Transfer', 'Conversion'])
+            if not (trans.get('category') and str(trans['category']).strip().lower() in ['transfer', 'conversion'])
         ]
 
         total_withdraw = 0.0
@@ -55,7 +55,7 @@ def calculate_user_report(start_date, end_date, user):
         withdraw_places = {}
         for trans in user_withdraw_on_range:
             raw_category = trans["category"]
-            category = raw_category.strip().title() if raw_category and str(raw_category).strip() else "Uncategorized"
+            category = raw_category.strip().lower() if raw_category and str(raw_category).strip() else "uncategorized"
             raw_place = trans["place"]
             place = raw_place.strip().title() if raw_place and str(raw_place).strip() else "General"
             
@@ -99,7 +99,7 @@ def calculate_user_report(start_date, end_date, user):
         deposit_places = {}
         for trans in user_deposit_on_range:
             raw_category = trans["category"]
-            category = raw_category.strip().title() if raw_category and str(raw_category).strip() else "Uncategorized"
+            category = raw_category.strip().lower() if raw_category and str(raw_category).strip() else "uncategorized"
             raw_place = trans["place"]
             place = raw_place.strip().title() if raw_place and str(raw_place).strip() else "General"
             

@@ -11,6 +11,14 @@ class TransactionInputSerializerTest(TestCase):
         serializer = TransactionInputSerializer(data=data)
         self.assertTrue(serializer.is_valid())
         self.assertEqual(serializer.validated_data['amount'], Decimal('100.50'))
+        self.assertEqual(serializer.validated_data['category'], 'salary')
+
+    def test_category_lowercased_and_trimmed(self):
+        """Test serializer trims and lowercases category"""
+        data = {'amount': '100.50', 'currency': 'USD', 'trans_status': 'deposit', 'category': '   FOOD & Dining  '}
+        serializer = TransactionInputSerializer(data=data)
+        self.assertTrue(serializer.is_valid())
+        self.assertEqual(serializer.validated_data['category'], 'food & dining')
 
     def test_invalid_amount_zero(self):
         """Test serializer rejects zero amount"""
@@ -40,6 +48,14 @@ class TransactionFilterSerializerTest(TestCase):
         data = {'start_date': '2024-01-01', 'end_date': '2024-01-31', 'category': 'Food', 'trans_status': 'deposit', 'page': '1'}
         serializer = TransactionFilterSerializer(data=data)
         self.assertTrue(serializer.is_valid())
+        self.assertEqual(serializer.validated_data['category'], 'food')
+
+    def test_filter_category_lowercased_and_trimmed(self):
+        """Test filter serializer trims and lowercases category query"""
+        data = {'category': '   ENTERTAINMENT   '}
+        serializer = TransactionFilterSerializer(data=data)
+        self.assertTrue(serializer.is_valid())
+        self.assertEqual(serializer.validated_data['category'], 'entertainment')
 
     def test_optional_fields(self):
         """Test filter serializer with optional fields omitted"""

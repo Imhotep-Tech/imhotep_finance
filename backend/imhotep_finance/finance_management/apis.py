@@ -74,7 +74,7 @@ class GetCategoryApi(APIView):
 
     @extend_schema(
         tags=['Finance Management'],
-        description="Get user's most frequently used categories optionally filtered by status.",
+        description="Get user's most frequently used categories in lowercase, optionally filtered by status.",
         parameters=[CategoryRequestSerializer],
         responses={200: CategoryResponseSerializer},
         operation_id='get_categories'
@@ -159,7 +159,7 @@ class MoveMoneyApi(APIView):
                     amount=amount,
                     currency=currency,
                     trans_details=f"Transfer to {target_place}",
-                    category="Transfer",
+                    category="transfer",
                     trans_status="Withdraw",
                     transaction_date=date.today(),
                     place=source_place
@@ -171,7 +171,7 @@ class MoveMoneyApi(APIView):
                     amount=amount,
                     currency=currency,
                     trans_details=f"Transfer from {source_place}",
-                    category="Transfer",
+                    category="transfer",
                     trans_status="Deposit",
                     transaction_date=date.today(),
                     place=target_place
@@ -242,7 +242,7 @@ class ConvertCurrencyApi(APIView):
                     amount=amount,
                     currency=source_currency,
                     trans_details=f"Currency Conversion to {target_currency}",
-                    category="Conversion",
+                    category="conversion",
                     trans_status="Withdraw",
                     transaction_date=date.today(),
                     place=place
@@ -254,7 +254,7 @@ class ConvertCurrencyApi(APIView):
                     amount=target_amount,
                     currency=target_currency,
                     trans_details=f"Currency Conversion from {source_currency}",
-                    category="Conversion",
+                    category="conversion",
                     trans_status="Deposit",
                     transaction_date=date.today(),
                     place=place

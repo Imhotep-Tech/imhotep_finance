@@ -18,7 +18,13 @@ class CreateScheduledTransactionServiceTest(TestCase):
         self.assertIsNotNone(scheduled_trans.id)
         self.assertEqual(scheduled_trans.date, 15)
         self.assertEqual(float(scheduled_trans.amount), 500.0)
+        self.assertEqual(scheduled_trans.category, 'salary')
         self.assertTrue(scheduled_trans.status)
+
+    def test_create_scheduled_transaction_category_lowercased(self):
+        """Test that mixed case category is lowercased"""
+        scheduled_trans = create_scheduled_transaction(user=self.user, day_of_month=1, amount=100.0, currency='USD', scheduled_trans_status='deposit', category='  Rent & Utilities  ', scheduled_trans_details='')
+        self.assertEqual(scheduled_trans.category, 'rent & utilities')
 
     def test_create_scheduled_transaction_invalid_amount(self):
         """Test creating scheduled transaction with invalid amount"""
@@ -60,6 +66,7 @@ class UpdateScheduledTransactionServiceTest(TestCase):
         self.assertEqual(updated.date, 20)
         self.assertEqual(float(updated.amount), 600)
         self.assertEqual(updated.currency, 'EUR')
+        self.assertEqual(updated.category, 'updated')
 
 class ToggleScheduledTransactionStatusTest(TestCase):
 

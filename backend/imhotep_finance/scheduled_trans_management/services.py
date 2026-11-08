@@ -30,6 +30,9 @@ def create_scheduled_transaction(*, user, day_of_month, amount, currency, schedu
     if not day_of_month or day_of_month < 1 or day_of_month > 31:
         raise ValidationError("Day of month must be between 1 and 31")
     
+    if category is not None:
+        category = str(category).strip().lower()
+
     with transaction.atomic():
         scheduled_trans = ScheduledTransaction.objects.create(
             user=user,
@@ -85,6 +88,9 @@ def update_scheduled_transaction(*, user, scheduled_trans_id, day_of_month, amou
     if not day_of_month or day_of_month < 1 or day_of_month > 31:
         raise ValidationError("Day of month must be between 1 and 31")
     
+    if category is not None:
+        category = str(category).strip().lower()
+
     scheduled_trans = get_object_or_404(ScheduledTransaction, id=scheduled_trans_id, user=user)
     
     with transaction.atomic():

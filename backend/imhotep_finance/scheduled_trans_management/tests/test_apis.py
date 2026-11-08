@@ -22,6 +22,8 @@ class ScheduledTransactionCreateApiTest(TestCase):
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertIn('id', response.data)
+        sched = ScheduledTransaction.objects.get(id=response.data['id'])
+        self.assertEqual(sched.category, 'salary')
         self.assertTrue(ScheduledTransaction.objects.filter(user=self.user).exists())
 
     def test_create_scheduled_transaction_invalid_data(self):
@@ -44,6 +46,38 @@ class ScheduledTransactionDeleteApiTest(TestCase):
         response = self.client.delete(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertFalse(ScheduledTransaction.objects.filter(id=self.scheduled_trans.id).exists())
+
+class ScheduledTransactionUpdateApiTest(TestCase):
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user(username='testuser', password='testpass123')
+        self.client.force_authenticate(user=self.user)
+        self.scheduled_trans = create_scheduled_transaction(
+            user=self.user,
+            day_of_month=15,
+            amount=500,
+            currency='USD',
+            scheduled_trans_status='deposit',
+            category='salary',
+            scheduled_trans_details=''
+        )
+        self.url = reverse('update_scheduled_trans', kwargs={'scheduled_trans_id': self.scheduled_trans.id})
+
+    def test_update_scheduled_transaction_lowercases_category(self):
+        """Test updating scheduled transaction with uppercase category lowercases it"""
+        data = {
+            'day_of_month': 20,
+            'amount': '600.00',
+            'currency': 'USD',
+            'scheduled_trans_status': 'withdraw',
+            'category': '  RENT & Bills  ',
+            'scheduled_trans_details': 'Monthly rent'
+        }
+        response = self.client.post(self.url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.scheduled_trans.refresh_from_db()
+        self.assertEqual(self.scheduled_trans.category, 'rent & bills')
 
 class ScheduledTransactionListApiTest(TestCase):
 

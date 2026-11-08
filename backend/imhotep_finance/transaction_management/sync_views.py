@@ -147,6 +147,10 @@ def _sync_transactions(user, records: list[dict]) -> tuple[int, int, list[str]]:
                     skipped += 1
                     continue
 
+                cat_val = record.get('category', '')
+                if cat_val is not None:
+                    cat_val = str(cat_val).strip().lower()
+
                 # Create new record from mobile
                 Transactions.objects.create(
                     user=user,
@@ -156,7 +160,7 @@ def _sync_transactions(user, records: list[dict]) -> tuple[int, int, list[str]]:
                     currency=record.get('currency', 'USD'),
                     trans_status=record.get('trans_status', 'Withdraw'),
                     trans_details=record.get('trans_details', ''),
-                    category=record.get('category', ''),
+                    category=cat_val,
                     place=record.get('place', 'General'),
                     is_deleted=is_deleted,
                 )
@@ -167,12 +171,16 @@ def _sync_transactions(user, records: list[dict]) -> tuple[int, int, list[str]]:
                 if is_deleted:
                     server_record.is_deleted = True
                 else:
+                    cat_val = record.get('category', server_record.category)
+                    if cat_val is not None:
+                        cat_val = str(cat_val).strip().lower()
+
                     server_record.date = record.get('date', server_record.date)
                     server_record.amount = record.get('amount', server_record.amount)
                     server_record.currency = record.get('currency', server_record.currency)
                     server_record.trans_status = record.get('trans_status', server_record.trans_status)
                     server_record.trans_details = record.get('trans_details', server_record.trans_details)
-                    server_record.category = record.get('category', server_record.category)
+                    server_record.category = cat_val
                     server_record.place = record.get('place', server_record.place)
                     server_record.is_deleted = False
 

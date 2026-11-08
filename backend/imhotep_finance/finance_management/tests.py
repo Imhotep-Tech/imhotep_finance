@@ -82,8 +82,8 @@ class MoveMoneyApiTest(APITestCase):
         self.assertEqual(deposits.count(), 1)
         self.assertEqual(withdrawals.first().amount, 300.0)
         self.assertEqual(deposits.first().amount, 300.0)
-        self.assertEqual(withdrawals.first().category, 'Transfer')
-        self.assertEqual(deposits.first().category, 'Transfer')
+        self.assertEqual(withdrawals.first().category, 'transfer')
+        self.assertEqual(deposits.first().category, 'transfer')
 
     def test_move_money_to_new_place_success(self):
         """Test moving money to a target place that doesn't exist yet"""
@@ -185,3 +185,41 @@ class DeleteNetworthApiTest(APITestCase):
         res = self.client.delete(self.url, payload, format='json')
         self.assertEqual(res.status_code, 400)
         self.assertIn("Net worth record not found.", str(res.data))
+
+
+class GetCategoryApiTest(APITestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_user(username='cattestuser', password='testpass123')
+        self.client.force_authenticate(user=self.user)
+        self.url = reverse('get_category')
+
+    def test_get_categories_returns_lowercase_and_deduplicated(self):
+        """Test that get-category returns lowercase categories deduplicated by Counter"""
+        # Create transactions with mixed cases and spaces
+        Transactions.objects.create(user=self.user, amount=10, currency='USD', trans_status='Deposit', category='Food', place='General')
+        Transactions.objects.create(user=self.user, amount=20, currency='USD', trans_status='Deposit', category='FOOD', place='General')
+        Transactions.objects.create(user=self.user, amount=30, currency='USD', trans_status='Withdraw', category='food', place='General')
+        Transactions.objects.create(user=self.user, amount=100, currency='USD', trans_status='Deposit', category='Salary', place='General')
+
+        res = self.client.get(self.url)
+        self.assertEqual(res.status_code, 200)
+        categories = res.data['category']
+        # 'food' appeared 3 times, 'salary' appeared 1 time
+        self.assertEqual(categories, ['food', 'salary'])
+
+    def test_get_categories_filter_by_status(self):
+        """Test filtering categories by status (deposit/withdraw)"""
+        Transactions.objects.create(user=self.user, amount=10, currency='USD', trans_status='Deposit', category='Investments', place='General')
+        Transactions.objects.create(user=self.user, amount=30, currency='USD', trans_status='Withdraw', category='Dining', place='General')
+
+        res_deposit = self.client.get(f"{self.url}?status=Deposit")
+        self.assertEqual(res_deposit.status_code, 200)
+        self.assertIn('investments', res_deposit.data['category'])
+        self.assertNotIn('dining', res_deposit.data['category'])
+
+        res_withdraw = self.client.get(f"{self.url}?status=Withdraw")
+        self.assertEqual(res_withdraw.status_code, 200)
+        self.assertIn('dining', res_withdraw.data['category'])
+        self.assertNotIn('investments', res_withdraw.data['category'])
+

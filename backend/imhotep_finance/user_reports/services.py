@@ -171,13 +171,15 @@ def get_yearly_report_for_user(*, user, year=None):
         
         # Aggregate withdraw categories
         for item in data.get('user_withdraw_on_range', []):
-            category = item['category']
+            raw_category = item.get('category', '')
+            category = raw_category.strip().lower() if raw_category and str(raw_category).strip() else "uncategorized"
             amount = item['converted_amount']
             withdraw_categories[category] = withdraw_categories.get(category, 0) + amount
         
         # Aggregate deposit categories
         for item in data.get('user_deposit_on_range', []):
-            category = item['category']
+            raw_category = item.get('category', '')
+            category = raw_category.strip().lower() if raw_category and str(raw_category).strip() else "uncategorized"
             amount = item['converted_amount']
             deposit_categories[category] = deposit_categories.get(category, 0) + amount
             

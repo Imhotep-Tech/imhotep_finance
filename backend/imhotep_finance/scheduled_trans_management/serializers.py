@@ -32,7 +32,7 @@ class ScheduledTransactionInputSerializer(serializers.Serializer):
         required=False,
         allow_blank=True,
         allow_null=True,
-        help_text="Transaction category"
+        help_text="Transaction category (automatically lowercased)"
     )
     scheduled_trans_status = serializers.ChoiceField(
         choices=[
@@ -55,6 +55,12 @@ class ScheduledTransactionInputSerializer(serializers.Serializer):
         """Ensure amount is positive."""
         if value <= 0:
             raise serializers.ValidationError("Amount must be greater than zero")
+        return value
+
+    def validate_category(self, value):
+        """Ensure category is saved in lowercase."""
+        if value is not None:
+            return value.strip().lower()
         return value
 
 

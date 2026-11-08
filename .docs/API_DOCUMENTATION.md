@@ -206,8 +206,8 @@ This endpoint allows transferring funds from one place to another.
 - **Backend Execution**:
   1. Validates that the user has sufficient funds in the source place for the selected currency.
   2. Wraps the operation in a database transaction block (`transaction.atomic()`).
-  3. Creates a **Withdraw** transaction from the source place (e.g. `source_place = "Cash"`) with category `"Transfer"` and description `"Transfer to Bank"`.
-  4. Creates a corresponding **Deposit** transaction to the target place (e.g. `target_place = "Bank"`) with category `"Transfer"` and description `"Transfer from Cash"`.
+  3. Creates a **Withdraw** transaction from the source place (e.g. `source_place = "Cash"`) with category `"transfer"` and description `"Transfer to Bank"`.
+  4. Creates a corresponding **Deposit** transaction to the target place (e.g. `target_place = "Bank"`) with category `"transfer"` and description `"Transfer from Cash"`.
   5. The system dynamically updates the Net Worth representation for both locations.
 
 ### 2. Intra-Place Currency Conversion (`POST /api/finance-management/convert-currency/`)
@@ -225,7 +225,7 @@ This endpoint allows converting funds from one currency to another within a sing
 - **Backend Execution**:
   1. Validates that the user has sufficient funds of the source currency in the specified place.
   2. Wraps the execution in a database transaction block.
-  3. Creates a **Withdraw** transaction for the `source_currency` (e.g. `USD`) with category `"Conversion"`.
+  3. Creates a **Withdraw** transaction for the `source_currency` (e.g. `USD`) with category `"conversion"`.
   4. Creates a **Deposit** transaction for the `target_currency` (e.g. `EUR`) with the converted amount.
   5. Automatically recalculates and updates the place's currency balances.
 
@@ -292,10 +292,13 @@ List endpoints support pagination:
 Many list endpoints support filtering and sorting via query parameters:
 
 ```
-GET /api/finance-management/transactions/?start_date=2026-01-01&end_date=2026-01-31&category=Food
+GET /api/finance-management/transactions/?start_date=2026-01-01&end_date=2026-01-31&category=food
 ```
 
-See individual endpoint documentation in Swagger UI for available filters.
+### Category Normalization & Case-Insensitive Matching
+- **Always Lowercase on Save/Update**: All categories on transactions and scheduled transactions are automatically stripped and lowercased (`.lower()`) before saving or updating (via serializers, services, models, CSV imports, and offline sync).
+- **Case-Insensitive Search & Filter**: Searching and filtering by `category` (e.g. `?category=Food`, `?category=food`, or `?category=FOOD`) is completely case-insensitive.
+- **Lowercase Category Suggestions**: The `GET /api/finance-management/get-category/` endpoint returns all user categories normalized to lowercase and deduplicated by frequency.
 
 ## Testing in Swagger
 

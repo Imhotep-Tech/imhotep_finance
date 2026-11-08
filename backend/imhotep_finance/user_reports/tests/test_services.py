@@ -123,10 +123,10 @@ class RecalculateAllReportsTest(TestCase):
         self.assertEqual(report_data['total_deposit'], 1000.0)
         self.assertEqual(report_data['total_withdraw'], 0.0)
         
-        # Breakdown should only have 'Salary'
+        # Breakdown should only have 'salary'
         categories_deposit = [item['category'] for item in report_data['user_deposit_on_range']]
-        self.assertIn('Salary', categories_deposit)
-        self.assertNotIn('Conversion', categories_deposit)
+        self.assertIn('salary', categories_deposit)
+        self.assertNotIn('conversion', categories_deposit)
         
         categories_withdraw = [item['category'] for item in report_data['user_withdraw_on_range']]
-        self.assertNotIn('Transfer', categories_withdraw)
+        self.assertNotIn('transfer', categories_withdraw)
