@@ -280,10 +280,11 @@ const TransactionFormContent: React.FC<AddTransactionModalProps> = ({
 
     return (
         <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            style={styles.container}
+            behavior="padding"
+            style={styles.keyboardAvoidingView}
         >
-            <View style={[styles.modalView, themeStyles.container]}>
+            <View style={styles.container}>
+                <View style={[styles.modalView, themeStyles.container]}>
                 <View style={styles.dragHandle} />
 
                 {/* Header */}
@@ -343,6 +344,7 @@ const TransactionFormContent: React.FC<AddTransactionModalProps> = ({
                 </View>
 
                 <ScrollView
+                    style={{ flexShrink: 1 }}
                     contentContainerStyle={styles.scrollContent}
                     showsVerticalScrollIndicator={false}
                     keyboardShouldPersistTaps="handled"
@@ -442,7 +444,6 @@ const TransactionFormContent: React.FC<AddTransactionModalProps> = ({
                                             setAmount(text);
                                             setFieldErrors(prev => ({ ...prev, amount: '' }));
                                         }}
-                                        autoFocus={!editMode}
                                     />
                                     <Text style={[styles.currencySuffix, themeStyles.subText]}>
                                         {currency || 'CUR'}
@@ -720,6 +721,7 @@ const TransactionFormContent: React.FC<AddTransactionModalProps> = ({
                         <Text style={styles.deleteButtonText}>{t('transactions.modal.deleteTitle')}</Text>
                     </TouchableOpacity>
                 )}
+                </View>
             </View>
         </KeyboardAvoidingView>
     );
@@ -744,6 +746,9 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = (props) => {
 };
 
 const styles = StyleSheet.create({
+    keyboardAvoidingView: {
+        flex: 1,
+    },
     container: {
         flex: 1,
         justifyContent: 'flex-end',
@@ -756,7 +761,6 @@ const styles = StyleSheet.create({
         paddingTop: 12,
         paddingBottom: Platform.OS === 'ios' ? 36 : 24,
         maxHeight: '90%',
-        minHeight: 460,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: -3 },
         shadowOpacity: 0.15,

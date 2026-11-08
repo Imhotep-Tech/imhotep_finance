@@ -228,10 +228,11 @@ const WishlistFormContent: React.FC<AddWishlistModalProps> = ({
 
     return (
         <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            style={styles.container}
+            behavior="padding"
+            style={styles.keyboardAvoidingView}
         >
-            <View style={[styles.modalView, themeStyles.container]}>
+            <View style={styles.container}>
+                <View style={[styles.modalView, themeStyles.container]}>
                 <View style={styles.dragHandle} />
 
                 <View style={styles.header}>
@@ -288,6 +289,7 @@ const WishlistFormContent: React.FC<AddWishlistModalProps> = ({
                 </View>
 
                 <ScrollView
+                    style={{ flexShrink: 1 }}
                     contentContainerStyle={styles.scrollContent}
                     showsVerticalScrollIndicator={false}
                     keyboardShouldPersistTaps="handled"
@@ -330,7 +332,6 @@ const WishlistFormContent: React.FC<AddWishlistModalProps> = ({
                                             setPrice(text);
                                             setFieldErrors(prev => ({ ...prev, price: '' }));
                                         }}
-                                        autoFocus={!editMode}
                                     />
                                     <Text style={[styles.currencySuffix, themeStyles.subText]}>
                                         {currency || 'CUR'}
@@ -449,7 +450,6 @@ const WishlistFormContent: React.FC<AddWishlistModalProps> = ({
                                         setDetails(text);
                                         setFieldErrors(prev => ({ ...prev, details: '' }));
                                     }}
-                                    autoFocus
                                 />
                                 {!!fieldErrors.details && (
                                     <Text style={styles.errorText}>⚠️ {fieldErrors.details}</Text>
@@ -558,6 +558,7 @@ const WishlistFormContent: React.FC<AddWishlistModalProps> = ({
                         </TouchableOpacity>
                     )}
                 </View>
+                </View>
             </View>
         </KeyboardAvoidingView>
     );
@@ -582,6 +583,9 @@ const AddWishlistModal: React.FC<AddWishlistModalProps> = (props) => {
 };
 
 const styles = StyleSheet.create({
+    keyboardAvoidingView: {
+        flex: 1,
+    },
     container: {
         flex: 1,
         justifyContent: 'flex-end',
@@ -594,7 +598,6 @@ const styles = StyleSheet.create({
         paddingTop: 12,
         paddingBottom: Platform.OS === 'ios' ? 36 : 24,
         maxHeight: '90%',
-        minHeight: 460,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: -3 },
         shadowOpacity: 0.15,
