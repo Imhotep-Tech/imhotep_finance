@@ -1,7 +1,7 @@
 {
   "name": "imhotep_finance_mobile",
   "main": "index.ts",
-  "version": "1.0.0",
+  "version": "2.4.0",
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",

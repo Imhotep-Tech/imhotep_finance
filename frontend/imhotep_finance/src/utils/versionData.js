@@ -1,31 +1,20 @@
 export const versionEntries = [
   {
-    version: '9.1.0',
-    date: 'November 8, 2026',
-    badge: { label: 'LATEST', color: 'green' },
-    summary: 'Case-Insensitive Category Architecture, Report Normalization & Interactive Modals',
-    bullets: [
-      'Enforced automated lowercase normalization and whitespace trimming across transaction and scheduled transaction categories on creation, update, and bulk CSV imports.',
-      'Made transaction category filtering and search fully case-insensitive across API endpoints and web/mobile views (e.g., searching "FOOD", "Food", or "food" matches identically).',
-      'Enhanced category suggestion system (/api/finance-management/get-category/) to consolidate frequency counters under unified lowercase keys.',
-      'Normalized financial analytics and reports (monthly snapshots, yearly aggregation, and recalculation) to lowercase category breakdowns and case-insensitive groupings.',
-      'Automated database migrations across Transactions, Scheduled Transactions, and User Reports to safely migrate existing historical category data to lowercase.',
-      'Added interactive multi-step creation modals with real-time balance validation and MoveMoneyModal component for smooth fund transfers between accounts.',
-      'Maintained 100% pass rate across the full backend test suite (246 tests) with zero regressions.'
-    ]
-  },
-  {
     version: '9.0.0',
     date: 'November 8, 2026',
-    badge: { label: 'MAJOR', color: 'yellow' },
-    summary: 'Full-Stack Modular Multi-Language (i18n) Support & Mobile Currency Intelligence',
+    badge: { label: 'MAJOR', color: 'green' },
+    summary: 'Interactive Multi-Step Wizards, Full-Stack i18n, Case-Insensitive Categories & Mobile UI Overhaul',
     bullets: [
-      'Introduced a modular internationalization (i18n) architecture separating translations into domain JSON files (common, auth, dashboard, transactions, scheduled, wishlist, reports, profile, landing) with complete English and Arabic (RTL) parity.',
-      'Unified localization across the React web application and React Native Expo mobile app using shared context and key conventions.',
-      'Refined language switcher placement: prominent dropdown menu on pre-login/auth screens and consolidated into the Profile page once authenticated.',
-      'Fully localized all mobile modal overlays and selectors, including Add/Edit Transaction, Add/Edit Scheduled Transaction, Add/Edit Wishlist, CategorySelect, PlaceSelect, CurrencySelect, App Lock, User Guide, and Net Worth details dialogs.',
-      'Fixed currency auto-selection in mobile Wishlist modal: new wishes now dynamically fetch and apply the user\'s default favorite currency via the API instead of hardcoded EGP.',
-      'Maintained 100% pass rate across the full backend test suite (232 tests) and clean production builds across Web and Mobile.'
+      'Interactive Multi-Step Wizards: Redesigned Add/Edit Transaction, Scheduled Transaction, and Wishlist modals across Web and Mobile with step progress pills, smooth slide animations, quick amount chips (+10, +50, +100, +500), and a confirmation review card.',
+      'Contextual Real-Time Balance Intelligence: Live checking against net worth balances (/api/finance-management/get-networth-details/) with dynamic shortfall alerts, remaining balance previews, and savings progress meters.',
+      'Mobile Keyboard Avoidance & Visibility: Complete refactoring of mobile KeyboardAvoidingView with behavior="padding" and dynamic scroll adjustments, ensuring inputs and action buttons remain visible and accessible on Android and iOS.',
+      'Interactive Move Money & Currency Conversion: Upgraded Net Worth actions into multi-step interactive wizards (MoveMoneyModal and ConvertCurrencyModal) on Web and Mobile with real-time balance calculations, before/after balance diffs, and live exchange rate equations.',
+      'CSV Transactions Import Wizard: Redesigned Web CSV importer into a 3-step wizard with drag-and-drop zone, template download chip, in-browser client-side 5-row preview with detected columns, and detailed import summary.',
+      'Interactive Target & Goal Setting: Enhanced monthly savings goal settings in Web and Mobile profiles with quick increment chips (+500, +1,000, +5,000, +10,000) and live goal preview summary cards.',
+      'Modular Full-Stack Multi-Language (i18n): Unified modular internationalization architecture with domain-separated translations (common, auth, dashboard, transactions, scheduled, wishlist, reports, profile, landing) and complete English and Arabic (RTL) parity across Web and Mobile.',
+      'Case-Insensitive Category Architecture: Enforced automated lowercase normalization and whitespace trimming across transaction/scheduled categories, search filters, suggestion counters, and historical analytics reports.',
+      'Mobile Currency Intelligence: Dynamically fetches and applies user\'s favorite currency across creation modals instead of static defaults.',
+      'Zero Regressions & Full Test Suite Pass: 100% pass rate across the full backend test suite (246 tests) with zero errors, and clean builds across Web and Mobile.'
     ]
   },
   {
