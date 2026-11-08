@@ -283,22 +283,34 @@ export default function Dashboard() {
                 size={32}
                 color="white"
               />
-              <Text style={styles.scoreTitle}>Monthly Target Status</Text>
+              <Text style={styles.scoreTitle}>{t('dashboard.target.monthlyStatus')}</Text>
             </View>
-            <Text style={styles.scoreText}>{scoreTxt}</Text>
+            <Text style={styles.scoreText}>
+              {score && score > 0
+                ? t('dashboard.target.aboveTarget')
+                : score && score < 0
+                  ? t('dashboard.target.belowTarget')
+                  : t('dashboard.target.onTarget')}
+            </Text>
 
             <View style={styles.scoreStats}>
               <View style={styles.statItem}>
-                <Text style={styles.statLabel}>Target</Text>
+                <Text style={styles.statLabel}>{t('dashboard.target.targetLabel')}</Text>
                 <Text style={styles.statValue}>{target} {favoriteCurrency}</Text>
               </View>
               <View style={styles.statItem}>
-                <Text style={styles.statLabel}>Score</Text>
+                <Text style={styles.statLabel}>{t('dashboard.target.scoreLabel')}</Text>
                 <Text style={styles.statValue}>{score && score > 0 ? '+' : ''}{score?.toFixed(0)} {favoriteCurrency}</Text>
               </View>
               <View style={styles.statItem}>
-                <Text style={styles.statLabel}>Status</Text>
-                <Text style={styles.statValue}>{score && score > 0 ? 'Above' : score && score < 0 ? 'Below' : 'On Target'}</Text>
+                <Text style={styles.statLabel}>{t('dashboard.target.statusLabel')}</Text>
+                <Text style={styles.statValue}>
+                  {score && score > 0
+                    ? t('dashboard.target.statusAbove')
+                    : score && score < 0
+                      ? t('dashboard.target.statusBelow')
+                      : t('dashboard.target.statusOnTarget')}
+                </Text>
               </View>
             </View>
           </LinearGradient>
@@ -307,13 +319,13 @@ export default function Dashboard() {
             <View style={[styles.getStartedIcon, themeStyles.iconBg]}>
               <Ionicons name="rocket-outline" size={32} color="#366c6b" />
             </View>
-            <Text style={[styles.getStartedTitle, themeStyles.text]}>Get Started</Text>
-            <Text style={[styles.getStartedText, themeStyles.subText]}>Set a monthly target in your profile to track your progress.</Text>
+            <Text style={[styles.getStartedTitle, themeStyles.text]}>{t('dashboard.gettingStarted.title')}</Text>
+            <Text style={[styles.getStartedText, themeStyles.subText]}>{t('dashboard.gettingStarted.subtitle')}</Text>
             <TouchableOpacity
               style={styles.getStartedButton}
               onPress={() => router.push('/profile')}
             >
-              <Text style={styles.getStartedButtonText}>Set Target</Text>
+              <Text style={styles.getStartedButtonText}>{t('dashboard.gettingStarted.setTarget')}</Text>
             </TouchableOpacity>
           </View>
         )}

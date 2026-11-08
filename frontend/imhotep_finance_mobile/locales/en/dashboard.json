@@ -19,7 +19,17 @@
     "scoreHistory": "View Target History",
     "noTarget": "No target set yet",
     "setTarget": "Set Target",
-    "currentTarget": "Target: {amount} {currency}"
+    "currentTarget": "Target: {amount} {currency}",
+    "monthlyStatus": "Monthly Target Status",
+    "targetLabel": "Target",
+    "scoreLabel": "Score",
+    "statusLabel": "Status",
+    "belowTarget": "Below target",
+    "aboveTarget": "Above target",
+    "onTarget": "On target",
+    "statusAbove": "Above",
+    "statusBelow": "Below",
+    "statusOnTarget": "On Target"
   },
   "quickActions": {
     "title": "Quick Actions",

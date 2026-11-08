@@ -19,7 +19,17 @@
     "scoreHistory": "عرض سجل الأهداف",
     "noTarget": "لم يتم تحديد هدف بعد",
     "setTarget": "تحديد الهدف",
-    "currentTarget": "الهدف: {amount} {currency}"
+    "currentTarget": "الهدف: {amount} {currency}",
+    "monthlyStatus": "حالة الهدف الشهري",
+    "targetLabel": "الهدف",
+    "scoreLabel": "النتيجة",
+    "statusLabel": "الحالة",
+    "belowTarget": "أقل من الهدف",
+    "aboveTarget": "أعلى من الهدف",
+    "onTarget": "على الهدف",
+    "statusAbove": "أعلى",
+    "statusBelow": "أقل",
+    "statusOnTarget": "على الهدف"
   },
   "quickActions": {
     "title": "إجراءات سريعة",

@@ -18,27 +18,52 @@
     "biometricAuth": "Biometric Authentication",
     "biometricAuthDesc": "Use Fingerprint or Face ID to unlock the mobile app",
     "appLock": "App Lock",
-    "appLockDesc": "Require biometric authentication every time app opens"
+    "appLockDesc": "Require Face ID/Fingerprint or your device PIN to unlock the app when opening or returning."
+  },
+  "placeholders": {
+    "firstName": "First name",
+    "lastName": "Last name",
+    "username": "Username",
+    "email": "you@example.com",
+    "currentPassword": "Current password",
+    "newPassword": "New password (min 8 characters)",
+    "confirmPassword": "Confirm new password"
+  },
+  "financial": {
+    "monthlyTarget": "Monthly Target Amount",
+    "monthlyTargetDesc": "Set your monthly financial goal to track progress on the dashboard.",
+    "saveSettings": "Save Financial Settings"
   },
   "passwords": {
     "title": "Change Password",
     "currentPassword": "Current Password",
     "newPassword": "New Password",
-    "confirmNewPassword": "Confirm New Password",
-    "updateButton": "Update Password"
+    "confirmNewPassword": "Confirm Password",
+    "updateButton": "Change Password"
   },
   "emailChange": {
-    "title": "Change Email Address",
+    "title": "Verify Email Change",
     "newEmail": "New Email Address",
     "submitButton": "Request Verification Code",
-    "otpSubtitle": "Enter the 6-digit code sent to your new email."
+    "otpSubtitle": "Enter the 6-digit code sent to your new email.",
+    "otpModalDesc": "Enter the 6-digit OTP code sent to your new email address ({email}). The code expires in 10 minutes.",
+    "verify": "Verify"
   },
   "deleteAccount": {
     "title": "Delete Account",
-    "description": "Permanently delete your account, credentials, and all recorded transactions. This cannot be undone.",
-    "button": "Delete My Account",
-    "confirm": "Are you absolutely sure? This action is permanent and irreversible."
+    "dangerZone": "Danger Zone",
+    "dangerWarning": "Once you delete your account, there is no going back. Please be certain.",
+    "description": "This action cannot be undone. How would you like to verify your identity to proceed?",
+    "button": "Delete Account",
+    "confirm": "Are you absolutely sure? This action is permanent and irreversible.",
+    "verifyPassword": "Verify with Password",
+    "verifyOtp": "Verify with Email OTP",
+    "enterOtp": "Enter 6-digit OTP",
+    "enterPassword": "Enter your password",
+    "otpSent": "An OTP has been sent to your email address.",
+    "confirmDelete": "Confirm Delete"
   },
+  "logoutConfirm": "Are you sure you want to log out?",
   "messages": {
     "profileUpdated": "Profile updated successfully.",
     "passwordChanged": "Password changed successfully.",

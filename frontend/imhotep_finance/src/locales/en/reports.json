@@ -24,6 +24,7 @@
   "loadingReportDesc": "Please wait while we fetch your report data...",
   "totalExpenses": "Total Expenses",
   "totalIncome": "Total Income",
+  "netBalance": "Net Balance",
   "basedOnMonths": "Based on {count} months of data",
   "expenseBreakdown": "Expense Breakdown",
   "incomeBreakdown": "Income Breakdown",

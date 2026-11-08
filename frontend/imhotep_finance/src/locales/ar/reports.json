@@ -24,6 +24,7 @@
   "loadingReportDesc": "يرجى الانتظار بينما نقوم بجلب بيانات التقرير...",
   "totalExpenses": "إجمالي المصروفات",
   "totalIncome": "إجمالي الدخل",
+  "netBalance": "صافي الرصيد",
   "basedOnMonths": "بناءً على بيانات {count} أشهر",
   "expenseBreakdown": "تفاصيل المصروفات",
   "incomeBreakdown": "تفاصيل الدخل",
