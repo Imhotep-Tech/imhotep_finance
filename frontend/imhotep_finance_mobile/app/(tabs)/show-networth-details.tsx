@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, RefreshControl, TouchableOpacity, Modal, TextInput, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, RefreshControl, TouchableOpacity, Alert } from 'react-native';
 import { Stack, router } from 'expo-router';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -8,6 +8,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from '@/contexts/LanguageContext';
 import api from '@/constants/api';
 import { currencies as allCurrencies } from '@/constants/currencies';
+import MoveMoneyModal from '@/components/MoveMoneyModal';
+import ConvertCurrencyModal from '@/components/ConvertCurrencyModal';
 
 interface NetWorthDetail {
     currency: string;
@@ -85,25 +87,9 @@ export default function NetWorthDetailsScreen() {
         return Object.entries(currencyGroups);
     };
 
-    // Move Money states
+    // Modal states
     const [showMoveModal, setShowMoveModal] = useState(false);
-    const [sourcePlace, setSourcePlace] = useState('');
-    const [targetPlace, setTargetPlace] = useState('');
-    const [targetPlaceInput, setTargetPlaceInput] = useState('');
-    const [isCustomTarget, setIsCustomTarget] = useState(false);
-    const [currency, setCurrency] = useState('');
-    const [amount, setAmount] = useState('');
-    const [submitting, setSubmitting] = useState(false);
-
-    // Convert Currency states
     const [showConvertModal, setShowConvertModal] = useState(false);
-    const [convertPlace, setConvertPlace] = useState('');
-    const [sourceCurrency, setSourceCurrency] = useState('');
-    const [targetCurrency, setTargetCurrency] = useState('');
-    const [convertAmount, setConvertAmount] = useState('');
-    const [targetAmount, setTargetAmount] = useState('');
-    const [exchangeRate, setExchangeRate] = useState('');
-    const [convertSubmitting, setConvertSubmitting] = useState(false);
     const [exchangeRates, setExchangeRates] = useState<Record<string, number> | null>(null);
 
     const fetchDetails = async () => {
@@ -127,149 +113,42 @@ export default function NetWorthDetailsScreen() {
     };
 
     useEffect(() => {
-        fetchDetails();
+        let isMounted = true;
+        api.get('/api/finance-management/get-networth-details/')
+            .then(res => {
+                if (!isMounted) return;
+                const data = res.data.networth_details;
+                if (data && typeof data === 'object' && !Array.isArray(data)) {
+                    setDetails(data as any);
+                } else {
+                    setDetails({});
+                }
+            })
+            .catch(err => {
+                if (!isMounted) return;
+                console.error('Failed to fetch net worth details:', err);
+                setDetails({});
+            })
+            .finally(() => {
+                if (!isMounted) return;
+                setLoading(false);
+                setRefreshing(false);
+            });
+
         api.get('/api/finance-management/get-exchange-rates/')
-            .then(res => setExchangeRates(res.data))
-            .catch(() => console.error("Failed to load exchange rates"));
+            .then(res => {
+                if (isMounted) setExchangeRates(res.data);
+            })
+            .catch(() => console.error('Failed to load exchange rates'));
+
+        return () => {
+            isMounted = false;
+        };
     }, []);
 
     const onRefresh = () => {
         setRefreshing(true);
         fetchDetails();
-    };
-
-    const handleMoveSubmit = async () => {
-        const finalTarget = isCustomTarget ? targetPlaceInput.trim() : targetPlace;
-        if (!sourcePlace || !currency || !finalTarget || !amount) {
-            Alert.alert('Error', 'All fields are required.');
-            return;
-        }
-
-        if (sourcePlace.toLowerCase().trim() === finalTarget.toLowerCase().trim()) {
-            Alert.alert('Error', 'Source and target places must be different.');
-            return;
-        }
-
-        const parsedAmount = parseFloat(amount);
-        if (isNaN(parsedAmount) || parsedAmount <= 0) {
-            Alert.alert(t('common.status.error'), 'Amount must be greater than zero.');
-            return;
-        }
-
-        const maxAvailable = (details[sourcePlace] || []).find(item => item.currency === currency)?.amount || 0;
-        if (parsedAmount > maxAvailable) {
-            Alert.alert(t('common.status.error'), `Insufficient funds in ${sourcePlace}. Maximum available is ${maxAvailable} ${currency}.`);
-            return;
-        }
-
-        setSubmitting(true);
-        try {
-            await api.post('/api/finance-management/move-money/', {
-                source_place: sourcePlace,
-                target_place: finalTarget,
-                amount: parsedAmount,
-                currency
-            });
-            setShowMoveModal(false);
-            Alert.alert(t('common.status.success'), t('dashboard.netWorthDetails.moveSuccess'));
-            fetchDetails();
-        } catch (err: any) {
-            const errorMessage = err.response?.data?.error || err.response?.data?.detail || 'An error occurred during transfer.';
-            Alert.alert(t('common.status.error'), errorMessage);
-        } finally {
-            setSubmitting(false);
-        }
-    };
-
-    const updateDefaultRate = (src: string, tgt: string) => {
-        if (src && tgt && exchangeRates) {
-            const srcRate = exchangeRates[src];
-            const tgtRate = exchangeRates[tgt];
-            if (srcRate && tgtRate) {
-                const rate = (tgtRate / srcRate).toFixed(6);
-                setExchangeRate(rate);
-                const parsedAmount = parseFloat(convertAmount);
-                if (!isNaN(parsedAmount)) {
-                    setTargetAmount((parsedAmount * parseFloat(rate)).toFixed(2));
-                }
-                return;
-            }
-        }
-        setExchangeRate('');
-        setTargetAmount('');
-    };
-
-    const handleConvertAmountChange = (val: string) => {
-        setConvertAmount(val);
-        const parsedVal = parseFloat(val);
-        const parsedRate = parseFloat(exchangeRate);
-        if (!isNaN(parsedVal) && !isNaN(parsedRate) && parsedRate > 0) {
-            setTargetAmount((parsedVal * parsedRate).toFixed(2));
-        } else {
-            setTargetAmount('');
-        }
-    };
-
-    const handleExchangeRateChange = (val: string) => {
-        setExchangeRate(val);
-        const parsedAmount = parseFloat(convertAmount);
-        const parsedRate = parseFloat(val);
-        if (!isNaN(parsedAmount) && !isNaN(parsedRate) && parsedRate > 0) {
-            setTargetAmount((parsedAmount * parsedRate).toFixed(2));
-        }
-    };
-
-    const handleTargetAmountChange = (val: string) => {
-        setTargetAmount(val);
-        const parsedTarget = parseFloat(val);
-        const parsedAmount = parseFloat(convertAmount);
-        if (!isNaN(parsedTarget) && !isNaN(parsedAmount) && parsedAmount > 0) {
-            setExchangeRate((parsedTarget / parsedAmount).toFixed(6));
-        }
-    };
-
-    const handleConvertSubmit = async () => {
-        if (!convertPlace || !sourceCurrency || !targetCurrency || !convertAmount || !targetAmount) {
-            Alert.alert(t('common.status.error'), 'All fields are required.');
-            return;
-        }
-
-        if (sourceCurrency === targetCurrency) {
-            Alert.alert(t('common.status.error'), 'Source and target currencies must be different.');
-            return;
-        }
-
-        const parsedAmount = parseFloat(convertAmount);
-        const parsedTargetAmount = parseFloat(targetAmount);
-        if (isNaN(parsedAmount) || parsedAmount <= 0 || isNaN(parsedTargetAmount) || parsedTargetAmount <= 0) {
-            Alert.alert(t('common.status.error'), 'Amounts must be greater than zero.');
-            return;
-        }
-
-        const maxAvailable = (details[convertPlace] || []).find(item => item.currency === sourceCurrency)?.amount || 0;
-        if (parsedAmount > maxAvailable) {
-            Alert.alert(t('common.status.error'), `Insufficient funds. Maximum available is ${maxAvailable} ${sourceCurrency}.`);
-            return;
-        }
-
-        setConvertSubmitting(true);
-        try {
-            await api.post('/api/finance-management/convert-currency/', {
-                place: convertPlace,
-                source_currency: sourceCurrency,
-                target_currency: targetCurrency,
-                amount: parsedAmount,
-                target_amount: parsedTargetAmount
-            });
-            setShowConvertModal(false);
-            Alert.alert(t('common.status.success'), t('dashboard.netWorthDetails.convertSuccess'));
-            fetchDetails();
-        } catch (err: any) {
-            const errorMessage = err.response?.data?.error || err.response?.data?.detail || 'An error occurred during conversion.';
-            Alert.alert(t('common.status.error'), errorMessage);
-        } finally {
-            setConvertSubmitting(false);
-        }
     };
 
     const handleDeleteNetWorth = (place: string, currency: string) => {
@@ -477,15 +356,7 @@ export default function NetWorthDetailsScreen() {
                     <View style={styles.buttonRow}>
                         <TouchableOpacity
                             style={[styles.moveButton, { backgroundColor: '#2563EB' }]}
-                            onPress={() => {
-                                setConvertPlace('');
-                                setSourceCurrency('');
-                                setTargetCurrency('');
-                                setConvertAmount('');
-                                setTargetAmount('');
-                                setExchangeRate('');
-                                setShowConvertModal(true);
-                            }}
+                            onPress={() => setShowConvertModal(true)}
                         >
                             <Ionicons name="cash-outline" size={20} color="#fff" />
                             <Text style={styles.backButtonText}>{t('dashboard.netWorthDetails.convertCurrencies')}</Text>
@@ -493,15 +364,7 @@ export default function NetWorthDetailsScreen() {
 
                         <TouchableOpacity
                             style={[styles.moveButton, { backgroundColor: colors.primary }]}
-                            onPress={() => {
-                                setSourcePlace('');
-                                setTargetPlace('');
-                                setTargetPlaceInput('');
-                                setIsCustomTarget(false);
-                                setCurrency('');
-                                setAmount('');
-                                setShowMoveModal(true);
-                            }}
+                            onPress={() => setShowMoveModal(true)}
                         >
                             <Ionicons name="swap-horizontal-outline" size={20} color="#fff" />
                             <Text style={styles.backButtonText}>{t('dashboard.netWorthDetails.moveMoney')}</Text>
@@ -520,357 +383,29 @@ export default function NetWorthDetailsScreen() {
                 </ScrollView>
             </View>
 
-            {/* Move Money Native Overlay Modal */}
-            <Modal
+            {/* Move Money Interactive Modal */}
+            <MoveMoneyModal
                 visible={showMoveModal}
-                animationType="slide"
-                transparent={true}
-                onRequestClose={() => setShowMoveModal(false)}
-            >
-                <KeyboardAvoidingView
-                    style={{ flex: 1 }}
-                    behavior="padding"
-                >
-                <View style={styles.modalOverlay}>
-                    <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
-                        <View style={styles.modalHeader}>
-                            <Text style={[styles.modalTitle, { color: colors.text }]}>{t('dashboard.netWorthDetails.moveMoney')}</Text>
-                            <TouchableOpacity onPress={() => setShowMoveModal(false)}>
-                                <Ionicons name="close" size={24} color={colors.text} />
-                            </TouchableOpacity>
-                        </View>
+                onClose={() => setShowMoveModal(false)}
+                onSuccess={() => {
+                    setShowMoveModal(false);
+                    fetchDetails();
+                }}
+                details={details}
+            />
 
-                        <ScrollView contentContainerStyle={{ gap: 20 }} keyboardShouldPersistTaps="handled">
-                            {/* Source Place */}
-                            <View>
-                                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>{t('dashboard.netWorthDetails.sourcePlace')}</Text>
-                                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsContainer}>
-                                    {Object.keys(details).map(place => (
-                                        <TouchableOpacity
-                                            key={place}
-                                            style={[
-                                                styles.chip,
-                                                { borderColor: colors.border },
-                                                sourcePlace === place && { backgroundColor: colors.primary, borderColor: colors.primary }
-                                            ]}
-                                            onPress={() => {
-                                                setSourcePlace(place);
-                                                setCurrency('');
-                                                setAmount('');
-                                            }}
-                                        >
-                                            <Text style={[styles.chipText, { color: colors.text }, sourcePlace === place && { color: '#fff', fontWeight: 'bold' }]}>
-                                                {place}
-                                            </Text>
-                                        </TouchableOpacity>
-                                    ))}
-                                </ScrollView>
-                            </View>
-
-                            {/* Currency */}
-                            {sourcePlace ? (
-                                <View>
-                                    <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>{t('dashboard.netWorthDetails.currency')}</Text>
-                                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsContainer}>
-                                        {(details[sourcePlace] || []).map(item => (
-                                            <TouchableOpacity
-                                                key={item.currency}
-                                                style={[
-                                                    styles.chip,
-                                                    { borderColor: colors.border },
-                                                    currency === item.currency && { backgroundColor: colors.primary, borderColor: colors.primary }
-                                                ]}
-                                                onPress={() => {
-                                                    setCurrency(item.currency);
-                                                    setAmount('');
-                                                }}
-                                            >
-                                                <Text style={[styles.chipText, { color: colors.text }, currency === item.currency && { color: '#fff', fontWeight: 'bold' }]}>
-                                                    {item.currency}
-                                                </Text>
-                                            </TouchableOpacity>
-                                        ))}
-                                    </ScrollView>
-                                    {currency ? (
-                                        <Text style={[styles.balanceText, { color: colors.textSecondary }]}>
-                                            {t('dashboard.netWorthDetails.available', {
-                                                amount: Number((details[sourcePlace] || []).find(item => item.currency === currency)?.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
-                                                currency
-                                            })}
-                                        </Text>
-                                    ) : null}
-                                </View>
-                            ) : null}
-
-                            {/* Target Place */}
-                            <View>
-                                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>{t('dashboard.netWorthDetails.targetPlace')}</Text>
-                                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsContainer}>
-                                    {Object.keys(details)
-                                        .filter(place => place !== sourcePlace)
-                                        .map(place => (
-                                            <TouchableOpacity
-                                                key={place}
-                                                style={[
-                                                    styles.chip,
-                                                    { borderColor: colors.border },
-                                                    !isCustomTarget && targetPlace === place && { backgroundColor: colors.primary, borderColor: colors.primary }
-                                                ]}
-                                                onPress={() => {
-                                                    setIsCustomTarget(false);
-                                                    setTargetPlace(place);
-                                                }}
-                                            >
-                                                <Text style={[styles.chipText, { color: colors.text }, !isCustomTarget && targetPlace === place && { color: '#fff', fontWeight: 'bold' }]}>
-                                                    {place}
-                                                </Text>
-                                            </TouchableOpacity>
-                                        ))}
-                                    <TouchableOpacity
-                                        style={[
-                                            styles.chip,
-                                            { borderColor: colors.border },
-                                            isCustomTarget && { backgroundColor: colors.primary, borderColor: colors.primary }
-                                        ]}
-                                        onPress={() => {
-                                            setIsCustomTarget(true);
-                                            setTargetPlace('');
-                                        }}
-                                    >
-                                        <Text style={[styles.chipText, { color: colors.text }, isCustomTarget && { color: '#fff', fontWeight: 'bold' }]}>
-                                            {t('dashboard.netWorthDetails.newPlace')}
-                                        </Text>
-                                    </TouchableOpacity>
-                                </ScrollView>
-
-                                {isCustomTarget ? (
-                                    <TextInput
-                                        style={[styles.textInput, { borderColor: colors.border, color: colors.text, backgroundColor: isDark ? '#1F2937' : '#F9FAFB' }]}
-                                        placeholder={t('dashboard.netWorthDetails.newPlacePlaceholder')}
-                                        placeholderTextColor={colors.textSecondary}
-                                        value={targetPlaceInput}
-                                        onChangeText={setTargetPlaceInput}
-                                        autoCapitalize="words"
-                                    />
-                                ) : null}
-                            </View>
-
-                            {/* Amount */}
-                            <View>
-                                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>{t('dashboard.netWorthDetails.amount')}</Text>
-                                <TextInput
-                                    style={[styles.textInput, { borderColor: colors.border, color: colors.text, backgroundColor: isDark ? '#1F2937' : '#F9FAFB' }]}
-                                    placeholder="0.00"
-                                    placeholderTextColor={colors.textSecondary}
-                                    value={amount}
-                                    onChangeText={setAmount}
-                                    keyboardType="numeric"
-                                />
-                            </View>
-
-                            {/* Actions */}
-                            <View style={styles.modalActions}>
-                                <TouchableOpacity
-                                    style={[styles.modalButton, { borderColor: colors.border, borderWidth: 1 }]}
-                                    onPress={() => setShowMoveModal(false)}
-                                >
-                                    <Text style={{ color: colors.text, fontWeight: '600' }}>{t('common.actions.cancel')}</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    style={[styles.modalButton, { backgroundColor: colors.primary }]}
-                                    onPress={handleMoveSubmit}
-                                    disabled={submitting}
-                                >
-                                    {submitting ? (
-                                        <ActivityIndicator size="small" color="#fff" />
-                                    ) : (
-                                        <Text style={{ color: '#fff', fontWeight: '600' }}>{t('dashboard.netWorthDetails.move')}</Text>
-                                    )}
-                                </TouchableOpacity>
-                            </View>
-                        </ScrollView>
-                    </View>
-                </View>
-                </KeyboardAvoidingView>
-            </Modal>
-
-            {/* Convert Currency Native Overlay Modal */}
-            <Modal
+            {/* Convert Currency Interactive Modal */}
+            <ConvertCurrencyModal
                 visible={showConvertModal}
-                animationType="slide"
-                transparent={true}
-                onRequestClose={() => setShowConvertModal(false)}
-            >
-                <KeyboardAvoidingView
-                    style={{ flex: 1 }}
-                    behavior="padding"
-                >
-                <View style={styles.modalOverlay}>
-                    <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
-                        <View style={styles.modalHeader}>
-                            <Text style={[styles.modalTitle, { color: colors.text }]}>{t('dashboard.netWorthDetails.convertCurrencies')}</Text>
-                            <TouchableOpacity onPress={() => setShowConvertModal(false)}>
-                                <Ionicons name="close" size={24} color={colors.text} />
-                            </TouchableOpacity>
-                        </View>
-
-                        <ScrollView contentContainerStyle={{ gap: 20 }} keyboardShouldPersistTaps="handled">
-                            {/* Place */}
-                            <View>
-                                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>{t('dashboard.netWorthDetails.place')}</Text>
-                                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsContainer}>
-                                    {Object.keys(details).map(place => (
-                                        <TouchableOpacity
-                                            key={place}
-                                            style={[
-                                                styles.chip,
-                                                { borderColor: colors.border },
-                                                convertPlace === place && { backgroundColor: colors.primary, borderColor: colors.primary }
-                                            ]}
-                                            onPress={() => {
-                                                setConvertPlace(place);
-                                                setSourceCurrency('');
-                                                setTargetCurrency('');
-                                                setExchangeRate('');
-                                                setTargetAmount('');
-                                            }}
-                                        >
-                                            <Text style={[styles.chipText, { color: colors.text }, convertPlace === place && { color: '#fff', fontWeight: 'bold' }]}>
-                                                {place}
-                                            </Text>
-                                        </TouchableOpacity>
-                                    ))}
-                                </ScrollView>
-                            </View>
-
-                            {convertPlace ? (
-                                <>
-                                    {/* Source Currency */}
-                                    <View>
-                                        <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>{t('dashboard.netWorthDetails.currentCurrency')}</Text>
-                                        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsContainer}>
-                                            {(details[convertPlace] || []).map(item => (
-                                                <TouchableOpacity
-                                                    key={item.currency}
-                                                    style={[
-                                                        styles.chip,
-                                                        { borderColor: colors.border },
-                                                        sourceCurrency === item.currency && { backgroundColor: colors.primary, borderColor: colors.primary }
-                                                    ]}
-                                                    onPress={() => {
-                                                        setSourceCurrency(item.currency);
-                                                        updateDefaultRate(item.currency, targetCurrency);
-                                                    }}
-                                                >
-                                                    <Text style={[styles.chipText, { color: colors.text }, sourceCurrency === item.currency && { color: '#fff', fontWeight: 'bold' }]}>
-                                                        {item.currency}
-                                                    </Text>
-                                                </TouchableOpacity>
-                                            ))}
-                                        </ScrollView>
-                                        {sourceCurrency ? (
-                                            <Text style={[styles.balanceText, { color: colors.textSecondary }]}>
-                                                {t('dashboard.netWorthDetails.available', {
-                                                    amount: Number((details[convertPlace] || []).find(item => item.currency === sourceCurrency)?.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
-                                                    currency: sourceCurrency
-                                                })}
-                                            </Text>
-                                        ) : null}
-                                    </View>
-
-                                    {/* Target Currency */}
-                                    <View>
-                                        <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>{t('dashboard.netWorthDetails.targetCurrency')}</Text>
-                                        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsContainer}>
-                                            {allCurrencies.map(c => (
-                                                <TouchableOpacity
-                                                    key={c}
-                                                    style={[
-                                                        styles.chip,
-                                                        { borderColor: colors.border },
-                                                        targetCurrency === c && { backgroundColor: colors.primary, borderColor: colors.primary }
-                                                    ]}
-                                                    onPress={() => {
-                                                        setTargetCurrency(c);
-                                                        updateDefaultRate(sourceCurrency, c);
-                                                    }}
-                                                >
-                                                    <Text style={[styles.chipText, { color: colors.text }, targetCurrency === c && { color: '#fff', fontWeight: 'bold' }]}>
-                                                        {c}
-                                                    </Text>
-                                                </TouchableOpacity>
-                                            ))}
-                                        </ScrollView>
-                                    </View>
-                                </>
-                            ) : null}
-
-                            {/* Rate */}
-                            <View>
-                                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>{t('dashboard.netWorthDetails.rate')}</Text>
-                                <TextInput
-                                    style={[styles.textInput, { borderColor: colors.border, color: colors.text, backgroundColor: isDark ? '#1F2937' : '#F9FAFB' }]}
-                                    placeholder="0.00"
-                                    placeholderTextColor={colors.textSecondary}
-                                    value={exchangeRate}
-                                    onChangeText={handleExchangeRateChange}
-                                    keyboardType="numeric"
-                                />
-                            </View>
-
-                            <View style={{ flexDirection: 'row', gap: 12 }}>
-                                {/* Amount */}
-                                <View style={{ flex: 1 }}>
-                                    <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>{t('dashboard.netWorthDetails.amount')} ({sourceCurrency || '...'})</Text>
-                                    <TextInput
-                                        style={[styles.textInput, { borderColor: colors.border, color: colors.text, backgroundColor: isDark ? '#1F2937' : '#F9FAFB' }]}
-                                        placeholder="0.00"
-                                        placeholderTextColor={colors.textSecondary}
-                                        value={convertAmount}
-                                        onChangeText={handleConvertAmountChange}
-                                        keyboardType="numeric"
-                                    />
-                                </View>
-                                
-                                {/* Target Amount */}
-                                <View style={{ flex: 1 }}>
-                                    <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>{t('dashboard.netWorthDetails.target')} ({targetCurrency || '...'})</Text>
-                                    <TextInput
-                                        style={[styles.textInput, { borderColor: colors.border, color: colors.text, backgroundColor: isDark ? '#1F2937' : '#F9FAFB' }]}
-                                        placeholder="0.00"
-                                        placeholderTextColor={colors.textSecondary}
-                                        value={targetAmount}
-                                        onChangeText={handleTargetAmountChange}
-                                        keyboardType="numeric"
-                                    />
-                                </View>
-                            </View>
-
-                            {/* Actions */}
-                            <View style={styles.modalActions}>
-                                <TouchableOpacity
-                                    style={[styles.modalButton, { borderColor: colors.border, borderWidth: 1 }]}
-                                    onPress={() => setShowConvertModal(false)}
-                                >
-                                    <Text style={{ color: colors.text, fontWeight: '600' }}>{t('common.actions.cancel')}</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    style={[styles.modalButton, { backgroundColor: '#2563EB' }]}
-                                    onPress={handleConvertSubmit}
-                                    disabled={convertSubmitting}
-                                >
-                                    {convertSubmitting ? (
-                                        <ActivityIndicator size="small" color="#fff" />
-                                    ) : (
-                                        <Text style={{ color: '#fff', fontWeight: '600' }}>{t('dashboard.netWorthDetails.convert')}</Text>
-                                    )}
-                                </TouchableOpacity>
-                            </View>
-                        </ScrollView>
-                    </View>
-                </View>
-                </KeyboardAvoidingView>
-            </Modal>
+                onClose={() => setShowConvertModal(false)}
+                onSuccess={() => {
+                    setShowConvertModal(false);
+                    fetchDetails();
+                }}
+                details={details}
+                allCurrencies={allCurrencies}
+                exchangeRates={exchangeRates}
+            />
         </>
     );
 }
@@ -1032,72 +567,6 @@ const styles = StyleSheet.create({
     placeTitle: {
         fontSize: 20,
         fontWeight: 'bold',
-    },
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        justifyContent: 'flex-end',
-    },
-    modalContent: {
-        borderTopLeftRadius: 24,
-        borderTopRightRadius: 24,
-        padding: 24,
-        maxHeight: '85%',
-    },
-    modalHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 20,
-    },
-    modalTitle: {
-        fontSize: 22,
-        fontWeight: 'bold',
-    },
-    inputLabel: {
-        fontSize: 14,
-        fontWeight: '600',
-        marginBottom: 8,
-    },
-    chipsContainer: {
-        flexDirection: 'row',
-        gap: 8,
-        paddingBottom: 4,
-    },
-    chip: {
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        borderRadius: 20,
-        borderWidth: 1,
-        backgroundColor: 'transparent',
-    },
-    chipText: {
-        fontSize: 14,
-    },
-    balanceText: {
-        fontSize: 12,
-        marginTop: 4,
-    },
-    textInput: {
-        borderWidth: 1,
-        borderRadius: 12,
-        padding: 12,
-        fontSize: 16,
-        marginTop: 8,
-    },
-    modalActions: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'space-between',
-        marginTop: 8,
-        marginBottom: 16,
-    },
-    modalButton: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: 14,
-        borderRadius: 12,
     },
     deleteButton: {
         position: 'absolute',

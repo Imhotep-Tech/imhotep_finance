@@ -3,6 +3,7 @@ import {
   StyleSheet,
   View,
   Pressable,
+  TouchableOpacity,
   Alert,
   TextInput,
   ScrollView,
@@ -11,7 +12,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   useColorScheme,
-  Keyboard,
   Switch,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -24,7 +24,6 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from '@/contexts/LanguageContext';
-import { useThemeColor } from '@/hooks/use-theme-color';
 import api from '@/constants/api';
 import CurrencySelect from '@/components/CurrencySelect'; // Import CurrencySelect
 import { updateNetworthWidget } from '@/widgets/widget-updater';
@@ -72,11 +71,12 @@ const themes = {
 };
 
 export default function ProfileScreen() {
-  const { user, logout, updateUser, token } = useAuth();
+  const { user, logout, updateUser } = useAuth();
   const { t, language, setLanguage, supportedLanguages } = useTranslation();
   const colorScheme = useColorScheme();
-  const backgroundColor = colorScheme === 'dark' ? '#0f172a' : '#f8fafc';
-  const colors = themes[colorScheme === 'dark' ? 'dark' : 'light'];
+  const isDark = colorScheme === 'dark';
+  const backgroundColor = isDark ? '#0f172a' : '#f8fafc';
+  const colors = themes[isDark ? 'dark' : 'light'];
   const scrollViewRef = useRef<ScrollView>(null);
 
   // Helper to scroll input into view on Android
@@ -151,12 +151,12 @@ export default function ProfileScreen() {
   const [otpError, setOtpError] = useState('');
 
   // Profile form data
-  const [profileData, setProfileData] = useState({
-    first_name: '',
-    last_name: '',
-    username: '',
-    email: '',
-  });
+  const [profileData, setProfileData] = useState(() => ({
+    first_name: user?.first_name || '',
+    last_name: user?.last_name || '',
+    username: user?.username || '',
+    email: user?.email || '',
+  }));
 
   // Password form data
   const [passwordData, setPasswordData] = useState({
@@ -176,52 +176,30 @@ export default function ProfileScreen() {
   const [currency, setCurrency] = useState('');
   const [initialCurrency, setInitialCurrency] = useState('');
 
-  // Load profile data on component mount
-  useEffect(() => {
-    if (user) {
-      setProfileData({
-        first_name: user.first_name || '',
-        last_name: user.last_name || '',
-        username: user.username || '',
-        email: user.email || '',
-      });
-    }
-  }, [user]);
-
   // Fetch Financial Data when tab is active
   useEffect(() => {
+    let isMounted = true;
     if (activeTab === 'financial') {
-      fetchFinancialData();
+      api.get('/api/finance-management/target/get-target/')
+        .then(res => {
+          if (isMounted && res.data.target) setTarget(String(res.data.target));
+        })
+        .catch(() => {});
+
+      api.get('/api/get-fav-currency/')
+        .then(res => {
+          if (isMounted) {
+            const curr = res.data.favorite_currency || '';
+            setCurrency(curr);
+            setInitialCurrency(curr);
+          }
+        })
+        .catch(() => {});
     }
+    return () => {
+      isMounted = false;
+    };
   }, [activeTab]);
-
-  const fetchFinancialData = async () => {
-    setLoading(true);
-    try {
-      // Fetch Target
-      try {
-        const targetRes = await api.get('/api/finance-management/target/get-target/');
-        setTarget(targetRes.data.target ? String(targetRes.data.target) : '');
-      } catch (e: any) {
-        if (e.response?.status !== 404) console.warn('Fetch target error', e);
-      }
-
-      // Fetch Currency
-      try {
-        const currRes = await api.get('/api/get-fav-currency/');
-        const curr = currRes.data.favorite_currency || '';
-        setCurrency(curr);
-        setInitialCurrency(curr);
-      } catch (e) {
-        console.warn('Fetch currency error', e);
-      }
-
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleRequestDeleteOTP = async () => {
     setDeleteLoading(true);
@@ -772,13 +750,75 @@ export default function ProfileScreen() {
                   {t('profile.financial.monthlyTarget')}
                 </ThemedText>
                 <TextInput
-                  style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
+                  style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text, fontSize: 18, fontWeight: 'bold' }]}
                   value={target}
                   onChangeText={(text) => setTarget(text.replace(/[^0-9.]/g, ''))}
                   placeholder="0.00"
                   placeholderTextColor={colors.placeholder}
                   keyboardType="numeric"
                 />
+
+                {/* Quick Increment Chips */}
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
+                  {[500, 1000, 5000, 10000].map((val) => (
+                    <TouchableOpacity
+                      key={val}
+                      onPress={() => {
+                        const cur = parseFloat(target) || 0;
+                        setTarget(String(cur + val));
+                      }}
+                      style={{
+                        paddingHorizontal: 10,
+                        paddingVertical: 5,
+                        borderRadius: 8,
+                        backgroundColor: isDark ? '#334155' : '#f1f5f9',
+                      }}
+                    >
+                      <ThemedText style={{ fontSize: 12, fontWeight: '600' }}>
+                        +{val.toLocaleString()}
+                      </ThemedText>
+                    </TouchableOpacity>
+                  ))}
+                  <TouchableOpacity
+                    onPress={() => setTarget('')}
+                    style={{
+                      paddingHorizontal: 10,
+                      paddingVertical: 5,
+                      borderRadius: 8,
+                      backgroundColor: isDark ? 'rgba(239, 68, 68, 0.2)' : '#fee2e2',
+                    }}
+                  >
+                    <ThemedText style={{ fontSize: 12, fontWeight: '600', color: '#ef4444' }}>
+                      Clear
+                    </ThemedText>
+                  </TouchableOpacity>
+                </View>
+
+                {/* Target Preview */}
+                {parseFloat(target) > 0 && (
+                  <View style={{
+                    marginTop: 10,
+                    padding: 12,
+                    borderRadius: 12,
+                    backgroundColor: isDark ? 'rgba(54, 108, 107, 0.2)' : 'rgba(54, 108, 107, 0.08)',
+                    borderColor: 'rgba(54, 108, 107, 0.3)',
+                    borderWidth: 1,
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}>
+                    <View>
+                      <ThemedText style={{ fontSize: 10, fontWeight: 'bold', color: colors.primary, textTransform: 'uppercase' }}>
+                        Target Goal
+                      </ThemedText>
+                      <ThemedText style={{ fontSize: 16, fontWeight: 'bold', marginTop: 2 }}>
+                        {parseFloat(target).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency || ''}
+                      </ThemedText>
+                    </View>
+                    <Ionicons name="flag" size={20} color={colors.primary} />
+                  </View>
+                )}
+
                 <ThemedText style={{ fontSize: 12, color: colors.textSecondary, marginTop: 4 }}>
                   {t('profile.financial.monthlyTargetDesc')}
                 </ThemedText>
