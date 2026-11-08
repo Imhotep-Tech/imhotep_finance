@@ -11,10 +11,12 @@ The **Imhotep Finance Mobile App** is a cross-platform mobile application built 
 ### Key Features
 
 - 📊 **Dashboard**: View balance, recent transactions, and financial overview
-- 💰 **Transactions**: Add, edit, and manage income/expense transactions
+- 💰 **Transactions**: Add, edit, and manage income/expense transactions with interactive multi-step wizard, slide animations, and real-time balance check
 - 📈 **Reports**: Analyze spending patterns with monthly/yearly reports
-- 🎯 **Wishlist**: Track savings goals and progress
-- ⏰ **Scheduled Transactions**: Manage recurring bills and income
+- 🎯 **Wishlist**: Track savings goals with goal deficit tracking and instant savings progress indicator
+- ⏰ **Scheduled Transactions**: Manage recurring bills and automated schedules with balance coverage warnings
+- 🪄 **Interactive Guided Creation Modals**: Step-by-step interactive wizards with animated transitions, quick amount chips (+10, +50, +100, +500), and live review cards
+- ⚠️ **Real-Time Balance & Fund Validation**: Instant notification if attempting to withdraw more than available in an account or place, with cross-account balance tips
 - 👤 **Profile**: Manage account settings and preferences
 - 🔐 **Secure Authentication**: JWT-based authentication with email verification
 - 🏠 **Places Asset Tracking**: Track transactions and net worth across custom places (e.g. Bank, Cash, Safe) and execute transfers or conversions
@@ -246,6 +248,28 @@ Imhotep Finance includes a biometric App Lock feature for enhanced privacy and s
 The mobile app includes full internationalization powered by modular JSON files:
 - **Available Languages**: English (`en`) and Arabic (`ar`, with RTL support).
 - **Architecture**: Separate JSON files per module under `locales/<lang>/` (`common.json`, `auth.json`, `dashboard.json`, `transactions.json`, `scheduled.json`, `wishlist.json`, `reports.json`, `profile.json`, `landing.json`).
+
+---
+
+## 🪄 Interactive Creation Modals & Real-Time Validation
+
+All creation and edit modals (Transactions, Wishlist items, and Scheduled Transactions) feature guided multi-step flows with smooth animated slide/fade transitions, quick chips, and live balance verification:
+
+### 1. Add/Edit Transaction Modal (`AddTransactionModal`)
+- **Step 1: Amount & Type**: Income vs. Expense selection with vibrant active badges, currency selector, large numeric amount input, quick amount chips (`+10`, `+50`, `+100`, `+500`, `+1000`), and real-time positive number & 2-decimal validations.
+- **Step 2: Account & Category**: Account (`PlaceSelect`) selection with dynamic balance check against user's actual funds in that currency/account via `/api/finance-management/get-networth-details/`.
+  - **Insufficient Funds Alert**: If withdrawing more than available, prominently highlights deficit shortfall (`-X.XX CUR`), available funds, and cross-account balance suggestions.
+  - **Income Projection**: Displays expected new balance after deposit.
+- **Step 3: Review & Date**: Date picker, description notes, and a live review recipe card before final submission.
+
+### 2. Add/Edit Wishlist Modal (`AddWishlistModal`)
+- **Step 1: Target Cost & Year**: Price input, currency, target goal year, and real-time savings affordability meter (calculates percentage saved towards goal and deficit needed).
+- **Step 2: Details & Review**: Wish item title, purchase link (with URL format validation), account, and summary card.
+
+### 3. Add/Edit Scheduled Transaction Modal (`AddScheduledTransactionModal`)
+- **Step 1: Amount & Schedule**: Recurring income/expense, amount, currency, and day of month (1-31) with smart month-end notice for shorter months (e.g. February).
+- **Step 2: Account & Category**: Account selection with monthly balance coverage verification alert, category, description, and Active/Paused toggle.
+- **Step 3: Review**: Comprehensive schedule review before confirming.
 - **Language Switcher**: Users can change their language preference directly from the **Profile** screen or during **Login**.
 - **Storage**: Preferences are persisted across app restarts via `AsyncStorage` (key: `language_preference`).
 - Detailed setup and instructions for adding new languages: see [`.docs/LOCALIZATION.md`](LOCALIZATION.md).

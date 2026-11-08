@@ -71,7 +71,19 @@
     "updateSuccess": "Scheduled transaction updated successfully!",
     "updateFailed": "Failed to update scheduled transaction.",
     "requiredFields": "Amount, currency, and day of month are required.",
-    "dayRangeError": "Day of month must be between 1 and 31."
+    "dayRangeError": "Day of month must be between 1 and 31.",
+    "step": "Step {current} of {total}",
+    "step1Title": "Amount & Schedule",
+    "step1Desc": "Type, recurring amount, currency, and day of month",
+    "step2Title": "Account & Category",
+    "step2Desc": "Where it executes, category, and optional description",
+    "reviewTitle": "Review Scheduled Transaction",
+    "amountPositive": "Amount must be greater than 0.",
+    "amountDecimals": "Amount cannot exceed 2 decimal places.",
+    "currencyRequired": "Please choose a currency.",
+    "monthEndNotice": "Note: For months with fewer days (e.g. February), execution occurs on the last day of that month.",
+    "balanceWarning": "⚠️ Current balance in {place} ({balance} {currency}) is less than this recurring charge. Ensure sufficient funds before day {day}.",
+    "balanceOk": "✓ Current balance in {place} ({balance} {currency}) covers this recurring charge."
   },
   "item": {
     "noCategory": "No Category",

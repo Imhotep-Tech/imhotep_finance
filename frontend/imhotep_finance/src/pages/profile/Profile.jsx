@@ -1016,13 +1016,65 @@ const Profile = () => {
                     name="target"
                     value={targetData.target}
                     onChange={handleTargetChange}
-                    className="chef-input pl-10"
+                    className="chef-input pl-10 text-xl font-bold"
                     placeholder="Enter your target amount"
                     min="0"
                     step="0.01"
                     required
                   />
                 </div>
+
+                {/* Quick Increment Chips */}
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {[500, 1000, 5000, 10000].map((val) => (
+                    <button
+                      key={val}
+                      type="button"
+                      onClick={() => {
+                        const cur = parseFloat(targetData.target) || 0;
+                        setTargetData(prev => ({ ...prev, target: String(cur + val) }));
+                        if (error) setError('');
+                        if (success) setSuccess('');
+                      }}
+                      className="px-3 py-1.5 text-xs font-semibold rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-[#366c6b] hover:text-white dark:hover:bg-[#51adac] dark:hover:text-white transition-all border border-gray-200 dark:border-gray-700"
+                    >
+                      +{val.toLocaleString()}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTargetData(prev => ({ ...prev, target: '' }));
+                      if (error) setError('');
+                      if (success) setSuccess('');
+                    }}
+                    className="px-3 py-1.5 text-xs font-semibold rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 transition-all border border-red-200 dark:border-red-800"
+                  >
+                    Clear
+                  </button>
+                </div>
+
+                {/* Target Projection Card */}
+                {parseFloat(targetData.target) > 0 && (
+                  <div className="mt-4 p-4 rounded-2xl bg-[#366c6b]/5 dark:bg-[#366c6b]/15 border border-[#366c6b]/20 flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#366c6b] dark:text-[#51adac]">
+                        Target Goal Summary
+                      </span>
+                      <p className="text-xl font-black text-gray-900 dark:text-gray-100 mt-0.5">
+                        {parseFloat(targetData.target).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{' '}
+                        <span className="text-sm font-semibold text-gray-500">{currencyData.current || 'CUR'}</span>
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 text-xs font-bold">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                      </svg>
+                      Active Goal
+                    </div>
+                  </div>
+                )}
+
                 <p className="text-sm text-gray-500 mt-1">
                   Enter the amount you want to achieve by the end of this month
                 </p>
