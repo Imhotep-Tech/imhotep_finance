@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTranslation } from '../../contexts/LanguageContext';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Footer from '../../components/common/Footer';
+import LanguageToggle from '../../components/common/LanguageToggle';
 import { currencies } from '../../utils/currencies';
 
 const Profile = () => {
   const { user, logout, updateUser } = useAuth();
+  const { t, language, setLanguage, supportedLanguages } = useTranslation();
   const [activeTab, setActiveTab] = useState('profile');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -364,7 +367,7 @@ const Profile = () => {
                 Manage your account and preferences
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex flex-col sm:flex-row gap-3 items-center">
               <Link
                 to="/dashboard"
                 className="chef-button bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white flex items-center space-x-2 justify-center"
@@ -374,6 +377,7 @@ const Profile = () => {
                 </svg>
                 <span>Back to Dashboard</span>
               </Link>
+              <LanguageToggle />
               <button
                 onClick={logout}
                 className="chef-button bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white flex items-center space-x-2 justify-center"
@@ -381,7 +385,7 @@ const Profile = () => {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
-                <span>Logout</span>
+                <span>{t('common.navigation.logout')}</span>
               </button>
             </div>
           </div>
@@ -402,7 +406,7 @@ const Profile = () => {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
-              <span>Profile Information</span>
+              <span>{t('profile.sections.personal')}</span>
             </button>
             <button
               className={`chef-button flex-1 ${activeTab === 'password'
@@ -414,7 +418,7 @@ const Profile = () => {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
-              <span>Change Password</span>
+              <span>{t('profile.passwords.title')}</span>
             </button>
             <button
               className={`chef-button flex-1 ${activeTab === 'currency'
@@ -426,7 +430,7 @@ const Profile = () => {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
               </svg>
-              <span>Change Currency</span>
+              <span>{t('profile.fields.favoriteCurrency')}</span>
             </button>
             <button
               className={`chef-button flex-1 ${activeTab === 'target'
@@ -438,7 +442,7 @@ const Profile = () => {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span>Target</span>
+              <span>{t('dashboard.target.title')}</span>
             </button>
           </div>
         </div>

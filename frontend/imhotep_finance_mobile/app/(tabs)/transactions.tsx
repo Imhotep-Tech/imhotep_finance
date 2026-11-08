@@ -25,8 +25,10 @@ import PlaceSelect from '@/components/PlaceSelect';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { updateNetworthWidget } from '@/widgets/widget-updater';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from '@/contexts/LanguageContext';
 
 export default function TransactionsScreen() {
+    const { t } = useTranslation();
     const colorScheme = useColorScheme();
     const isDark = colorScheme === 'dark';
     const router = useRouter();
@@ -290,8 +292,8 @@ export default function TransactionsScreen() {
             {/* Header */}
             <View style={[styles.header, themeStyles.header, { paddingTop: insets.top + 12 }]}>
                 <View>
-                    <Text style={[styles.headerTitle, themeStyles.text]}>Transactions</Text>
-                    <Text style={[styles.headerSubtitle, themeStyles.subText]}>Manage your financial activity</Text>
+                    <Text style={[styles.headerTitle, themeStyles.text]}>{t('transactions.title')}</Text>
+                    <Text style={[styles.headerSubtitle, themeStyles.subText]}>{t('transactions.subtitle')}</Text>
                 </View>
                 <TouchableOpacity
                     style={[styles.filterButton, themeStyles.filterButton]}
@@ -442,11 +444,11 @@ export default function TransactionsScreen() {
                     !loading ? (
                         <View style={styles.emptyContainer}>
                             <Ionicons name="receipt-outline" size={64} color={isDark ? '#475569' : '#cbd5e1'} />
-                            <Text style={[styles.emptyText, themeStyles.text]}>No transactions found</Text>
+                            <Text style={[styles.emptyText, themeStyles.text]}>{t('transactions.empty.title')}</Text>
                              <Text style={[styles.emptySubtext, themeStyles.subText]}>
                                 {startDate || endDate || categoryFilter || placeFilter || detailsSearch
-                                    ? 'Try adjusting your filters'
-                                    : 'Add your first transaction to get started'}
+                                    ? t('transactions.filters.reset')
+                                    : t('transactions.empty.description')}
                             </Text>
                         </View>
                     ) : null

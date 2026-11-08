@@ -16,9 +16,11 @@ import api from '@/constants/api';
 import WishlistItem from '@/components/WishlistItem';
 import AddWishlistModal from '@/components/AddWishlistModal';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from '@/contexts/LanguageContext';
 
 export default function WishlistScreen() {
     const insets = useSafeAreaInsets();
+    const { t } = useTranslation();
     const colorScheme = useColorScheme();
     const isDark = colorScheme === 'dark';
 
@@ -188,7 +190,7 @@ export default function WishlistScreen() {
         <View style={[styles.container, themeStyles.container]}>
             {/* Header */}
             <View style={[styles.header, themeStyles.header, { paddingTop: insets.top + 12 }]}>
-                <Text style={[styles.headerTitle, themeStyles.text]}>Wishlist</Text>
+                <Text style={[styles.headerTitle, themeStyles.text]}>{t('wishlist.title')}</Text>
 
                 {/* Year Filter */}
                 <View style={styles.yearFilterContainer}>
@@ -222,7 +224,7 @@ export default function WishlistScreen() {
                 onEndReached={loadMore}
                 onEndReachedThreshold={0.5}
                 ListFooterComponent={loading && !refreshing ? <ActivityIndicator size="small" color="#366c6b" style={{ margin: 20 }} /> : null}
-                ListEmptyComponent={!loading ? <Text style={[styles.emptyText, themeStyles.subText]}>No wishes found for {year}.</Text> : null}
+                ListEmptyComponent={!loading ? <Text style={[styles.emptyText, themeStyles.subText]}>{t('wishlist.empty.title')}</Text> : null}
                 contentContainerStyle={{ paddingBottom: 100, paddingTop: 16 }}
             />
 

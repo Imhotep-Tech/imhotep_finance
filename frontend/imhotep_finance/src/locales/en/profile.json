@@ -1,0 +1,48 @@
+{
+  "title": "Profile & Settings",
+  "subtitle": "Manage your personal information, security options, and preferences",
+  "sections": {
+    "personal": "Personal Information",
+    "preferences": "Preferences & Display",
+    "security": "Security & Authentication",
+    "dangerZone": "Danger Zone"
+  },
+  "fields": {
+    "username": "Username",
+    "email": "Email Address",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "favoriteCurrency": "Favorite Currency",
+    "theme": "Theme",
+    "language": "App Language",
+    "biometricAuth": "Biometric Authentication",
+    "biometricAuthDesc": "Use Fingerprint or Face ID to unlock the mobile app",
+    "appLock": "App Lock",
+    "appLockDesc": "Require biometric authentication every time app opens"
+  },
+  "passwords": {
+    "title": "Change Password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmNewPassword": "Confirm New Password",
+    "updateButton": "Update Password"
+  },
+  "emailChange": {
+    "title": "Change Email Address",
+    "newEmail": "New Email Address",
+    "submitButton": "Request Verification Code",
+    "otpSubtitle": "Enter the 6-digit code sent to your new email."
+  },
+  "deleteAccount": {
+    "title": "Delete Account",
+    "description": "Permanently delete your account, credentials, and all recorded transactions. This cannot be undone.",
+    "button": "Delete My Account",
+    "confirm": "Are you absolutely sure? This action is permanent and irreversible."
+  },
+  "messages": {
+    "profileUpdated": "Profile updated successfully.",
+    "passwordChanged": "Password changed successfully.",
+    "currencyUpdated": "Favorite currency updated.",
+    "languageChanged": "Language preference saved."
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "title": "المعاملات",
+  "subtitle": "تتبع وأدر عمليات الإيداع والسحب وسجل المصروفات",
+  "addTransaction": "إضافة معاملة",
+  "editTransaction": "تعديل المعاملة",
+  "deleteTransaction": "حذف المعاملة",
+  "deleteConfirm": "هل أنت متأكد من رغبتك في حذف هذه المعاملة؟",
+  "deleteSuccess": "تم حذف المعاملة بنجاح.",
+  "saveSuccess": "تم حفظ المعاملة بنجاح.",
+  "types": {
+    "all": "جميع الأنواع",
+    "deposit": "إيداع",
+    "withdraw": "سحب",
+    "income": "دخل",
+    "expense": "مصروف"
+  },
+  "fields": {
+    "type": "نوع المعاملة",
+    "amount": "المبلغ",
+    "amountPlaceholder": "0.00",
+    "currency": "العملة",
+    "selectCurrency": "اختر العملة",
+    "category": "الفئة",
+    "selectCategory": "اختر الفئة",
+    "addNewCategory": "+ إضافة فئة",
+    "place": "المكان / الحساب",
+    "selectPlace": "اختر المكان",
+    "addNewPlace": "+ إضافة مكان",
+    "date": "التاريخ",
+    "description": "الوصف",
+    "descriptionPlaceholder": "مثال: مشتريات السوبرماركت، الراتب الشهري"
+  },
+  "filters": {
+    "title": "تصفية النتائج",
+    "search": "بحث في المعاملات...",
+    "category": "الفئة",
+    "currency": "العملة",
+    "place": "المكان",
+    "status": "النوع",
+    "startDate": "تاريخ البدء",
+    "endDate": "تاريخ الانتهاء",
+    "reset": "إعادة ضبط التصفية"
+  },
+  "import": {
+    "title": "استيراد المعاملات",
+    "instructions": "قم برفع ملف CSV يحتوي على معاملاتك وتأكد من تطابق الأعمدة مع النموذج المطلوب.",
+    "selectFile": "اختر ملف CSV",
+    "uploading": "جاري استيراد المعاملات...",
+    "success": "تم استيراد المعاملات بنجاح!",
+    "downloadTemplate": "تحميل نموذج CSV"
+  },
+  "empty": {
+    "title": "لا توجد معاملات",
+    "description": "لم يتم العثور على أي معاملات مطابقة لخيارات التصفية المحددة.",
+    "cta": "إضافة معاملة"
+  }
+}

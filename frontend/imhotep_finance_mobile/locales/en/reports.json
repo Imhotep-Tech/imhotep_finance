@@ -1,0 +1,33 @@
+{
+  "title": "Reports & Analytics",
+  "subtitle": "Visualize spending habits, income sources, and financial trends",
+  "monthlyReport": "Monthly Report",
+  "annualReport": "Annual Report",
+  "metrics": {
+    "totalIncome": "Total Income",
+    "totalExpenses": "Total Expenses",
+    "netSavings": "Net Savings",
+    "savingsRate": "Savings Rate"
+  },
+  "charts": {
+    "incomeVsExpense": "Income vs. Expenses",
+    "categoryBreakdown": "Spending by Category",
+    "monthlyTrends": "Monthly Trend Over Time",
+    "placeBreakdown": "Spending by Place"
+  },
+  "export": {
+    "title": "Export Reports",
+    "pdf": "Export as PDF",
+    "csv": "Export as CSV",
+    "generating": "Generating report..."
+  },
+  "selectors": {
+    "selectMonth": "Select Month",
+    "selectYear": "Select Year",
+    "currentMonth": "Current Month"
+  },
+  "empty": {
+    "title": "No Report Data",
+    "description": "No transactions found for the selected period to generate an analytical report."
+  }
+}

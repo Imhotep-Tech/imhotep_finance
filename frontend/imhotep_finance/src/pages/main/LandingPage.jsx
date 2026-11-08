@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Footer from '../../components/common/Footer';
 import Logo from '../../assets/Logo.jpeg';
+import LanguageToggle from '../../components/common/LanguageToggle';
+import { useTranslation } from '../../contexts/LanguageContext';
 import { versionEntries } from '../../utils/versionData';
 
 // Features data with emojis
@@ -65,12 +67,17 @@ const calculateDevelopmentMonths = () => {
 const developmentMonths = calculateDevelopmentMonths();
 
 function LandingPage() {
+  const { t } = useTranslation();
   const [currentFeature, setCurrentFeature] = useState(0);
 
   return (
     <div
       className="min-h-screen relative overflow-hidden bg-[var(--bg)] text-[var(--text)] transition-colors"
     >
+      {/* Top right language switch */}
+      <div className="fixed top-4 right-4 z-50">
+        <LanguageToggle />
+      </div>
       {/* Floating background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-20 w-32 h-32 rounded-full filter blur-xl opacity-20 animate-float bg-[#366c6b] mix-blend-multiply dark:bg-emerald-600/40 dark:mix-blend-screen"></div>
@@ -130,7 +137,7 @@ function LandingPage() {
                 background: 'linear-gradient(90deg, #366c6b 0%, #1a3535 100%)',
               }}
             >
-              🚀 Get Started Free
+              🚀 {t('landing.hero.cta')}
             </Link>
             <Link
               to="/login"
@@ -139,7 +146,7 @@ function LandingPage() {
                 background: 'linear-gradient(90deg, #366c6b 0%, #1a3535 100%)',
               }}
             >
-              🔓 Sign In
+              🔓 {t('landing.hero.login')}
             </Link>
             <Link
               to="/download-app"
@@ -148,7 +155,7 @@ function LandingPage() {
                 background: 'linear-gradient(90deg, #366c6b 0%, #1a3535 100%)',
               }}
             >
-              📥 Download App
+              📥 {t('common.navigation.downloadApp')}
             </Link>
           </div>
           {/* Stats */}

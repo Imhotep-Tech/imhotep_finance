@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTranslation } from '../../contexts/LanguageContext';
 import axios from 'axios';
 import Footer from '../../components/common/Footer';
 import Logo from '../../assets/Logo.jpeg';
@@ -10,6 +11,7 @@ import UserGuideModal from '../../components/common/UserGuideModal';
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [networth, setNetworth] = useState('0');
   const [favoriteCurrency, setFavoriteCurrency] = useState('');
   const [score, setScore] = useState(null);
@@ -162,15 +164,15 @@ const Dashboard = () => {
                   }}>
                   Imhotep Finance
                 </div>
-                <p className="text-gray-500 dark:text-gray-400 text-sm">Manage your finances efficiently</p>
+                <p className="text-gray-500 dark:text-gray-400 text-sm">{t('dashboard.tagline')}</p>
               </div>
             </div>
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold font-chef text-gray-800 dark:text-gray-100 mb-2">
-            Welcome, {user?.first_name || user?.username}!
+            {t('dashboard.welcome', { name: user?.first_name || user?.username || '' })}
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-300 font-medium leading-relaxed">
-            Here's your financial overview
+            {t('dashboard.overview')}
           </p>
         </div>
 
@@ -197,8 +199,8 @@ const Dashboard = () => {
               <svg className="w-6 h-6 md:w-8 md:h-8 text-green-600 dark:text-green-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 5v14m7-7H5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </div>
             <div className="text-center md:text-left">
-              <h3 className="text-sm md:text-xl font-semibold text-gray-900 dark:text-gray-100 mb-0 md:mb-1">Add Income</h3>
-              <p className="hidden md:block text-sm text-gray-600 dark:text-gray-300">Record your earnings and financial growth</p>
+              <h3 className="text-sm md:text-xl font-semibold text-gray-900 dark:text-gray-100 mb-0 md:mb-1">{t('dashboard.quickActions.addIncome')}</h3>
+              <p className="hidden md:block text-sm text-gray-600 dark:text-gray-300">{t('dashboard.quickActions.addIncomeDesc')}</p>
             </div>
           </button>
           <button
@@ -214,8 +216,8 @@ const Dashboard = () => {
               </svg>
             </div>
             <div className="text-center md:text-left">
-              <h3 className="text-sm md:text-xl font-semibold text-gray-900 dark:text-gray-100 mb-0 md:mb-1">Add Expense</h3>
-              <p className="hidden md:block text-sm text-gray-600 dark:text-gray-300">Track your spending and manage budget</p>
+              <h3 className="text-sm md:text-xl font-semibold text-gray-900 dark:text-gray-100 mb-0 md:mb-1">{t('dashboard.quickActions.addExpense')}</h3>
+              <p className="hidden md:block text-sm text-gray-600 dark:text-gray-300">{t('dashboard.quickActions.addExpenseDesc')}</p>
             </div>
           </button>
         </div>

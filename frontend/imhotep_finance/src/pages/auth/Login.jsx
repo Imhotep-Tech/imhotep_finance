@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTranslation } from '../../contexts/LanguageContext';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import Footer from '../../components/common/Footer';
 import Logo from '../../assets/Logo.jpeg';
+import LanguageToggle from '../../components/common/LanguageToggle';
 import { API_URL } from '../../config/api';
 
 const Login = () => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -170,6 +173,11 @@ const Login = () => {
         <div className="absolute bottom-20 left-40 w-40 h-40 rounded-full filter blur-xl opacity-16 animate-float bg-[#2f7775] dark:bg-cyan-700/30 dark:mix-blend-screen" style={{ animationDelay: '4s' }}></div>
       </div>
 
+      {/* Top right language switch */}
+      <div className="fixed top-4 right-4 z-50">
+        <LanguageToggle />
+      </div>
+
       <div className="flex items-center justify-center min-h-screen p-4">
         <div className="relative w-full max-w-md">
           {/* Glassmorphism Card */}
@@ -197,13 +205,13 @@ const Login = () => {
                 Imhotep Finance
               </div>
               <p className="text-sm mb-2 text-[#1a3535] dark:text-gray-300 opacity-80">
-                Manage your finances efficiently with Imhotep Financial Manager
+                {t('dashboard.tagline')}
               </p>
               <h1 className="text-3xl font-bold font-chef text-gray-800 dark:text-gray-100 mb-2">
-                Welcome Back!
+                {t('auth.login.title')}
               </h1>
               <p className="font-medium text-[#1a3535] dark:text-gray-300 opacity-90">
-                Sign in to your Imhotep Finance account
+                {t('auth.login.subtitle')}
               </p>
             </div>
 
@@ -234,7 +242,7 @@ const Login = () => {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                    Username or Email
+                    {t('auth.login.username')}
                   </label>
                   <div className="relative">
                     <input
@@ -244,7 +252,7 @@ const Login = () => {
                       onChange={handleChange}
                       required
                       className="chef-input pl-12"
-                      placeholder="Enter your username or email"
+                      placeholder={t('auth.login.usernamePlaceholder')}
                     />
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       {/* finance-relevant icon: chart bars */}
@@ -256,7 +264,7 @@ const Login = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                    Password
+                    {t('auth.login.password')}
                   </label>
                   <div className="relative">
                     <input
@@ -266,7 +274,7 @@ const Login = () => {
                       onChange={handleChange}
                       required
                       className="chef-input pl-12 pr-12"
-                      placeholder="Enter your password"
+                      placeholder={t('auth.login.passwordPlaceholder')}
                     />
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       {/* lock icon with finance tint */}
@@ -299,7 +307,7 @@ const Login = () => {
                   to="/forgot-password"
                   className="text-sm font-medium transition-colors hover:underline text-[#366c6b] dark:text-emerald-400"
                 >
-                  Forgot your password?
+                  {t('auth.login.forgotPassword')}
                 </Link>
               </div>
               <button
@@ -316,10 +324,10 @@ const Login = () => {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Signing in...
+                    {t('auth.login.signingIn')}
                   </div>
                 ) : (
-                  'Sign In'
+                  t('auth.login.signInButton')
                 )}
               </button>
             </form>
@@ -327,7 +335,7 @@ const Login = () => {
             {/* Divider */}
             <div className="my-8 flex items-center">
               <div className="flex-1 border-t" style={{ borderColor: 'rgba(26,53,53,0.12)' }}></div>
-              <span className="px-4 text-sm font-medium dark:text-gray-300" style={{ color: '#1a3535', opacity: 0.85 }}>or continue with</span>
+              <span className="px-4 text-sm font-medium dark:text-gray-300" style={{ color: '#1a3535', opacity: 0.85 }}>{t('auth.login.or')}</span>
               <div className="flex-1 border-t" style={{ borderColor: 'rgba(26,53,53,0.12)' }}></div>
             </div>
 
@@ -341,7 +349,7 @@ const Login = () => {
               <svg className="w-5 h-5 mr-3 text-white" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M21.35 11.1H12v2.8h5.35c-.25 1.45-1.62 4.1-5.35 4.1-3.23 0-5.86-2.67-5.86-5.99s2.63-5.99 5.86-5.99c1.84 0 3.08.78 3.79 1.45l1.96-1.88C16.3 3.99 14.35 3 12 3 6.98 3 2.94 7.03 2.94 12S6.98 21 12 21c6.69 0 7.86-5.86 7.86-8.39 0-.56-.05-.92-.11-1.51z" />
               </svg>
-              {googleLoading ? 'Redirecting...' : 'Sign in with Google'}
+              {googleLoading ? t('common.actions.loading') : t('auth.login.continueWithGoogle')}
             </button>
 
             {/* Demo Login */}
@@ -356,19 +364,19 @@ const Login = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
               </svg>
-              {demoLoading ? 'Setting up Demo...' : 'Try Demo Account'}
+              {demoLoading ? t('auth.login.demoPreparing') : t('auth.login.tryDemo')}
             </button>
 
             {/* Footer */}
             <div className="mt-8 text-center">
               <p className="text-gray-600 dark:text-gray-300">
-                Don't have an account?{' '}
+                {t('auth.login.dontHaveAccount')}{' '}
                 <Link
                   to="/register"
                   className="font-semibold transition-colors hover:underline"
                   style={{ color: '#366c6b' }}
                 >
-                  Create Account
+                  {t('auth.login.signUp')}
                 </Link>
               </p>
             </div>

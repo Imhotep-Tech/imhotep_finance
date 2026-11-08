@@ -1,0 +1,29 @@
+{
+  "title": "Scheduled Transactions",
+  "subtitle": "Set up recurring income and expenses that process automatically",
+  "addScheduled": "Add Scheduled Transaction",
+  "editScheduled": "Edit Scheduled Transaction",
+  "deleteConfirm": "Are you sure you want to delete this scheduled transaction?",
+  "saveSuccess": "Scheduled transaction saved successfully.",
+  "deleteSuccess": "Scheduled transaction removed.",
+  "frequencies": {
+    "daily": "Daily",
+    "weekly": "Weekly",
+    "monthly": "Monthly",
+    "yearly": "Yearly"
+  },
+  "fields": {
+    "frequency": "Frequency",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "nextRun": "Next Execution",
+    "lastRun": "Last Execution",
+    "active": "Active",
+    "paused": "Paused"
+  },
+  "empty": {
+    "title": "No Scheduled Transactions",
+    "description": "Automate your recurring bills, subscriptions, or salaries by creating a schedule.",
+    "cta": "Create Schedule"
+  }
+}

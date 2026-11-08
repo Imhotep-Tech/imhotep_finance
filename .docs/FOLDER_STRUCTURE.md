@@ -65,6 +65,7 @@ imhotep_finance/
 │   │   │   │   │   ├── Navbar.jsx
 │   │   │   │   │   ├── Footer.jsx
 │   │   │   │   │   ├── ThemeToggle.jsx
+│   │   │   │   │   ├── LanguageToggle.jsx
 │   │   │   │   │   └── ...
 │   │   │   │   └── pwa/          # PWA components
 │   │   │   ├── pages/            # Page components
@@ -73,7 +74,12 @@ imhotep_finance/
 │   │   │   │   └── profile/      # User profile pages
 │   │   │   ├── contexts/         # React contexts
 │   │   │   │   ├── AuthContext.jsx
-│   │   │   │   └── ThemeContext.jsx
+│   │   │   │   ├── ThemeContext.jsx
+│   │   │   │   └── LanguageContext.jsx
+│   │   │   ├── locales/          # Modular i18n JSON translations
+│   │   │   │   ├── en/           # English module JSON files
+│   │   │   │   ├── ar/           # Arabic module JSON files
+│   │   │   │   └── index.js      # Locale aggregator & language configuration
 │   │   │   ├── hooks/            # Custom React hooks
 │   │   │   ├── config/           # Configuration
 │   │   │   │   └── api.js        # API client setup
@@ -109,7 +115,12 @@ imhotep_finance/
 │   │   │   ├── Colors.ts      # Color palette
 │   │   │   └── types.ts       # TypeScript types
 │   │   ├── contexts/          # React Context providers
-│   │   │   └── AuthContext.tsx
+│   │   │   ├── AuthContext.tsx
+│   │   │   └── LanguageContext.tsx
+│   │   ├── locales/           # Modular i18n JSON translations
+│   │   │   ├── en/            # English module JSON files
+│   │   │   ├── ar/            # Arabic module JSON files
+│   │   │   └── index.ts       # Locale aggregator & language configuration
 │   │   ├── hooks/             # Custom React hooks
 │   │   │   ├── use-color-scheme.ts
 │   │   │   ├── use-color-scheme.web.ts

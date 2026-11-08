@@ -3,6 +3,7 @@ import axios from 'axios';
 import CurrencySelect from './CurrencySelect';
 import CategorySelect from './CategorySelect';
 import PlaceSelect from './PlaceSelect';
+import { useTranslation } from '../contexts/LanguageContext';
 
 const AddTransactionModal = ({
   onClose,
@@ -11,6 +12,7 @@ const AddTransactionModal = ({
   initialValues = {},
   editMode = false,
 }) => {
+  const { t } = useTranslation();
   const [status, setStatus] = useState(initialType);
   const [amount, setAmount] = useState(initialValues.amount || '');
   const [desc, setDesc] = useState(initialValues.desc || '');
@@ -123,11 +125,11 @@ const AddTransactionModal = ({
             </svg>
           </button>
           <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">
-            {editMode ? 'Edit Transaction' : 'Add Transaction'}
+            {editMode ? t('transactions.editTransaction') : t('transactions.addTransaction')}
           </h2>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Type</label>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">{t('transactions.fields.type')}</label>
               <div className="flex gap-4">
                 <button
                   type="button"
@@ -136,7 +138,7 @@ const AddTransactionModal = ({
                   aria-pressed={status === 'deposit'}
                   disabled={editMode}
                 >
-                  Income
+                  {t('transactions.types.income')}
                 </button>
                 <button
                   type="button"
@@ -145,12 +147,12 @@ const AddTransactionModal = ({
                   aria-pressed={status === 'withdraw'}
                   disabled={editMode}
                 >
-                  Expense
+                  {t('transactions.types.expense')}
                 </button>
               </div>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Amount</label>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">{t('transactions.fields.amount')}</label>
               <input
                 type="number"
                 min="0"
@@ -159,11 +161,11 @@ const AddTransactionModal = ({
                 onChange={e => setAmount(e.target.value)}
                 required
                 className="chef-input"
-                placeholder="Enter amount"
+                placeholder={t('transactions.fields.amountPlaceholder')}
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Currency</label>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">{t('transactions.fields.currency')}</label>
 
               <CurrencySelect
                 value={currency}
@@ -172,7 +174,7 @@ const AddTransactionModal = ({
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Category</label>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">{t('transactions.fields.category')}</label>
               <CategorySelect
                 value={category}
                 onChange={setCategory}
@@ -180,7 +182,7 @@ const AddTransactionModal = ({
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Place</label>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">{t('transactions.fields.place')}</label>
               <PlaceSelect
                 value={place}
                 onChange={setPlace}
@@ -188,23 +190,22 @@ const AddTransactionModal = ({
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Description</label>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">{t('transactions.fields.description')}</label>
               <input
                 type="text"
                 value={desc}
                 onChange={e => setDesc(e.target.value)}
                 className="chef-input"
-                placeholder="Description (optional)"
+                placeholder={t('transactions.fields.descriptionPlaceholder')}
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Date</label>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">{t('transactions.fields.date')}</label>
               <input
                 type="date"
                 value={date}
                 onChange={e => setDate(e.target.value)}
                 className="chef-input"
-                placeholder="Date (optional)"
               />
             </div>
             <div className="flex justify-end gap-2 mt-4">
@@ -214,7 +215,7 @@ const AddTransactionModal = ({
                 onClick={onClose}
                 disabled={loading}
               >
-                Cancel
+                {t('common.actions.cancel')}
               </button>
               <button
                 type="submit"
@@ -226,7 +227,7 @@ const AddTransactionModal = ({
                 }}
                 disabled={loading}
               >
-                {loading ? (editMode ? 'Saving...' : 'Saving...') : (editMode ? 'Save' : 'Add')}
+                {loading ? (editMode ? t('common.actions.saving') : t('common.actions.saving')) : (editMode ? t('common.actions.save') : t('common.actions.add'))}
               </button>
             </div>
             {success && (

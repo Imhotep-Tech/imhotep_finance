@@ -16,6 +16,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import api from '@/constants/api';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from '@/contexts/LanguageContext';
 
 const FilterModal = ({ visible, options, onSelect, onClose, title, selectedValue }: any) => {
     const colorScheme = useColorScheme();
@@ -73,6 +74,7 @@ const FilterModal = ({ visible, options, onSelect, onClose, title, selectedValue
 
 export default function ReportsScreen() {
     const insets = useSafeAreaInsets();
+    const { t } = useTranslation();
     const colorScheme = useColorScheme();
     const isDark = colorScheme === 'dark';
 
@@ -326,8 +328,8 @@ export default function ReportsScreen() {
                 {/* Header */}
                 <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
                     <View>
-                        <Text style={[styles.title, themeStyles.text]}>Financial Reports</Text>
-                        <Text style={[styles.subtitle, themeStyles.subText]}>Track your financial performance</Text>
+                        <Text style={[styles.title, themeStyles.text]}>{t('reports.title')}</Text>
+                        <Text style={[styles.subtitle, themeStyles.subText]}>{t('reports.subtitle')}</Text>
                     </View>
                     <TouchableOpacity
                         onPress={handleRecalculate}
@@ -354,7 +356,7 @@ export default function ReportsScreen() {
                             color={viewBy === 'category' ? 'white' : (isDark ? '#cbd5e1' : '#475569')}
                         />
                         <Text style={[styles.tabText, viewBy === 'category' ? themeStyles.activeTabText : themeStyles.inactiveTabText]}>
-                            By Category
+                            {t('reports.charts.categoryBreakdown')}
                         </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
@@ -371,7 +373,7 @@ export default function ReportsScreen() {
                             color={viewBy === 'place' ? 'white' : (isDark ? '#cbd5e1' : '#475569')}
                         />
                         <Text style={[styles.tabText, viewBy === 'place' ? themeStyles.activeTabText : themeStyles.inactiveTabText]}>
-                            By Place
+                            {t('reports.charts.placeBreakdown')}
                         </Text>
                     </TouchableOpacity>
                 </View>
@@ -392,7 +394,7 @@ export default function ReportsScreen() {
                             color={reportType === 'monthly' ? 'white' : (isDark ? '#cbd5e1' : '#475569')}
                         />
                         <Text style={[styles.tabText, reportType === 'monthly' ? themeStyles.activeTabText : themeStyles.inactiveTabText]}>
-                            Monthly
+                            {t('reports.monthlyReport')}
                         </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
@@ -409,7 +411,7 @@ export default function ReportsScreen() {
                             color={reportType === 'yearly' ? 'white' : (isDark ? '#cbd5e1' : '#475569')}
                         />
                         <Text style={[styles.tabText, reportType === 'yearly' ? themeStyles.activeTabText : themeStyles.inactiveTabText]}>
-                            Yearly
+                            {t('reports.annualReport')}
                         </Text>
                     </TouchableOpacity>
                 </View>

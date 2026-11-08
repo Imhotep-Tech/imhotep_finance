@@ -1,0 +1,102 @@
+{
+  "navigation": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "transactions": "Transactions",
+    "scheduled": "Scheduled",
+    "scheduledTrans": "Scheduled Trans",
+    "wishlist": "Wishlist",
+    "reports": "Reports",
+    "profile": "Profile",
+    "downloadApp": "Download App",
+    "privacyPolicy": "Privacy Policy",
+    "logout": "Logout",
+    "collapseSidebar": "Collapse sidebar",
+    "expandSidebar": "Expand sidebar",
+    "emailNotVerified": "Email not verified"
+  },
+  "actions": {
+    "save": "Save",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "deleting": "Deleting...",
+    "edit": "Edit",
+    "add": "Add",
+    "close": "Close",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "loading": "Loading...",
+    "search": "Search...",
+    "filter": "Filter",
+    "all": "All",
+    "select": "Select...",
+    "submit": "Submit",
+    "clear": "Clear",
+    "retry": "Retry",
+    "apply": "Apply",
+    "update": "Update",
+    "updating": "Updating...",
+    "download": "Download",
+    "upload": "Upload",
+    "viewDetails": "View Details"
+  },
+  "status": {
+    "success": "Success",
+    "error": "Error",
+    "warning": "Warning",
+    "info": "Info",
+    "noData": "No data available",
+    "active": "Active",
+    "paused": "Paused",
+    "completed": "Completed",
+    "pending": "Pending"
+  },
+  "labels": {
+    "amount": "Amount",
+    "currency": "Currency",
+    "category": "Category",
+    "place": "Place",
+    "description": "Description",
+    "date": "Date",
+    "type": "Type",
+    "status": "Status",
+    "actions": "Actions",
+    "details": "Details",
+    "optional": "Optional",
+    "required": "Required",
+    "notes": "Notes"
+  },
+  "network": {
+    "offlineTitle": "You're Offline",
+    "offlineMessage": "You are currently offline. Changes will sync when reconnected.",
+    "onlineMessage": "Connection restored."
+  },
+  "pwa": {
+    "installApp": "Install App",
+    "installPrompt": "Install Imhotep Finance for a better app experience.",
+    "updateAvailable": "Update available! Refresh to load new features.",
+    "reload": "Reload"
+  },
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page",
+    "showing": "Showing",
+    "of": "of",
+    "results": "results"
+  },
+  "languages": {
+    "language": "Language",
+    "selectLanguage": "Select Language",
+    "en": "English",
+    "ar": "العربية"
+  },
+  "footer": {
+    "allRightsReserved": "All rights reserved.",
+    "builtFor": "Built for modern financial clarity.",
+    "feedback": "Feedback",
+    "version": "Version"
+  }
+}

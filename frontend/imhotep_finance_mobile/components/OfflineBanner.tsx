@@ -3,9 +3,11 @@ import { TouchableOpacity, Alert, StyleSheet } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from '@/contexts/LanguageContext';
 
 export default function OfflineBanner() {
   const [isConnected, setIsConnected] = useState<boolean | null>(true);
+  const { t } = useTranslation();
   
   // This hooks into the device's hardware safely to dodge the notch/island
   const insets = useSafeAreaInsets();
@@ -25,9 +27,9 @@ export default function OfflineBanner() {
 
   const showOfflineMessage = () => {
     Alert.alert(
-      'No Internet Connection',
-      'You are currently offline. The app is showing cached data, and changes may not be saved until you reconnect.',
-      [{ text: 'Got it', style: 'default' }]
+      t('common.network.offlineTitle'),
+      t('common.network.offlineMessage'),
+      [{ text: t('common.actions.close'), style: 'default' }]
     );
   };
 

@@ -1,0 +1,40 @@
+{
+  "welcome": "Welcome, {name}!",
+  "welcomeDefault": "Welcome!",
+  "overview": "Here's your financial overview",
+  "tagline": "Manage your finances efficiently",
+  "netWorth": {
+    "title": "Net Worth",
+    "totalBalance": "Total Balance",
+    "viewDetails": "View Details",
+    "calculating": "Calculating net worth...",
+    "favoriteCurrency": "Favorite Currency",
+    "currencyBreakdown": "Currency Breakdown",
+    "allCurrencies": "All Currencies",
+    "noCurrencies": "No currency balances recorded yet."
+  },
+  "target": {
+    "title": "Savings Target",
+    "score": "Target Score",
+    "scoreHistory": "View Target History",
+    "noTarget": "No target set yet",
+    "setTarget": "Set Target",
+    "currentTarget": "Target: {amount} {currency}"
+  },
+  "quickActions": {
+    "title": "Quick Actions",
+    "addIncome": "Add Income",
+    "addIncomeDesc": "Record your earnings and financial growth",
+    "addExpense": "Add Expense",
+    "addExpenseDesc": "Track your spending and manage budget",
+    "viewTransactions": "View Transactions",
+    "manageScheduled": "Scheduled Trans",
+    "wishlist": "Wishlist Goals"
+  },
+  "recentTransactions": {
+    "title": "Recent Transactions",
+    "viewAll": "View All",
+    "empty": "No recent transactions found.",
+    "addFirst": "Add your first transaction to get started."
+  }
+}

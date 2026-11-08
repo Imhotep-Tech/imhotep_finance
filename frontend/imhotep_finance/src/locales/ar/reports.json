@@ -1,0 +1,33 @@
+{
+  "title": "التقارير والتحليلات",
+  "subtitle": "رؤية بصرية لعادات الإنفاق، مصادر الدخل، والاتجاهات المالية",
+  "monthlyReport": "التقرير الشهري",
+  "annualReport": "التقرير السنوي",
+  "metrics": {
+    "totalIncome": "إجمالي الدخل",
+    "totalExpenses": "إجمالي المصروفات",
+    "netSavings": "صافي الادخار",
+    "savingsRate": "معدل الادخار"
+  },
+  "charts": {
+    "incomeVsExpense": "الدخل مقابل المصروفات",
+    "categoryBreakdown": "توزيع الإنفاق حسب الفئة",
+    "monthlyTrends": "الاتجاه الشهري عبر الزمن",
+    "placeBreakdown": "الإنفاق حسب المكان"
+  },
+  "export": {
+    "title": "تصدير التقارير",
+    "pdf": "تصدير كـ PDF",
+    "csv": "تصدير كـ CSV",
+    "generating": "جاري تجهيز التقرير..."
+  },
+  "selectors": {
+    "selectMonth": "اختر الشهر",
+    "selectYear": "اختر السنة",
+    "currentMonth": "الشهر الحالي"
+  },
+  "empty": {
+    "title": "لا توجد بيانات للتقرير",
+    "description": "لم يتم العثور على معاملات خلال الفترة المحددة لتوليد تقرير تحليلي."
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "brand": "Imhotep Finance",
+  "hero": {
+    "title": "Master Your Finances with Elegance",
+    "subtitle": "Imhotep Finance gives you complete clarity over your wealth, multi-currency assets, expenses, and savings targets.",
+    "cta": "Get Started Free",
+    "login": "Sign In",
+    "dashboard": "Go to Dashboard"
+  },
+  "features": {
+    "title": "Everything you need for financial freedom",
+    "multiCurrencyTitle": "Multi-Currency Net Worth",
+    "multiCurrencyDesc": "Track balances across multiple currencies with automated real-time conversion into your preferred primary currency.",
+    "savingsTargetTitle": "Intelligent Savings Goals",
+    "savingsTargetDesc": "Define financial milestones and watch your score adapt in real-time as your net worth progresses.",
+    "recurringTitle": "Automated Scheduled Expenses",
+    "recurringDesc": "Never miss a bill or pay cycle. Recurring transactions execute seamlessly with zero manual stress.",
+    "wishlistTitle": "Integrated Wishlist",
+    "wishlistDesc": "Plan your luxury and personal purchases, set priorities, and convert them to transactions with one click."
+  },
+  "mobileApp": {
+    "title": "Finance on the Go",
+    "subtitle": "Download the mobile app for iOS and Android with biometric lock, instant notifications, and offline caching.",
+    "downloadButton": "Download Mobile App"
+  },
+  "privacyPolicy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last updated",
+    "content": "Your privacy is paramount. Imhotep Finance encrypts your financial data and never shares or sells your information."
+  }
+}

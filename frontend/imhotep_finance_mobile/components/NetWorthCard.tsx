@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTranslation } from '@/contexts/LanguageContext';
 
 interface NetWorthCardProps {
     networth: string | number;
@@ -27,6 +28,7 @@ const NetWorthCard: React.FC<NetWorthCardProps> = ({
     mode = 'dashboard',
     onPress
 }) => {
+    const { t } = useTranslation();
     const formattedNetworth = loading
         ? '...'
         : Number(networth || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -42,7 +44,7 @@ const NetWorthCard: React.FC<NetWorthCardProps> = ({
                 style={styles.card}
             >
                 <View style={styles.content}>
-                    <Text style={styles.label}>Total Net Worth</Text>
+                    <Text style={styles.label}>{t('dashboard.netWorth.title')}</Text>
                     {loading ? (
                         <ActivityIndicator color="white" size="large" />
                     ) : (

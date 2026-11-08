@@ -18,6 +18,7 @@ The **Imhotep Finance Mobile App** is a cross-platform mobile application built 
 - 👤 **Profile**: Manage account settings and preferences
 - 🔐 **Secure Authentication**: JWT-based authentication with email verification
 - 🏠 **Places Asset Tracking**: Track transactions and net worth across custom places (e.g. Bank, Cash, Safe) and execute transfers or conversions
+- 🌐 **Multi-Language Support (i18n)**: Instant switching between English and Arabic with localized strings and modular JSON files
 - 🌓 **Dark Mode**: Automatic theme switching based on system preferences
 
 ## 📥 Download the App
@@ -237,6 +238,17 @@ Imhotep Finance includes a biometric App Lock feature for enhanced privacy and s
 1. Navigate to the **Profile** settings tab.
 2. Toggle the **App Lock** switch to enable/disable.
 3. Preferences are saved locally on the device using `AsyncStorage` (key: `app_lock_enabled`).
+
+---
+
+## 🌐 Multi-Language & Modular Localization
+
+The mobile app includes full internationalization powered by modular JSON files:
+- **Available Languages**: English (`en`) and Arabic (`ar`, with RTL support).
+- **Architecture**: Separate JSON files per module under `locales/<lang>/` (`common.json`, `auth.json`, `dashboard.json`, `transactions.json`, `scheduled.json`, `wishlist.json`, `reports.json`, `profile.json`, `landing.json`).
+- **Language Switcher**: Users can change their language preference directly from the **Profile** screen or during **Login**.
+- **Storage**: Preferences are persisted across app restarts via `AsyncStorage` (key: `language_preference`).
+- Detailed setup and instructions for adding new languages: see [`.docs/LOCALIZATION.md`](LOCALIZATION.md).
 4. Once enabled, launching the app or returning from the background triggers the lock screen.
 
 ---

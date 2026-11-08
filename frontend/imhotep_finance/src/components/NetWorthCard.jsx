@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from '../contexts/LanguageContext';
 
 const getFontSize = (networth, mode) => {
   const length = String(networth).replace(/[^0-9]/g, '').length;
@@ -11,6 +12,7 @@ const getFontSize = (networth, mode) => {
 };
 
 const NetWorthCard = ({ networth, favoriteCurrency, loading, mode = 'dashboard' }) => {
+  const { t } = useTranslation();
   const [showFull, setShowFull] = useState(false);
 
   // Format networth to 2 decimal places, fallback to '0.00'
@@ -41,7 +43,7 @@ const NetWorthCard = ({ networth, favoriteCurrency, loading, mode = 'dashboard' 
       }}
     >
       <div className="w-full flex flex-col items-center justify-center text-center">
-        <h2 className="text-lg font-medium text-white/90 mb-2">Total Net Worth</h2>
+        <h2 className="text-lg font-medium text-white/90 mb-2">{t('dashboard.netWorth.title')}</h2>
         {mode === 'navbar' && tooltip ? (
           <div
             className={`font-bold mb-2 ${fontSizeClass} whitespace-nowrap flex items-center justify-center relative`}

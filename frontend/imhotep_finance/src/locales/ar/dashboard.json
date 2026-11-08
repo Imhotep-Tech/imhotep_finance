@@ -1,0 +1,40 @@
+{
+  "welcome": "مرحباً، {name}!",
+  "welcomeDefault": "مرحباً بك!",
+  "overview": "إليك نظرة عامة على وضعك المالي",
+  "tagline": "أدر شؤونك المالية بكفاءة وسهولة",
+  "netWorth": {
+    "title": "صافي الثروة",
+    "totalBalance": "الرصيد الإجمالي",
+    "viewDetails": "عرض التفاصيل",
+    "calculating": "جاري احتساب صافي الثروة...",
+    "favoriteCurrency": "العملة المفضلة",
+    "currencyBreakdown": "تفصيل العملات",
+    "allCurrencies": "جميع العملات",
+    "noCurrencies": "لا توجد أرصدة عملات مسجلة بعد."
+  },
+  "target": {
+    "title": "هدف الادخار",
+    "score": "معدل تحقيق الهدف",
+    "scoreHistory": "عرض سجل الأهداف",
+    "noTarget": "لم يتم تحديد هدف بعد",
+    "setTarget": "تحديد هدف",
+    "currentTarget": "الهدف: {amount} {currency}"
+  },
+  "quickActions": {
+    "title": "إجراءات سريعة",
+    "addIncome": "إضافة دخل",
+    "addIncomeDesc": "سجل أرباحك وعوائدك المالية",
+    "addExpense": "إضافة مصروف",
+    "addExpenseDesc": "تتبع نفقاتك وأدر ميزانيتك",
+    "viewTransactions": "عرض المعاملات",
+    "manageScheduled": "المعاملات المجدولة",
+    "wishlist": "قائمة الرغبات"
+  },
+  "recentTransactions": {
+    "title": "أحدث المعاملات",
+    "viewAll": "عرض الكل",
+    "empty": "لا توجد معاملات حديثة.",
+    "addFirst": "أضف أول معاملة لك للبدء."
+  }
+}

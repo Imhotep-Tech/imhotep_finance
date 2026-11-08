@@ -23,6 +23,7 @@ import { router } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslation } from '@/contexts/LanguageContext';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import api from '@/constants/api';
 import CurrencySelect from '@/components/CurrencySelect'; // Import CurrencySelect
@@ -72,6 +73,7 @@ const themes = {
 
 export default function ProfileScreen() {
   const { user, logout, updateUser, token } = useAuth();
+  const { t, language, setLanguage, supportedLanguages } = useTranslation();
   const colorScheme = useColorScheme();
   const backgroundColor = colorScheme === 'dark' ? '#0f172a' : '#f8fafc';
   const colors = themes[colorScheme === 'dark' ? 'dark' : 'light'];
@@ -432,9 +434,9 @@ export default function ProfileScreen() {
           showsVerticalScrollIndicator={false}
         >
           <ThemedView style={styles.header} lightColor="#f8fafc" darkColor="#0f172a">
-            <ThemedText type="title" style={styles.title}>My Profile</ThemedText>
+            <ThemedText type="title" style={styles.title}>{t('profile.title')}</ThemedText>
             <ThemedText style={[styles.subtitle, { color: colors.textSecondary }]}>
-              Manage your account and preferences
+              {t('profile.subtitle')}
             </ThemedText>
           </ThemedView>
 
@@ -458,7 +460,7 @@ export default function ProfileScreen() {
               onPress={() => { setActiveTab('profile'); setError(''); setSuccess(''); }}
             >
               <ThemedText style={[styles.tabText, activeTab === 'profile' && { color: colors.primary }]}>
-                Profile
+                {t('profile.sections.personal')}
               </ThemedText>
             </Pressable>
             <Pressable
@@ -469,7 +471,7 @@ export default function ProfileScreen() {
               onPress={() => { setActiveTab('security'); setError(''); setSuccess(''); }}
             >
               <ThemedText style={[styles.tabText, activeTab === 'security' && { color: colors.primary }]}>
-                Security
+                {t('profile.sections.security')}
               </ThemedText>
             </Pressable>
             <Pressable
@@ -480,7 +482,7 @@ export default function ProfileScreen() {
               onPress={() => { setActiveTab('financial'); setError(''); setSuccess(''); }}
             >
               <ThemedText style={[styles.tabText, activeTab === 'financial' && { color: colors.primary }]}>
-                Financial
+                {t('profile.fields.favoriteCurrency')}
               </ThemedText>
             </Pressable>
           </View>
@@ -553,6 +555,39 @@ export default function ProfileScreen() {
                 />
               </View>
 
+              {/* Language Selection Card */}
+              <View style={[styles.securityCard, { backgroundColor: colors.surface, borderColor: colors.border, marginTop: 8, marginBottom: 16 }]}>
+                <ThemedText style={[styles.securityTitle, { color: colors.text, marginBottom: 8 }]} type="defaultSemiBold">
+                  {t('profile.fields.language')}
+                </ThemedText>
+                <View style={{ flexDirection: 'row', gap: 12 }}>
+                  {Object.values(supportedLanguages).map((lang) => (
+                    <Pressable
+                      key={lang.code}
+                      onPress={() => setLanguage(lang.code)}
+                      style={{
+                        flex: 1,
+                        paddingVertical: 10,
+                        paddingHorizontal: 14,
+                        borderRadius: 12,
+                        backgroundColor: language === lang.code ? colors.primary : colors.surfaceActive,
+                        borderWidth: 1,
+                        borderColor: language === lang.code ? colors.primary : colors.border,
+                        alignItems: 'center',
+                      }}
+                    >
+                      <ThemedText style={{
+                        color: language === lang.code ? '#ffffff' : colors.text,
+                        fontWeight: '600',
+                        fontSize: 14,
+                      }}>
+                        {lang.flag} {lang.nativeName}
+                      </ThemedText>
+                    </Pressable>
+                  ))}
+                </View>
+              </View>
+
               <Pressable
                 style={[styles.primaryButton, { backgroundColor: colors.primary }, loading && styles.buttonDisabled]}
                 onPress={handleProfileSubmit}
@@ -561,7 +596,7 @@ export default function ProfileScreen() {
                 {loading ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
-                  <ThemedText style={styles.buttonText}>Update Profile</ThemedText>
+                  <ThemedText style={styles.buttonText}>{t('common.actions.update')}</ThemedText>
                 )}
               </Pressable>
 

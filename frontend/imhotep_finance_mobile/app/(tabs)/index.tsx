@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslation } from '@/contexts/LanguageContext';
 import NetWorthCard from '@/components/NetWorthCard';
 import AddTransactionModal from '@/components/AddTransactionModal';
 import UserGuideModal from '@/components/UserGuideModal';
@@ -31,6 +32,7 @@ import { updateNetworthWidget } from '@/widgets/widget-updater';
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   // ... existing state ...
   const [networth, setNetworth] = useState('0');
@@ -221,10 +223,10 @@ export default function Dashboard() {
             </View>
             <View>
               <Text style={[styles.brandName, { color: '#366c6b' }]}>Imhotep Finance</Text>
-              <Text style={[styles.brandSubtitle, themeStyles.subText]}>Manage your finances</Text>
+              <Text style={[styles.brandSubtitle, themeStyles.subText]}>{t('dashboard.tagline')}</Text>
             </View>
           </View>
-          <Text style={[styles.welcomeText, themeStyles.text]}>Welcome, {user?.first_name || user?.username}!</Text>
+          <Text style={[styles.welcomeText, themeStyles.text]}>{t('dashboard.welcome', { name: user?.first_name || user?.username || '' })}</Text>
         </View>
 
         {/* Net Worth */}
@@ -248,7 +250,7 @@ export default function Dashboard() {
               <Ionicons name="add-circle" size={32} color="#366c6b" />
             </View>
             <View>
-              <Text style={[styles.actionTitle, themeStyles.text]}>Deposit</Text>
+              <Text style={[styles.actionTitle, themeStyles.text]}>{t('dashboard.quickActions.addIncome')}</Text>
             </View>
           </TouchableOpacity>
 
@@ -263,7 +265,7 @@ export default function Dashboard() {
               <Ionicons name="remove-circle" size={32} color="#dc2626" />
             </View>
             <View>
-              <Text style={[styles.actionTitle, themeStyles.text]}>Withdraw</Text>
+              <Text style={[styles.actionTitle, themeStyles.text]}>{t('dashboard.quickActions.addExpense')}</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -318,20 +320,11 @@ export default function Dashboard() {
 
         {/* Quick Links Grid */}
         <View style={styles.linksGrid}>
-          <QuickLink icon="list" title="Transactions" subtitle="View All" color="blue" href="/show_trans" isDark={isDark} />
-          <QuickLink icon="calendar" title="Scheduled" subtitle="Recurring" color="indigo" href="/show_scheduled_trans" isDark={isDark} />
-          <QuickLink icon="pie-chart" title="Net Worth" subtitle="Details" color="purple" href="/show_networth_details" isDark={isDark} />
-          <QuickLink icon="bar-chart" title="Reports" subtitle="Analysis" color="emerald" href="/reports" isDark={isDark} />
-          <QuickLink icon="person" title="Manage Target" subtitle="Goals" color="green" href="/profile" isDark={isDark} />
-          {/* TEMP: Widget test entry (comment out before production release) */}
-          {/* <QuickLink
-            icon="bug"
-            title="Widget Test"
-            subtitle="Networth layout"
-            color="indigo"
-            href="/networth-widget-test"
-            isDark={isDark}
-          /> */}
+          <QuickLink icon="list" title={t('common.navigation.transactions')} subtitle={t('common.actions.all')} color="blue" href="/show_trans" isDark={isDark} />
+          <QuickLink icon="calendar" title={t('common.navigation.scheduled')} subtitle={t('scheduled.frequencies.monthly')} color="indigo" href="/show_scheduled_trans" isDark={isDark} />
+          <QuickLink icon="pie-chart" title={t('dashboard.netWorth.title')} subtitle={t('common.actions.details')} color="purple" href="/show_networth_details" isDark={isDark} />
+          <QuickLink icon="bar-chart" title={t('common.navigation.reports')} subtitle={t('reports.title')} color="emerald" href="/reports" isDark={isDark} />
+          <QuickLink icon="person" title={t('dashboard.target.title')} subtitle={t('dashboard.target.score')} color="green" href="/profile" isDark={isDark} />
         </View>
 
         <View style={{ height: insets.bottom + 100 }} />

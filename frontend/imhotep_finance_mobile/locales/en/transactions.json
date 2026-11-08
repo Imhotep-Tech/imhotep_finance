@@ -1,0 +1,57 @@
+{
+  "title": "Transactions",
+  "subtitle": "Track and manage your deposits, withdrawals, and spending history",
+  "addTransaction": "Add Transaction",
+  "editTransaction": "Edit Transaction",
+  "deleteTransaction": "Delete Transaction",
+  "deleteConfirm": "Are you sure you want to delete this transaction?",
+  "deleteSuccess": "Transaction deleted successfully.",
+  "saveSuccess": "Transaction saved successfully.",
+  "types": {
+    "all": "All Types",
+    "deposit": "Deposit",
+    "withdraw": "Withdraw",
+    "income": "Income",
+    "expense": "Expense"
+  },
+  "fields": {
+    "type": "Transaction Type",
+    "amount": "Amount",
+    "amountPlaceholder": "0.00",
+    "currency": "Currency",
+    "selectCurrency": "Select Currency",
+    "category": "Category",
+    "selectCategory": "Select Category",
+    "addNewCategory": "+ Add Category",
+    "place": "Place / Account",
+    "selectPlace": "Select Place",
+    "addNewPlace": "+ Add Place",
+    "date": "Date",
+    "description": "Description",
+    "descriptionPlaceholder": "e.g., Grocery shopping, Monthly salary"
+  },
+  "filters": {
+    "title": "Filters",
+    "search": "Search transactions...",
+    "category": "Category",
+    "currency": "Currency",
+    "place": "Place",
+    "status": "Type",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "reset": "Reset Filters"
+  },
+  "import": {
+    "title": "Import Transactions",
+    "instructions": "Upload a CSV file containing your transactions. Ensure columns match the required format.",
+    "selectFile": "Select CSV File",
+    "uploading": "Importing transactions...",
+    "success": "Import completed successfully!",
+    "downloadTemplate": "Download CSV Template"
+  },
+  "empty": {
+    "title": "No Transactions Found",
+    "description": "You haven't recorded any transactions matching your filters.",
+    "cta": "Add Transaction"
+  }
+}
