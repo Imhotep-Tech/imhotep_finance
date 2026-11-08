@@ -65,6 +65,46 @@ class CreateTransactionServiceTest(TestCase):
         networth_general = NetWorth.objects.get(user=self.user, currency='USD', place='General')
         self.assertEqual(float(networth_general.total), 50)
 
+    def test_create_transaction_category_lowercased(self):
+        """Test that category is converted to lowercase and trimmed when creating transaction"""
+        transaction = create_transaction(
+            user=self.user,
+            amount=100,
+            currency='USD',
+            trans_status='deposit',
+            category='  Groceries & FOOD  ',
+            trans_details='Weekly shopping',
+            transaction_date=date.today(),
+            place='General'
+        )
+        self.assertEqual(transaction.category, 'groceries & food')
+
+    def test_create_transaction_none_and_empty_category(self):
+        """Test creating transaction with None or empty category"""
+        t1 = create_transaction(
+            user=self.user,
+            amount=50,
+            currency='USD',
+            trans_status='deposit',
+            category=None,
+            trans_details='',
+            transaction_date=date.today(),
+            place='General'
+        )
+        self.assertIsNone(t1.category)
+
+        t2 = create_transaction(
+            user=self.user,
+            amount=50,
+            currency='USD',
+            trans_status='deposit',
+            category='   ',
+            trans_details='',
+            transaction_date=date.today(),
+            place='General'
+        )
+        self.assertEqual(t2.category, '')
+
 class DeleteTransactionServiceTest(TestCase):
 
     def setUp(self):
@@ -145,6 +185,21 @@ class UpdateTransactionServiceTest(TestCase):
         self.assertEqual(float(old_networth.total), 0)
         self.assertEqual(float(new_networth.total), 100)
 
+    def test_update_transaction_category_lowercased(self):
+        """Test that updating a transaction lowercases the category"""
+        updated = update_transaction(
+            user=self.user,
+            transaction_id=self.transaction.id,
+            amount=100,
+            currency='USD',
+            trans_status='deposit',
+            category='  New CATEGORY  ',
+            trans_details='Updated',
+            transaction_date=date.today(),
+            place='General'
+        )
+        self.assertEqual(updated.category, 'new category')
+
 class BulkImportTransactionsTest(TestCase):
 
     def setUp(self):
@@ -157,6 +212,16 @@ class BulkImportTransactionsTest(TestCase):
         self.assertEqual(created_count, 2)
         self.assertEqual(len(errors), 0)
         self.assertEqual(Transactions.objects.filter(user=self.user).count(), 2)
+
+    def test_bulk_import_lowercases_category(self):
+        """Test that bulk imported transactions have lowercased categories"""
+        transactions_data = [
+            {'date': '2024-01-15', 'amount': 100, 'currency': 'USD', 'trans_status': 'deposit', 'category': '  UPPERCASE Category  ', 'trans_details': ''}
+        ]
+        created_count, errors = bulk_import_transactions(user=self.user, transactions_data=transactions_data)
+        self.assertEqual(created_count, 1)
+        imported = Transactions.objects.filter(user=self.user).first()
+        self.assertEqual(imported.category, 'uppercase category')
 
     def test_bulk_import_with_errors(self):
         """Test bulk import with some invalid transactions"""

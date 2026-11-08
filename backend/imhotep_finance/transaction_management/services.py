@@ -43,6 +43,9 @@ def create_transaction(*,user, amount, currency, trans_details, category, trans_
     # Clean place to ensure consistent grouping
     place = place.strip().title() if place and str(place).strip() else 'General'
 
+    # Clean category to ensure lowercase consistency
+    category = str(category).strip().lower() if category is not None else None
+
     if trans_status.lower() == "withdraw":
         net_worth = NetWorth.objects.filter(user=user, currency=currency, place=place).first()
         current_balance = net_worth.total if net_worth else 0.00
@@ -145,6 +148,9 @@ def update_transaction(*, user, transaction_id, amount, currency, trans_details,
 
     # Enforce default place to prevent orphans and ensure consistent grouping
     place = place.strip().title() if place and str(place).strip() else 'General'
+
+    # Clean category to ensure lowercase consistency
+    category = str(category).strip().lower() if category is not None else None
 
     # Get the transaction
     trans_obj = get_object_or_404(Transactions, id=transaction_id, user=user)
@@ -298,6 +304,9 @@ def parse_csv_transactions(file) -> Tuple[List[Dict], List[str]]:
                 errors.append(f"Row {row_num}: Invalid trans_status '{trans_status_val}'. Must be 'deposit' or 'withdraw'.")
                 continue
             
+            raw_category = normalized_row.get('category', '')
+            category_val = raw_category.strip().lower() if raw_category else ''
+
             # Add to transactions data
             transactions_data.append({
                 'date': date_val,
@@ -305,7 +314,7 @@ def parse_csv_transactions(file) -> Tuple[List[Dict], List[str]]:
                 'currency': currency_val,
                 'trans_status': trans_status_lower,
                 'trans_details': normalized_row.get('trans_details', ''),
-                'category': normalized_row.get('category', ''),
+                'category': category_val,
                 'place': normalized_row.get('place', 'General'),
             })
     

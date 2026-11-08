@@ -32,7 +32,7 @@ class TransactionInputSerializer(serializers.Serializer):
         required=False,
         allow_blank=True,
         allow_null=True,
-        help_text="Transaction category (e.g., Food, Transport, Salary)"
+        help_text="Transaction category (automatically lowercased, e.g., food, transport, salary)"
     )
     trans_status = serializers.ChoiceField(
         choices=[
@@ -56,6 +56,12 @@ class TransactionInputSerializer(serializers.Serializer):
         """Ensure amount is positive."""
         if value <= 0:
             raise serializers.ValidationError("Amount must be greater than zero")
+        return value
+
+    def validate_category(self, value):
+        """Ensure category is saved in lowercase."""
+        if value is not None:
+            return value.strip().lower()
         return value
 
 class TransactionDeleteResponseSerializer(serializers.Serializer):
@@ -95,7 +101,7 @@ class TransactionUpdateSerializer(serializers.Serializer):
         required=False,
         allow_blank=True,
         allow_null=True,
-        help_text="Transaction category (e.g., Food, Transport, Salary)"
+        help_text="Transaction category (automatically lowercased, e.g., food, transport, salary)"
     )
     trans_status = serializers.ChoiceField(
         choices=[
@@ -119,6 +125,12 @@ class TransactionUpdateSerializer(serializers.Serializer):
         """Ensure amount is positive."""
         if value <= 0:
             raise serializers.ValidationError("Amount must be greater than zero")
+        return value
+
+    def validate_category(self, value):
+        """Ensure category is saved in lowercase."""
+        if value is not None:
+            return value.strip().lower()
         return value
 
 
@@ -145,7 +157,7 @@ class TransactionFilterSerializer(serializers.Serializer):
         required=False,
         allow_null=True,
         allow_blank=True,
-        help_text="Filter by category"
+        help_text="Filter by category (case-insensitive)"
     )
     place = serializers.CharField(
         required=False,
@@ -176,6 +188,12 @@ class TransactionFilterSerializer(serializers.Serializer):
         min_value=1,
         help_text="Page number for pagination"
     )
+
+    def validate_category(self, value):
+        """Ensure category filter is lowercase for case-insensitive search."""
+        if value is not None:
+            return value.strip().lower()
+        return value
 
 
 class TransactionOutputSerializer(serializers.Serializer):

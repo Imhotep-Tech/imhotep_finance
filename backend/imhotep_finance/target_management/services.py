@@ -78,7 +78,7 @@ def calculate_score(*, user, target_obj):
     score_deposit = [
         (amount, currency)
         for amount, currency, category in score_deposit_raw
-        if not (category and str(category).strip().title() in ['Transfer', 'Conversion'])
+        if not (category and str(category).strip().lower() in ['transfer', 'conversion'])
     ]
 
     score_withdraw_raw = Transactions.objects.filter(
@@ -90,7 +90,7 @@ def calculate_score(*, user, target_obj):
     score_withdraw = [
         (amount, currency)
         for amount, currency, category in score_withdraw_raw
-        if not (category and str(category).strip().title() in ['Transfer', 'Conversion'])
+        if not (category and str(category).strip().lower() in ['transfer', 'conversion'])
     ]
 
     # Aggregate deposits

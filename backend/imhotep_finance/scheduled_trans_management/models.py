@@ -34,6 +34,11 @@ class ScheduledTransaction(models.Model):
     status =  models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
+    def save(self, *args, **kwargs):
+        if self.category is not None:
+            self.category = str(self.category).strip().lower()
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"ScheduledTransaction of {self.user.username} ({self.date}) with amount {self.amount} and status {self.scheduled_trans_status}"
     

@@ -87,20 +87,31 @@ def get_monthly_report_for_user(*, user, month, year):
         except json.JSONDecodeError:
             raise ValidationError("Error parsing report data")
     
-    # Sort the data by percentage in descending order
+    # Normalize categories to lowercase, consolidate any duplicates, and sort by percentage descending
     if isinstance(report_data, dict):
-        if 'user_deposit_on_range' in report_data and isinstance(report_data['user_deposit_on_range'], list):
-            report_data['user_deposit_on_range'] = sorted(
-                report_data['user_deposit_on_range'],
-                key=lambda x: x.get('percentage', 0),
-                reverse=True
-            )
-        if 'user_withdraw_on_range' in report_data and isinstance(report_data['user_withdraw_on_range'], list):
-            report_data['user_withdraw_on_range'] = sorted(
-                report_data['user_withdraw_on_range'],
-                key=lambda x: x.get('percentage', 0),
-                reverse=True
-            )
+        for range_key in ['user_deposit_on_range', 'user_withdraw_on_range']:
+            if range_key in report_data and isinstance(report_data[range_key], list):
+                consolidated = {}
+                for item in report_data[range_key]:
+                    raw_cat = item.get('category', '')
+                    cat = raw_cat.strip().lower() if raw_cat and str(raw_cat).strip() else "uncategorized"
+                    amt = float(item.get('converted_amount', 0))
+                    consolidated[cat] = consolidated.get(cat, 0.0) + amt
+
+                total = report_data.get('total_deposit' if range_key == 'user_deposit_on_range' else 'total_withdraw', 0)
+                rebuilt = [
+                    {
+                        "category": cat,
+                        "converted_amount": amt,
+                        "percentage": round((amt / total) * 100, 1) if total > 0 else 0.0
+                    }
+                    for cat, amt in consolidated.items()
+                ]
+                report_data[range_key] = sorted(
+                    rebuilt,
+                    key=lambda x: x.get('percentage', 0),
+                    reverse=True
+                )
 
     return {
         "report_data": report_data,
@@ -171,13 +182,15 @@ def get_yearly_report_for_user(*, user, year=None):
         
         # Aggregate withdraw categories
         for item in data.get('user_withdraw_on_range', []):
-            category = item['category']
+            raw_category = item.get('category', '')
+            category = raw_category.strip().lower() if raw_category and str(raw_category).strip() else "uncategorized"
             amount = item['converted_amount']
             withdraw_categories[category] = withdraw_categories.get(category, 0) + amount
         
         # Aggregate deposit categories
         for item in data.get('user_deposit_on_range', []):
-            category = item['category']
+            raw_category = item.get('category', '')
+            category = raw_category.strip().lower() if raw_category and str(raw_category).strip() else "uncategorized"
             amount = item['converted_amount']
             deposit_categories[category] = deposit_categories.get(category, 0) + amount
             

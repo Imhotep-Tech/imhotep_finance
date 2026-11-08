@@ -32,10 +32,19 @@ class GetTransactionsForUserTest(TestCase):
         self.assertEqual(queryset.count(), 3)
 
     def test_get_transactions_filtered_by_category(self):
-        """Test filtering transactions by category"""
+        """Test filtering transactions by category (case-insensitive)"""
         queryset, _, _ = get_transactions_for_user(user=self.user, category='Food')
         self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset.first().category, 'Food')
+        self.assertEqual(queryset.first().category, 'food')
+
+        # Test with uppercase and mixed-case
+        queryset_upper, _, _ = get_transactions_for_user(user=self.user, category='FOOD')
+        self.assertEqual(queryset_upper.count(), 1)
+        self.assertEqual(queryset_upper.first().category, 'food')
+
+        queryset_lower, _, _ = get_transactions_for_user(user=self.user, category='food')
+        self.assertEqual(queryset_lower.count(), 1)
+        self.assertEqual(queryset_lower.first().category, 'food')
 
     def test_get_transactions_filtered_by_place(self):
         """Test filtering transactions by place"""

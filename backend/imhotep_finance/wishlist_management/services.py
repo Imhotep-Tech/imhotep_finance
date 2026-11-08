@@ -129,7 +129,7 @@ def update_wish_status(*, user, wish_id):
                 amount=amount,
                 currency=currency,
                 trans_details=wish_details,
-                category="Wishes",
+                category="wishes",
                 trans_status="Withdraw",
                 transaction_date=current_date,
                 place=wish.place

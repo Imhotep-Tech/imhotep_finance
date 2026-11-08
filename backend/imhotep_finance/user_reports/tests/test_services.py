@@ -39,6 +39,31 @@ class GetMonthlyReportTest(TestCase):
         self.assertEqual(result['month'], 1)
         self.assertEqual(result['year'], 2024)
         self.assertIn('report_data', result)
+        categories = [item['category'] for item in result['report_data']['user_deposit_on_range']]
+        self.assertEqual(categories, ['salary'])
+
+    def test_get_monthly_report_consolidates_mixed_case_categories(self):
+        """Test that get_monthly_report consolidates mixed case categories into lowercase"""
+        Reports.objects.create(
+            user=self.user,
+            month=5,
+            year=2024,
+            data=json.dumps({
+                'user_deposit_on_range': [
+                    {'category': 'Food', 'converted_amount': 200, 'percentage': 50},
+                    {'category': 'food', 'converted_amount': 200, 'percentage': 50}
+                ],
+                'user_withdraw_on_range': [],
+                'total_deposit': 400,
+                'total_withdraw': 0
+            })
+        )
+        result = get_monthly_report_for_user(user=self.user, month=5, year=2024)
+        items = result['report_data']['user_deposit_on_range']
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0]['category'], 'food')
+        self.assertEqual(items[0]['converted_amount'], 400.0)
+        self.assertEqual(items[0]['percentage'], 100.0)
 
     def test_get_monthly_report_not_found(self):
         """Test getting non-existent monthly report"""
@@ -123,10 +148,10 @@ class RecalculateAllReportsTest(TestCase):
         self.assertEqual(report_data['total_deposit'], 1000.0)
         self.assertEqual(report_data['total_withdraw'], 0.0)
         
-        # Breakdown should only have 'Salary'
+        # Breakdown should only have 'salary'
         categories_deposit = [item['category'] for item in report_data['user_deposit_on_range']]
-        self.assertIn('Salary', categories_deposit)
-        self.assertNotIn('Conversion', categories_deposit)
+        self.assertIn('salary', categories_deposit)
+        self.assertNotIn('conversion', categories_deposit)
         
         categories_withdraw = [item['category'] for item in report_data['user_withdraw_on_range']]
-        self.assertNotIn('Transfer', categories_withdraw)
+        self.assertNotIn('transfer', categories_withdraw)

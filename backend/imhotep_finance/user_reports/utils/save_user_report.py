@@ -67,8 +67,8 @@ def save_user_report_with_transaction(user, start_date, transaction, parent_func
 
     trans_status = transaction.trans_status.lower()
     amount = float(transaction.amount)
-    category = transaction.category or "Uncategorized"
-    if category.strip().title() in ["Transfer", "Conversion"]:
+    category = transaction.category.strip().lower() if transaction.category and str(transaction.category).strip() else "uncategorized"
+    if category in ["transfer", "conversion"]:
         return True, None
     currency = transaction.currency
 
@@ -122,7 +122,7 @@ def save_user_report_with_transaction(user, start_date, transaction, parent_func
             # Update or add category breakdown
             found = False
             for item in report_data.get("user_deposit_on_range", []):
-                if item["category"] == category:
+                if item["category"].strip().lower() == category:
                     item["converted_amount"] = item.get("converted_amount", 0) + amount
                     found = True
                     break
@@ -182,7 +182,7 @@ def save_user_report_with_transaction(user, start_date, transaction, parent_func
             # Update or add category breakdown
             found = False
             for item in report_data.get("user_withdraw_on_range", []):
-                if item["category"] == category:
+                if item["category"].strip().lower() == category:
                     item["converted_amount"] = item.get("converted_amount", 0) + amount
                     found = True
                     break

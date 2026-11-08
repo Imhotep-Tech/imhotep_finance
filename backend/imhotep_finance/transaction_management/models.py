@@ -26,6 +26,11 @@ class Transactions(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     is_deleted = models.BooleanField(default=False, db_index=True)
     
+    def save(self, *args, **kwargs):
+        if self.category is not None:
+            self.category = str(self.category).strip().lower()
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"Transaction of {self.user.username} ({self.date.strftime('%Y-%m-%d')}) with amount {self.amount} and Status of {self.trans_status}"
     

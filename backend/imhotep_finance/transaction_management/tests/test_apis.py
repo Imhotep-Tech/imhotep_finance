@@ -25,6 +25,8 @@ class TransactionCreateApiTest(TestCase):
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertIn('id', response.data)
+        transaction = Transactions.objects.get(id=response.data['id'])
+        self.assertEqual(transaction.category, 'salary')
         self.assertTrue(Transactions.objects.filter(user=self.user).exists())
 
     def test_create_transaction_unauthenticated(self):
@@ -57,6 +59,20 @@ class TransactionListApiTest(TestCase):
         self.assertIn('transactions', response.data)
         self.assertIn('pagination', response.data)
         self.assertEqual(len(response.data['transactions']), 5)
+
+    def test_filter_transactions_by_category_case_insensitive(self):
+        """Test filtering transactions by category is case-insensitive"""
+        create_transaction(user=self.user, amount=50, currency='USD', trans_status='deposit', category='Food', trans_details='', transaction_date=date.today(), place='General')
+        # Query with uppercase FOOD
+        res_upper = self.client.get(self.url, {'category': 'FOOD'})
+        self.assertEqual(res_upper.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res_upper.data['transactions']), 1)
+        self.assertEqual(res_upper.data['transactions'][0]['category'], 'food')
+
+        # Query with lowercase food
+        res_lower = self.client.get(self.url, {'category': 'food'})
+        self.assertEqual(res_lower.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res_lower.data['transactions']), 1)
 
     def test_list_transactions_with_filters(self):
         """Test listing transactions with filters"""
@@ -94,6 +110,7 @@ class TransactionUpdateApiTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.transaction.refresh_from_db()
         self.assertEqual(self.transaction.amount, Decimal('150.00'))
+        self.assertEqual(self.transaction.category, 'updated')
 
     def test_update_transaction_not_found(self):
         """Test updating non-existent transaction"""

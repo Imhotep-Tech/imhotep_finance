@@ -100,7 +100,7 @@ class UpdateWishStatusServiceTest(TestCase):
         transaction = Transactions.objects.get(id=updated_wish.transaction.id)
         self.assertEqual(float(transaction.amount), 200.0)
         self.assertEqual(transaction.trans_status.lower(), 'withdraw')
-        self.assertEqual(transaction.category, 'Wishes')
+        self.assertEqual(transaction.category, 'wishes')
         networth = NetWorth.objects.get(user=self.user, currency='USD')
         self.assertEqual(float(networth.total), 800.0)
 

@@ -18,7 +18,7 @@ class ScheduledTransactionIntegrationTest(TransactionTestCase):
         result = apply_scheduled_transactions(user=self.user)
         if date.today().day >= 1:
             self.assertGreater(result['applied_count'], 0)
-            transactions = Transactions.objects.filter(user=self.user, category='Salary')
+            transactions = Transactions.objects.filter(user=self.user, category='salary')
             if transactions.exists():
                 transaction = transactions.first()
                 self.assertEqual(float(transaction.amount), 1000)

@@ -52,9 +52,9 @@ def get_transactions_for_user(
             trans_category = trans.category or ""
             trans_details = trans.trans_details or ""
             
-            # Apply category filter
-            if category:
-                if trans_category != category:
+            # Apply category filter (case-insensitive)
+            if category and str(category).strip():
+                if trans_category.strip().lower() != str(category).strip().lower():
                     continue
             
             # Apply details_search filter

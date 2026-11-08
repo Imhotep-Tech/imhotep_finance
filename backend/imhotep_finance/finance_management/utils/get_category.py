@@ -14,5 +14,5 @@ def get_category(user, status="ANY"):
     qs = qs.exclude(category__isnull=True).exclude(category__exact="")
 
     # Grouping on an encrypted column is non-deterministic, so count in Python after decryption
-    category_list = [c for c in (tx.category for tx in qs.only("category")) if c and c.strip()]
+    category_list = [c.strip().lower() for c in (tx.category for tx in qs.only("category")) if c and c.strip()]
     return [category for category, _ in Counter(category_list).most_common()]

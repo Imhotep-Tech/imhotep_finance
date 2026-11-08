@@ -26,7 +26,7 @@ class CategoryResponseSerializer(serializers.Serializer):
     id = serializers.IntegerField(help_text="User ID")
     category = serializers.ListField(
         child=serializers.CharField(),
-        help_text="List of frequently used category names"
+        help_text="List of frequently used category names (in lowercase)"
     )
 
 class PlaceRequestSerializer(serializers.Serializer):
