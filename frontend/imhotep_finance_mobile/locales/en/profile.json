@@ -44,5 +44,11 @@
     "passwordChanged": "Password changed successfully.",
     "currencyUpdated": "Favorite currency updated.",
     "languageChanged": "Language preference saved."
-  }
+  },
+  "languagePreferences": "Language Preferences",
+  "languageSubtitle": "Choose your preferred language for the interface",
+  "availableLanguages": "Available Languages",
+  "active": "Active",
+  "switchLanguage": "Switch to {name}",
+  "backToDashboard": "Back to Dashboard"
 }

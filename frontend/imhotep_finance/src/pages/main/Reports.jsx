@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useTranslation } from '../../contexts/LanguageContext';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import Footer from '../../components/common/Footer';
@@ -8,6 +9,7 @@ import { Link } from 'react-router-dom';
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const Reports = () => {
+  const { t } = useTranslation();
   const [reportType, setReportType] = useState('monthly'); // 'monthly' or 'yearly'
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -329,13 +331,13 @@ const Reports = () => {
           <div className="flex flex-col gap-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold font-chef text-gray-800 dark:text-gray-100 mb-2">Financial Reports</h1>
+                <h1 className="text-3xl font-bold font-chef text-gray-800 dark:text-gray-100 mb-2">{t('reports.financialReportsTitle')}</h1>
                 <p className="text-lg text-gray-600 dark:text-gray-300 font-medium leading-relaxed mb-4">
                   {reportType === 'monthly' && selectedMonth 
-                    ? `Breakdown for ${formatMonthYear(...selectedMonth.split('-').map(Number))}`
+                    ? t('reports.breakdownFor', { period: formatMonthYear(...selectedMonth.split('-').map(Number)) })
                     : reportType === 'yearly' && selectedYear
-                    ? `Breakdown for ${selectedYear}`
-                    : 'Select a period to view reports'
+                    ? t('reports.breakdownFor', { period: selectedYear })
+                    : t('reports.selectPeriod')
                   }
                 </p>
               </div>
@@ -354,16 +356,16 @@ const Reports = () => {
                   {recalculateLoading ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin inline-block mr-2"></div>
-                      <span className="hidden sm:inline">Recalculating...</span>
-                      <span className="sm:hidden">Loading...</span>
+                      <span className="hidden sm:inline">{t('reports.recalculating')}</span>
+                      <span className="sm:hidden">{t('transactions.actions.loading')}</span>
                     </>
                   ) : (
                     <>
                       <svg className="w-4 h-4 sm:w-5 sm:h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
-                      <span className="hidden sm:inline">Recalculate Reports</span>
-                      <span className="sm:hidden">Recalculate</span>
+                      <span className="hidden sm:inline">{t('reports.recalculate')}</span>
+                      <span className="sm:hidden">{t('reports.recalculateShort')}</span>
                     </>
                   )}
                 </button>
@@ -372,8 +374,8 @@ const Reports = () => {
                   to="/dashboard"
                   className="chef-button bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white px-4 sm:px-6 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-center text-sm sm:text-base"
                 >
-                  <span className="hidden sm:inline">Back to Dashboard</span>
-                  <span className="sm:hidden">Back</span>
+                  <span className="hidden sm:inline">{t('reports.backToDashboard')}</span>
+                  <span className="sm:hidden">{t('reports.back')}</span>
                 </Link>
               </div>
             </div>
@@ -389,7 +391,7 @@ const Reports = () => {
                 }`}
               >
                 <span className="material-icons align-middle mr-2">category</span>
-                View by Category
+                {t('reports.viewByCategory')}
               </button>
               
               <button
@@ -401,7 +403,7 @@ const Reports = () => {
                 }`}
               >
                 <span className="material-icons align-middle mr-2">place</span>
-                View by Place
+                {t('reports.viewByPlace')}
               </button>
             </div>
 
@@ -415,8 +417,8 @@ const Reports = () => {
                     : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'
                 }`}
               >
-                <span className="hidden sm:inline">📅 Monthly Reports</span>
-                <span className="sm:hidden">📅 Monthly</span>
+                <span className="hidden sm:inline">{t('reports.monthlyReports')}</span>
+                <span className="sm:hidden">{t('reports.monthly')}</span>
               </button>
               
               <button
@@ -427,8 +429,8 @@ const Reports = () => {
                     : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'
                 }`}
               >
-                <span className="hidden sm:inline">📊 Yearly Reports</span>
-                <span className="sm:hidden">📊 Yearly</span>
+                <span className="hidden sm:inline">{t('reports.yearlyReports')}</span>
+                <span className="sm:hidden">{t('reports.yearly')}</span>
               </button>
             </div>
 
@@ -436,14 +438,14 @@ const Reports = () => {
             {reportType === 'monthly' && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Select Month & Year
+                  {t('reports.selectMonthYear')}
                 </label>
                 <select
                   value={selectedMonth}
                   onChange={(e) => setSelectedMonth(e.target.value)}
                   className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-[#366c6b] focus:border-transparent text-gray-900 dark:text-gray-100"
                 >
-                  <option value="">Select a month...</option>
+                  <option value="">{t('reports.selectMonthPlaceholder')}</option>
                   {historicalMonths.map((item, index) => (
                     <option key={index} value={`${item.month}-${item.year}`}>
                       {formatMonthYear(item.month, item.year)}
@@ -457,7 +459,7 @@ const Reports = () => {
             {reportType === 'yearly' && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Select Year
+                  {t('reports.selectYear')}
                 </label>
                 <select
                   value={selectedYear}
@@ -478,47 +480,47 @@ const Reports = () => {
         {/* Content based on report type */}
         {reportType === 'monthly' && !selectedMonth ? (
           <div className="chef-card rounded-xl p-8 text-center">
-            <div className="w-16 h-16 bg-[#eaf6f6] rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-[#366c6b]" fill="currentColor" viewBox="0 0 24 24">
+            <div className="w-16 h-16 bg-[#eaf6f6] dark:bg-teal-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-[#366c6b] dark:text-teal-400" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm0 16H5V8h14v11zm0-13H5V5h14v1z"/>
               </svg>
             </div>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Select a Month</h2>
-            <p className="text-gray-600 dark:text-gray-300">Choose a month and year from the dropdown above to view monthly reports.</p>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">{t('reports.selectMonthEmptyTitle')}</h2>
+            <p className="text-gray-600 dark:text-gray-300">{t('reports.selectMonthEmptyDesc')}</p>
           </div>
         ) : !getDisplayData() ? (
           <div className="chef-card rounded-xl p-8 text-center">
-            <div className="w-16 h-16 bg-[#eaf6f6] rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-[#366c6b]" fill="currentColor" viewBox="0 0 24 24">
+            <div className="w-16 h-16 bg-[#eaf6f6] dark:bg-teal-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-[#366c6b] dark:text-teal-400" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm0 16H5V8h14v11zm0-13H5V5h14v1z"/>
               </svg>
             </div>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Loading Report</h2>
-            <p className="text-gray-600 dark:text-gray-300">Please wait while we fetch your report data...</p>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">{t('reports.loadingReport')}</h2>
+            <p className="text-gray-600 dark:text-gray-300">{t('reports.loadingReportDesc')}</p>
           </div>
         ) : (
           <>
             {/* Totals Section */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="chef-card rounded-xl p-6 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500">
-                <h3 className="text-xl font-semibold text-red-600 dark:text-red-400 mb-4">Total Expenses</h3>
+                <h3 className="text-xl font-semibold text-red-600 dark:text-red-400 mb-4">{t('reports.totalExpenses')}</h3>
                 <p className="text-3xl font-bold text-red-800 dark:text-red-300">
                   {getDisplayData()?.total_withdraw?.toFixed(2) || '0.00'} {favoriteCurrency}
                 </p>
                 {reportType === 'yearly' && getDisplayData()?.months_included && (
                   <p className="text-sm text-red-600 dark:text-red-400 mt-2">
-                    Based on {getDisplayData().months_included} months of data
+                    {t('reports.basedOnMonths', { count: getDisplayData().months_included })}
                   </p>
                 )}
               </div>
               <div className="chef-card rounded-xl p-6 bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500">
-                <h3 className="text-xl font-semibold text-green-600 dark:text-green-400 mb-4">Total Income</h3>
+                <h3 className="text-xl font-semibold text-green-600 dark:text-green-400 mb-4">{t('reports.totalIncome')}</h3>
                 <p className="text-3xl font-bold text-green-800 dark:text-green-300">
                   {getDisplayData()?.total_deposit?.toFixed(2) || '0.00'} {favoriteCurrency}
                 </p>
                 {reportType === 'yearly' && getDisplayData()?.months_included && (
                   <p className="text-sm text-green-600 dark:text-green-400 mt-2">
-                    Based on {getDisplayData().months_included} months of data
+                    {t('reports.basedOnMonths', { count: getDisplayData().months_included })}
                   </p>
                 )}
               </div>
@@ -531,25 +533,25 @@ const Reports = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   {/* Expense Chart */}
                   <div className="chef-card rounded-xl p-6 shadow-lg border-l-4 border-red-500">
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">Expense Breakdown</h3>
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">{t('reports.expenseBreakdown')}</h3>
                     {getDisplayData()?.user_withdraw_on_range?.length ? (
                       <div className="relative h-80">
                         <Pie data={expenseChartData} options={chartOptions} />
                       </div>
                     ) : (
-                      <p className="text-gray-500 dark:text-gray-400 text-center">No expense data available.</p>
+                      <p className="text-gray-500 dark:text-gray-400 text-center">{t('reports.noExpenseData')}</p>
                     )}
                   </div>
 
                   {/* Income Chart */}
                   <div className="chef-card rounded-xl p-6 shadow-lg border-l-4 border-green-500">
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">Income Breakdown</h3>
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">{t('reports.incomeBreakdown')}</h3>
                     {getDisplayData()?.user_deposit_on_range?.length ? (
                       <div className="relative h-80">
                         <Pie data={incomeChartData} options={chartOptions} />
                       </div>
                     ) : (
-                      <p className="text-gray-500 dark:text-gray-400 text-center">No income data available.</p>
+                      <p className="text-gray-500 dark:text-gray-400 text-center">{t('reports.noIncomeData')}</p>
                     )}
                   </div>
                 </div>
@@ -558,7 +560,7 @@ const Reports = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
                   {/* Expense Details */}
                   <div className="chef-card rounded-xl p-6">
-                    <h3 className="text-lg font-semibold text-red-600 dark:text-red-400 mb-4">Expense Details</h3>
+                    <h3 className="text-lg font-semibold text-red-600 dark:text-red-400 mb-4">{t('reports.expenseDetails')}</h3>
                     {getDisplayData()?.user_withdraw_on_range?.map((item, index) => (
                       <div key={index} className="flex justify-between py-2 border-b border-[var(--border)]">
                         <span>{item.category}</span>
@@ -566,12 +568,12 @@ const Reports = () => {
                           {item.converted_amount.toFixed(2)} {favoriteCurrency} ({item.percentage}%)
                         </span>
                       </div>
-                    )) || <p className="text-gray-500 dark:text-gray-400">No details available.</p>}
+                    )) || <p className="text-gray-500 dark:text-gray-400">{t('reports.noDetails')}</p>}
                   </div>
 
                   {/* Income Details */}
                   <div className="chef-card rounded-xl p-6">
-                    <h3 className="text-lg font-semibold text-green-600 dark:text-green-400 mb-4">Income Details</h3>
+                    <h3 className="text-lg font-semibold text-green-600 dark:text-green-400 mb-4">{t('reports.incomeDetails')}</h3>
                     {getDisplayData()?.user_deposit_on_range?.map((item, index) => (
                       <div key={index} className="flex justify-between py-2 border-b border-[var(--border)]">
                         <span>{item.category}</span>
@@ -579,7 +581,7 @@ const Reports = () => {
                           {item.converted_amount.toFixed(2)} {favoriteCurrency} ({item.percentage}%)
                         </span>
                       </div>
-                    )) || <p className="text-gray-500 dark:text-gray-400">No details available.</p>}
+                    )) || <p className="text-gray-500 dark:text-gray-400">{t('reports.noDetails')}</p>}
                   </div>
                 </div>
               </>
@@ -592,25 +594,25 @@ const Reports = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
                   {/* Expense Place Chart */}
                   <div className="chef-card rounded-xl p-6 shadow-lg border-l-4 border-orange-500">
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">Expense By Place</h3>
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">{t('reports.expenseByPlace')}</h3>
                     {getDisplayData()?.user_withdraw_by_place?.length ? (
                       <div className="relative h-80">
                         <Pie data={expensePlaceChartData} options={chartOptions} />
                       </div>
                     ) : (
-                      <p className="text-gray-500 dark:text-gray-400 text-center">No expense data available.</p>
+                      <p className="text-gray-500 dark:text-gray-400 text-center">{t('reports.noExpenseData')}</p>
                     )}
                   </div>
 
                   {/* Income Place Chart */}
                   <div className="chef-card rounded-xl p-6 shadow-lg border-l-4 border-teal-500">
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">Income By Place</h3>
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">{t('reports.incomeByPlace')}</h3>
                     {getDisplayData()?.user_deposit_by_place?.length ? (
                       <div className="relative h-80">
                         <Pie data={incomePlaceChartData} options={chartOptions} />
                       </div>
                     ) : (
-                      <p className="text-gray-500 dark:text-gray-400 text-center">No income data available.</p>
+                      <p className="text-gray-500 dark:text-gray-400 text-center">{t('reports.noIncomeData')}</p>
                     )}
                   </div>
                 </div>
@@ -619,7 +621,7 @@ const Reports = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
                   {/* Expense Details by Place */}
                   <div className="chef-card rounded-xl p-6">
-                    <h3 className="text-lg font-semibold text-orange-600 dark:text-orange-400 mb-4">Expense Place Details</h3>
+                    <h3 className="text-lg font-semibold text-orange-600 dark:text-orange-400 mb-4">{t('reports.expensePlaceDetails')}</h3>
                     {getDisplayData()?.user_withdraw_by_place?.map((item, index) => (
                       <div key={index} className="flex justify-between py-2 border-b border-[var(--border)]">
                         <span>{item.place}</span>
@@ -627,12 +629,12 @@ const Reports = () => {
                           {item.converted_amount.toFixed(2)} {favoriteCurrency} ({item.percentage}%)
                         </span>
                       </div>
-                    )) || <p className="text-gray-500 dark:text-gray-400">No details available.</p>}
+                    )) || <p className="text-gray-500 dark:text-gray-400">{t('reports.noDetails')}</p>}
                   </div>
 
                   {/* Income Details by Place */}
                   <div className="chef-card rounded-xl p-6">
-                    <h3 className="text-lg font-semibold text-teal-600 dark:text-teal-400 mb-4">Income Place Details</h3>
+                    <h3 className="text-lg font-semibold text-teal-600 dark:text-teal-400 mb-4">{t('reports.incomePlaceDetails')}</h3>
                     {getDisplayData()?.user_deposit_by_place?.map((item, index) => (
                       <div key={index} className="flex justify-between py-2 border-b border-[var(--border)]">
                         <span>{item.place}</span>
@@ -640,14 +642,14 @@ const Reports = () => {
                           {item.converted_amount.toFixed(2)} {favoriteCurrency} ({item.percentage}%)
                         </span>
                       </div>
-                    )) || <p className="text-gray-500 dark:text-gray-400">No details available.</p>}
+                    )) || <p className="text-gray-500 dark:text-gray-400">{t('reports.noDetails')}</p>}
                   </div>
                 </div>
 
                 {/* Current Wealth Distribution by Place */}
                 <div className="mt-8 mb-8">
                   <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100 flex items-center gap-3">
-                    Current Wealth By Place
+                    {t('reports.currentWealthByPlace')}
                   </h2>
                   {netWorthLoading ? (
                     <div className="flex justify-center p-12">
@@ -658,7 +660,7 @@ const Reports = () => {
                       {/* Chart visualization */}
                       <div className="chef-card rounded-xl p-6 shadow-lg border-l-4 border-[#366c6b]">
                         <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
-                           Wealth Distribution
+                           {t('reports.wealthDistribution')}
                         </h3>
                         <div className="relative h-80">
                           <Pie data={netWorthPlaceChartData} options={chartOptions} />
@@ -669,7 +671,7 @@ const Reports = () => {
                       <div className="chef-card rounded-xl p-6 shadow-lg border-l-4 border-gray-500">
                         <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
                            <span className="material-icons text-gray-500">list</span>
-                           Wealth Details
+                           {t('reports.wealthDetails')}
                         </h3>
                         <div className="flex flex-col gap-4">
                           {netWorthByPlace.map((item, index) => (
@@ -696,7 +698,7 @@ const Reports = () => {
                   ) : (
                     <div className="chef-card p-8 rounded-2xl text-center">
                       <span className="material-icons text-5xl text-gray-400 dark:text-gray-600 mb-3">money_off</span>
-                      <p className="text-gray-500 dark:text-gray-400 font-medium">No wealth data available by place.</p>
+                      <p className="text-gray-500 dark:text-gray-400 font-medium">{t('reports.noWealthData')}</p>
                     </div>
                   )}
                 </div>

@@ -130,6 +130,22 @@ t('dashboard.welcome', { name: 'Alex' }); // Output: "Welcome, Alex!"
 
 ---
 
+## 🎛️ Language Switcher Placement Rules (Web & Mobile)
+
+To ensure a clean, uncluttered user experience, the language selection controls follow strict placement rules:
+
+1. **Before Login (Unauthenticated)**:
+   - A dropdown menu is positioned prominently at the top right of the screen (Web) or top of the authentication card (Mobile).
+   - Available on: Landing page, Login, Register, Forgot Password, Reset Password, and OTP Verification screens.
+   - When opened, it reveals a list of all currently supported languages (`Object.values(supportedLanguages)`), allowing one-click language switching.
+
+2. **Once Logged In (Authenticated)**:
+   - The top navigation bar (`Navbar.jsx` on Web, Tab bar/Header on Mobile) **does not** display a language toggle.
+   - Language preferences are **only accessible from the Profile page** (`/profile` on Web, `app/(tabs)/profile.tsx` on Mobile).
+   - On the Profile page, language selection is rendered as a clean list/card displaying all available languages dynamically from `supportedLanguages`, with native names, flags, language codes, and active indicators.
+
+---
+
 ## 🚀 How to Add a New Language in 3 Steps
 
 Adding a new language (for example, French `fr` or Spanish `es`) requires zero changes to application pages or UI components.

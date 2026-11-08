@@ -31,6 +31,25 @@
     "manageScheduled": "Scheduled Trans",
     "wishlist": "Wishlist Goals"
   },
+  "quickLinks": {
+    "transactions": "Transactions",
+    "viewAll": "View All",
+    "scheduled": "Scheduled",
+    "recurring": "Recurring",
+    "netWorth": "Net Worth",
+    "details": "Details",
+    "reports": "Reports",
+    "monthlyAndYearly": "Monthly & Yearly",
+    "manageTarget": "Manage Target",
+    "goals": "Goals"
+  },
+  "gettingStarted": {
+    "title": "Get Started with Your Financial Journey",
+    "subtitle": "Start tracking your finances by adding your first transaction or setting a monthly target.",
+    "addIncome": "Add Income",
+    "addExpense": "Add Expense",
+    "setTarget": "Set Target"
+  },
   "recentTransactions": {
     "title": "Recent Transactions",
     "viewAll": "View All",

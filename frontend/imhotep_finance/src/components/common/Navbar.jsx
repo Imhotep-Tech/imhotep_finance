@@ -5,7 +5,6 @@ import { Link, useLocation } from 'react-router-dom';
 import Logo from '../../assets/Logo.jpeg';
 import axios from 'axios';
 import ThemeToggle from './ThemeToggle';
-import LanguageToggle from './LanguageToggle';
 
 const Navbar = ({ onToggle }) => {
   const { user, logout } = useAuth();
@@ -84,9 +83,8 @@ const Navbar = ({ onToggle }) => {
         </svg>
       </button>
 
-      {/* Theme and Language toggles - top right */}
+      {/* Theme toggle - top right */}
       <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
-        <LanguageToggle />
         <ThemeToggle />
       </div>
 

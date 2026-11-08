@@ -1,25 +1,64 @@
 {
   "title": "التقارير والتحليلات",
-  "subtitle": "رؤية بصرية لعادات الإنفاق، مصادر الدخل، والاتجاهات المالية",
-  "monthlyReport": "التقرير الشهري",
-  "annualReport": "التقرير السنوي",
+  "subtitle": "تصور عادات الإنفاق ومصادر الدخل والاتجاهات المالية",
+  "financialReportsTitle": "التقارير المالية",
+  "selectPeriod": "اختر فترة لعرض التقارير",
+  "breakdownFor": "تفاصيل فترة {period}",
+  "backToDashboard": "العودة إلى لوحة التحكم",
+  "back": "رجوع",
+  "recalculate": "إعادة احتساب التقارير",
+  "recalculateShort": "إعادة احتساب",
+  "recalculating": "جارٍ الحساب...",
+  "viewByCategory": "عرض حسب الفئة",
+  "viewByPlace": "عرض حسب المكان",
+  "monthlyReports": "📅 تقارير شهرية",
+  "monthly": "📅 شهري",
+  "yearlyReports": "📊 تقارير سنوية",
+  "yearly": "📊 سنوي",
+  "selectMonthYear": "اختر الشهر والسنة",
+  "selectMonthPlaceholder": "اختر شهراً...",
+  "selectYear": "اختر السنة",
+  "selectMonthEmptyTitle": "اختر شهراً",
+  "selectMonthEmptyDesc": "اختر شهراً وسنة من القائمة المنسدلة أعلاه لعرض التقارير الشهرية.",
+  "loadingReport": "جارٍ تحميل التقرير",
+  "loadingReportDesc": "يرجى الانتظار بينما نقوم بجلب بيانات التقرير...",
+  "totalExpenses": "إجمالي المصروفات",
+  "totalIncome": "إجمالي الدخل",
+  "basedOnMonths": "بناءً على بيانات {count} أشهر",
+  "expenseBreakdown": "تفاصيل المصروفات",
+  "incomeBreakdown": "تفاصيل الدخل",
+  "expenseDetails": "تفاصيل بنود المصروفات",
+  "incomeDetails": "تفاصيل بنود الدخل",
+  "expenseByPlace": "المصروفات حسب المكان",
+  "incomeByPlace": "الدخل حسب المكان",
+  "expensePlaceDetails": "تفاصيل المصروفات حسب المكان",
+  "incomePlaceDetails": "تفاصيل الدخل حسب المكان",
+  "currentWealthByPlace": "توزيع الثروة الحالي حسب المكان",
+  "wealthDistribution": "توزيع الثروة",
+  "wealthDetails": "تفاصيل الثروة",
+  "noExpenseData": "لا توجد بيانات مصروفات متاحة.",
+  "noIncomeData": "لا توجد بيانات دخل متاحة.",
+  "noDetails": "لا توجد تفاصيل متاحة.",
+  "noWealthData": "لا توجد بيانات ثروة متاحة حسب المكان.",
+  "monthlyReport": "تقرير شهري",
+  "annualReport": "تقرير سنوي",
   "metrics": {
     "totalIncome": "إجمالي الدخل",
     "totalExpenses": "إجمالي المصروفات",
-    "netSavings": "صافي الادخار",
+    "netSavings": "صافي المدخرات",
     "savingsRate": "معدل الادخار"
   },
   "charts": {
     "incomeVsExpense": "الدخل مقابل المصروفات",
-    "categoryBreakdown": "توزيع الإنفاق حسب الفئة",
-    "monthlyTrends": "الاتجاه الشهري عبر الزمن",
+    "categoryBreakdown": "الإنفاق حسب الفئة",
+    "monthlyTrends": "الاتجاه الشهري عبر الوقت",
     "placeBreakdown": "الإنفاق حسب المكان"
   },
   "export": {
     "title": "تصدير التقارير",
-    "pdf": "تصدير كـ PDF",
-    "csv": "تصدير كـ CSV",
-    "generating": "جاري تجهيز التقرير..."
+    "pdf": "تصدير كملف PDF",
+    "csv": "تصدير كملف CSV",
+    "generating": "جارٍ إنشاء التقرير..."
   },
   "selectors": {
     "selectMonth": "اختر الشهر",
@@ -28,6 +67,6 @@
   },
   "empty": {
     "title": "لا توجد بيانات للتقرير",
-    "description": "لم يتم العثور على معاملات خلال الفترة المحددة لتوليد تقرير تحليلي."
+    "description": "لم يتم العثور على أي معاملات في الفترة المحددة لإنشاء تقرير تحليلي."
   }
 }

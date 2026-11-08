@@ -279,8 +279,8 @@ const Dashboard = () => {
               <div className="w-12 h-12 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center mx-auto mb-3">
                 <svg className="w-6 h-6 text-blue-600 dark:text-blue-300" fill="currentColor" viewBox="0 0 24 24"><path d="M3 13h2v7H3zM7 9h2v11H7zM11 5h2v15h-2zM15 11h2v9h-2zM19 7h2v13h-2z"/></svg>
               </div>
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100">Transactions</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">View All</p>
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100">{t('dashboard.quickLinks.transactions')}</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{t('dashboard.quickLinks.viewAll')}</p>
             </div>
           </a>
           <a href="/show_scheduled_trans" className="metric-card rounded-xl p-6 hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
@@ -288,8 +288,8 @@ const Dashboard = () => {
               <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-800 rounded-full flex items-center justify-center mx-auto mb-3">
                 <svg className="w-6 h-6 text-indigo-600 dark:text-indigo-300" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm0 16H5V8h14v11zm0-13H5V5h14v1z"/></svg>
               </div>
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100">Scheduled</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">Recurring</p>
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100">{t('dashboard.quickLinks.scheduled')}</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{t('dashboard.quickLinks.recurring')}</p>
             </div>
           </a>
           <a href="/show_networth_details" className="metric-card rounded-xl p-6 hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
@@ -297,8 +297,8 @@ const Dashboard = () => {
               <div className="w-12 h-12 bg-purple-100 dark:bg-purple-800 rounded-full flex items-center justify-center mx-auto mb-3">
                 <svg className="w-6 h-6 text-purple-600 dark:text-purple-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l1.5 4.5h4.5l-3.75 2.75L15 14l-3-2.25L9 14l1.75-4.75L7 6.5h4.5z"/></svg>
               </div>
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100">Net Worth</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">Details</p>
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100">{t('dashboard.quickLinks.netWorth')}</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{t('dashboard.quickLinks.details')}</p>
             </div>
           </a>
           <a href="/reports" className="metric-card rounded-xl p-6 hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
@@ -308,44 +308,44 @@ const Dashboard = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
               </div>
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100">Reports</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">Monthly & Yearly</p>
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100">{t('dashboard.quickLinks.reports')}</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{t('dashboard.quickLinks.monthlyAndYearly')}</p>
             </div>
           </a>
-          <a href="/profile"  className="metric-card rounded-xl p-6 hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
+          <a href="/profile" className="metric-card rounded-xl p-6 hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
             <div className="text-center">
               <div className="w-12 h-12 bg-green-100 dark:bg-blue-800 rounded-full flex items-center justify-center mx-auto mb-3">
                 <svg className="w-6 h-6 text-green-600 dark:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </div>
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100">Manage Target</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">Goals</p>
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100">{t('dashboard.quickLinks.manageTarget')}</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{t('dashboard.quickLinks.goals')}</p>
             </div>
           </a>
         </div>
 
         {/* Getting Started Section (if no target set) */}
         {!scoreTxt && (
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-8">
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 p-8">
             <div className="text-center">
-              <div className="w-16 h-16 bg-[#eaf6f6] rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-[#366c6b]" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l1.5 4.5h4.5l-3.75 2.75L15 14l-3-2.25L9 14l1.75-4.75L7 6.5h4.5z"/></svg>
+              <div className="w-16 h-16 bg-[#eaf6f6] dark:bg-teal-900/40 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-[#366c6b] dark:text-teal-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l1.5 4.5h4.5l-3.75 2.75L15 14l-3-2.25L9 14l1.75-4.75L7 6.5h4.5z"/></svg>
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Get Started with Your Financial Journey</h2>
-              <p className="text-gray-600 mb-6">Start tracking your finances by adding your first transaction or setting a monthly target.</p>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">{t('dashboard.gettingStarted.title')}</h2>
+              <p className="text-gray-600 dark:text-gray-300 mb-6">{t('dashboard.gettingStarted.subtitle')}</p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto">
-                <button onClick={() => setShowAddModal(true)} className="flex flex-col items-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
-                  <svg className="w-6 h-6 text-green-600 mb-2" fill="currentColor" viewBox="0 0 24 24"><path d="M12 5v14m7-7H5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                  <span className="font-medium text-green-700">Add Income</span>
+                <button onClick={() => setShowAddModal(true)} className="flex flex-col items-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors">
+                  <svg className="w-6 h-6 text-green-600 dark:text-green-400 mb-2" fill="currentColor" viewBox="0 0 24 24"><path d="M12 5v14m7-7H5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  <span className="font-medium text-green-700 dark:text-green-300">{t('dashboard.gettingStarted.addIncome')}</span>
                 </button>
-                <button onClick={() => setShowAddModal(true)} className="flex flex-col items-center p-4 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">
-                  <svg className="w-6 h-6 text-red-600 mb-2" fill="currentColor" viewBox="0 0 24 24"><path d="M12 5v14m-7-7h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                  <span className="font-medium text-red-700">Add Expense</span>
+                <button onClick={() => setShowAddModal(true)} className="flex flex-col items-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors">
+                  <svg className="w-6 h-6 text-red-600 dark:text-red-400 mb-2" fill="currentColor" viewBox="0 0 24 24"><path d="M12 5v14m-7-7h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  <span className="font-medium text-red-700 dark:text-red-300">{t('dashboard.gettingStarted.addExpense')}</span>
                 </button>
-                <a href="/profile" className="flex flex-col items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors">
-                  <svg className="w-6 h-6 text-purple-600 mb-2" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
-                  <span className="font-medium text-purple-700">Set Target</span>
+                <a href="/profile" className="flex flex-col items-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors">
+                  <svg className="w-6 h-6 text-purple-600 dark:text-purple-400 mb-2" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
+                  <span className="font-medium text-purple-700 dark:text-purple-300">{t('dashboard.gettingStarted.setTarget')}</span>
                 </a>
               </div>
             </div>

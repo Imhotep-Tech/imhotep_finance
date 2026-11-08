@@ -557,34 +557,52 @@ export default function ProfileScreen() {
 
               {/* Language Selection Card */}
               <View style={[styles.securityCard, { backgroundColor: colors.surface, borderColor: colors.border, marginTop: 8, marginBottom: 16 }]}>
-                <ThemedText style={[styles.securityTitle, { color: colors.text, marginBottom: 8 }]} type="defaultSemiBold">
-                  {t('profile.fields.language')}
+                <ThemedText style={[styles.securityTitle, { color: colors.text, marginBottom: 4 }]} type="defaultSemiBold">
+                  {t('profile.languagePreferences')}
                 </ThemedText>
-                <View style={{ flexDirection: 'row', gap: 12 }}>
-                  {Object.values(supportedLanguages).map((lang) => (
-                    <Pressable
-                      key={lang.code}
-                      onPress={() => setLanguage(lang.code)}
-                      style={{
-                        flex: 1,
-                        paddingVertical: 10,
-                        paddingHorizontal: 14,
-                        borderRadius: 12,
-                        backgroundColor: language === lang.code ? colors.primary : colors.surfaceActive,
-                        borderWidth: 1,
-                        borderColor: language === lang.code ? colors.primary : colors.border,
-                        alignItems: 'center',
-                      }}
-                    >
-                      <ThemedText style={{
-                        color: language === lang.code ? '#ffffff' : colors.text,
-                        fontWeight: '600',
-                        fontSize: 14,
-                      }}>
-                        {lang.flag} {lang.nativeName}
-                      </ThemedText>
-                    </Pressable>
-                  ))}
+                <ThemedText style={{ color: colors.textSecondary, fontSize: 13, marginBottom: 12 }}>
+                  {t('profile.languageSubtitle')}
+                </ThemedText>
+                <View style={{ gap: 8 }}>
+                  {Object.values(supportedLanguages).map((lang) => {
+                    const isSelected = language === lang.code;
+                    return (
+                      <Pressable
+                        key={lang.code}
+                        onPress={() => setLanguage(lang.code)}
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          paddingVertical: 12,
+                          paddingHorizontal: 16,
+                          borderRadius: 14,
+                          backgroundColor: isSelected ? colors.primaryLight : colors.surfaceActive,
+                          borderWidth: 1.5,
+                          borderColor: isSelected ? colors.primary : colors.border,
+                        }}
+                      >
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                          <ThemedText style={{ fontSize: 22 }}>{lang.flag}</ThemedText>
+                          <View>
+                            <ThemedText style={{
+                              color: isSelected ? colors.primary : colors.text,
+                              fontWeight: isSelected ? '700' : '600',
+                              fontSize: 15,
+                            }}>
+                              {lang.nativeName}
+                            </ThemedText>
+                            <ThemedText style={{ color: colors.textSecondary, fontSize: 12, marginTop: 1 }}>
+                              {lang.name} ({lang.code.toUpperCase()})
+                            </ThemedText>
+                          </View>
+                        </View>
+                        {isSelected && (
+                          <Ionicons name="checkmark-circle" size={20} color={colors.primary} />
+                        )}
+                      </Pressable>
+                    );
+                  })}
                 </View>
               </View>
 

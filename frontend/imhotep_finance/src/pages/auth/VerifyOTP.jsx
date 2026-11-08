@@ -3,6 +3,7 @@ import { useLocation, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import Footer from '../../components/common/Footer';
 import Logo from '../../assets/Logo.jpeg';
+import LanguageToggle from '../../components/common/LanguageToggle';
 
 const VerifyOTP = () => {
     const location = useLocation();
@@ -71,7 +72,11 @@ const VerifyOTP = () => {
                     <div className="absolute bottom-20 left-40 w-40 h-40 rounded-full filter blur-xl opacity-16 animate-float bg-[#2f7775] dark:bg-cyan-700/30 dark:mix-blend-screen" style={{ animationDelay: '4s' }}></div>
                 </div>
 
-                <div className="flex items-center justify-center min-h-screen p-4">
+                {/* Top right language switch */}
+            <div className="fixed top-4 right-4 z-50">
+                <LanguageToggle />
+            </div>
+            <div className="flex items-center justify-center min-h-screen p-4">
                     <div className="relative w-full max-w-md">
                         <div className="chef-card rounded-3xl p-8 shadow-2xl backdrop-blur-2xl text-center">
                             <div className="inline-flex items-center justify-center w-20 h-20 bg-[#366c6b] rounded-full mb-6 shadow-lg animate-pulse-slow">
@@ -101,6 +106,10 @@ const VerifyOTP = () => {
                 <div className="absolute bottom-20 left-40 w-40 h-40 rounded-full filter blur-xl opacity-16 animate-float bg-[#2f7775] dark:bg-cyan-700/30 dark:mix-blend-screen" style={{ animationDelay: '4s' }}></div>
             </div>
 
+            {/* Top right language switch */}
+            <div className="fixed top-4 right-4 z-50">
+                <LanguageToggle />
+            </div>
             <div className="flex items-center justify-center min-h-screen p-4">
                 <div className="relative w-full max-w-md">
                     {/* Main Card */}

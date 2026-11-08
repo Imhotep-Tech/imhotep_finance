@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import Logo from '../../assets/Logo.jpeg';
+import LanguageToggle from '../../components/common/LanguageToggle';
 
 const EmailVerification = () => {
   const { uid, token } = useParams();
@@ -255,7 +256,10 @@ const EmailVerification = () => {
       className={`min-h-screen bg-chef-pattern flex items-center justify-center p-4`}
       style={getBackgroundStyle(status)}
     >
-      {/* Floating decorative elements */}
+      {/* Top right language switch */}
+      <div className="fixed top-4 right-4 z-50">
+        <LanguageToggle />
+      </div>
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {getFloatingElements(status)}
       </div>

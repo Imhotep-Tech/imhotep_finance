@@ -21,6 +21,7 @@ import * as Linking from 'expo-linking';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from '@/contexts/LanguageContext';
+import LanguageDropdown from '@/components/LanguageDropdown';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const themes = {
@@ -251,25 +252,9 @@ export default function LoginScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={[styles.card, { backgroundColor: colors.card }]}>
-          {/* Language Toggle in Auth */}
+          {/* Language Dropdown in Auth */}
           <View style={{ alignItems: 'flex-end', marginBottom: 4 }}>
-            <TouchableOpacity
-              onPress={() => setLanguage(language === 'en' ? 'ar' : 'en')}
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 6,
-                paddingHorizontal: 12,
-                paddingVertical: 6,
-                borderRadius: 16,
-                backgroundColor: colors.primaryLight,
-              }}
-            >
-              <Text style={{ fontSize: 13 }}>🌐</Text>
-              <Text style={{ fontSize: 12, fontWeight: '600', color: colors.primary }}>
-                {language === 'en' ? 'العربية' : 'English'}
-              </Text>
-            </TouchableOpacity>
+            <LanguageDropdown align="right" />
           </View>
 
           {/* Logo */}

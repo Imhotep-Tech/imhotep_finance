@@ -1,40 +1,59 @@
 {
-  "welcome": "مرحباً، {name}!",
-  "welcomeDefault": "مرحباً بك!",
+  "welcome": "أهلاً بك، {name}!",
+  "welcomeDefault": "أهلاً بك!",
   "overview": "إليك نظرة عامة على وضعك المالي",
   "tagline": "أدر شؤونك المالية بكفاءة وسهولة",
   "netWorth": {
     "title": "صافي الثروة",
     "totalBalance": "الرصيد الإجمالي",
     "viewDetails": "عرض التفاصيل",
-    "calculating": "جاري احتساب صافي الثروة...",
+    "calculating": "جارٍ احتساب صافي الثروة...",
     "favoriteCurrency": "العملة المفضلة",
-    "currencyBreakdown": "تفصيل العملات",
+    "currencyBreakdown": "توزيع العملات",
     "allCurrencies": "جميع العملات",
     "noCurrencies": "لا توجد أرصدة عملات مسجلة بعد."
   },
   "target": {
     "title": "هدف الادخار",
-    "score": "معدل تحقيق الهدف",
+    "score": "نقاط الهدف",
     "scoreHistory": "عرض سجل الأهداف",
     "noTarget": "لم يتم تحديد هدف بعد",
-    "setTarget": "تحديد هدف",
+    "setTarget": "تحديد الهدف",
     "currentTarget": "الهدف: {amount} {currency}"
   },
   "quickActions": {
     "title": "إجراءات سريعة",
     "addIncome": "إضافة دخل",
-    "addIncomeDesc": "سجل أرباحك وعوائدك المالية",
+    "addIncomeDesc": "تسجيل أرباحك وعوائدك المالية",
     "addExpense": "إضافة مصروف",
-    "addExpenseDesc": "تتبع نفقاتك وأدر ميزانيتك",
+    "addExpenseDesc": "تتبع نفقاتك وإدارة ميزانيتك",
     "viewTransactions": "عرض المعاملات",
     "manageScheduled": "المعاملات المجدولة",
     "wishlist": "قائمة الرغبات"
   },
+  "quickLinks": {
+    "transactions": "المعاملات",
+    "viewAll": "عرض الكل",
+    "scheduled": "المجدولة",
+    "recurring": "المتكررة",
+    "netWorth": "صافي الثروة",
+    "details": "التفاصيل",
+    "reports": "التقارير",
+    "monthlyAndYearly": "شهري وسنوي",
+    "manageTarget": "إدارة الهدف",
+    "goals": "الأهداف"
+  },
+  "gettingStarted": {
+    "title": "ابدأ رحلتك المالية",
+    "subtitle": "ابدأ بتتبع أموالك عبر إضافة معاملتك الأولى أو تحديد هدف شهري.",
+    "addIncome": "إضافة دخل",
+    "addExpense": "إضافة مصروف",
+    "setTarget": "تحديد الهدف"
+  },
   "recentTransactions": {
-    "title": "أحدث المعاملات",
+    "title": "آخر المعاملات",
     "viewAll": "عرض الكل",
     "empty": "لا توجد معاملات حديثة.",
-    "addFirst": "أضف أول معاملة لك للبدء."
+    "addFirst": "أضف معاملتك الأولى للبدء."
   }
 }

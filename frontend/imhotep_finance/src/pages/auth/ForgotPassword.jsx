@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import Footer from '../../components/common/Footer';
 import Logo from '../../assets/Logo.jpeg';
+import LanguageToggle from '../../components/common/LanguageToggle';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -78,7 +79,15 @@ const ForgotPassword = () => {
           <div className="absolute top-40 right-20 w-24 h-24 rounded-full filter blur-xl opacity-18 animate-float bg-[rgba(26,53,53,0.9)] dark:bg-teal-800/40" style={{ animationDelay: '2s' }}></div>
           <div className="absolute bottom-20 left-40 w-40 h-40 rounded-full filter blur-xl opacity-16 animate-float bg-[#2f7775] dark:bg-cyan-700/30 dark:mix-blend-screen" style={{ animationDelay: '4s' }}></div>
         </div>
-        <div className="flex items-center justify-center min-h-screen p-4">
+        {/* Top right language switch */}
+        <div className="fixed top-4 right-4 z-50">
+          <LanguageToggle />
+        </div>
+        {/* Top right language switch */}
+      <div className="fixed top-4 right-4 z-50">
+        <LanguageToggle />
+      </div>
+      <div className="flex items-center justify-center min-h-screen p-4">
           <div className="relative w-full max-w-md">
             <div
               className="chef-card rounded-3xl p-8 shadow-2xl backdrop-blur-2xl text-center"
@@ -143,6 +152,10 @@ const ForgotPassword = () => {
         <div className="absolute top-20 left-20 w-32 h-32 rounded-full filter blur-xl opacity-20 animate-float bg-[#366c6b] mix-blend-multiply dark:bg-emerald-600/40 dark:mix-blend-screen"></div>
         <div className="absolute top-40 right-20 w-24 h-24 rounded-full filter blur-xl opacity-18 animate-float bg-[rgba(26,53,53,0.9)] dark:bg-teal-800/40" style={{ animationDelay: '2s' }}></div>
         <div className="absolute bottom-20 left-40 w-40 h-40 rounded-full filter blur-xl opacity-16 animate-float bg-[#2f7775] dark:bg-cyan-700/30 dark:mix-blend-screen" style={{ animationDelay: '4s' }}></div>
+      </div>
+      {/* Top right language switch */}
+      <div className="fixed top-4 right-4 z-50">
+        <LanguageToggle />
       </div>
       <div className="flex items-center justify-center min-h-screen p-4">
         <div className="relative w-full max-w-md">

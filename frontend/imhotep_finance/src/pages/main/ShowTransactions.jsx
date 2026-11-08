@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useTranslation } from '../../contexts/LanguageContext';
 import axios from 'axios';
 import Footer from '../../components/common/Footer';
 import Pagination from '../../components/common/Pagination';
@@ -9,6 +10,7 @@ import CategorySelect from '../../components/CategorySelect';
 import PlaceSelect from '../../components/PlaceSelect';
 
 const ShowTransactions = () => {
+  const { t } = useTranslation();
   const [transactions, setTransactions] = useState([]);
   const [pagination, setPagination] = useState({});
   const [loading, setLoading] = useState(true);
@@ -263,9 +265,9 @@ const ShowTransactions = () => {
           <div className="flex flex-col gap-6">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold font-chef text-gray-800 dark:text-gray-100 mb-2">Transactions</h1>
+                <h1 className="text-3xl font-bold font-chef text-gray-800 dark:text-gray-100 mb-2">{t('transactions.title')}</h1>
                 <p className="text-lg text-gray-600 dark:text-gray-300 font-medium leading-relaxed mb-4">
-                  View and filter your transaction history
+                  {t('transactions.subtitle')}
                 </p>
               </div>
             </div>
@@ -279,8 +281,8 @@ const ShowTransactions = () => {
                 <svg className="w-4 h-4 sm:w-5 sm:h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                 </svg>
-                <span className="hidden sm:inline">Scheduled Plan</span>
-                <span className="sm:hidden">Plan</span>
+                <span className="hidden sm:inline">{t('transactions.actions.scheduledPlan')}</span>
+                <span className="sm:hidden">{t('transactions.actions.plan')}</span>
               </a>
 
               <button
@@ -290,7 +292,7 @@ const ShowTransactions = () => {
                 <svg className="w-4 h-4 sm:w-5 sm:h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                 </svg>
-                <span>{showFilters ? 'Hide Filters' : 'Show Filters'}</span>
+                <span>{showFilters ? t('transactions.actions.hideFilters') : t('transactions.actions.showFilters')}</span>
               </button>
 
               <button
@@ -300,8 +302,8 @@ const ShowTransactions = () => {
                 <svg className="w-4 h-4 sm:w-5 sm:h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path d="M12 5v14m7-7H5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                <span className="hidden sm:inline">Add Transaction</span>
-                <span className="sm:hidden">Add</span>
+                <span className="hidden sm:inline">{t('transactions.actions.addTransaction')}</span>
+                <span className="sm:hidden">{t('transactions.actions.add')}</span>
               </button>
             </div>
             
@@ -313,8 +315,8 @@ const ShowTransactions = () => {
                 <svg className="w-4 h-4 sm:w-5 sm:h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                <span className="hidden sm:inline">Export CSV</span>
-                <span className="sm:hidden">Export</span>
+                <span className="hidden sm:inline">{t('transactions.actions.exportCsv')}</span>
+                <span className="sm:hidden">{t('transactions.actions.export')}</span>
               </button>
 
               <button
@@ -324,8 +326,8 @@ const ShowTransactions = () => {
                 <svg className="w-4 h-4 sm:w-5 sm:h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                <span className="hidden sm:inline">Import CSV</span>
-                <span className="sm:hidden">Import</span>
+                <span className="hidden sm:inline">{t('transactions.actions.importCsv')}</span>
+                <span className="sm:hidden">{t('transactions.actions.import')}</span>
               </button>
               
               <button
@@ -340,16 +342,16 @@ const ShowTransactions = () => {
                 {recalculateNetworthLoading ? (
                   <>
                     <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin inline-block mr-2"></div>
-                    <span className="hidden sm:inline">Recalculating...</span>
-                    <span className="sm:hidden">Loading...</span>
+                    <span className="hidden sm:inline">{t('transactions.actions.recalculating')}</span>
+                    <span className="sm:hidden">{t('transactions.actions.loading')}</span>
                   </>
                 ) : (
                   <>
                     <svg className="w-4 h-4 sm:w-5 sm:h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
-                    <span className="hidden sm:inline">Recalculate Networth</span>
-                    <span className="sm:hidden">Recalculate</span>
+                    <span className="hidden sm:inline">{t('transactions.actions.recalculateNetworth')}</span>
+                    <span className="sm:hidden">{t('transactions.actions.recalculate')}</span>
                   </>
                 )}
               </button>
@@ -362,7 +364,7 @@ const ShowTransactions = () => {
               {/* Date Range Filters */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">From Date</label>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">{t('transactions.filterLabels.fromDate')}</label>
                   <input
                     type="date"
                     value={startDate}
@@ -371,7 +373,7 @@ const ShowTransactions = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">To Date</label>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">{t('transactions.filterLabels.toDate')}</label>
                   <input
                     type="date"
                     value={endDate}
@@ -383,15 +385,15 @@ const ShowTransactions = () => {
 
               {/* Transaction Type Filter */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Transaction Type</label>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">{t('transactions.filterLabels.transType')}</label>
                 <select
                   value={statusFilter}
                   onChange={(e) => handleFilterChange(setStatusFilter)(e.target.value)}
                   className="chef-input w-full"
                 >
-                  <option value="">All Types</option>
-                  <option value="deposit">Income</option>
-                  <option value="withdraw">Expense</option>
+                  <option value="">{t('transactions.filterLabels.allTypes')}</option>
+                  <option value="deposit">{t('transactions.types.income')}</option>
+                  <option value="withdraw">{t('transactions.types.expense')}</option>
                 </select>
               </div>
 
@@ -399,7 +401,7 @@ const ShowTransactions = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Category Filter */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Category</label>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">{t('transactions.filterLabels.category')}</label>
                   <CategorySelect
                     value={categoryFilter}
                     onChange={handleFilterChange(setCategoryFilter)}
@@ -409,7 +411,7 @@ const ShowTransactions = () => {
 
                 {/* Place Filter */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Place</label>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">{t('transactions.filterLabels.place')}</label>
                   <PlaceSelect
                     value={placeFilter}
                     onChange={handleFilterChange(setPlaceFilter)}
@@ -420,13 +422,13 @@ const ShowTransactions = () => {
 
               {/* Details Search */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Search Description</label>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">{t('transactions.filterLabels.searchDesc')}</label>
                 <input
                   type="text"
                   value={detailsSearch}
                   onChange={(e) => handleFilterChange(setDetailsSearch)(e.target.value)}
                   className="chef-input w-full"
-                  placeholder="Search in descriptions..."
+                  placeholder={t('transactions.filterLabels.searchPlaceholder')}
                 />
               </div>
 
@@ -440,7 +442,7 @@ const ShowTransactions = () => {
                     <svg className="w-4 h-4 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
-                    Clear Filters
+                    {t('transactions.actions.clearFilters')}
                   </button>
                 </div>
               )}
@@ -448,9 +450,9 @@ const ShowTransactions = () => {
               {/* Date Range Display */}
               {dateRange.start_date && dateRange.end_date && (
                 <div className="text-sm text-gray-600 dark:text-gray-300 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg mt-4">
-                  <span className="font-medium">Showing: </span>
+                  <span className="font-medium">{t('transactions.filterLabels.showing')}</span>
                   <span className="font-semibold">{dateRange.start_date}</span>
-                  <span className="mx-2">to</span>
+                  <span className="mx-2">{t('transactions.filterLabels.to')}</span>
                   <span className="font-semibold">{dateRange.end_date}</span>
                 </div>
               )}
@@ -463,11 +465,11 @@ const ShowTransactions = () => {
           {(startDate || endDate || categoryFilter || placeFilter || statusFilter || detailsSearch) && (
             <div className="flex flex-wrap gap-2 mb-6 p-4 bg-gray-50 dark:bg-gray-800/40 rounded-xl border border-gray-100 dark:border-gray-800">
               <span className="text-sm font-semibold text-gray-500 dark:text-gray-400 self-center mr-2">
-                Active Filters:
+                {t('transactions.filterLabels.activeFilters')}
               </span>
               {startDate && (
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#eaf6f6] text-[#366c6b] border border-[#366c6b]/20 dark:bg-teal-950/40 dark:text-teal-300">
-                  From: {startDate}
+                  {t('transactions.filterLabels.from')}{startDate}
                   <button
                     onClick={() => { setStartDate(''); setPage(1); }}
                     className="ml-1.5 inline-flex items-center justify-center p-0.5 rounded-full hover:bg-[#366c6b]/10 dark:hover:bg-teal-300/10"
@@ -478,7 +480,7 @@ const ShowTransactions = () => {
               )}
               {endDate && (
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#eaf6f6] text-[#366c6b] border border-[#366c6b]/20 dark:bg-teal-950/40 dark:text-teal-300">
-                  To: {endDate}
+                  {t('transactions.filterLabels.to')}: {endDate}
                   <button
                     onClick={() => { setEndDate(''); setPage(1); }}
                     className="ml-1.5 inline-flex items-center justify-center p-0.5 rounded-full hover:bg-[#366c6b]/10 dark:hover:bg-teal-300/10"
@@ -489,7 +491,7 @@ const ShowTransactions = () => {
               )}
               {statusFilter && (
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#eaf6f6] text-[#366c6b] border border-[#366c6b]/20 dark:bg-teal-950/40 dark:text-teal-300">
-                  Type: {statusFilter === 'deposit' ? 'Income' : 'Expense'}
+                  {t('transactions.filterLabels.type')}{statusFilter === 'deposit' ? t('transactions.types.income') : t('transactions.types.expense')}
                   <button
                     onClick={() => { setStatusFilter(''); setPage(1); }}
                     className="ml-1.5 inline-flex items-center justify-center p-0.5 rounded-full hover:bg-[#366c6b]/10 dark:hover:bg-teal-300/10"
@@ -500,7 +502,7 @@ const ShowTransactions = () => {
               )}
               {categoryFilter && (
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#eaf6f6] text-[#366c6b] border border-[#366c6b]/20 dark:bg-teal-950/40 dark:text-teal-300">
-                  Category: {categoryFilter}
+                  {t('transactions.filterLabels.category')}: {categoryFilter}
                   <button
                     onClick={() => { setCategoryFilter(''); setPage(1); }}
                     className="ml-1.5 inline-flex items-center justify-center p-0.5 rounded-full hover:bg-[#366c6b]/10 dark:hover:bg-teal-300/10"
@@ -511,7 +513,7 @@ const ShowTransactions = () => {
               )}
               {placeFilter && (
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#eaf6f6] text-[#366c6b] border border-[#366c6b]/20 dark:bg-teal-950/40 dark:text-teal-300">
-                  Place: {placeFilter}
+                  {t('transactions.filterLabels.place')}: {placeFilter}
                   <button
                     onClick={() => {
                       setPlaceFilter('');
@@ -528,7 +530,7 @@ const ShowTransactions = () => {
               )}
               {detailsSearch && (
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#eaf6f6] text-[#366c6b] border border-[#366c6b]/20 dark:bg-teal-950/40 dark:text-teal-300">
-                  Search: "{detailsSearch}"
+                  {t('transactions.filterLabels.search')}"{detailsSearch}"
                   <button
                     onClick={() => { setDetailsSearch(''); setPage(1); }}
                     className="ml-1.5 inline-flex items-center justify-center p-0.5 rounded-full hover:bg-[#366c6b]/10 dark:hover:bg-teal-300/10"
@@ -541,17 +543,17 @@ const ShowTransactions = () => {
                 onClick={handleClearFilters}
                 className="text-xs text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-semibold underline ml-auto self-center"
               >
-                Clear All
+                {t('transactions.actions.clearAll')}
               </button>
             </div>
           )}
 
           {loading ? (
-            <div className="text-center text-gray-500 dark:text-gray-400 py-8">Loading transactions...</div>
+            <div className="text-center text-gray-500 dark:text-gray-400 py-8">{t('transactions.loading')}</div>
           ) : error ? (
             <div className="text-center text-red-600 dark:text-red-400 py-8">{error}</div>
           ) : transactions.length === 0 ? (
-            <div className="text-center text-gray-500 dark:text-gray-400 py-8">No transactions found.</div>
+            <div className="text-center text-gray-500 dark:text-gray-400 py-8">{t('transactions.noTransactionsFound')}</div>
           ) : (
             <>
               {/* Desktop Table */}
@@ -559,14 +561,14 @@ const ShowTransactions = () => {
                 <table className="min-w-full text-sm">
                   <thead>
                     <tr className="bg-gray-50 dark:bg-gray-800">
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Date</th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Type</th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Amount</th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Currency</th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Category</th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Place</th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Description</th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Actions</th>
+                      <th className="px-4 py-2 text-left rtl:text-right font-semibold text-gray-700 dark:text-gray-200">{t('transactions.table.date')}</th>
+                      <th className="px-4 py-2 text-left rtl:text-right font-semibold text-gray-700 dark:text-gray-200">{t('transactions.table.type')}</th>
+                      <th className="px-4 py-2 text-left rtl:text-right font-semibold text-gray-700 dark:text-gray-200">{t('transactions.table.amount')}</th>
+                      <th className="px-4 py-2 text-left rtl:text-right font-semibold text-gray-700 dark:text-gray-200">{t('transactions.table.currency')}</th>
+                      <th className="px-4 py-2 text-left rtl:text-right font-semibold text-gray-700 dark:text-gray-200">{t('transactions.table.category')}</th>
+                      <th className="px-4 py-2 text-left rtl:text-right font-semibold text-gray-700 dark:text-gray-200">{t('transactions.table.place')}</th>
+                      <th className="px-4 py-2 text-left rtl:text-right font-semibold text-gray-700 dark:text-gray-200">{t('transactions.table.description')}</th>
+                      <th className="px-4 py-2 text-left rtl:text-right font-semibold text-gray-700 dark:text-gray-200">{t('transactions.table.actions')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -588,11 +590,11 @@ const ShowTransactions = () => {
                           <CategoryTag type={tx.trans_status} category={tx.category} />
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap text-gray-700 dark:text-gray-300 font-medium">
-                          {tx.place || 'General'}
+                          {tx.place || t('transactions.table.general')}
                         </td>
                         <td className="px-4 py-2 text-gray-700 dark:text-gray-300 max-w-xs">
                           <div className="truncate">
-                            {tx.trans_details ? tx.trans_details : <span className="text-gray-400 dark:text-gray-500 italic">No description</span>}
+                            {tx.trans_details ? tx.trans_details : <span className="text-gray-400 dark:text-gray-500 italic">{t('transactions.table.noDescription')}</span>}
                           </div>
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap">
@@ -601,13 +603,13 @@ const ShowTransactions = () => {
                               className="chef-button-secondary px-2 py-1 text-xs dark:text-gray-100 dark:bg-gray-800"
                               onClick={() => handleEdit(tx)}
                             >
-                              Edit
+                              {t('transactions.actions.edit')}
                             </button>
                             <button
                               className="chef-button-secondary px-2 py-1 text-xs text-red-600 dark:text-gray-100 dark:bg-gray-800"
                               onClick={() => handleDelete(tx)}
                             >
-                              Delete
+                              {t('transactions.actions.delete')}
                             </button>
                           </div>
                         </td>
@@ -656,7 +658,7 @@ const ShowTransactions = () => {
                       <CategoryTag type={tx.trans_status} category={tx.category} />
                       <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800">
                         <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                        {tx.place || 'General'}
+                        {tx.place || t('transactions.table.general')}
                       </span>
                     </div>
                     {/* Description Section */}
@@ -671,13 +673,13 @@ const ShowTransactions = () => {
                         className="chef-button-secondary px-2 py-1 text-xs dark:text-gray-100 dark:bg-gray-800"
                         onClick={() => handleEdit(tx)}
                       >
-                        Edit
+                        {t('transactions.actions.edit')}
                       </button>
                       <button
                         className="chef-button-secondary px-2 py-1 text-xs text-red-600 dark:text-gray-100 dark:bg-gray-800"
                         onClick={() => handleDelete(tx)}
                       >
-                        Delete
+                        {t('transactions.actions.delete')}
                       </button>
                     </div>
                   </div>

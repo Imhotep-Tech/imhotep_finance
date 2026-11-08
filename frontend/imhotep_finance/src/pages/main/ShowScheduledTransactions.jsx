@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from '../../contexts/LanguageContext';
 import axios from 'axios';
 import Footer from '../../components/common/Footer';
 import Pagination from '../../components/common/Pagination';
 import AddScheduledTransactionModal from '../../components/AddScheduledTransactionModal';
 
 const ShowScheduledTransactions = () => {
+  const { t } = useTranslation();
   const [scheduledTrans, setScheduledTrans] = useState([]);
   const [pagination, setPagination] = useState({});
   const [loading, setLoading] = useState(true);
@@ -147,9 +149,9 @@ const ShowScheduledTransactions = () => {
         <div className="chef-card rounded-3xl p-8 shadow-2xl backdrop-blur-2xl mb-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold font-chef text-gray-800 dark:text-gray-100 mb-2">Scheduled Transactions</h1>
+              <h1 className="text-3xl font-bold font-chef text-gray-800 dark:text-gray-100 mb-2">{t('scheduled.title')}</h1>
               <p className="text-lg text-gray-600 dark:text-gray-300 font-medium leading-relaxed mb-4">
-                View and manage your recurring transactions
+                {t('scheduled.subtitle')}
               </p>
             </div>
             <button
@@ -159,7 +161,7 @@ const ShowScheduledTransactions = () => {
               <svg className="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path d="M12 5v14m7-7H5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-              Add Scheduled
+              {t('scheduled.actions.addScheduled')}
             </button>
           </div>
         </div>
@@ -171,25 +173,25 @@ const ShowScheduledTransactions = () => {
             </div>
           )}
           {loading ? (
-            <div className="text-center text-gray-500 dark:text-gray-400 py-8">Loading scheduled transactions...</div>
+            <div className="text-center text-gray-500 dark:text-gray-400 py-8">{t('scheduled.loading')}</div>
           ) : error ? (
             <div className="text-center text-red-600 dark:text-red-400 py-8">{error}</div>
           ) : scheduledTrans.length === 0 ? (
-            <div className="text-center text-gray-500 dark:text-gray-400 py-8">No scheduled transactions found.</div>
+            <div className="text-center text-gray-500 dark:text-gray-400 py-8">{t('scheduled.noScheduledFound')}</div>
           ) : (
             <>
               <div className="hidden md:block overflow-x-auto">
                 <table className="min-w-full text-sm">
                   <thead>
                     <tr className="bg-gray-50 dark:bg-gray-800">
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Day</th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Type</th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Amount</th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Currency</th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Category</th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Place</th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Description</th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Actions</th>
+                      <th className="px-4 py-2 text-left rtl:text-right font-semibold text-gray-700 dark:text-gray-200">{t('scheduled.table.day')}</th>
+                      <th className="px-4 py-2 text-left rtl:text-right font-semibold text-gray-700 dark:text-gray-200">{t('scheduled.table.type')}</th>
+                      <th className="px-4 py-2 text-left rtl:text-right font-semibold text-gray-700 dark:text-gray-200">{t('scheduled.table.amount')}</th>
+                      <th className="px-4 py-2 text-left rtl:text-right font-semibold text-gray-700 dark:text-gray-200">{t('scheduled.table.currency')}</th>
+                      <th className="px-4 py-2 text-left rtl:text-right font-semibold text-gray-700 dark:text-gray-200">{t('scheduled.table.category')}</th>
+                      <th className="px-4 py-2 text-left rtl:text-right font-semibold text-gray-700 dark:text-gray-200">{t('scheduled.table.place')}</th>
+                      <th className="px-4 py-2 text-left rtl:text-right font-semibold text-gray-700 dark:text-gray-200">{t('scheduled.table.description')}</th>
+                      <th className="px-4 py-2 text-left rtl:text-right font-semibold text-gray-700 dark:text-gray-200">{t('scheduled.table.actions')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -211,11 +213,11 @@ const ShowScheduledTransactions = () => {
                           <CategoryTag type={tx.scheduled_trans_status} category={tx.category} />
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap text-gray-700 dark:text-gray-300 font-medium">
-                          {tx.place || 'General'}
+                          {tx.place || t('scheduled.table.general')}
                         </td>
                         <td className="px-4 py-2 text-gray-700 dark:text-gray-300 max-w-xs">
                           <div className="truncate">
-                            {tx.scheduled_trans_details ? tx.scheduled_trans_details : <span className="text-gray-400 dark:text-gray-500 italic">No description</span>}
+                            {tx.scheduled_trans_details ? tx.scheduled_trans_details : <span className="text-gray-400 dark:text-gray-500 italic">{t('scheduled.table.noDescription')}</span>}
                           </div>
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap">
@@ -224,7 +226,7 @@ const ShowScheduledTransactions = () => {
                               className="chef-button-secondary px-2 py-1 text-xs dark:text-gray-100 dark:bg-gray-800"
                               onClick={() => handleEdit(tx)}
                             >
-                              Edit
+                              {t('scheduled.actions.edit')}
                             </button>
                             <button
                               className="chef-button-secondary px-2 py-1 text-xs text-red-600 dark:text-gray-100 dark:bg-gray-800"
@@ -309,7 +311,7 @@ const ShowScheduledTransactions = () => {
                       <CategoryTag type={tx.scheduled_trans_status} category={tx.category} />
                       <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800">
                         <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                        {tx.place || 'General'}
+                        {tx.place || t('scheduled.table.general')}
                       </span>
                     </div>
                     {tx.scheduled_trans_details && (
@@ -322,7 +324,7 @@ const ShowScheduledTransactions = () => {
                         className="chef-button-secondary px-2 py-1 text-xs dark:text-gray-100 dark:bg-gray-800"
                         onClick={() => handleEdit(tx)}
                       >
-                        Edit
+                        {t('scheduled.actions.edit')}
                       </button>
                       <button
                         className="chef-button-secondary px-2 py-1 text-xs text-red-600 dark:text-gray-100 dark:bg-gray-800"
