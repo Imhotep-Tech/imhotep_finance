@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useTranslation } from '@/contexts/LanguageContext';
 import api from '@/constants/api';
 import CurrencySelect from './CurrencySelect';
 import PlaceSelect from './PlaceSelect';
@@ -34,6 +35,7 @@ const AddWishlistModal: React.FC<AddWishlistModalProps> = ({
     initialValues = {},
     currentYear = new Date().getFullYear()
 }) => {
+    const { t } = useTranslation();
     const colorScheme = useColorScheme();
     const isDark = colorScheme === 'dark';
 
@@ -68,19 +70,19 @@ const AddWishlistModal: React.FC<AddWishlistModalProps> = ({
 
     const handleSubmit = async () => {
         if (!price || !currency || !year) {
-            Alert.alert('Error', 'Please fill in required fields (Price, Currency, Year).');
+            Alert.alert(t('common.status.error'), t('wishlist.modal.requiredFieldsMobile'));
             return;
         }
 
         const priceNum = parseFloat(price);
         if (isNaN(priceNum) || priceNum <= 0) {
-            Alert.alert('Error', 'Price must be greater than 0.');
+            Alert.alert(t('common.status.error'), t('wishlist.modal.pricePositive'));
             return;
         }
 
         const yearNum = parseInt(year);
         if (isNaN(yearNum) || yearNum < 2000 || yearNum > 2100) {
-            Alert.alert('Error', 'Please enter a valid year.');
+            Alert.alert(t('common.status.error'), t('wishlist.modal.validYear'));
             return;
         }
 
@@ -98,15 +100,15 @@ const AddWishlistModal: React.FC<AddWishlistModalProps> = ({
 
             if (editMode && initialValues?.id) {
                 await api.post(`/api/finance-management/wishlist/update-wish/${initialValues.id}/`, payload);
-                Alert.alert('Success', 'Wish updated successfully');
+                Alert.alert(t('common.status.success'), t('wishlist.modal.updateSuccess'));
             } else {
                 await api.post('/api/finance-management/wishlist/add-wish/', payload);
-                Alert.alert('Success', 'Wish added successfully');
+                Alert.alert(t('common.status.success'), t('wishlist.modal.addSuccess'));
             }
             onSuccess();
         } catch (err: any) {
             console.error('Wish save error:', err);
-            Alert.alert('Error', err.response?.data?.error || 'Failed to save wish');
+            Alert.alert(t('common.status.error'), err.response?.data?.error || t('wishlist.modal.saveFailed'));
         } finally {
             setLoading(false);
         }
@@ -143,7 +145,7 @@ const AddWishlistModal: React.FC<AddWishlistModalProps> = ({
                 <View style={[styles.modalContent, themeStyles.modalContent]}>
                     <View style={styles.header}>
                         <Text style={[styles.title, themeStyles.title]}>
-                            {editMode ? 'Edit Wish' : 'Add New Wish'}
+                            {editMode ? t('wishlist.modal.editTitle') : t('wishlist.modal.addNewWish')}
                         </Text>
                         <TouchableOpacity onPress={onClose}>
                             <Ionicons name="close" size={24} color={isDark ? '#cbd5e1' : '#64748b'} />
@@ -152,10 +154,10 @@ const AddWishlistModal: React.FC<AddWishlistModalProps> = ({
 
                     <ScrollView contentContainerStyle={styles.form}>
                         {/* Details */}
-                        <Text style={[styles.label, themeStyles.label]}>Details / Description</Text>
+                        <Text style={[styles.label, themeStyles.label]}>{t('wishlist.modal.detailsDescription')}</Text>
                         <TextInput
                             style={[styles.input, themeStyles.input]}
-                            placeholder="e.g. New Laptop"
+                            placeholder={t('wishlist.modal.detailsMobilePlaceholder')}
                             placeholderTextColor={isDark ? '#94a3b8' : '#cbd5e1'}
                             value={details}
                             onChangeText={setDetails}
@@ -164,7 +166,7 @@ const AddWishlistModal: React.FC<AddWishlistModalProps> = ({
                         {/* Price and Currency Row */}
                         <View style={styles.row}>
                             <View style={{ flex: 1.5, marginRight: 10 }}>
-                                <Text style={[styles.label, themeStyles.label]}>Price</Text>
+                                <Text style={[styles.label, themeStyles.label]}>{t('wishlist.modal.price')}</Text>
                                 <TextInput
                                     style={[styles.input, themeStyles.input]}
                                     placeholder="0.00"
@@ -175,7 +177,7 @@ const AddWishlistModal: React.FC<AddWishlistModalProps> = ({
                                 />
                             </View>
                             <View style={{ flex: 1 }}>
-                                <Text style={[styles.label, themeStyles.label]}>Currency</Text>
+                                <Text style={[styles.label, themeStyles.label]}>{t('wishlist.modal.currency')}</Text>
                                 <CurrencySelect
                                     value={currency}
                                     onChange={setCurrency}
@@ -185,7 +187,7 @@ const AddWishlistModal: React.FC<AddWishlistModalProps> = ({
 
 
                         {/* Year */}
-                        <Text style={[styles.label, themeStyles.label]}>Year</Text>
+                        <Text style={[styles.label, themeStyles.label]}>{t('wishlist.modal.year')}</Text>
                         <TextInput
                             style={[styles.input, themeStyles.input]}
                             placeholder="YYYY"
@@ -197,7 +199,7 @@ const AddWishlistModal: React.FC<AddWishlistModalProps> = ({
                         />
 
                         {/* Place */}
-                        <Text style={[styles.label, themeStyles.label]}>Place</Text>
+                        <Text style={[styles.label, themeStyles.label]}>{t('wishlist.modal.place')}</Text>
                         <PlaceSelect
                             value={place}
                             onChange={setPlace}
@@ -205,10 +207,10 @@ const AddWishlistModal: React.FC<AddWishlistModalProps> = ({
                         />
 
                         {/* Link */}
-                        <Text style={[styles.label, themeStyles.label]}>Link (Optional)</Text>
+                        <Text style={[styles.label, themeStyles.label]}>{t('wishlist.modal.linkOptional')}</Text>
                         <TextInput
                             style={[styles.input, themeStyles.input]}
-                            placeholder="https://example.com/item"
+                            placeholder={t('wishlist.modal.linkUrlPlaceholder')}
                             placeholderTextColor={isDark ? '#94a3b8' : '#cbd5e1'}
                             value={link}
                             onChangeText={setLink}
@@ -222,9 +224,9 @@ const AddWishlistModal: React.FC<AddWishlistModalProps> = ({
                             disabled={loading}
                         >
                             {loading ? (
-                                <Text style={styles.submitButtonText}>Saving...</Text>
+                                <Text style={styles.submitButtonText}>{t('wishlist.modal.saving')}</Text>
                             ) : (
-                                <Text style={styles.submitButtonText}>{editMode ? 'Update Wish' : 'Add Wish'}</Text>
+                                <Text style={styles.submitButtonText}>{editMode ? t('wishlist.modal.updateWish') : t('wishlist.modal.addWish')}</Text>
                             )}
                         </TouchableOpacity>
                     </ScrollView>

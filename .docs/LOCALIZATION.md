@@ -65,10 +65,10 @@ locales/
 | `dashboard.json` | Dashboard greeting, welcome banners, Net Worth overview card, Target progress, and quick action cards. |
 | `transactions.json` | Transaction lists, filter chips, search input, deposit/withdraw types, Add/Edit transaction modal, Place/Category selects, and CSV import. |
 | `scheduled.json` | Recurring transactions, frequencies (Daily, Weekly, Monthly, Yearly), auto-apply status, next execution dates. |
-| `wishlist.json` | Wishlist items, cost estimates, priorities (High, Medium, Low), convert to expense transaction confirmation. |
+| `wishlist.json` | Wishlist items, table column headers, year filters, completion status toggle, delete & unmark warnings, Add/Update wish modals. |
 | `reports.json` | Analytical dashboards, Monthly/Annual summaries, Income vs Expense charts, and category/place breakdowns. |
 | `profile.json` | Account information, password change form, favorite currency selector, app language preferences, and account deletion. |
-| `landing.json` | Public landing page hero section, feature cards, download mobile app banner, and privacy policy overview. |
+| `landing.json` | Public landing page hero section, self-hosting notices, dynamic stats counters, feature cards, step-by-step onboarding guide, and CTA buttons. |
 
 ---
 

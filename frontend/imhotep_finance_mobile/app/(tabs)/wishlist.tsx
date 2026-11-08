@@ -117,12 +117,12 @@ export default function WishlistScreen() {
 
     const handleDelete = async (wish: any) => {
         Alert.alert(
-            "Delete Wish",
-            "Are you sure you want to delete this wish?",
+            t('wishlist.alerts.deleteTitle'),
+            t('wishlist.alerts.deleteConfirm'),
             [
-                { text: "Cancel", style: "cancel" },
+                { text: t('common.actions.cancel'), style: "cancel" },
                 {
-                    text: "Delete",
+                    text: t('common.actions.delete'),
                     style: "destructive",
                     onPress: async () => {
                         setDeleteLoading(prev => ({ ...prev, [wish.id]: true }));
@@ -130,7 +130,7 @@ export default function WishlistScreen() {
                             await api.delete(`/api/finance-management/wishlist/delete-wish/${wish.id}/`);
                             setWishlist(prev => prev.filter(w => w.id !== wish.id));
                         } catch (err: any) {
-                            Alert.alert("Error", err.response?.data?.error || "Failed to delete wish");
+                            Alert.alert(t('common.status.error'), err.response?.data?.error || t('wishlist.deleteConfirm'));
                         } finally {
                             setDeleteLoading(prev => ({ ...prev, [wish.id]: false }));
                         }
@@ -152,7 +152,7 @@ export default function WishlistScreen() {
                 onRefresh();
             } catch (err: any) {
                 console.error("Status toggle error:", err);
-                Alert.alert("Error", err.response?.data?.error || "Failed to update status");
+                Alert.alert(t('common.status.error'), err.response?.data?.error || "Failed to update status");
             } finally {
                 setActionLoading(prev => ({ ...prev, [wish.id]: false }));
             }
@@ -161,21 +161,21 @@ export default function WishlistScreen() {
         if (!isCompleting) {
             // Marking as NOT completed (WARNING)
             Alert.alert(
-                "Warning",
-                "Are you sure you want to mark this wish as not completed?\n\nThis will:\n• Delete the associated transaction\n• Remove the transaction date\n• Update your networth",
+                t('wishlist.alerts.unmarkTitle'),
+                t('wishlist.alerts.unmarkConfirm'),
                 [
-                    { text: "Cancel", style: "cancel" },
-                    { text: "Continue", onPress: proceedToggle }
+                    { text: t('common.actions.cancel'), style: "cancel" },
+                    { text: t('wishlist.alerts.continue'), onPress: proceedToggle }
                 ]
             );
         } else {
             // Marking as Completed
             Alert.alert(
-                "Mark as Completed",
-                "This will create a transaction for this wish expense.",
+                t('wishlist.alerts.markTitle'),
+                t('wishlist.alerts.markMessage'),
                 [
-                    { text: "Cancel", style: "cancel" },
-                    { text: "Confirm", onPress: proceedToggle }
+                    { text: t('common.actions.cancel'), style: "cancel" },
+                    { text: t('wishlist.alerts.confirm'), onPress: proceedToggle }
                 ]
             );
         }
