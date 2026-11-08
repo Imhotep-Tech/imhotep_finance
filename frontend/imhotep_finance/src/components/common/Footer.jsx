@@ -40,7 +40,7 @@ function Footer() {
         </p>
         <div className="flex justify-center space-x-4 text-xs mb-2">
           <a
-            href="https://imhoteptech.vercel.app/"
+            href="https://imhotep-tech.com"
             className="hover:underline"
             target="_blank"
             rel="noopener noreferrer"
