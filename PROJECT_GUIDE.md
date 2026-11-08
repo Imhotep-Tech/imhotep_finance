@@ -18,6 +18,7 @@ Complete documentation is available in the `.docs/` folder:
 | [🧪 Testing Guide](.docs/TESTING.md) | Running & writing tests, test structure |
 | [👥 Contributing](.docs/CONTRIBUTING.md) | How to contribute, code style, PR guidelines |
 | [🧱 Development Workflow](.docs/DEVELOPMENT_WORKFLOW.md) | Development practices, CI/CD, best practices |
+| [🤖 AI Agent Guide](AGENTS.md) | Canonical operating manual, branch/commit rules, Swagger & test mandates for AI agents |
 
 ---
 

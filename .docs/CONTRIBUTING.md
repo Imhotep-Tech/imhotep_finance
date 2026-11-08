@@ -73,6 +73,20 @@ Then create a Pull Request on GitHub describing your changes.
 - **Bug fixes**: `fix/issue-description`
 - **Documentation**: `docs/documentation-update`
 
+## 🤖 AI Agent Guidelines
+
+If you are developing or contributing using an AI agent (Copilot, Claude, GPT, Antigravity, etc.), you **must strictly follow [AGENTS.md](../AGENTS.md)**.
+
+Key non-negotiable rules for AI agents:
+1. **Branch Isolation**: Never commit to `main`; always branch from `main` (`feature/backend/`, `feature/frontend/`, `fix/`, `docs/`, `refactor/`, `test/`).
+2. **Descriptive Commits**: Explicitly state what changed, which files were touched, and why.
+3. **Mandatory Pre-Commit Test Run**: No commit may be submitted without running the full test suite (`docker exec imhotep_finance-backend-1 python manage.py test --keepdb`) and achieving 100% pass rate.
+4. **Mandatory Swagger Annotations**: All new and modified endpoints must include `@extend_schema` with request/response serializers, parameters, and status codes.
+5. **Edge Case Test Coverage**: Cover unauthenticated access (401), cross-tenant isolation (403/404), boundary values, malformed inputs, and empty states.
+6. **Synchronize `.docs/`**: Update all relevant technical documentation files in `.docs/` matching the code changes made.
+
+---
+
 ## Code Style
 
 ### Backend (Python/Django)

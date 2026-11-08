@@ -96,6 +96,7 @@ docker compose up --build
 
 ## 📚 Related Docs
 
+- [🤖 AI Agent Operating Manual](../AGENTS.md)
 - [🧪 Testing Guide](TESTING.md)
 - [👥 Contributing Guide](CONTRIBUTING.md)
 - [⚙️ Environment Variables](ENVIRONMENT_VARIABLES.md)

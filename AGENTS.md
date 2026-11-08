@@ -16,6 +16,7 @@ Every AI agent operating in this repository **must** comply with these mandatory
 4. **Mandatory Swagger Documentation**: Every new or updated API endpoint **must** be comprehensively documented with `drf-spectacular` (`@extend_schema`), including request/response serializers, query/path parameters, tags, and status codes.
 5. **Mandatory Test Coverage & Edge Cases**: Whenever code is added or modified, you **must** write new tests or adjust existing tests. Tests must cover both the happy path and **all edge cases** (authentication, authorization, user isolation, malformed inputs, boundary values, empty states).
 6. **Zero Regression Guarantee**: All existing tests (230+ tests across the backend) must continue to run and pass identically as before the update.
+7. **Mandatory `.docs/` Synchronization**: Every code change, endpoint modification, environment variable addition, architectural shift, or mobile update **must** immediately update its corresponding documentation in `.docs/`. Never leave documentation stale or out of sync with code.
 
 ---
 
@@ -409,6 +410,30 @@ When backend changes affect the frontend or mobile apps:
 
 ---
 
+## 📑 Mandatory Synchronization with Technical Documentation (`.docs/`)
+
+AI agents **must keep technical documentation synchronized with code changes at all times**. Whenever any feature, endpoint, configuration, model, test, or architecture detail is introduced or updated, the corresponding document inside `.docs/` **must be updated in the same commit / branch**.
+
+### Documentation Mapping Matrix
+
+| What Changed in the Codebase | Corresponding Documentation File to Update |
+|-----------------------------|---------------------------------------------|
+| Added, changed, or removed API endpoints, query params, request/response formats | [`.docs/API_DOCUMENTATION.md`](.docs/API_DOCUMENTATION.md) |
+| Added, changed, or removed environment variables or config keys | [`.docs/ENVIRONMENT_VARIABLES.md`](.docs/ENVIRONMENT_VARIABLES.md) & `.env.example` files |
+| Added new apps, directories, modules, or changed directory structure | [`.docs/FOLDER_STRUCTURE.md`](.docs/FOLDER_STRUCTURE.md) |
+| Added new test files, testing patterns, tools, or commands | [`.docs/TESTING.md`](.docs/TESTING.md) |
+| Changes to branch policies, git standards, PR guidelines, or contribution rules | [`.docs/CONTRIBUTING.md`](.docs/CONTRIBUTING.md) & `PROJECT_GUIDE.md` |
+| Changes to local dev workflow, Docker configuration, port mappings | [`.docs/DEVELOPMENT_WORKFLOW.md`](.docs/DEVELOPMENT_WORKFLOW.md) & [`.docs/SETUP.md`](.docs/SETUP.md) |
+| React Native / Expo changes, navigation, widgets, or mobile screens | [`.docs/MOBILE_APP.md`](.docs/MOBILE_APP.md) |
+| Self-hosting, deployment, or production orchestration changes | [`.docs/SELF_HOSTING.md`](.docs/SELF_HOSTING.md) |
+
+### Documentation Quality Mandate
+- Never submit a code change without checking if `.docs/` needs an update.
+- Ensure all markdown links, code blocks, curl examples, and path references in `.docs/` are accurate and verified.
+- Keep table of contents and documentation index tables (e.g. in `PROJECT_GUIDE.md` and `README.md`) up to date.
+
+---
+
 ## 📋 AI Agent Step-by-Step Task Checklist
 
 Whenever you are assigned a development task, follow this exact sequence:
@@ -424,15 +449,17 @@ flowchart TD
     G --> H{All Tests Pass?}
     H -- No --> I[Fix Issues & Re-test]
     I --> G
-    H -- Yes --> J[Inspect git diff & Status]
-    J --> K[Commit to Branch with Detailed Summary]
+    H -- Yes --> J[Update Corresponding .docs/ Files]
+    J --> K[Inspect git diff & Status]
+    K --> L[Commit to Branch with Detailed Summary]
 ```
 
 1. **Branch**: `git checkout -b <prefix>/<task-name>`
-2. **Plan**: Identify models, selectors, services, serializers, APIs, and tests to touch.
+2. **Plan**: Identify models, selectors, services, serializers, APIs, tests, and documentation files to touch.
 3. **Code**: Follow layer separation (thin views, rich services, optimized selectors).
-4. **Document**: Add complete `@extend_schema` decorators to all endpoints.
+4. **Document Code**: Add complete `@extend_schema` decorators to all endpoints.
 5. **Test**: Write comprehensive tests for happy path and all edge cases (401, 403, 400, boundary, empty).
-6. **Execute & Verify**: Run `docker exec imhotep_finance-backend-1 python manage.py test --keepdb` and verify **100% pass rate** (zero failures, zero errors).
-7. **Verify Git Tree**: Confirm only desired files are changed (`git status`).
-8. **Commit**: Commit to the branch with a descriptive message detailing exactly what was done.
+6. **Execute & Verify Tests**: Run `docker exec imhotep_finance-backend-1 python manage.py test --keepdb` and verify **100% pass rate** (zero failures, zero errors).
+7. **Synchronize `.docs/`**: Update all relevant technical documentation files in `.docs/` corresponding to the changes made.
+8. **Verify Git Tree**: Confirm only desired files are changed (`git status` and `git diff`).
+9. **Commit**: Commit to the branch with a descriptive message detailing exactly what was done (including code, tests, and doc updates).
