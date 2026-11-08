@@ -15,6 +15,7 @@ import {
 import { Link, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import axios, { AxiosError } from 'axios';
+import LanguageDropdown from '@/components/LanguageDropdown';
 
 const themes = {
   light: {
@@ -410,6 +411,11 @@ export default function ForgotPasswordScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={[styles.card, { backgroundColor: colors.card }]}>
+          {/* Language Dropdown in Auth */}
+          <View style={{ alignItems: 'flex-end', marginBottom: 4 }}>
+            <LanguageDropdown align="right" />
+          </View>
+
           {/* Logo */}
           <View style={styles.logoContainer}>
             <View style={[styles.logoCircle, { backgroundColor: colors.primaryLight }]}>

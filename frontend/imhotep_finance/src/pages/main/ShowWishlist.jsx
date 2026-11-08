@@ -4,8 +4,10 @@ import Footer from '../../components/common/Footer';
 import Pagination from '../../components/common/Pagination';
 import AddWishModal from '../../components/AddWishModal';
 import UpdateWishModal from '../../components/UpdateWishModal';
+import { useTranslation } from '../../contexts/LanguageContext';
 
 const ShowWishlist = () => {
+  const { t } = useTranslation();
   const [wishlist, setWishlist] = useState([]);
   const [pagination, setPagination] = useState({});
   const [loading, setLoading] = useState(true);
@@ -65,7 +67,7 @@ const ShowWishlist = () => {
   // Delete wish handler
   const handleDelete = async (wish) => {
     setActionError('');
-    if (!window.confirm('Are you sure you want to delete this wish?')) return;
+    if (!window.confirm(t('wishlist.alerts.deleteConfirm'))) return;
     setDeleteLoading(prev => ({ ...prev, [wish.id]: true }));
     try {
       await axios.delete(`/api/finance-management/wishlist/delete-wish/${wish.id}/`);
@@ -85,12 +87,7 @@ const ShowWishlist = () => {
     
     // Show warning when unmarking a completed wish
     if (wish.status === true) {
-      const confirmMessage = 'Are you sure you want to mark this wish as not completed?\n\n' +
-        'This will:\n' +
-        '• Delete the associated transaction\n' +
-        '• Remove the transaction date\n' +
-        '• Update your networth\n\n' +
-        'Do you want to continue?';
+      const confirmMessage = t('wishlist.alerts.unmarkConfirm');
       
       if (!window.confirm(confirmMessage)) return;
     }
@@ -142,9 +139,9 @@ const ShowWishlist = () => {
         <div className="chef-card rounded-3xl p-8 shadow-2xl backdrop-blur-2xl mb-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold font-chef text-gray-800 dark:text-gray-100 mb-2">Wishlist</h1>
+              <h1 className="text-3xl font-bold font-chef text-gray-800 dark:text-gray-100 mb-2">{t('wishlist.title')}</h1>
               <p className="text-lg text-gray-600 dark:text-gray-300 font-medium leading-relaxed mb-4">
-                View and manage your wishlist items
+                {t('wishlist.subtitle')}
               </p>
             </div>
             <button
@@ -154,12 +151,12 @@ const ShowWishlist = () => {
               <svg className="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path d="M12 5v14m7-7H5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-              Add Wish
+              {t('wishlist.addWish')}
             </button>
           </div>
           <div className="flex flex-wrap gap-4 items-center mb-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Year</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">{t('wishlist.year')}</label>
               <input
                 type="number"
                 min="2000"
@@ -180,11 +177,11 @@ const ShowWishlist = () => {
             </div>
           )}
           {loading ? (
-            <div className="text-center text-gray-500 dark:text-gray-400 py-8">Loading wishlist...</div>
+            <div className="text-center text-gray-500 dark:text-gray-400 py-8">{t('wishlist.loading')}</div>
           ) : error ? (
             <div className="text-center text-red-600 dark:text-red-400 py-8">{error}</div>
           ) : wishlist.length === 0 ? (
-            <div className="text-center text-gray-500 dark:text-gray-400 py-8">No wishlist items found.</div>
+            <div className="text-center text-gray-500 dark:text-gray-400 py-8">{t('wishlist.emptyState')}</div>
           ) : (
             <>
               {/* Desktop Table */}
@@ -192,21 +189,21 @@ const ShowWishlist = () => {
                 <table className="min-w-full text-sm">
                   <thead>
                     <tr className="bg-gray-50 dark:bg-gray-800">
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Wish</th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Price</th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Currency</th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Year</th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Place</th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Link</th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Status</th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">Actions</th>
+                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">{t('wishlist.table.wish')}</th>
+                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">{t('wishlist.table.price')}</th>
+                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">{t('wishlist.table.currency')}</th>
+                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">{t('wishlist.table.year')}</th>
+                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">{t('wishlist.table.place')}</th>
+                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">{t('wishlist.table.link')}</th>
+                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">{t('wishlist.table.status')}</th>
+                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">{t('wishlist.table.actions')}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {wishlist.map(w => (
                       <tr key={w.id} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 hover:dark:bg-gray-800/60">
                         <td className="px-4 py-2 whitespace-nowrap text-gray-900 dark:text-gray-100">
-                          {w.wish_details || <span className="text-gray-400 italic">No details</span>}
+                          {w.wish_details || <span className="text-gray-400 italic">{t('wishlist.noDetails')}</span>}
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap">
                           <AmountCell price={w.price} currency={w.currency} />
@@ -218,13 +215,13 @@ const ShowWishlist = () => {
                           {w.year}
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap text-gray-700 dark:text-gray-300 font-medium">
-                          {w.place || 'General'}
+                          {w.place || t('wishlist.general')}
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap">
                           {w.link ? (
-                            <a href={w.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 underline">View</a>
+                            <a href={w.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 underline">{t('wishlist.viewLink')}</a>
                           ) : (
-                            <span className="text-gray-400 dark:text-gray-500 italic">No link</span>
+                            <span className="text-gray-400 dark:text-gray-500 italic">{t('wishlist.noLink')}</span>
                           )}
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap">
@@ -242,14 +239,14 @@ const ShowWishlist = () => {
                                 <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path d="M5 13l4 4L19 7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                 </svg>
-                                Completed
+                                {t('wishlist.completed')}
                               </>
                             ) : (
                               <>
                                 <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path d="M12 5v14m7-7H5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                 </svg>
-                                Mark as Completed
+                                {t('wishlist.markAsCompleted')}
                               </>
                             )}
                           </button>
@@ -258,10 +255,10 @@ const ShowWishlist = () => {
                           {w.status === true ? (
                             <div className="flex flex-col gap-1">
                               <span className="text-sm text-gray-600 dark:text-gray-400">
-                                Completed on:
+                                {t('wishlist.completedOn')}
                               </span>
                               <span className="text-sm font-medium text-green-700 dark:text-green-300">
-                                {w.transaction_date || 'N/A'}
+                                {w.transaction_date || t('wishlist.na')}
                               </span>
                             </div>
                           ) : (
@@ -270,7 +267,7 @@ const ShowWishlist = () => {
                                 className="chef-button-secondary px-2 py-1 text-xs dark:text-gray-100 dark:bg-gray-800"
                                 onClick={() => handleEdit(w)}
                               >
-                                Edit
+                                {t('common.actions.edit')}
                               </button>
                               <button
                                 className="chef-button-secondary px-2 py-1 text-xs text-red-600 dark:text-gray-100 dark:bg-gray-800"
@@ -282,7 +279,7 @@ const ShowWishlist = () => {
                                     <circle cx="12" cy="12" r="10" strokeWidth="4" stroke="currentColor" fill="none"/>
                                   </svg>
                                 ) : (
-                                  'Delete'
+                                  t('common.actions.delete')
                                 )}
                               </button>
                             </div>
@@ -302,7 +299,7 @@ const ShowWishlist = () => {
                   >
                     <div className="flex items-center justify-between mb-3">
                       <div className="font-medium text-blue-800 dark:text-blue-200">
-                        {w.wish_details || <span className="text-gray-400 italic">No details</span>}
+                        {w.wish_details || <span className="text-gray-400 italic">{t('wishlist.noDetails')}</span>}
                       </div>
                       <div className="text-right">
                         <div className="text-lg font-bold text-blue-600 dark:text-blue-300">
@@ -314,12 +311,12 @@ const ShowWishlist = () => {
                     <div className="mb-2">
                       <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800">
                         <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                        {w.place || 'General'}
+                        {w.place || t('wishlist.general')}
                       </span>
                     </div>
                     {w.link && (
                       <div className="mb-2">
-                        <a href={w.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 underline text-sm">View Link</a>
+                        <a href={w.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 underline text-sm">{t('wishlist.viewLinkFull')}</a>
                       </div>
                     )}
                     <div className="flex gap-2 mt-2">
@@ -337,24 +334,24 @@ const ShowWishlist = () => {
                             <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path d="M5 13l4 4L19 7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                             </svg>
-                            Completed
+                            {t('wishlist.completed')}
                           </>
                         ) : (
                           <>
                             <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path d="M12 5v14m7-7H5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                             </svg>
-                            Mark as Completed
+                            {t('wishlist.markAsCompleted')}
                           </>
                         )}
                       </button>
                       {w.status === true ? (
                         <div className="flex flex-col gap-1 flex-1">
                           <span className="text-xs text-gray-600 dark:text-gray-400">
-                            Completed on:
+                            {t('wishlist.completedOn')}
                           </span>
                           <span className="text-xs font-medium text-green-700 dark:text-green-300">
-                            {w.transaction_date || 'N/A'}
+                            {w.transaction_date || t('wishlist.na')}
                           </span>
                         </div>
                       ) : (
@@ -363,7 +360,7 @@ const ShowWishlist = () => {
                             className="chef-button-secondary px-2 py-1 text-xs dark:text-gray-100 dark:bg-gray-800"
                             onClick={() => handleEdit(w)}
                           >
-                            Edit
+                            {t('common.actions.edit')}
                           </button>
                           <button
                             className="chef-button-secondary px-2 py-1 text-xs text-red-600 dark:text-gray-100 dark:bg-gray-800"
@@ -375,7 +372,7 @@ const ShowWishlist = () => {
                                 <circle cx="12" cy="12" r="10" strokeWidth="4" stroke="currentColor" fill="none"/>
                               </svg>
                             ) : (
-                              'Delete'
+                              t('common.actions.delete')
                             )}
                           </button>
                         </>

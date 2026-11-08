@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Linking, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useTranslation } from '@/contexts/LanguageContext';
 
 interface WishlistItemProps {
     wish: {
@@ -30,6 +31,7 @@ const WishlistItem: React.FC<WishlistItemProps> = ({
     loading = false,
     deleteLoading = false
 }) => {
+    const { t } = useTranslation();
     const colorScheme = useColorScheme();
     const isDark = colorScheme === 'dark';
     const isCompleted = wish.status;
@@ -68,7 +70,7 @@ const WishlistItem: React.FC<WishlistItemProps> = ({
                 await Linking.openURL(url);
             } catch (err) {
                 console.error("An error occurred", err);
-                Alert.alert("Error", "Cannot open this link: " + wish.link);
+                Alert.alert(t('common.status.error'), t('wishlist.alerts.cannotOpenLink') + wish.link);
             }
         }
     };
@@ -78,7 +80,7 @@ const WishlistItem: React.FC<WishlistItemProps> = ({
             <View style={styles.contentContainer}>
                 <View style={styles.headerRow}>
                     <Text style={[styles.details, themeStyles.text]} numberOfLines={1}>
-                        {wish.wish_details || 'No Details'}
+                        {wish.wish_details || t('wishlist.noDetails')}
                     </Text>
                     <Text style={[styles.price, themeStyles.price]}>
                         {Number(wish.price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {wish.currency}
@@ -86,11 +88,11 @@ const WishlistItem: React.FC<WishlistItemProps> = ({
                 </View>
 
                 <View style={styles.infoRow}>
-                    <Text style={[styles.year, themeStyles.subText]}>Year: {wish.year}{wish.place && wish.place !== 'General' ? ` • ${wish.place}` : ''}</Text>
+                    <Text style={[styles.year, themeStyles.subText]}>{t('wishlist.year')}: {wish.year}{wish.place && wish.place !== 'General' ? ` • ${wish.place}` : ''}</Text>
                     {wish.link ? (
                         <TouchableOpacity onPress={handleOpenLink}>
                             <Text style={[styles.link, themeStyles.link]} numberOfLines={1}>
-                                View Link
+                                {t('wishlist.viewLinkFull')}
                             </Text>
                         </TouchableOpacity>
                     ) : null}
@@ -107,14 +109,14 @@ const WishlistItem: React.FC<WishlistItemProps> = ({
                         disabled={loading}
                     >
                         {loading ? (
-                            <Text style={[styles.actionText, themeStyles.subText]}>Processing...</Text>
+                            <Text style={[styles.actionText, themeStyles.subText]}>{t('wishlist.processing')}</Text>
                         ) : isCompleted ? (
                             <View style={styles.completedContainer}>
                                 <Ionicons name="checkmark-circle" size={16} color={isDark ? '#34d399' : '#059669'} />
-                                <Text style={[styles.actionText, themeStyles.completedText]}>Completed</Text>
+                                <Text style={[styles.actionText, themeStyles.completedText]}>{t('wishlist.completed')}</Text>
                             </View>
                         ) : (
-                            <Text style={[styles.actionText, { color: isDark ? '#94a3b8' : '#64748b' }]}>Mark Completed</Text>
+                            <Text style={[styles.actionText, { color: isDark ? '#94a3b8' : '#64748b' }]}>{t('wishlist.markCompleted')}</Text>
                         )}
                     </TouchableOpacity>
 
@@ -136,7 +138,7 @@ const WishlistItem: React.FC<WishlistItemProps> = ({
 
                 {isCompleted && wish.transaction_date && (
                     <Text style={[styles.completedDate, themeStyles.subText]}>
-                        Completed on: {wish.transaction_date}
+                        {t('wishlist.completedOn')} {wish.transaction_date}
                     </Text>
                 )}
             </View>

@@ -1,6 +1,7 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router/react-navigation';
 import { Stack } from 'expo-router';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { LanguageProvider } from '@/contexts/LanguageContext';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import React, { useState, useEffect, useRef } from 'react';
 import { AppState } from 'react-native';
@@ -123,9 +124,11 @@ function RootLayoutContent() {
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
-      <AuthProvider>
-        <RootLayoutContent />
-      </AuthProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <RootLayoutContent />
+        </AuthProvider>
+      </LanguageProvider>
     </SafeAreaProvider>
   );
 }

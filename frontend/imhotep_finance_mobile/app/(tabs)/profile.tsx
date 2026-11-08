@@ -23,6 +23,7 @@ import { router } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslation } from '@/contexts/LanguageContext';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import api from '@/constants/api';
 import CurrencySelect from '@/components/CurrencySelect'; // Import CurrencySelect
@@ -72,6 +73,7 @@ const themes = {
 
 export default function ProfileScreen() {
   const { user, logout, updateUser, token } = useAuth();
+  const { t, language, setLanguage, supportedLanguages } = useTranslation();
   const colorScheme = useColorScheme();
   const backgroundColor = colorScheme === 'dark' ? '#0f172a' : '#f8fafc';
   const colors = themes[colorScheme === 'dark' ? 'dark' : 'light'];
@@ -397,19 +399,19 @@ export default function ProfileScreen() {
 
   const handleLogout = () => {
     Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
+      t('common.navigation.logout'),
+      t('profile.logoutConfirm'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.actions.cancel'), style: 'cancel' },
         {
-          text: 'Logout',
+          text: t('common.navigation.logout'),
           style: 'destructive',
           onPress: async () => {
             try {
               await logout();
             } catch (err) {
               console.error('Logout error:', err);
-              Alert.alert('Error', 'Failed to logout. Please try again.');
+              Alert.alert(t('common.status.error'), 'Failed to logout. Please try again.');
             }
           },
         },
@@ -432,9 +434,9 @@ export default function ProfileScreen() {
           showsVerticalScrollIndicator={false}
         >
           <ThemedView style={styles.header} lightColor="#f8fafc" darkColor="#0f172a">
-            <ThemedText type="title" style={styles.title}>My Profile</ThemedText>
+            <ThemedText type="title" style={styles.title}>{t('profile.title')}</ThemedText>
             <ThemedText style={[styles.subtitle, { color: colors.textSecondary }]}>
-              Manage your account and preferences
+              {t('profile.subtitle')}
             </ThemedText>
           </ThemedView>
 
@@ -458,7 +460,7 @@ export default function ProfileScreen() {
               onPress={() => { setActiveTab('profile'); setError(''); setSuccess(''); }}
             >
               <ThemedText style={[styles.tabText, activeTab === 'profile' && { color: colors.primary }]}>
-                Profile
+                {t('profile.sections.personal')}
               </ThemedText>
             </Pressable>
             <Pressable
@@ -469,7 +471,7 @@ export default function ProfileScreen() {
               onPress={() => { setActiveTab('security'); setError(''); setSuccess(''); }}
             >
               <ThemedText style={[styles.tabText, activeTab === 'security' && { color: colors.primary }]}>
-                Security
+                {t('profile.sections.security')}
               </ThemedText>
             </Pressable>
             <Pressable
@@ -480,7 +482,7 @@ export default function ProfileScreen() {
               onPress={() => { setActiveTab('financial'); setError(''); setSuccess(''); }}
             >
               <ThemedText style={[styles.tabText, activeTab === 'financial' && { color: colors.primary }]}>
-                Financial
+                {t('profile.fields.favoriteCurrency')}
               </ThemedText>
             </Pressable>
           </View>
@@ -502,22 +504,22 @@ export default function ProfileScreen() {
             <View style={styles.form}>
               <View style={styles.row}>
                 <View style={styles.halfInput}>
-                  <ThemedText style={[styles.label, { color: colors.textSecondary }]}>First Name</ThemedText>
+                  <ThemedText style={[styles.label, { color: colors.textSecondary }]}>{t('profile.fields.firstName')}</ThemedText>
                   <TextInput
                     style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
                     value={profileData.first_name}
                     onChangeText={(text) => setProfileData({ ...profileData, first_name: text })}
-                    placeholder="First name"
+                    placeholder={t('profile.placeholders.firstName')}
                     placeholderTextColor={colors.placeholder}
                   />
                 </View>
                 <View style={styles.halfInput}>
-                  <ThemedText style={[styles.label, { color: colors.textSecondary }]}>Last Name</ThemedText>
+                  <ThemedText style={[styles.label, { color: colors.textSecondary }]}>{t('profile.fields.lastName')}</ThemedText>
                   <TextInput
                     style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
                     value={profileData.last_name}
                     onChangeText={(text) => setProfileData({ ...profileData, last_name: text })}
-                    placeholder="Last name"
+                    placeholder={t('profile.placeholders.lastName')}
                     placeholderTextColor={colors.placeholder}
                   />
                 </View>
@@ -525,13 +527,13 @@ export default function ProfileScreen() {
 
               <View style={styles.inputGroup}>
                 <ThemedText style={[styles.label, { color: colors.textSecondary }]}>
-                  Username <ThemedText style={{ color: colors.error }}>*</ThemedText>
+                  {t('profile.fields.username')} <ThemedText style={{ color: colors.error }}>*</ThemedText>
                 </ThemedText>
                 <TextInput
                   style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
                   value={profileData.username}
                   onChangeText={(text) => setProfileData({ ...profileData, username: text })}
-                  placeholder="Username"
+                  placeholder={t('profile.placeholders.username')}
                   placeholderTextColor={colors.placeholder}
                   autoCapitalize="none"
                 />
@@ -539,18 +541,69 @@ export default function ProfileScreen() {
 
               <View style={styles.inputGroup}>
                 <ThemedText style={[styles.label, { color: colors.textSecondary }]}>
-                  Email <ThemedText style={{ color: colors.error }}>*</ThemedText>
+                  {t('profile.fields.email')} <ThemedText style={{ color: colors.error }}>*</ThemedText>
                 </ThemedText>
                 <TextInput
                   style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
                   value={profileData.email}
                   onChangeText={(text) => setProfileData({ ...profileData, email: text })}
-                  placeholder="you@example.com"
+                  placeholder={t('profile.placeholders.email')}
                   placeholderTextColor={colors.placeholder}
                   keyboardType="email-address"
                   autoCapitalize="none"
                   onFocus={() => scrollToInput(350)}
                 />
+              </View>
+
+              {/* Language Selection Card */}
+              <View style={[styles.securityCard, { backgroundColor: colors.surface, borderColor: colors.border, marginTop: 8, marginBottom: 16 }]}>
+                <ThemedText style={[styles.securityTitle, { color: colors.text, marginBottom: 4 }]} type="defaultSemiBold">
+                  {t('profile.languagePreferences')}
+                </ThemedText>
+                <ThemedText style={{ color: colors.textSecondary, fontSize: 13, marginBottom: 12 }}>
+                  {t('profile.languageSubtitle')}
+                </ThemedText>
+                <View style={{ gap: 8 }}>
+                  {Object.values(supportedLanguages).map((lang) => {
+                    const isSelected = language === lang.code;
+                    return (
+                      <Pressable
+                        key={lang.code}
+                        onPress={() => setLanguage(lang.code)}
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          paddingVertical: 12,
+                          paddingHorizontal: 16,
+                          borderRadius: 14,
+                          backgroundColor: isSelected ? colors.primaryLight : colors.surfaceActive,
+                          borderWidth: 1.5,
+                          borderColor: isSelected ? colors.primary : colors.border,
+                        }}
+                      >
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                          <ThemedText style={{ fontSize: 22 }}>{lang.flag}</ThemedText>
+                          <View>
+                            <ThemedText style={{
+                              color: isSelected ? colors.primary : colors.text,
+                              fontWeight: isSelected ? '700' : '600',
+                              fontSize: 15,
+                            }}>
+                              {lang.nativeName}
+                            </ThemedText>
+                            <ThemedText style={{ color: colors.textSecondary, fontSize: 12, marginTop: 1 }}>
+                              {lang.name} ({lang.code.toUpperCase()})
+                            </ThemedText>
+                          </View>
+                        </View>
+                        {isSelected && (
+                          <Ionicons name="checkmark-circle" size={20} color={colors.primary} />
+                        )}
+                      </Pressable>
+                    );
+                  })}
+                </View>
               </View>
 
               <Pressable
@@ -561,16 +614,16 @@ export default function ProfileScreen() {
                 {loading ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
-                  <ThemedText style={styles.buttonText}>Update Profile</ThemedText>
+                  <ThemedText style={styles.buttonText}>{t('common.actions.update')}</ThemedText>
                 )}
               </Pressable>
 
               {/* Danger Zone */}
               {user?.username !== 'demo' && (
                 <View style={[styles.dangerZone, { borderTopColor: colors.error }]}>
-                  <ThemedText style={[styles.dangerZoneTitle, { color: colors.error }]}>Danger Zone</ThemedText>
+                  <ThemedText style={[styles.dangerZoneTitle, { color: colors.error }]}>{t('profile.deleteAccount.dangerZone')}</ThemedText>
                   <ThemedText style={[styles.dangerZoneText, { color: colors.textSecondary }]}>
-                    Once you delete your account, there is no going back. Please be certain.
+                    {t('profile.deleteAccount.dangerWarning')}
                   </ThemedText>
                   <Pressable
                     style={[styles.dangerButton, { backgroundColor: colors.errorLight, borderColor: colors.error }]}
@@ -583,7 +636,7 @@ export default function ProfileScreen() {
                       setSuccess('');
                     }}
                   >
-                    <ThemedText style={{ color: colors.error, fontWeight: 'bold' }}>Delete Account</ThemedText>
+                    <ThemedText style={{ color: colors.error, fontWeight: 'bold' }}>{t('profile.deleteAccount.button')}</ThemedText>
                   </Pressable>
                 </View>
               )}
@@ -598,10 +651,10 @@ export default function ProfileScreen() {
                 <View style={styles.securityRow}>
                   <View style={styles.securityTextContainer}>
                     <ThemedText style={[styles.securityTitle, { color: colors.text }]} type="defaultSemiBold">
-                      App Lock
+                      {t('profile.fields.appLock')}
                     </ThemedText>
                     <ThemedText style={[styles.securityDescription, { color: colors.textSecondary }]}>
-                      Require Face ID/Fingerprint or your device PIN to unlock the app when opening or returning.
+                      {t('profile.fields.appLockDesc')}
                     </ThemedText>
                   </View>
                   <Switch
@@ -616,18 +669,18 @@ export default function ProfileScreen() {
               <View style={[styles.divider, { backgroundColor: colors.borderLight }]} />
 
               <ThemedText style={[styles.sectionTitle, { color: colors.text }]} type="defaultSemiBold">
-                Change Password
+                {t('profile.passwords.title')}
               </ThemedText>
               <View style={styles.inputGroup}>
                 <ThemedText style={[styles.label, { color: colors.textSecondary }]}>
-                  Current Password <ThemedText style={{ color: colors.error }}>*</ThemedText>
+                  {t('profile.passwords.currentPassword')} <ThemedText style={{ color: colors.error }}>*</ThemedText>
                 </ThemedText>
                 <View style={styles.passwordContainer}>
                   <TextInput
                     style={[styles.passwordInput, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
                     value={passwordData.current_password}
                     onChangeText={(text) => setPasswordData({ ...passwordData, current_password: text })}
-                    placeholder="Current password"
+                    placeholder={t('profile.placeholders.currentPassword')}
                     placeholderTextColor={colors.placeholder}
                     secureTextEntry={!showPasswords.current}
                   />
@@ -646,14 +699,14 @@ export default function ProfileScreen() {
 
               <View style={styles.inputGroup}>
                 <ThemedText style={[styles.label, { color: colors.textSecondary }]}>
-                  New Password <ThemedText style={{ color: colors.error }}>*</ThemedText>
+                  {t('profile.passwords.newPassword')} <ThemedText style={{ color: colors.error }}>*</ThemedText>
                 </ThemedText>
                 <View style={styles.passwordContainer}>
                   <TextInput
                     style={[styles.passwordInput, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
                     value={passwordData.new_password}
                     onChangeText={(text) => setPasswordData({ ...passwordData, new_password: text })}
-                    placeholder="New password (min 8 characters)"
+                    placeholder={t('profile.placeholders.newPassword')}
                     placeholderTextColor={colors.placeholder}
                     secureTextEntry={!showPasswords.new}
                   />
@@ -672,14 +725,14 @@ export default function ProfileScreen() {
 
               <View style={styles.inputGroup}>
                 <ThemedText style={[styles.label, { color: colors.textSecondary }]}>
-                  Confirm Password <ThemedText style={{ color: colors.error }}>*</ThemedText>
+                  {t('profile.passwords.confirmNewPassword')} <ThemedText style={{ color: colors.error }}>*</ThemedText>
                 </ThemedText>
                 <View style={styles.passwordContainer}>
                   <TextInput
                     style={[styles.passwordInput, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
                     value={passwordData.confirm_password}
                     onChangeText={(text) => setPasswordData({ ...passwordData, confirm_password: text })}
-                    placeholder="Confirm new password"
+                    placeholder={t('profile.placeholders.confirmPassword')}
                     placeholderTextColor={colors.placeholder}
                     secureTextEntry={!showPasswords.confirm}
                     onFocus={() => scrollToInput(450)}
@@ -705,7 +758,7 @@ export default function ProfileScreen() {
                 {loading ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
-                  <ThemedText style={styles.buttonText}>Change Password</ThemedText>
+                  <ThemedText style={styles.buttonText}>{t('profile.passwords.updateButton')}</ThemedText>
                 )}
               </Pressable>
             </View>
@@ -716,7 +769,7 @@ export default function ProfileScreen() {
             <View style={styles.form}>
               <View style={styles.inputGroup}>
                 <ThemedText style={[styles.label, { color: colors.textSecondary }]}>
-                  Monthly Target Amount
+                  {t('profile.financial.monthlyTarget')}
                 </ThemedText>
                 <TextInput
                   style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
@@ -727,13 +780,13 @@ export default function ProfileScreen() {
                   keyboardType="numeric"
                 />
                 <ThemedText style={{ fontSize: 12, color: colors.textSecondary, marginTop: 4 }}>
-                  Set your monthly financial goal to track progress on the dashboard.
+                  {t('profile.financial.monthlyTargetDesc')}
                 </ThemedText>
               </View>
 
               <View style={styles.inputGroup}>
                 <ThemedText style={[styles.label, { color: colors.textSecondary }]}>
-                  Favorite Currency
+                  {t('profile.fields.favoriteCurrency')}
                 </ThemedText>
                 <CurrencySelect
                   value={currency}
@@ -749,7 +802,7 @@ export default function ProfileScreen() {
                 {loading ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
-                  <ThemedText style={styles.buttonText}>Save Financial Settings</ThemedText>
+                  <ThemedText style={styles.buttonText}>{t('profile.financial.saveSettings')}</ThemedText>
                 )}
               </Pressable>
             </View>
@@ -764,7 +817,7 @@ export default function ProfileScreen() {
           >
             <View style={styles.privacyButtonLeft}>
               <Ionicons name="shield-checkmark-outline" size={22} color={colors.primary} />
-              <ThemedText style={styles.privacyButtonText}>Privacy Policy</ThemedText>
+              <ThemedText style={styles.privacyButtonText}>{t('common.navigation.privacyPolicy')}</ThemedText>
             </View>
             <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
           </Pressable>
@@ -772,7 +825,7 @@ export default function ProfileScreen() {
           {/* Logout Button */}
           <Pressable style={styles.logoutButton} onPress={handleLogout}>
             <Ionicons name="log-out-outline" size={24} color="#fff" />
-            <ThemedText style={styles.logoutButtonText}>Logout</ThemedText>
+            <ThemedText style={styles.logoutButtonText}>{t('common.navigation.logout')}</ThemedText>
           </Pressable>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -790,7 +843,7 @@ export default function ProfileScreen() {
         >
           <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
             <View style={[styles.modalHeader, { borderBottomColor: colors.borderLight }]}>
-              <ThemedText type="subtitle" style={{ color: colors.text }}>Verify Email Change</ThemedText>
+              <ThemedText type="subtitle" style={{ color: colors.text }}>{t('profile.emailChange.title')}</ThemedText>
               <Pressable onPress={closeOtpModal}>
                 <Ionicons name="close" size={24} color={colors.textSecondary} />
               </Pressable>
@@ -798,7 +851,7 @@ export default function ProfileScreen() {
 
             <View style={styles.modalContent}>
               <ThemedText style={[styles.modalDescription, { color: colors.textSecondary }]}>
-                Enter the 6-digit OTP code sent to your new email address ({pendingNewEmail}). The code expires in 10 minutes.
+                {t('profile.emailChange.otpModalDesc', { email: pendingNewEmail })}
               </ThemedText>
 
               {otpError ? (
@@ -826,7 +879,7 @@ export default function ProfileScreen() {
                   style={[styles.cancelButton, { borderColor: colors.border }]}
                   onPress={closeOtpModal}
                 >
-                  <ThemedText style={{ color: colors.textSecondary }}>Cancel</ThemedText>
+                  <ThemedText style={{ color: colors.textSecondary }}>{t('common.actions.cancel')}</ThemedText>
                 </Pressable>
                 <Pressable
                   style={[
@@ -840,7 +893,7 @@ export default function ProfileScreen() {
                   {otpLoading ? (
                     <ActivityIndicator color="#fff" />
                   ) : (
-                    <ThemedText style={styles.buttonText}>Verify</ThemedText>
+                    <ThemedText style={styles.buttonText}>{t('profile.emailChange.verify')}</ThemedText>
                   )}
                 </Pressable>
               </View>
@@ -862,7 +915,7 @@ export default function ProfileScreen() {
         >
           <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
             <View style={[styles.modalHeader, { borderBottomColor: colors.borderLight }]}>
-              <ThemedText type="subtitle" style={{ color: colors.error }}>Delete Account</ThemedText>
+              <ThemedText type="subtitle" style={{ color: colors.error }}>{t('profile.deleteAccount.title')}</ThemedText>
               <Pressable onPress={() => setShowDeleteModal(false)}>
                 <Ionicons name="close" size={24} color={colors.textSecondary} />
               </Pressable>
@@ -870,7 +923,7 @@ export default function ProfileScreen() {
 
             <View style={styles.modalContent}>
               <ThemedText style={[styles.modalDescription, { color: colors.textSecondary }]}>
-                This action cannot be undone. How would you like to verify your identity to proceed?
+                {t('profile.deleteAccount.description')}
               </ThemedText>
 
               {!deleteMethod ? (
@@ -879,7 +932,7 @@ export default function ProfileScreen() {
                     style={[styles.dangerButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
                     onPress={() => setDeleteMethod('password')}
                   >
-                    <ThemedText style={{ color: colors.text }}>Verify with Password</ThemedText>
+                    <ThemedText style={{ color: colors.text }}>{t('profile.deleteAccount.verifyPassword')}</ThemedText>
                   </Pressable>
                   <Pressable
                     style={[styles.dangerButton, { backgroundColor: colors.surface, borderColor: colors.border }, deleteLoading && styles.buttonDisabled]}
@@ -892,7 +945,7 @@ export default function ProfileScreen() {
                     {deleteLoading ? (
                       <ActivityIndicator color={colors.text} />
                     ) : (
-                      <ThemedText style={{ color: colors.text }}>Verify with Email OTP</ThemedText>
+                      <ThemedText style={{ color: colors.text }}>{t('profile.deleteAccount.verifyOtp')}</ThemedText>
                     )}
                   </Pressable>
                 </View>
@@ -900,12 +953,12 @@ export default function ProfileScreen() {
                 <View style={{ gap: 16 }}>
                   {deleteMethod === 'otp' && deleteOtpSent && (
                     <ThemedText style={{ color: colors.success, fontSize: 14 }}>
-                      An OTP has been sent to your email address.
+                      {t('profile.deleteAccount.otpSent')}
                     </ThemedText>
                   )}
                   <View>
                     <ThemedText style={[styles.label, { color: colors.textSecondary }]}>
-                      {deleteMethod === 'otp' ? 'Enter 6-digit OTP' : 'Enter your password'}
+                      {deleteMethod === 'otp' ? t('profile.deleteAccount.enterOtp') : t('profile.deleteAccount.enterPassword')}
                     </ThemedText>
                     <TextInput
                       style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
@@ -928,7 +981,7 @@ export default function ProfileScreen() {
                         setSuccess('');
                       }}
                     >
-                      <ThemedText style={{ color: colors.textSecondary }}>Back</ThemedText>
+                      <ThemedText style={{ color: colors.textSecondary }}>{t('common.actions.back')}</ThemedText>
                     </Pressable>
                     <Pressable
                       style={[
@@ -942,7 +995,7 @@ export default function ProfileScreen() {
                       {deleteLoading ? (
                         <ActivityIndicator color="#fff" />
                       ) : (
-                        <ThemedText style={styles.buttonText}>Confirm Delete</ThemedText>
+                        <ThemedText style={styles.buttonText}>{t('profile.deleteAccount.confirmDelete')}</ThemedText>
                       )}
                     </Pressable>
                   </View>

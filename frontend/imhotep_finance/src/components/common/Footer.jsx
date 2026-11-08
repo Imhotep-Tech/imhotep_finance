@@ -1,10 +1,13 @@
 import { Link } from 'react-router-dom';
 import { usePWA } from '../../hooks/usePWA';
+import { useTranslation } from '../../contexts/LanguageContext';
+import { versionEntries } from '../../utils/versionData';
 import Logo from '../../assets/Logo.jpeg';
 import TallyFeedbackLink from './TallyFeedbackLink';
 
 function Footer() {
   const { updateApp } = usePWA();
+  const { t } = useTranslation();
 
   // Function to clear cache and reload the app
   const clearCacheAndReload = async () => {
@@ -36,7 +39,7 @@ function Footer() {
         </div>
         <div className="font-extrabold text-xl mb-1 font-chef">Imhotep Finance</div>
         <p className="text-white/80 text-xs mb-2">
-          Manage your finances efficiently with Imhotep Financial Manager
+          {t('dashboard.tagline')}
         </p>
         <div className="flex justify-center space-x-4 text-xs mb-2">
           <a
@@ -65,7 +68,7 @@ function Footer() {
           </a>
           <TallyFeedbackLink />
           <Link to="/version-history" className="hover:underline">
-            Version 8.3.0
+            Version {versionEntries[0].version}
           </Link>
         </div>
 
@@ -75,13 +78,13 @@ function Footer() {
             onClick={clearCacheAndReload}
             className="bg-white text-[#366c6b] px-6 py-2 rounded-lg font-semibold shadow-md hover:shadow-lg hover:scale-105 transition-transform"
           >
-            Update
+            {t('common.actions.update')}
           </button>
           <Link
             to="/download-app"
             className="bg-white text-[#366c6b] px-6 py-2 rounded-lg font-semibold shadow-md hover:shadow-lg hover:scale-105 transition-transform inline-block"
           >
-            Download App
+            {t('common.navigation.downloadApp')}
           </Link>
         </div>
 

@@ -1,0 +1,90 @@
+{
+  "brand": "Imhotep Finance",
+  "hero": {
+    "titlePre": "Take Control of Your",
+    "titleHighlight": "Financial Future",
+    "title": "Master Your Finances with Elegance",
+    "subtitle": "Imhotep Finance gives you complete clarity over your wealth, multi-currency assets, expenses, and savings targets.",
+    "description": "The ultimate cross-platform personal finance manager. Native on Android, perfectly optimized for iOS, and accessible from anywhere.",
+    "selfHostTitle": "🏠 Imhotep Finance is fully self-hostable in production.",
+    "selfHostDocs": "Learn how to deploy and develop it from the official docs:",
+    "selfHostGuide": "Self-Hosting Guide",
+    "and": "and",
+    "devWorkflow": "Development Workflow",
+    "cta": "Get Started Free",
+    "login": "Sign In",
+    "dashboard": "Go to Dashboard"
+  },
+  "stats": {
+    "currenciesSupported": "Currencies Supported",
+    "featuresAdded": "Features Added",
+    "developmentTime": "Development Time",
+    "months": "mo"
+  },
+  "featuresSection": {
+    "title": "Why Choose Imhotep Finance?",
+    "subtitle": "Powerful features designed to make financial management effortless"
+  },
+  "featuresList": {
+    "expenseTracking": {
+      "title": "Expense Tracking",
+      "desc": "Easily track your daily expenses and stay on budget."
+    },
+    "crossPlatform": {
+      "title": "Cross-Platform & iOS Ready",
+      "desc": "Native Android app, optimized iOS web app, and accessible on any device."
+    },
+    "multiCurrency": {
+      "title": "Multi-Currency Support",
+      "desc": "170+ currencies supported with real-time conversion."
+    },
+    "analyticsPlaces": {
+      "title": "Advanced Analytics & Places",
+      "desc": "Filter transactions by location and gain deeper insights into your spending."
+    },
+    "securePrivate": {
+      "title": "Secure & Private",
+      "desc": "Your financial data is protected and 100% open source."
+    },
+    "scheduledTrans": {
+      "title": "Scheduled Transactions",
+      "desc": "Automate your recurring payments and never miss a bill."
+    }
+  },
+  "steps": {
+    "title": "Get Started in 3 Simple Steps",
+    "step1Title": "Sign Up",
+    "step1Desc": "Create your free account in less than 2 minutes",
+    "step2Title": "Connect",
+    "step2Desc": "Add your accounts and start tracking your finances",
+    "step3Title": "Achieve",
+    "step3Desc": "Reach your financial goals with our smart tools"
+  },
+  "cta": {
+    "title": "Ready to Transform Your Financial Life?",
+    "subtitle": "Join thousands of users who have already taken control of their finances with Imhotep.",
+    "startJourney": "Start Your Journey",
+    "signIn": "Sign In"
+  },
+  "features": {
+    "title": "Everything you need for financial freedom",
+    "multiCurrencyTitle": "Multi-Currency Net Worth",
+    "multiCurrencyDesc": "Track balances across multiple currencies with automated real-time conversion into your preferred primary currency.",
+    "savingsTargetTitle": "Intelligent Savings Goals",
+    "savingsTargetDesc": "Define financial milestones and watch your score adapt in real-time as your net worth progresses.",
+    "recurringTitle": "Automated Scheduled Expenses",
+    "recurringDesc": "Never miss a bill or pay cycle. Recurring transactions execute seamlessly with zero manual stress.",
+    "wishlistTitle": "Integrated Wishlist",
+    "wishlistDesc": "Plan your luxury and personal purchases, set priorities, and convert them to transactions with one click."
+  },
+  "mobileApp": {
+    "title": "Finance on the Go",
+    "subtitle": "Download the mobile app for iOS and Android with biometric lock, instant notifications, and offline caching.",
+    "downloadButton": "Download Mobile App"
+  },
+  "privacyPolicy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last updated",
+    "content": "Your privacy is paramount. Imhotep Finance encrypts your financial data and never shares or sells your information."
+  }
+}

@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import CurrencySelect from './CurrencySelect';
 import PlaceSelect from './PlaceSelect';
+import { useTranslation } from '../contexts/LanguageContext';
 
 const UpdateWishModal = ({
   onClose,
   onSuccess,
   initialValues = {},
 }) => {
+  const { t } = useTranslation();
   const [price, setPrice] = useState(initialValues.price || '');
   const [currency, setCurrency] = useState(initialValues.currency || '');
   const [wishDetails, setWishDetails] = useState(initialValues.wish_details || '');
@@ -35,7 +37,7 @@ const UpdateWishModal = ({
     setError('');
     setSuccess('');
     if (!price || !currency) {
-      setError('Price and currency are required.');
+      setError(t('wishlist.modal.requiredFields'));
       setLoading(false);
       return;
     }
@@ -51,14 +53,14 @@ const UpdateWishModal = ({
           place,
         }
       );
-      setSuccess('Wish updated successfully!');
+      setSuccess(t('wishlist.modal.updateSuccess'));
       setTimeout(() => {
         if (onSuccess) onSuccess();
       }, 1000);
     } catch (err) {
       setError(
         err.response?.data?.error ||
-        'Failed to update wish.'
+        t('wishlist.modal.saveFailed')
       );
     }
     setLoading(false);
@@ -84,11 +86,11 @@ const UpdateWishModal = ({
             </svg>
           </button>
           <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">
-            Edit Wish
+            {t('wishlist.modal.editTitle')}
           </h2>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Price</label>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">{t('wishlist.modal.price')}</label>
               <input
                 type="number"
                 min="0"
@@ -97,11 +99,11 @@ const UpdateWishModal = ({
                 onChange={e => setPrice(e.target.value)}
                 required
                 className="chef-input"
-                placeholder="Enter price"
+                placeholder={t('wishlist.modal.pricePlaceholder')}
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Currency</label>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">{t('wishlist.modal.currency')}</label>
 
               {/* Use shared CurrencySelect so the opened wish currency is preserved */}
               <CurrencySelect
@@ -111,7 +113,7 @@ const UpdateWishModal = ({
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Year</label>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">{t('wishlist.modal.year')}</label>
               <input
                 type="number"
                 min="2000"
@@ -123,27 +125,27 @@ const UpdateWishModal = ({
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Wish Details</label>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">{t('wishlist.modal.details')}</label>
               <input
                 type="text"
                 value={wishDetails}
                 onChange={e => setWishDetails(e.target.value)}
                 className="chef-input"
-                placeholder="Details (optional)"
+                placeholder={t('wishlist.modal.detailsPlaceholder')}
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Link</label>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">{t('wishlist.modal.link')}</label>
               <input
                 type="url"
                 value={link}
                 onChange={e => setLink(e.target.value)}
                 className="chef-input"
-                placeholder="Link (optional)"
+                placeholder={t('wishlist.modal.linkPlaceholder')}
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Place</label>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">{t('wishlist.modal.place')}</label>
               <PlaceSelect
                 value={place}
                 onChange={setPlace}
@@ -157,14 +159,14 @@ const UpdateWishModal = ({
                 onClick={onClose}
                 disabled={loading}
               >
-                Cancel
+                {t('common.actions.cancel')}
               </button>
               <button
                 type="submit"
                 className="chef-button bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                 disabled={loading}
               >
-                {loading ? 'Saving...' : 'Save'}
+                {loading ? t('wishlist.modal.saving') : t('wishlist.modal.save')}
               </button>
             </div>
             {success && (

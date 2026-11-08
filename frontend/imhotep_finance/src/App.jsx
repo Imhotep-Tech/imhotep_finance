@@ -1,5 +1,6 @@
 import { AuthProvider } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
+import { LanguageProvider } from './contexts/LanguageContext'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { useEffect } from 'react'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -58,8 +59,9 @@ function App() {
 
   return (
     <ThemeProvider>
-      <AuthProvider>
-        <Router>
+      <LanguageProvider>
+        <AuthProvider>
+          <Router>
           <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] transition-colors">
             {/* Global PWA Components */}
             <InstallPrompt />
@@ -205,7 +207,8 @@ function App() {
           </div>
         </Router>
       </AuthProvider>
-    </ThemeProvider>
+    </LanguageProvider>
+  </ThemeProvider>
   )
 }
 

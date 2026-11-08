@@ -2,39 +2,41 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Footer from '../../components/common/Footer';
 import Logo from '../../assets/Logo.jpeg';
+import LanguageToggle from '../../components/common/LanguageToggle';
+import { useTranslation } from '../../contexts/LanguageContext';
 import { versionEntries } from '../../utils/versionData';
 
 // Features data with emojis
 const features = [
   {
     icon: "💸",
-    title: "Expense Tracking",
-    description: "Easily track your daily expenses and stay on budget."
+    titleKey: "landing.featuresList.expenseTracking.title",
+    descKey: "landing.featuresList.expenseTracking.desc"
   },
   {
     icon: "📱",
-    title: "Cross-Platform & iOS Ready",
-    description: "Native Android app, optimized iOS web app, and accessible on any device."
+    titleKey: "landing.featuresList.crossPlatform.title",
+    descKey: "landing.featuresList.crossPlatform.desc"
   },
   {
     icon: "🌍",
-    title: "Multi-Currency Support",
-    description: "170+ currencies supported with real-time conversion."
+    titleKey: "landing.featuresList.multiCurrency.title",
+    descKey: "landing.featuresList.multiCurrency.desc"
   },
   {
     icon: "📍",
-    title: "Advanced Analytics & Places",
-    description: "Filter transactions by location and gain deeper insights into your spending."
+    titleKey: "landing.featuresList.analyticsPlaces.title",
+    descKey: "landing.featuresList.analyticsPlaces.desc"
   },
   {
     icon: "🛡️",
-    title: "Secure & Private",
-    description: "Your financial data is protected and 100% open source."
+    titleKey: "landing.featuresList.securePrivate.title",
+    descKey: "landing.featuresList.securePrivate.desc"
   },
   {
     icon: "⏰",
-    title: "Scheduled Transactions",
-    description: "Automate your recurring payments and never miss a bill."
+    titleKey: "landing.featuresList.scheduledTrans.title",
+    descKey: "landing.featuresList.scheduledTrans.desc"
   },
 ];
 
@@ -65,12 +67,17 @@ const calculateDevelopmentMonths = () => {
 const developmentMonths = calculateDevelopmentMonths();
 
 function LandingPage() {
+  const { t } = useTranslation();
   const [currentFeature, setCurrentFeature] = useState(0);
 
   return (
     <div
       className="min-h-screen relative overflow-hidden bg-[var(--bg)] text-[var(--text)] transition-colors"
     >
+      {/* Top right language switch */}
+      <div className="fixed top-4 right-4 z-50">
+        <LanguageToggle />
+      </div>
       {/* Floating background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-20 w-32 h-32 rounded-full filter blur-xl opacity-20 animate-float bg-[#366c6b] mix-blend-multiply dark:bg-emerald-600/40 dark:mix-blend-screen"></div>
@@ -85,20 +92,20 @@ function LandingPage() {
             <img src={Logo} alt="Logo" className="w-16 h-16 object-contain" />
           </div>
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-gray-100 mb-6 leading-tight">
-            Take Control of Your{' '}
+            {t('landing.hero.titlePre')}{' '}
             <span className="bg-gradient-to-r from-[#366c6b] to-[#1a3535] bg-clip-text text-transparent">
-              Financial Future
+              {t('landing.hero.titleHighlight')}
             </span>
           </h1>
           <p className="text-xl sm:text-2xl lg:text-3xl text-[#1a3535] dark:text-gray-300 mb-8 font-medium max-w-4xl mx-auto leading-relaxed opacity-90">
-            The ultimate cross-platform personal finance manager. Native on Android, perfectly optimized for iOS, and accessible from anywhere.
+            {t('landing.hero.description')}
           </p>
           <div className="max-w-4xl mx-auto mb-10 rounded-2xl border border-[#366c6b]/20 bg-white/80 dark:bg-gray-900/70 p-5 sm:p-6 shadow-lg">
             <p className="text-base sm:text-lg text-[#1a3535] dark:text-gray-200 font-medium mb-3">
-              🏠 Imhotep Finance is fully self-hostable in production.
+              {t('landing.hero.selfHostTitle')}
             </p>
             <p className="text-sm sm:text-base text-[#366c6b] dark:text-emerald-400">
-              Learn how to deploy and develop it from the official docs:
+              {t('landing.hero.selfHostDocs')}
               {' '}
               <a
                 href="https://github.com/Imhotep-Tech/imhotep_finance/blob/main/.docs/SELF_HOSTING.md"
@@ -106,10 +113,10 @@ function LandingPage() {
                 rel="noopener noreferrer"
                 className="underline font-semibold hover:opacity-80"
               >
-                Self-Hosting Guide
+                {t('landing.hero.selfHostGuide')}
               </a>
               {' '}
-              and
+              {t('landing.hero.and')}
               {' '}
               <a
                 href="https://github.com/Imhotep-Tech/imhotep_finance/blob/main/.docs/DEVELOPMENT_WORKFLOW.md"
@@ -117,7 +124,7 @@ function LandingPage() {
                 rel="noopener noreferrer"
                 className="underline font-semibold hover:opacity-80"
               >
-                Development Workflow
+                {t('landing.hero.devWorkflow')}
               </a>
               .
             </p>
@@ -130,7 +137,7 @@ function LandingPage() {
                 background: 'linear-gradient(90deg, #366c6b 0%, #1a3535 100%)',
               }}
             >
-              🚀 Get Started Free
+              🚀 {t('landing.hero.cta')}
             </Link>
             <Link
               to="/login"
@@ -139,7 +146,7 @@ function LandingPage() {
                 background: 'linear-gradient(90deg, #366c6b 0%, #1a3535 100%)',
               }}
             >
-              🔓 Sign In
+              🔓 {t('landing.hero.login')}
             </Link>
             <Link
               to="/download-app"
@@ -148,7 +155,7 @@ function LandingPage() {
                 background: 'linear-gradient(90deg, #366c6b 0%, #1a3535 100%)',
               }}
             >
-              📥 Download App
+              📥 {t('common.navigation.downloadApp')}
             </Link>
           </div>
           {/* Stats */}
@@ -156,15 +163,15 @@ function LandingPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 justify-center">
               <div className="glass-effect rounded-lg p-6 text-center transform hover:scale-105 transition-all duration-300 bg-white/80 dark:bg-gray-900/60">
                 <div className="text-3xl font-bold text-[#366c6b] dark:text-emerald-400 mb-2">170+</div>
-                <div className="text-[#1a3535] dark:text-gray-300 opacity-90">Currencies Supported</div>
+                <div className="text-[#1a3535] dark:text-gray-300 opacity-90">{t('landing.stats.currenciesSupported')}</div>
               </div>
               <div className="glass-effect rounded-lg p-6 text-center transform hover:scale-105 transition-all duration-300 bg-white/80 dark:bg-gray-900/60">
                 <div className="text-3xl font-bold text-[#366c6b] dark:text-emerald-400 mb-2">{featuresAdded}+</div>
-                <div className="text-[#1a3535] dark:text-gray-300 opacity-90">Features Added</div>
+                <div className="text-[#1a3535] dark:text-gray-300 opacity-90">{t('landing.stats.featuresAdded')}</div>
               </div>
               <div className="glass-effect rounded-lg p-6 text-center transform hover:scale-105 transition-all duration-300 bg-white/80 dark:bg-gray-900/60">
-                <div className="text-3xl font-bold text-[#366c6b] dark:text-emerald-400 mb-2">{developmentMonths} mo</div>
-                <div className="text-[#1a3535] dark:text-gray-300 opacity-90">Development Time</div>
+                <div className="text-3xl font-bold text-[#366c6b] dark:text-emerald-400 mb-2">{developmentMonths} {t('landing.stats.months')}</div>
+                <div className="text-[#1a3535] dark:text-gray-300 opacity-90">{t('landing.stats.developmentTime')}</div>
               </div>
             </div>
           </div>
@@ -180,10 +187,10 @@ function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-[#1a3535] dark:text-gray-100 mb-4">
-              Why Choose Imhotep Finance?
+              {t('landing.featuresSection.title')}
             </h2>
             <p className="text-xl text-[#366c6b] dark:text-emerald-400">
-              Powerful features designed to make financial management effortless
+              {t('landing.featuresSection.subtitle')}
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -192,8 +199,8 @@ function LandingPage() {
                 <div className="w-16 h-16 bg-[#eaf6f6] dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">
                   {feature.icon}
                 </div>
-                <h3 className="text-xl font-semibold text-[#1a3535] dark:text-gray-100 mb-4">{feature.title}</h3>
-                <p className="text-[#366c6b] dark:text-emerald-400">{feature.description}</p>
+                <h3 className="text-xl font-semibold text-[#1a3535] dark:text-gray-100 mb-4">{t(feature.titleKey)}</h3>
+                <p className="text-[#366c6b] dark:text-emerald-400">{t(feature.descKey)}</p>
               </div>
             ))}
           </div>
@@ -205,7 +212,7 @@ function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-[#1a3535] dark:text-gray-100 mb-4">
-              Get Started in 3 Simple Steps
+              {t('landing.steps.title')}
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -213,22 +220,22 @@ function LandingPage() {
               <div className="w-24 h-24 bg-[#366c6b] rounded-full flex items-center justify-center mx-auto mb-6">
                 <span className="text-3xl font-bold text-white">1</span>
               </div>
-              <h3 className="text-2xl font-semibold text-[#1a3535] dark:text-gray-100 mb-4">Sign Up</h3>
-              <p className="text-[#366c6b] dark:text-emerald-400">Create your free account in less than 2 minutes</p>
+              <h3 className="text-2xl font-semibold text-[#1a3535] dark:text-gray-100 mb-4">{t('landing.steps.step1Title')}</h3>
+              <p className="text-[#366c6b] dark:text-emerald-400">{t('landing.steps.step1Desc')}</p>
             </div>
             <div className="text-center">
               <div className="w-24 h-24 bg-[#366c6b] rounded-full flex items-center justify-center mx-auto mb-6">
                 <span className="text-3xl font-bold text-white">2</span>
               </div>
-              <h3 className="text-2xl font-semibold text-[#1a3535] dark:text-gray-100 mb-4">Connect</h3>
-              <p className="text-[#366c6b] dark:text-emerald-400">Add your accounts and start tracking your finances</p>
+              <h3 className="text-2xl font-semibold text-[#1a3535] dark:text-gray-100 mb-4">{t('landing.steps.step2Title')}</h3>
+              <p className="text-[#366c6b] dark:text-emerald-400">{t('landing.steps.step2Desc')}</p>
             </div>
             <div className="text-center">
               <div className="w-24 h-24 bg-[#366c6b] rounded-full flex items-center justify-center mx-auto mb-6">
                 <span className="text-3xl font-bold text-white">3</span>
               </div>
-              <h3 className="text-2xl font-semibold text-[#1a3535] dark:text-gray-100 mb-4">Achieve</h3>
-              <p className="text-[#366c6b] dark:text-emerald-400">Reach your financial goals with our smart tools</p>
+              <h3 className="text-2xl font-semibold text-[#1a3535] dark:text-gray-100 mb-4">{t('landing.steps.step3Title')}</h3>
+              <p className="text-[#366c6b] dark:text-emerald-400">{t('landing.steps.step3Desc')}</p>
             </div>
           </div>
         </div>
@@ -238,10 +245,10 @@ function LandingPage() {
       <section className="py-20 bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-4xl font-bold mb-6">
-            Ready to Transform Your Financial Life?
+            {t('landing.cta.title')}
           </h2>
           <p className="text-xl mb-8 opacity-90">
-            Join thousands of users who have already taken control of their finances with Imhotep.
+            {t('landing.cta.subtitle')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
@@ -251,7 +258,7 @@ function LandingPage() {
                 background: 'linear-gradient(90deg, #366c6b 0%, #1a3535 100%)',
               }}
             >
-              🚀 Start Your Journey
+              🚀 {t('landing.cta.startJourney')}
             </Link>
             <Link
               to="/login"
@@ -260,7 +267,7 @@ function LandingPage() {
                 background: 'linear-gradient(90deg, #366c6b 0%, #1a3535 100%)',
               }}
             >
-              🔓 Sign In
+              🔓 {t('landing.cta.signIn')}
             </Link>
           </div>
         </div>

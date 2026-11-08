@@ -1,8 +1,22 @@
 export const versionEntries = [
   {
+    version: '9.0.0',
+    date: 'November 8, 2026',
+    badge: { label: 'LATEST', color: 'green' },
+    summary: 'Full-Stack Modular Multi-Language (i18n) Support & Mobile Currency Intelligence',
+    bullets: [
+      'Introduced a modular internationalization (i18n) architecture separating translations into domain JSON files (common, auth, dashboard, transactions, scheduled, wishlist, reports, profile, landing) with complete English and Arabic (RTL) parity.',
+      'Unified localization across the React web application and React Native Expo mobile app using shared context and key conventions.',
+      'Refined language switcher placement: prominent dropdown menu on pre-login/auth screens and consolidated into the Profile page once authenticated.',
+      'Fully localized all mobile modal overlays and selectors, including Add/Edit Transaction, Add/Edit Scheduled Transaction, Add/Edit Wishlist, CategorySelect, PlaceSelect, CurrencySelect, App Lock, User Guide, and Net Worth details dialogs.',
+      'Fixed currency auto-selection in mobile Wishlist modal: new wishes now dynamically fetch and apply the user\'s default favorite currency via the API instead of hardcoded EGP.',
+      'Maintained 100% pass rate across the full backend test suite (232 tests) and clean production builds across Web and Mobile.'
+    ]
+  },
+  {
     version: '8.3.0',
     date: 'July 10, 2026',
-    badge: { label: 'LATEST', color: 'green' },
+    badge: { label: 'UPDATE', color: 'blue' },
     summary: 'Net Worth Grouping, UI Fixes, Large Screen & Edge-to-Edge Mobile Support',
     bullets: [
       'Added Top Toggle Tabs on the Net Worth details page to view balances "By Place" or "By Currency" with interactive progress bars showing percentage allocations.',

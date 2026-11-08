@@ -20,6 +20,8 @@ import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslation } from '@/contexts/LanguageContext';
+import LanguageDropdown from '@/components/LanguageDropdown';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const themes = {
@@ -64,6 +66,7 @@ const themes = {
 export default function LoginScreen() {
   const colorScheme = useColorScheme();
   const colors = themes[colorScheme === 'dark' ? 'dark' : 'light'];
+  const { t, language, setLanguage } = useTranslation();
 
   const [formData, setFormData] = useState({
     username: '',
@@ -249,6 +252,11 @@ export default function LoginScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={[styles.card, { backgroundColor: colors.card }]}>
+          {/* Language Dropdown in Auth */}
+          <View style={{ alignItems: 'flex-end', marginBottom: 4 }}>
+            <LanguageDropdown align="right" />
+          </View>
+
           {/* Logo */}
           <View style={styles.logoContainer}>
             <View style={[styles.logoCircle, { backgroundColor: colors.primaryLight }]}>
@@ -260,9 +268,9 @@ export default function LoginScreen() {
             </View>
           </View>
 
-          <Text style={[styles.title, { color: colors.text }]}>Welcome Back</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{t('auth.login.title')}</Text>
           <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-            Sign in to continue managing your finances
+            {t('auth.login.subtitle')}
           </Text>
 
           {/* Error Message */}
@@ -281,7 +289,7 @@ export default function LoginScreen() {
 
           {/* Username/Email Input */}
           <View style={styles.inputContainer}>
-            <Text style={[styles.label, { color: colors.text }]}>Username or Email</Text>
+            <Text style={[styles.label, { color: colors.text }]}>{t('auth.login.username')}</Text>
             <View style={[styles.inputWrapper, { backgroundColor: colors.inputBg, borderColor: colors.border }]}>
               <Ionicons
                 name="person-outline"
@@ -291,7 +299,7 @@ export default function LoginScreen() {
               />
               <TextInput
                 style={[styles.input, { color: colors.text }]}
-                placeholder="Username or Email"
+                placeholder={t('auth.login.usernamePlaceholder')}
                 placeholderTextColor={colors.placeholder}
                 value={formData.username}
                 onChangeText={(text) => {
@@ -308,10 +316,10 @@ export default function LoginScreen() {
           {/* Password Input */}
           <View style={styles.inputContainer}>
             <View style={styles.labelRow}>
-              <Text style={[styles.label, { color: colors.text }]}>Password</Text>
+              <Text style={[styles.label, { color: colors.text }]}>{t('auth.login.password')}</Text>
               <Link href="/(auth)/forgot-password" asChild>
                 <TouchableOpacity>
-                  <Text style={[styles.forgotPassword, { color: colors.primary }]}>Forgot password?</Text>
+                  <Text style={[styles.forgotPassword, { color: colors.primary }]}>{t('auth.login.forgotPassword')}</Text>
                 </TouchableOpacity>
               </Link>
             </View>
@@ -324,7 +332,7 @@ export default function LoginScreen() {
               />
               <TextInput
                 style={[styles.input, { color: colors.text }]}
-                placeholder="Enter your password"
+                placeholder={t('auth.login.passwordPlaceholder')}
                 placeholderTextColor={colors.placeholder}
                 value={formData.password}
                 onChangeText={(text) => {
@@ -357,14 +365,14 @@ export default function LoginScreen() {
             {loading ? (
               <ActivityIndicator color="white" />
             ) : (
-              <Text style={styles.submitButtonText}>Sign in</Text>
+              <Text style={styles.submitButtonText}>{t('auth.login.signInButton')}</Text>
             )}
           </TouchableOpacity>
 
           {/* Divider */}
           <View style={styles.divider}>
             <View style={[styles.dividerLine, { backgroundColor: colors.divider }]} />
-            <Text style={[styles.dividerText, { color: colors.textSecondary }]}>or continue with</Text>
+            <Text style={[styles.dividerText, { color: colors.textSecondary }]}>{t('auth.login.or')}</Text>
             <View style={[styles.dividerLine, { backgroundColor: colors.divider }]} />
           </View>
 
@@ -381,7 +389,7 @@ export default function LoginScreen() {
               style={{ width: '100%', paddingVertical: 14, alignItems: 'center', flexDirection: 'row', justifyContent: 'center' }}
             >
               <Ionicons name="logo-google" size={20} color="white" style={{ marginRight: 8 }} />
-              <Text style={styles.submitButtonText}>Sign in with Google</Text>
+              <Text style={styles.submitButtonText}>{t('auth.login.continueWithGoogle')}</Text>
             </LinearGradient>
           </TouchableOpacity>
 
@@ -396,17 +404,17 @@ export default function LoginScreen() {
             ) : (
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Ionicons name="eye-outline" size={20} color="white" style={{ marginRight: 8 }} />
-                <Text style={styles.submitButtonText}>Try Demo Account</Text>
+                <Text style={styles.submitButtonText}>{t('auth.login.tryDemo')}</Text>
               </View>
             )}
           </TouchableOpacity>
 
           {/* Sign Up Link */}
           <View style={styles.signUpContainer}>
-            <Text style={[styles.signUpText, { color: colors.textSecondary }]}>Don't have an account? </Text>
+            <Text style={[styles.signUpText, { color: colors.textSecondary }]}>{t('auth.login.dontHaveAccount')} </Text>
             <Link href="/(auth)/register" asChild>
               <TouchableOpacity>
-                <Text style={[styles.signUpLink, { color: colors.primary }]}>Sign up</Text>
+                <Text style={[styles.signUpLink, { color: colors.primary }]}>{t('auth.login.signUp')}</Text>
               </TouchableOpacity>
             </Link>
           </View>

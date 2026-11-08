@@ -15,6 +15,7 @@ import {
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useTranslation } from '@/contexts/LanguageContext';
 import api from '../constants/api';
 import CurrencySelect from './CurrencySelect';
 import CategorySelect from './CategorySelect';
@@ -38,6 +39,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     editMode = false,
     visible,
 }) => {
+    const { t } = useTranslation();
     const [status, setStatus] = useState<'deposit' | 'withdraw'>(initialType);
     const [amount, setAmount] = useState(initialValues.amount || '');
     const [desc, setDesc] = useState(initialValues.desc || '');
@@ -63,7 +65,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     const handleSubmit = async () => {
         setLoading(true);
         if (!amount || !currency) {
-            Alert.alert('Error', 'Amount and currency are required.');
+            Alert.alert(t('common.status.error'), t('transactions.modal.requiredFields'));
             setLoading(false);
             return;
         }
@@ -84,16 +86,16 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                     `/api/finance-management/transaction/update-transactions/${initialValues.id}/`,
                     payload
                 );
-                Alert.alert('Success', 'Transaction updated successfully!');
+                Alert.alert(t('common.status.success'), t('transactions.modal.updateSuccess'));
             } else {
                 await api.post('/api/finance-management/transaction/add-transactions/', payload);
-                Alert.alert('Success', 'Transaction added successfully!');
+                Alert.alert(t('common.status.success'), t('transactions.modal.addSuccess'));
             }
             updateNetworthWidget();
             onSuccess();
         } catch (err: any) {
-            const errorMessage = err.response?.data?.error || (editMode ? 'Failed to update transaction.' : 'Failed to add transaction.');
-            Alert.alert('Error', errorMessage);
+            const errorMessage = err.response?.data?.error || (editMode ? t('transactions.modal.updateFailed') : t('transactions.modal.addFailed'));
+            Alert.alert(t('common.status.error'), errorMessage);
         } finally {
             setLoading(false);
         }
@@ -113,24 +115,24 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
 
     const handleDelete = async () => {
         Alert.alert(
-            'Delete Transaction',
-            'Are you sure you want to delete this transaction?',
+            t('transactions.modal.deleteTitle'),
+            t('transactions.modal.deleteConfirm'),
             [
-                { text: 'Cancel', style: 'cancel' },
+                { text: t('common.actions.cancel'), style: 'cancel' },
                 {
-                    text: 'Delete',
+                    text: t('common.actions.delete'),
                     style: 'destructive',
                     onPress: async () => {
                         setLoading(true);
                         try {
                             if (initialValues.id) {
                                 await api.delete(`/api/finance-management/transaction/delete-transactions/${initialValues.id}/`);
-                                Alert.alert('Success', 'Transaction deleted successfully!');
+                                Alert.alert(t('common.status.success'), t('transactions.modal.deleteSuccess'));
                                 updateNetworthWidget();
                                 onSuccess();
                             }
                         } catch (err: any) {
-                            Alert.alert('Error', err.response?.data?.error || 'Failed to delete transaction.');
+                            Alert.alert(t('common.status.error'), err.response?.data?.error || t('transactions.modal.deleteFailed'));
                         } finally {
                             setLoading(false);
                         }
@@ -180,7 +182,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
             >
                 <View style={[styles.modalView, themeStyles.container]}>
                     <View style={styles.header}>
-                        <Text style={[styles.title, themeStyles.text]}>{editMode ? 'Edit Transaction' : 'Add Transaction'}</Text>
+                        <Text style={[styles.title, themeStyles.text]}>{editMode ? t('transactions.modal.editTitle') : t('transactions.modal.addTitle')}</Text>
                         <TouchableOpacity onPress={onClose}>
                             <Ionicons name="close" size={24} color={themeStyles.closeIcon} />
                         </TouchableOpacity>
@@ -197,7 +199,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                                 onPress={() => !editMode && setStatus('deposit')}
                                 activeOpacity={editMode ? 1 : 0.7}
                             >
-                                <Text style={[styles.typeText, themeStyles.subText, status === 'deposit' && (isDark ? { color: '#10b981' } : styles.typeTextActive)]}>Income</Text>
+                                <Text style={[styles.typeText, themeStyles.subText, status === 'deposit' && (isDark ? { color: '#10b981' } : styles.typeTextActive)]}>{t('transactions.modal.income')}</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={[
@@ -207,15 +209,15 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                                 onPress={() => !editMode && setStatus('withdraw')}
                                 activeOpacity={editMode ? 1 : 0.7}
                             >
-                                <Text style={[styles.typeText, themeStyles.subText, status === 'withdraw' && (isDark ? { color: '#ef4444' } : styles.typeTextActive)]}>Expense</Text>
+                                <Text style={[styles.typeText, themeStyles.subText, status === 'withdraw' && (isDark ? { color: '#ef4444' } : styles.typeTextActive)]}>{t('transactions.modal.expense')}</Text>
                             </TouchableOpacity>
                         </View>
 
                         {/* Amount */}
-                        <Text style={[styles.label, themeStyles.subText]}>Amount</Text>
+                        <Text style={[styles.label, themeStyles.subText]}>{t('transactions.modal.amount')}</Text>
                         <TextInput
                             style={[styles.input, themeStyles.input]}
-                            placeholder="0.00"
+                            placeholder={t('transactions.modal.amountPlaceholder')}
                             placeholderTextColor={isDark ? '#94a3b8' : '#aaa'}
                             keyboardType="numeric"
                             value={amount}
@@ -223,7 +225,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                         />
 
                         {/* Currency */}
-                        <Text style={[styles.label, themeStyles.subText]}>Currency</Text>
+                        <Text style={[styles.label, themeStyles.subText]}>{t('transactions.modal.currency')}</Text>
                         <CurrencySelect
                             value={currency}
                             onChange={setCurrency}
@@ -232,7 +234,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                         />
 
                         {/* Category */}
-                        <Text style={[styles.label, themeStyles.subText]}>Category</Text>
+                        <Text style={[styles.label, themeStyles.subText]}>{t('transactions.modal.category')}</Text>
                         <CategorySelect
                             value={category}
                             onChange={setCategory}
@@ -240,7 +242,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                         />
 
                         {/* Place */}
-                        <Text style={[styles.label, themeStyles.subText]}>Place</Text>
+                        <Text style={[styles.label, themeStyles.subText]}>{t('transactions.modal.place')}</Text>
                         <PlaceSelect
                             value={place}
                             onChange={setPlace}
@@ -248,17 +250,17 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                         />
 
                         {/* Description */}
-                        <Text style={[styles.label, themeStyles.subText]}>Description</Text>
+                        <Text style={[styles.label, themeStyles.subText]}>{t('transactions.modal.description')}</Text>
                         <TextInput
                             style={[styles.input, themeStyles.input]}
-                            placeholder="Description (optional)"
+                            placeholder={t('transactions.modal.descriptionOptional')}
                             placeholderTextColor={isDark ? '#94a3b8' : '#aaa'}
                             value={desc}
                             onChangeText={setDesc}
                         />
 
                         {/* Date */}
-                        <Text style={[styles.label, themeStyles.subText]}>Date</Text>
+                        <Text style={[styles.label, themeStyles.subText]}>{t('transactions.modal.date')}</Text>
                         <TouchableOpacity
                             style={[styles.dateButton, themeStyles.input]}
                             onPress={() => setShowDatePicker(true)}
@@ -289,7 +291,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                             {loading ? (
                                 <ActivityIndicator color="white" />
                             ) : (
-                                <Text style={styles.submitButtonText}>{editMode ? 'Save' : 'Add'}</Text>
+                                <Text style={styles.submitButtonText}>{editMode ? t('transactions.modal.save') : t('transactions.modal.add')}</Text>
                             )}
                         </TouchableOpacity>
 
@@ -300,7 +302,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                                 onPress={handleDelete}
                                 disabled={loading}
                             >
-                                <Text style={styles.deleteButtonText}>Delete Transaction</Text>
+                                <Text style={styles.deleteButtonText}>{t('transactions.modal.deleteTitle')}</Text>
                             </TouchableOpacity>
                         )}
                     </ScrollView>

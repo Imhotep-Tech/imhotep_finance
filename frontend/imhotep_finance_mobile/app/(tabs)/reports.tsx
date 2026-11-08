@@ -16,6 +16,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import api from '@/constants/api';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from '@/contexts/LanguageContext';
 
 const FilterModal = ({ visible, options, onSelect, onClose, title, selectedValue }: any) => {
     const colorScheme = useColorScheme();
@@ -73,6 +74,7 @@ const FilterModal = ({ visible, options, onSelect, onClose, title, selectedValue
 
 export default function ReportsScreen() {
     const insets = useSafeAreaInsets();
+    const { t } = useTranslation();
     const colorScheme = useColorScheme();
     const isDark = colorScheme === 'dark';
 
@@ -326,8 +328,8 @@ export default function ReportsScreen() {
                 {/* Header */}
                 <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
                     <View>
-                        <Text style={[styles.title, themeStyles.text]}>Financial Reports</Text>
-                        <Text style={[styles.subtitle, themeStyles.subText]}>Track your financial performance</Text>
+                        <Text style={[styles.title, themeStyles.text]}>{t('reports.title')}</Text>
+                        <Text style={[styles.subtitle, themeStyles.subText]}>{t('reports.subtitle')}</Text>
                     </View>
                     <TouchableOpacity
                         onPress={handleRecalculate}
@@ -354,7 +356,7 @@ export default function ReportsScreen() {
                             color={viewBy === 'category' ? 'white' : (isDark ? '#cbd5e1' : '#475569')}
                         />
                         <Text style={[styles.tabText, viewBy === 'category' ? themeStyles.activeTabText : themeStyles.inactiveTabText]}>
-                            By Category
+                            {t('reports.charts.categoryBreakdown')}
                         </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
@@ -371,7 +373,7 @@ export default function ReportsScreen() {
                             color={viewBy === 'place' ? 'white' : (isDark ? '#cbd5e1' : '#475569')}
                         />
                         <Text style={[styles.tabText, viewBy === 'place' ? themeStyles.activeTabText : themeStyles.inactiveTabText]}>
-                            By Place
+                            {t('reports.charts.placeBreakdown')}
                         </Text>
                     </TouchableOpacity>
                 </View>
@@ -392,7 +394,7 @@ export default function ReportsScreen() {
                             color={reportType === 'monthly' ? 'white' : (isDark ? '#cbd5e1' : '#475569')}
                         />
                         <Text style={[styles.tabText, reportType === 'monthly' ? themeStyles.activeTabText : themeStyles.inactiveTabText]}>
-                            Monthly
+                            {t('reports.monthlyReport')}
                         </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
@@ -409,7 +411,7 @@ export default function ReportsScreen() {
                             color={reportType === 'yearly' ? 'white' : (isDark ? '#cbd5e1' : '#475569')}
                         />
                         <Text style={[styles.tabText, reportType === 'yearly' ? themeStyles.activeTabText : themeStyles.inactiveTabText]}>
-                            Yearly
+                            {t('reports.annualReport')}
                         </Text>
                     </TouchableOpacity>
                 </View>
@@ -427,8 +429,8 @@ export default function ReportsScreen() {
                         />
                         <Text style={[styles.selectorText, themeStyles.text]}>
                             {reportType === 'monthly'
-                                ? (selectedMonth ? monthOptions.find(o => o.value === selectedMonth)?.label : 'Select Month')
-                                : (selectedYear || 'Select Year')
+                                ? (selectedMonth ? monthOptions.find(o => o.value === selectedMonth)?.label : t('reports.selectors.selectMonth'))
+                                : (selectedYear || t('reports.selectors.selectYear'))
                             }
                         </Text>
                     </View>
@@ -439,7 +441,7 @@ export default function ReportsScreen() {
                 {dataLoading ? (
                     <View style={{ padding: 60, alignItems: 'center' }}>
                         <ActivityIndicator size="large" color="#366c6b" />
-                        <Text style={[styles.loadingText, themeStyles.subText]}>Loading data...</Text>
+                        <Text style={[styles.loadingText, themeStyles.subText]}>{t('common.actions.loading')}</Text>
                     </View>
                 ) : error ? (
                     <View style={styles.errorContainer}>
@@ -449,7 +451,7 @@ export default function ReportsScreen() {
                 ) : !reportData ? (
                     <View style={styles.emptyContainer}>
                         <Ionicons name="document-text-outline" size={64} color={isDark ? '#475569' : '#cbd5e1'} />
-                        <Text style={[styles.emptyText, themeStyles.subText]}>Select a period to view reports</Text>
+                        <Text style={[styles.emptyText, themeStyles.subText]}>{t('reports.selectPeriod')}</Text>
                     </View>
                 ) : (
                     <View style={styles.content}>
@@ -464,7 +466,7 @@ export default function ReportsScreen() {
                                 >
                                     <Ionicons name="trending-down" size={24} color="white" />
                                     <View style={styles.summaryContent}>
-                                        <Text style={styles.summaryLabel}>Total Expenses</Text>
+                                        <Text style={styles.summaryLabel}>{t('reports.totalExpenses')}</Text>
                                         <Text style={styles.summaryValue}>
                                             {formatCurrency(reportData.total_withdraw || 0)}
                                         </Text>
@@ -480,7 +482,7 @@ export default function ReportsScreen() {
                                 >
                                     <Ionicons name="trending-up" size={24} color="white" />
                                     <View style={styles.summaryContent}>
-                                        <Text style={styles.summaryLabel}>Total Income</Text>
+                                        <Text style={styles.summaryLabel}>{t('reports.totalIncome')}</Text>
                                         <Text style={styles.summaryValue}>
                                             {formatCurrency(reportData.total_deposit || 0)}
                                         </Text>
@@ -497,7 +499,7 @@ export default function ReportsScreen() {
                                 end={{ x: 1, y: 1 }}
                                 style={styles.netBalanceGradient}
                             >
-                                <Text style={styles.netBalanceLabel}>Net Balance</Text>
+                                <Text style={styles.netBalanceLabel}>{t('reports.netBalance')}</Text>
                                 <Text style={styles.netBalanceValue}>
                                     {formatCurrency((reportData.total_deposit || 0) - (reportData.total_withdraw || 0))}
                                 </Text>
@@ -510,18 +512,18 @@ export default function ReportsScreen() {
                                 <View style={[styles.section, themeStyles.card]}>
                                     <View style={styles.sectionHeader}>
                                         <Ionicons name="wallet" size={22} color="#ef4444" />
-                                        <Text style={[styles.sectionTitle, themeStyles.text]}>Expense Breakdown</Text>
+                                        <Text style={[styles.sectionTitle, themeStyles.text]}>{t('reports.expenseBreakdown')}</Text>
                                     </View>
                                     {(!reportData.user_withdraw_on_range || reportData.user_withdraw_on_range.length === 0) ? (
                                         <View style={styles.noDataContainer}>
                                             <Ionicons name="information-circle-outline" size={32} color={isDark ? '#475569' : '#cbd5e1'} />
-                                            <Text style={[styles.noDataText, themeStyles.subText]}>No expense data available</Text>
+                                            <Text style={[styles.noDataText, themeStyles.subText]}>{t('reports.noExpenseData')}</Text>
                                         </View>
                                     ) : (
                                         reportData.user_withdraw_on_range.map((item: any, idx: number) => (
                                             <View key={idx} style={styles.breakdownItem}>
                                                 <View style={styles.breakdownHeader}>
-                                                    <Text style={[styles.categoryName, themeStyles.text]}>{item.category}</Text>
+                                                    <Text style={[styles.categoryName, themeStyles.text]}>{item.category || t('transactions.categories.uncategorized')}</Text>
                                                     <Text style={[styles.categoryValue, { color: '#ef4444' }]}>{item.percentage}%</Text>
                                                 </View>
                                                 <ProgressBar
@@ -539,18 +541,18 @@ export default function ReportsScreen() {
                                 <View style={[styles.section, themeStyles.card]}>
                                     <View style={styles.sectionHeader}>
                                         <Ionicons name="cash" size={22} color="#22c55e" />
-                                        <Text style={[styles.sectionTitle, themeStyles.text]}>Income Breakdown</Text>
+                                        <Text style={[styles.sectionTitle, themeStyles.text]}>{t('reports.incomeBreakdown')}</Text>
                                     </View>
                                     {(!reportData.user_deposit_on_range || reportData.user_deposit_on_range.length === 0) ? (
                                         <View style={styles.noDataContainer}>
                                             <Ionicons name="information-circle-outline" size={32} color={isDark ? '#475569' : '#cbd5e1'} />
-                                            <Text style={[styles.noDataText, themeStyles.subText]}>No income data available</Text>
+                                            <Text style={[styles.noDataText, themeStyles.subText]}>{t('reports.noIncomeData')}</Text>
                                         </View>
                                     ) : (
                                         reportData.user_deposit_on_range.map((item: any, idx: number) => (
                                             <View key={idx} style={styles.breakdownItem}>
                                                 <View style={styles.breakdownHeader}>
-                                                    <Text style={[styles.categoryName, themeStyles.text]}>{item.category}</Text>
+                                                    <Text style={[styles.categoryName, themeStyles.text]}>{item.category || t('transactions.categories.uncategorized')}</Text>
                                                     <Text style={[styles.categoryValue, { color: '#22c55e' }]}>{item.percentage}%</Text>
                                                 </View>
                                                 <ProgressBar
@@ -571,12 +573,12 @@ export default function ReportsScreen() {
                                 <View style={[styles.section, themeStyles.card]}>
                                     <View style={styles.sectionHeader}>
                                         <Ionicons name="wallet" size={22} color="#f97316" />
-                                        <Text style={[styles.sectionTitle, themeStyles.text]}>Expense by Place</Text>
+                                        <Text style={[styles.sectionTitle, themeStyles.text]}>{t('reports.expenseByPlace')}</Text>
                                     </View>
                                     {(!reportData.user_withdraw_by_place || reportData.user_withdraw_by_place.length === 0) ? (
                                         <View style={styles.noDataContainer}>
                                             <Ionicons name="information-circle-outline" size={32} color={isDark ? '#475569' : '#cbd5e1'} />
-                                            <Text style={[styles.noDataText, themeStyles.subText]}>No place expense data available</Text>
+                                            <Text style={[styles.noDataText, themeStyles.subText]}>{t('reports.noDetails')}</Text>
                                         </View>
                                     ) : (
                                         reportData.user_withdraw_by_place.map((item: any, idx: number) => (
@@ -600,12 +602,12 @@ export default function ReportsScreen() {
                                 <View style={[styles.section, themeStyles.card]}>
                                     <View style={styles.sectionHeader}>
                                         <Ionicons name="cash" size={22} color="#0d9488" />
-                                        <Text style={[styles.sectionTitle, themeStyles.text]}>Income by Place</Text>
+                                        <Text style={[styles.sectionTitle, themeStyles.text]}>{t('reports.incomeByPlace')}</Text>
                                     </View>
                                     {(!reportData.user_deposit_by_place || reportData.user_deposit_by_place.length === 0) ? (
                                         <View style={styles.noDataContainer}>
                                             <Ionicons name="information-circle-outline" size={32} color={isDark ? '#475569' : '#cbd5e1'} />
-                                            <Text style={[styles.noDataText, themeStyles.subText]}>No place income data available</Text>
+                                            <Text style={[styles.noDataText, themeStyles.subText]}>{t('reports.noDetails')}</Text>
                                         </View>
                                     ) : (
                                         reportData.user_deposit_by_place.map((item: any, idx: number) => (
@@ -630,14 +632,14 @@ export default function ReportsScreen() {
                                 <View style={[styles.section, themeStyles.card]}>
                                     <View style={styles.sectionHeader}>
                                         <Ionicons name="pie-chart" size={22} color="#366c6b" />
-                                        <Text style={[styles.sectionTitle, themeStyles.text]}>Current Wealth by Place</Text>
+                                        <Text style={[styles.sectionTitle, themeStyles.text]}>{t('reports.currentWealthByPlace')}</Text>
                                     </View>
                                     {netWorthLoading ? (
                                         <ActivityIndicator size="small" color="#366c6b" style={{ marginVertical: 20 }} />
                                     ) : (!netWorthByPlace || netWorthByPlace.length === 0) ? (
                                         <View style={styles.noDataContainer}>
                                             <Ionicons name="information-circle-outline" size={32} color={isDark ? '#475569' : '#cbd5e1'} />
-                                            <Text style={[styles.noDataText, themeStyles.subText]}>No wealth data available by place</Text>
+                                            <Text style={[styles.noDataText, themeStyles.subText]}>{t('reports.noWealthData')}</Text>
                                         </View>
                                     ) : (
                                         netWorthByPlace.map((item: any, idx: number) => (
@@ -672,7 +674,7 @@ export default function ReportsScreen() {
                     setShowMonthSelector(false);
                 }}
                 onClose={() => setShowMonthSelector(false)}
-                title="Select Month"
+                title={t('reports.selectors.selectMonth')}
                 selectedValue={selectedMonth}
             />
             <FilterModal
@@ -683,7 +685,7 @@ export default function ReportsScreen() {
                     setShowYearSelector(false);
                 }}
                 onClose={() => setShowYearSelector(false)}
-                title="Select Year"
+                title={t('reports.selectors.selectYear')}
                 selectedValue={selectedYear}
             />
         </View>

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useTranslation } from '@/contexts/LanguageContext';
 
 interface TransactionItemProps {
     transaction: {
@@ -18,6 +19,7 @@ interface TransactionItemProps {
 }
 
 const TransactionItem: React.FC<TransactionItemProps> = ({ transaction, onPress }) => {
+    const { t } = useTranslation();
     const colorScheme = useColorScheme();
     const isDark = colorScheme === 'dark';
     const isDeposit = transaction.trans_status.toLowerCase() === 'deposit';
@@ -61,7 +63,7 @@ const TransactionItem: React.FC<TransactionItemProps> = ({ transaction, onPress 
             <View style={styles.contentContainer}>
                 <View style={styles.topRow}>
                     <Text style={[styles.category, themeStyles.text]} numberOfLines={1}>
-                        {transaction.category || 'No Category'}{transaction.place && transaction.place !== 'General' ? ` • ${transaction.place}` : ''}
+                        {transaction.category || t('transactions.item.noCategory')}{transaction.place && transaction.place !== 'General' ? ` • ${transaction.place}` : ''}
                     </Text>
                     <Text style={[styles.amount, themeStyles.amount]}>
                         {isDeposit ? '+' : '-'} {Number(transaction.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {transaction.currency}
@@ -70,7 +72,7 @@ const TransactionItem: React.FC<TransactionItemProps> = ({ transaction, onPress 
 
                 <View style={styles.bottomRow}>
                     <Text style={[styles.details, themeStyles.subText]} numberOfLines={1}>
-                        {transaction.trans_details || 'No Description'}
+                        {transaction.trans_details || t('transactions.item.noDescription')}
                     </Text>
                     <Text style={[styles.date, themeStyles.subText]}>
                         {transaction.date}

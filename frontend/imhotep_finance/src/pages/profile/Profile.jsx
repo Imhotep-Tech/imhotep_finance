@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTranslation } from '../../contexts/LanguageContext';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Footer from '../../components/common/Footer';
@@ -7,6 +8,7 @@ import { currencies } from '../../utils/currencies';
 
 const Profile = () => {
   const { user, logout, updateUser } = useAuth();
+  const { t, language, setLanguage, supportedLanguages } = useTranslation();
   const [activeTab, setActiveTab] = useState('profile');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -355,16 +357,16 @@ const Profile = () => {
                 Imhotep Finance
               </div>
               <p className="text-sm mb-2 text-[#1a3535] dark:text-gray-300 opacity-80">
-                Manage your finances efficiently with Imhotep Financial Manager
+                {t('dashboard.tagline')}
               </p>
               <h1 className="text-3xl sm:text-4xl font-bold font-chef text-gray-800 dark:text-gray-100 mb-2">
-                My Profile
+                {t('common.navigation.profile')}
               </h1>
               <p className="text-lg text-gray-600 dark:text-gray-300 font-medium">
-                Manage your account and preferences
+                {t('profile.subtitle')}
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex flex-col sm:flex-row gap-3 items-center">
               <Link
                 to="/dashboard"
                 className="chef-button bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white flex items-center space-x-2 justify-center"
@@ -372,7 +374,7 @@ const Profile = () => {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
-                <span>Back to Dashboard</span>
+                <span>{t('profile.backToDashboard')}</span>
               </Link>
               <button
                 onClick={logout}
@@ -381,7 +383,7 @@ const Profile = () => {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
-                <span>Logout</span>
+                <span>{t('common.navigation.logout')}</span>
               </button>
             </div>
           </div>
@@ -402,7 +404,7 @@ const Profile = () => {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
-              <span>Profile Information</span>
+              <span>{t('profile.sections.personal')}</span>
             </button>
             <button
               className={`chef-button flex-1 ${activeTab === 'password'
@@ -414,7 +416,7 @@ const Profile = () => {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
-              <span>Change Password</span>
+              <span>{t('profile.passwords.title')}</span>
             </button>
             <button
               className={`chef-button flex-1 ${activeTab === 'currency'
@@ -426,7 +428,7 @@ const Profile = () => {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
               </svg>
-              <span>Change Currency</span>
+              <span>{t('profile.fields.favoriteCurrency')}</span>
             </button>
             <button
               className={`chef-button flex-1 ${activeTab === 'target'
@@ -438,7 +440,17 @@ const Profile = () => {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span>Target</span>
+              <span>{t('dashboard.target.title')}</span>
+            </button>
+            <button
+              className={`chef-button flex-1 ${activeTab === 'language'
+                ? 'bg-gradient-to-r from-teal-500 to-emerald-600 text-white shadow-lg scale-105'
+                : 'bg-gradient-to-r from-[#eaf6f6] to-[#d6efee] text-[#366c6b] hover:bg-[#d6efee] border border-[#366c6b]/30'
+                } flex items-center space-x-2 justify-center transition-all duration-200`}
+              onClick={() => setActiveTab('language')}
+            >
+              <span className="text-base" role="img" aria-hidden="true">🌐</span>
+              <span>{t('profile.fields.language')}</span>
             </button>
           </div>
         </div>
@@ -640,6 +652,64 @@ const Profile = () => {
                 </button>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Language Selection Card - Accessible on Profile and Language tabs */}
+        {(activeTab === 'profile' || activeTab === 'language') && (
+          <div className="chef-card rounded-2xl p-6 sm:p-8 shadow-lg backdrop-blur-2xl">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold font-chef text-gray-800 dark:text-gray-100 mb-2">
+                {t('profile.languagePreferences')}
+              </h2>
+              <p className="text-gray-600 dark:text-gray-300 font-medium">
+                {t('profile.languageSubtitle')}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Object.values(supportedLanguages).map((lang) => {
+                const isSelected = language === lang.code;
+                return (
+                  <button
+                    key={lang.code}
+                    type="button"
+                    onClick={() => setLanguage(lang.code)}
+                    className={`p-5 rounded-2xl border-2 flex items-center justify-between text-left rtl:text-right transition-all duration-200 cursor-pointer ${
+                      isSelected
+                        ? 'border-[#366c6b] bg-[#eaf6f6]/80 dark:bg-[#366c6b]/20 shadow-md ring-2 ring-[#366c6b]/30'
+                        : 'border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-800/70 hover:border-[#366c6b]/50 dark:hover:border-teal-500/50 hover:bg-white dark:hover:bg-gray-800'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3.5">
+                      <span className="text-3xl" role="img" aria-hidden="true">
+                        {lang.flag}
+                      </span>
+                      <div>
+                        <p className="font-bold text-base text-gray-900 dark:text-gray-100">
+                          {lang.nativeName}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          {lang.name} ({lang.code.toUpperCase()})
+                        </p>
+                      </div>
+                    </div>
+                    {isSelected ? (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#366c6b] text-white">
+                        <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                        {t('profile.active')}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-gray-400 dark:text-gray-500 font-medium">
+                        {lang.dir.toUpperCase()}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         )}
 

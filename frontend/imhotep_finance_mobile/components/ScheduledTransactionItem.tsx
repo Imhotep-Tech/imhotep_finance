@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Switch } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useTranslation } from '@/contexts/LanguageContext';
 
 interface ScheduledTransactionItemProps {
     transaction: {
@@ -26,6 +27,7 @@ const ScheduledTransactionItem: React.FC<ScheduledTransactionItemProps> = ({
     onToggleStatus,
     loading = false
 }) => {
+    const { t } = useTranslation();
     const colorScheme = useColorScheme();
     const isDark = colorScheme === 'dark';
     const isDeposit = transaction.scheduled_trans_status.toLowerCase() === 'deposit';
@@ -69,7 +71,7 @@ const ScheduledTransactionItem: React.FC<ScheduledTransactionItemProps> = ({
             <View style={styles.contentContainer}>
                 <View style={styles.topRow}>
                     <Text style={[styles.category, themeStyles.text]} numberOfLines={1}>
-                        {transaction.category || 'No Category'}{transaction.place && transaction.place !== 'General' ? ` • ${transaction.place}` : ''}
+                        {transaction.category || t('scheduled.item.noCategory')}{transaction.place && transaction.place !== 'General' ? ` • ${transaction.place}` : ''}
                     </Text>
                     <Text style={[styles.amount, themeStyles.amount]}>
                         {isDeposit ? '+' : '-'} {Number(transaction.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {transaction.currency}
@@ -78,11 +80,11 @@ const ScheduledTransactionItem: React.FC<ScheduledTransactionItemProps> = ({
 
                 <View style={styles.bottomRow}>
                     <Text style={[styles.details, themeStyles.subText]} numberOfLines={1}>
-                        {transaction.scheduled_trans_details || 'No Description'}
+                        {transaction.scheduled_trans_details || t('scheduled.item.noDescription')}
                     </Text>
                     <View style={styles.statusContainer}>
                         <Text style={[styles.date, themeStyles.subText]}>
-                            Day {transaction.day_of_month}
+                            {t('scheduled.item.day', { day: transaction.day_of_month })}
                         </Text>
                         <TouchableOpacity
                             onPress={(e) => {
@@ -108,7 +110,7 @@ const ScheduledTransactionItem: React.FC<ScheduledTransactionItemProps> = ({
                                         : (isDark ? '#94a3b8' : '#64748b')
                                 }
                             ]}>
-                                {loading ? '...' : (transaction.status ? 'Active' : 'Inactive')}
+                                {loading ? '...' : (transaction.status ? t('scheduled.item.active') : t('scheduled.item.inactive'))}
                             </Text>
                         </TouchableOpacity>
                     </View>

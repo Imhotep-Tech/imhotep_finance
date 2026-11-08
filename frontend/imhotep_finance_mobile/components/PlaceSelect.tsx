@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Modal, TouchableOpacity, FlatList, StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useTranslation } from '@/contexts/LanguageContext';
 import api from '../constants/api'; // Use the configured api instance
 import { Ionicons } from '@expo/vector-icons';
 
@@ -13,6 +14,7 @@ interface PlaceSelectProps {
 }
 
 const PlaceSelect: React.FC<PlaceSelectProps> = ({ value, onChange, currency, disabled = false, required }) => {
+    const { t } = useTranslation();
     const [modalVisible, setModalVisible] = useState(false);
     const [search, setSearch] = useState('');
     const [placesList, setPlacesList] = useState<string[]>([]);
@@ -77,7 +79,7 @@ const PlaceSelect: React.FC<PlaceSelectProps> = ({ value, onChange, currency, di
                 onPress={() => !disabled && setModalVisible(true)}
                 disabled={disabled}
             >
-                <Text style={[styles.selectorText, themeStyles.text]}>{value || 'General'}</Text>
+                <Text style={[styles.selectorText, themeStyles.text]}>{value || t('common.select.general')}</Text>
                 <Ionicons name="chevron-down" size={20} color={isDark ? '#94a3b8' : '#666'} />
             </TouchableOpacity>
 
@@ -94,7 +96,7 @@ const PlaceSelect: React.FC<PlaceSelectProps> = ({ value, onChange, currency, di
                     <View style={styles.modalOverlay}>
                         <View style={[styles.modalContent, themeStyles.modalContent]}>
                         <View style={styles.modalHeader}>
-                            <Text style={[styles.modalTitle, themeStyles.text]}>Select Place</Text>
+                            <Text style={[styles.modalTitle, themeStyles.text]}>{t('common.select.place')}</Text>
                             <TouchableOpacity onPress={() => setModalVisible(false)}>
                                 <Ionicons name="close" size={24} color={themeStyles.closeIcon} />
                             </TouchableOpacity>
@@ -102,7 +104,7 @@ const PlaceSelect: React.FC<PlaceSelectProps> = ({ value, onChange, currency, di
 
                         <TextInput
                             style={[styles.searchInput, themeStyles.searchInput]}
-                            placeholder="Search or add new place..."
+                            placeholder={t('common.select.searchOrAddPlace')}
                             placeholderTextColor={isDark ? '#94a3b8' : '#999'}
                             value={search}
                             onChangeText={setSearch}
@@ -131,7 +133,7 @@ const PlaceSelect: React.FC<PlaceSelectProps> = ({ value, onChange, currency, di
                                 )}
                                 ListEmptyComponent={
                                     <View style={styles.emptyContainer}>
-                                        <Text style={[styles.emptyText, themeStyles.emptyText]}>No places found.</Text>
+                                        <Text style={[styles.emptyText, themeStyles.emptyText]}>{t('common.select.noPlaces')}</Text>
                                         {search.length > 0 && (
                                             <TouchableOpacity
                                                 style={styles.addNewButton}
@@ -141,7 +143,7 @@ const PlaceSelect: React.FC<PlaceSelectProps> = ({ value, onChange, currency, di
                                                     setSearch('');
                                                 }}
                                             >
-                                                <Text style={styles.addNewText}>Add "{search}"</Text>
+                                                <Text style={styles.addNewText}>{t('common.select.add', { name: search })}</Text>
                                             </TouchableOpacity>
                                         )}
                                     </View>
@@ -159,7 +161,7 @@ const PlaceSelect: React.FC<PlaceSelectProps> = ({ value, onChange, currency, di
                                     setSearch('');
                                 }}
                             >
-                                <Text style={styles.addNewText}>Add "{search}" as new</Text>
+                                <Text style={styles.addNewText}>{t('common.select.addAsNew', { name: search })}</Text>
                             </TouchableOpacity>
                         )}
                         </View>

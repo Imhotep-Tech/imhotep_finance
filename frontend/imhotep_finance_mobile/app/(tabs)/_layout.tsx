@@ -9,6 +9,7 @@ import { HapticTab } from '@/components/haptic-tab';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslation } from '@/contexts/LanguageContext';
 import { Ionicons } from '@expo/vector-icons';
 
 // Theme colors for the layout
@@ -38,6 +39,7 @@ const themes = {
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const { isAuthenticated, loading } = useAuth();
+  const { t } = useTranslation();
   const colors = themes[colorScheme === 'dark' ? 'dark' : 'light'];
   const insets = useSafeAreaInsets();
 
@@ -53,7 +55,7 @@ export default function TabLayout() {
           </View>
 
           <Text style={[styles.title, { color: colors.text }]}>Imhotep Finance</Text>
-          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Loading your workspace...</Text>
+          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>{t('common.actions.loading')}</Text>
 
           <ActivityIndicator size="large" color={colors.primary} style={styles.spinner} />
         </View>
@@ -114,35 +116,35 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: t('common.navigation.home'),
           tabBarIcon: ({ color }) => <Ionicons name="home" size={24} color={color} />,
         }}
       />
       <Tabs.Screen
         name="transactions"
         options={{
-          title: 'Transactions',
+          title: t('common.navigation.transactions'),
           tabBarIcon: ({ color }) => <Ionicons name="swap-vertical" size={24} color={color} />,
         }}
       />
       <Tabs.Screen
         name="wishlist"
         options={{
-          title: 'Wishlist',
+          title: t('common.navigation.wishlist'),
           tabBarIcon: ({ color }) => <Ionicons name="star" size={24} color={color} />,
         }}
       />
       <Tabs.Screen
         name="reports"
         options={{
-          title: 'Reports',
+          title: t('common.navigation.reports'),
           tabBarIcon: ({ color }) => <Ionicons name="pie-chart" size={24} color={color} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
+          title: t('common.navigation.profile'),
           tabBarIcon: ({ color }) => <Ionicons name="person" size={24} color={color} />,
         }}
       />

@@ -1,0 +1,73 @@
+{
+  "title": "Reports & Analytics",
+  "subtitle": "Visualize spending habits, income sources, and financial trends",
+  "financialReportsTitle": "Financial Reports",
+  "selectPeriod": "Select a period to view reports",
+  "breakdownFor": "Breakdown for {period}",
+  "backToDashboard": "Back to Dashboard",
+  "back": "Back",
+  "recalculate": "Recalculate Reports",
+  "recalculateShort": "Recalculate",
+  "recalculating": "Recalculating...",
+  "viewByCategory": "View by Category",
+  "viewByPlace": "View by Place",
+  "monthlyReports": "📅 Monthly Reports",
+  "monthly": "📅 Monthly",
+  "yearlyReports": "📊 Yearly Reports",
+  "yearly": "📊 Yearly",
+  "selectMonthYear": "Select Month & Year",
+  "selectMonthPlaceholder": "Select a month...",
+  "selectYear": "Select Year",
+  "selectMonthEmptyTitle": "Select a Month",
+  "selectMonthEmptyDesc": "Choose a month and year from the dropdown above to view monthly reports.",
+  "loadingReport": "Loading Report",
+  "loadingReportDesc": "Please wait while we fetch your report data...",
+  "totalExpenses": "Total Expenses",
+  "totalIncome": "Total Income",
+  "netBalance": "Net Balance",
+  "basedOnMonths": "Based on {count} months of data",
+  "expenseBreakdown": "Expense Breakdown",
+  "incomeBreakdown": "Income Breakdown",
+  "expenseDetails": "Expense Details",
+  "incomeDetails": "Income Details",
+  "expenseByPlace": "Expense By Place",
+  "incomeByPlace": "Income By Place",
+  "expensePlaceDetails": "Expense Place Details",
+  "incomePlaceDetails": "Income Place Details",
+  "currentWealthByPlace": "Current Wealth By Place",
+  "wealthDistribution": "Wealth Distribution",
+  "wealthDetails": "Wealth Details",
+  "noExpenseData": "No expense data available.",
+  "noIncomeData": "No income data available.",
+  "noDetails": "No details available.",
+  "noWealthData": "No wealth data available by place.",
+  "monthlyReport": "Monthly Report",
+  "annualReport": "Annual Report",
+  "metrics": {
+    "totalIncome": "Total Income",
+    "totalExpenses": "Total Expenses",
+    "netSavings": "Net Savings",
+    "savingsRate": "Savings Rate"
+  },
+  "charts": {
+    "incomeVsExpense": "Income vs. Expenses",
+    "categoryBreakdown": "Spending by Category",
+    "monthlyTrends": "Monthly Trend Over Time",
+    "placeBreakdown": "Spending by Place"
+  },
+  "export": {
+    "title": "Export Reports",
+    "pdf": "Export as PDF",
+    "csv": "Export as CSV",
+    "generating": "Generating report..."
+  },
+  "selectors": {
+    "selectMonth": "Select Month",
+    "selectYear": "Select Year",
+    "currentMonth": "Current Month"
+  },
+  "empty": {
+    "title": "No Report Data",
+    "description": "No transactions found for the selected period to generate an analytical report."
+  }
+}

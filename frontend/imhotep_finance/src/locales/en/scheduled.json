@@ -1,0 +1,83 @@
+{
+  "title": "Scheduled Transactions",
+  "subtitle": "View and manage your recurring transactions",
+  "addScheduled": "Add Scheduled Transaction",
+  "editScheduled": "Edit Scheduled Transaction",
+  "deleteConfirm": "Are you sure you want to delete this scheduled transaction?",
+  "saveSuccess": "Scheduled transaction saved successfully.",
+  "deleteSuccess": "Scheduled transaction removed.",
+  "actions": {
+    "addScheduled": "Add Scheduled",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "frequencies": {
+    "daily": "Daily",
+    "weekly": "Weekly",
+    "monthly": "Monthly",
+    "yearly": "Yearly"
+  },
+  "fields": {
+    "frequency": "Frequency",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "nextRun": "Next Execution",
+    "lastRun": "Last Execution",
+    "active": "Active",
+    "paused": "Paused"
+  },
+  "table": {
+    "day": "Day",
+    "type": "Type",
+    "amount": "Amount",
+    "currency": "Currency",
+    "category": "Category",
+    "place": "Place",
+    "description": "Description",
+    "actions": "Actions",
+    "general": "General",
+    "noDescription": "No description"
+  },
+  "loading": "Loading scheduled transactions...",
+  "noScheduledFound": "No scheduled transactions found.",
+  "empty": {
+    "title": "No Scheduled Transactions",
+    "description": "Automate your recurring bills, subscriptions, or salaries by creating a schedule.",
+    "cta": "Create Schedule"
+  },
+  "modal": {
+    "addTitle": "Add Scheduled Transaction",
+    "editTitle": "Edit Scheduled Transaction",
+    "income": "Income",
+    "expense": "Expense",
+    "amount": "Amount",
+    "amountPlaceholder": "0.00",
+    "currency": "Currency",
+    "category": "Category",
+    "place": "Place",
+    "description": "Description",
+    "descriptionOptional": "Description (optional)",
+    "dayOfMonth": "Day of Month",
+    "dayPlaceholder": "1 - 31",
+    "active": "Active Status",
+    "save": "Save",
+    "add": "Add",
+    "deleteTitle": "Delete Scheduled Transaction",
+    "deleteConfirm": "Are you sure you want to delete this scheduled transaction?",
+    "deleteSuccess": "Scheduled transaction deleted successfully!",
+    "deleteFailed": "Failed to delete scheduled transaction.",
+    "addSuccess": "Scheduled transaction added successfully!",
+    "addFailed": "Failed to add scheduled transaction.",
+    "updateSuccess": "Scheduled transaction updated successfully!",
+    "updateFailed": "Failed to update scheduled transaction.",
+    "requiredFields": "Amount, currency, and day of month are required.",
+    "dayRangeError": "Day of month must be between 1 and 31."
+  },
+  "item": {
+    "noCategory": "No Category",
+    "noDescription": "No Description",
+    "day": "Day {day}",
+    "active": "Active",
+    "inactive": "Inactive"
+  }
+}

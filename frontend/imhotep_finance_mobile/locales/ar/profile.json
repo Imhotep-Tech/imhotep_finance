@@ -1,0 +1,79 @@
+{
+  "title": "الملف الشخصي والإعدادات",
+  "subtitle": "إدارة معلوماتك الشخصية وخيارات الأمان والتفضيلات",
+  "sections": {
+    "personal": "المعلومات الشخصية",
+    "preferences": "التفضيلات والعرض",
+    "security": "الأمان والمصادقة",
+    "dangerZone": "منطقة الخطر"
+  },
+  "fields": {
+    "username": "اسم المستخدم",
+    "email": "البريد الإلكتروني",
+    "firstName": "الاسم الأول",
+    "lastName": "اسم العائلة",
+    "favoriteCurrency": "العملة المفضلة",
+    "theme": "المظهر",
+    "language": "لغة التطبيق",
+    "biometricAuth": "المصادقة البيومترية",
+    "biometricAuthDesc": "استخدم بصمة الإصبع أو الوجه لفتح تطبيق الهاتف",
+    "appLock": "قفل التطبيق",
+    "appLockDesc": "طلب بصمة الوجه/الإصبع أو رمز PIN للجهاز لفتح التطبيق عند الدخول أو الرجوع."
+  },
+  "placeholders": {
+    "firstName": "الاسم الأول",
+    "lastName": "اسم العائلة",
+    "username": "اسم المستخدم",
+    "email": "you@example.com",
+    "currentPassword": "كلمة المرور الحالية",
+    "newPassword": "كلمة مرور جديدة (8 أحرف على الأقل)",
+    "confirmPassword": "تأكيد كلمة المرور الجديدة"
+  },
+  "financial": {
+    "monthlyTarget": "مبلغ الهدف الشهري",
+    "monthlyTargetDesc": "حدد هدفك المالي الشهري لتتبع تقدمك على لوحة التحكم.",
+    "saveSettings": "حفظ الإعدادات المالية"
+  },
+  "passwords": {
+    "title": "تغيير كلمة المرور",
+    "currentPassword": "كلمة المرور الحالية",
+    "newPassword": "كلمة المرور الجديدة",
+    "confirmNewPassword": "تأكيد كلمة المرور",
+    "updateButton": "تغيير كلمة المرور"
+  },
+  "emailChange": {
+    "title": "تأكيد تغيير البريد الإلكتروني",
+    "newEmail": "البريد الإلكتروني الجديد",
+    "submitButton": "طلب رمز التحقق",
+    "otpSubtitle": "أدخل الرمز المكون من 6 أرقام المرسل إلى بريدك الجديد.",
+    "otpModalDesc": "أدخل رمز التحقق المكون من 6 أرقام المرسل إلى بريدك الإلكتروني الجديد ({email}). ينتهي الرمز خلال 10 دقائق.",
+    "verify": "تأكيد"
+  },
+  "deleteAccount": {
+    "title": "حذف الحساب",
+    "dangerZone": "منطقة الخطر",
+    "dangerWarning": "بمجرد حذف حسابك، لن يمكنك التراجع. يرجى التأكد.",
+    "description": "لا يمكن التراجع عن هذا الإجراء. كيف ترغب في تأكيد هويتك للمتابعة؟",
+    "button": "حذف الحساب",
+    "confirm": "هل أنت متأكد تماماً؟ هذا الإجراء نهائي ولا رجعة فيه.",
+    "verifyPassword": "التأكيد بكلمة المرور",
+    "verifyOtp": "التأكيد برمز البريد الإلكتروني",
+    "enterOtp": "أدخل رمز OTP المكون من 6 أرقام",
+    "enterPassword": "أدخل كلمة المرور",
+    "otpSent": "تم إرسال رمز OTP إلى بريدك الإلكتروني.",
+    "confirmDelete": "تأكيد الحذف"
+  },
+  "logoutConfirm": "هل أنت متأكد من رغبتك في تسجيل الخروج؟",
+  "messages": {
+    "profileUpdated": "تم تحديث الملف الشخصي بنجاح.",
+    "passwordChanged": "تم تغيير كلمة المرور بنجاح.",
+    "currencyUpdated": "تم تحديث العملة المفضلة.",
+    "languageChanged": "تم حفظ تفضيل اللغة."
+  },
+  "languagePreferences": "تفضيلات اللغة",
+  "languageSubtitle": "اختر لغتك المفضلة لواجهة التطبيق",
+  "availableLanguages": "اللغات المتاحة",
+  "active": "نشط",
+  "switchLanguage": "التبديل إلى {name}",
+  "backToDashboard": "العودة للوحة التحكم"
+}

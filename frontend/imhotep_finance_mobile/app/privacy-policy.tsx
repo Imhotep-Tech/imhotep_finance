@@ -7,8 +7,10 @@ import { router } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { useTranslation } from '@/contexts/LanguageContext';
 
 export default function PrivacyPolicyScreen() {
+  const { t } = useTranslation();
   const colorScheme = useColorScheme();
   const backgroundColor = colorScheme === 'dark' ? '#0f172a' : '#f8fafc';
   const surfaceColor = colorScheme === 'dark' ? '#1e293b' : '#ffffff';
@@ -28,7 +30,7 @@ export default function PrivacyPolicyScreen() {
           style={styles.backIcon}
         />
         <ThemedText type="title" style={styles.headerTitle}>
-          Privacy Policy
+          {t('common.navigation.privacyPolicy')}
         </ThemedText>
         <View style={styles.placeholder} />
       </View>

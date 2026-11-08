@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView, Dimensions
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useTranslation } from '@/contexts/LanguageContext';
 
 const { width } = Dimensions.get('window');
 
@@ -12,6 +13,7 @@ interface UserGuideModalProps {
 }
 
 export default function UserGuideModal({ visible, onClose }: UserGuideModalProps) {
+  const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(0);
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
@@ -28,26 +30,26 @@ export default function UserGuideModal({ visible, onClose }: UserGuideModalProps
 
   const steps = [
     {
-      title: 'Welcome to Imhotep! 📈',
-      description: 'Your premium wealth manager. Keep track of your balances across different places and currencies, and achieve your financial targets.',
+      title: t('common.userGuide.step1Title'),
+      description: t('common.userGuide.step1Desc'),
       icon: 'wallet-outline',
       iconColor: '#366c6b',
     },
     {
-      title: 'Dashboard Overview ⚡',
-      description: 'See your net worth in your favorite currency, check your savings score, and use the floating plus button to log transactions quickly.',
+      title: t('common.userGuide.step2Title'),
+      description: t('common.userGuide.step2Desc'),
       icon: 'stats-chart-outline',
       iconColor: '#2563EB',
     },
     {
-      title: 'Toggles & Grouping 💼',
-      description: 'Deep-dive into details. View your holdings grouped by place or by currency with percentage share and progress bars. You can even move money or convert currencies.',
+      title: t('common.userGuide.step3Title'),
+      description: t('common.userGuide.step3Desc'),
       icon: 'swap-horizontal-outline',
       iconColor: '#D97706',
     },
     {
-      title: 'Home Widgets & Targets 📊',
-      description: 'Setup native home screen widgets for fast balance checks and shortcuts. Define monthly savings targets in your Profile to track your performance.',
+      title: t('common.userGuide.step4Title'),
+      description: t('common.userGuide.step4Desc'),
       icon: 'pie-chart-outline',
       iconColor: '#4F46E5',
     },
@@ -89,10 +91,10 @@ export default function UserGuideModal({ visible, onClose }: UserGuideModalProps
           {/* Header */}
           <View style={styles.header}>
             <Text style={[styles.stepText, { color: colors.textSecondary }]}>
-              Step {currentStep + 1} of {steps.length}
+              {t('common.userGuide.stepOf', { current: currentStep + 1, total: steps.length })}
             </Text>
             <TouchableOpacity onPress={handleComplete}>
-              <Text style={[styles.skipText, { color: colors.primary }]}>Skip</Text>
+              <Text style={[styles.skipText, { color: colors.primary }]}>{t('common.userGuide.skip')}</Text>
             </TouchableOpacity>
           </View>
 
@@ -134,7 +136,7 @@ export default function UserGuideModal({ visible, onClose }: UserGuideModalProps
                 currentStep === 0 && { opacity: 0.3 }
               ]}
             >
-              <Text style={[styles.navButtonText, { color: colors.text }]}>Back</Text>
+              <Text style={[styles.navButtonText, { color: colors.text }]}>{t('common.userGuide.back')}</Text>
             </TouchableOpacity>
             
             <TouchableOpacity
@@ -142,7 +144,7 @@ export default function UserGuideModal({ visible, onClose }: UserGuideModalProps
               style={[styles.nextButton, { backgroundColor: colors.primary }]}
             >
               <Text style={styles.nextButtonText}>
-                {currentStep === steps.length - 1 ? 'Start' : 'Next'}
+                {currentStep === steps.length - 1 ? t('common.userGuide.start') : t('common.userGuide.next')}
               </Text>
             </TouchableOpacity>
           </View>

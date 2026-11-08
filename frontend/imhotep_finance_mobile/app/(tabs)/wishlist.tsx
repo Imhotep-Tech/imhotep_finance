@@ -16,9 +16,11 @@ import api from '@/constants/api';
 import WishlistItem from '@/components/WishlistItem';
 import AddWishlistModal from '@/components/AddWishlistModal';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from '@/contexts/LanguageContext';
 
 export default function WishlistScreen() {
     const insets = useSafeAreaInsets();
+    const { t } = useTranslation();
     const colorScheme = useColorScheme();
     const isDark = colorScheme === 'dark';
 
@@ -115,12 +117,12 @@ export default function WishlistScreen() {
 
     const handleDelete = async (wish: any) => {
         Alert.alert(
-            "Delete Wish",
-            "Are you sure you want to delete this wish?",
+            t('wishlist.alerts.deleteTitle'),
+            t('wishlist.alerts.deleteConfirm'),
             [
-                { text: "Cancel", style: "cancel" },
+                { text: t('common.actions.cancel'), style: "cancel" },
                 {
-                    text: "Delete",
+                    text: t('common.actions.delete'),
                     style: "destructive",
                     onPress: async () => {
                         setDeleteLoading(prev => ({ ...prev, [wish.id]: true }));
@@ -128,7 +130,7 @@ export default function WishlistScreen() {
                             await api.delete(`/api/finance-management/wishlist/delete-wish/${wish.id}/`);
                             setWishlist(prev => prev.filter(w => w.id !== wish.id));
                         } catch (err: any) {
-                            Alert.alert("Error", err.response?.data?.error || "Failed to delete wish");
+                            Alert.alert(t('common.status.error'), err.response?.data?.error || t('wishlist.deleteConfirm'));
                         } finally {
                             setDeleteLoading(prev => ({ ...prev, [wish.id]: false }));
                         }
@@ -150,7 +152,7 @@ export default function WishlistScreen() {
                 onRefresh();
             } catch (err: any) {
                 console.error("Status toggle error:", err);
-                Alert.alert("Error", err.response?.data?.error || "Failed to update status");
+                Alert.alert(t('common.status.error'), err.response?.data?.error || "Failed to update status");
             } finally {
                 setActionLoading(prev => ({ ...prev, [wish.id]: false }));
             }
@@ -159,21 +161,21 @@ export default function WishlistScreen() {
         if (!isCompleting) {
             // Marking as NOT completed (WARNING)
             Alert.alert(
-                "Warning",
-                "Are you sure you want to mark this wish as not completed?\n\nThis will:\n• Delete the associated transaction\n• Remove the transaction date\n• Update your networth",
+                t('wishlist.alerts.unmarkTitle'),
+                t('wishlist.alerts.unmarkConfirm'),
                 [
-                    { text: "Cancel", style: "cancel" },
-                    { text: "Continue", onPress: proceedToggle }
+                    { text: t('common.actions.cancel'), style: "cancel" },
+                    { text: t('wishlist.alerts.continue'), onPress: proceedToggle }
                 ]
             );
         } else {
             // Marking as Completed
             Alert.alert(
-                "Mark as Completed",
-                "This will create a transaction for this wish expense.",
+                t('wishlist.alerts.markTitle'),
+                t('wishlist.alerts.markMessage'),
                 [
-                    { text: "Cancel", style: "cancel" },
-                    { text: "Confirm", onPress: proceedToggle }
+                    { text: t('common.actions.cancel'), style: "cancel" },
+                    { text: t('wishlist.alerts.confirm'), onPress: proceedToggle }
                 ]
             );
         }
@@ -188,7 +190,7 @@ export default function WishlistScreen() {
         <View style={[styles.container, themeStyles.container]}>
             {/* Header */}
             <View style={[styles.header, themeStyles.header, { paddingTop: insets.top + 12 }]}>
-                <Text style={[styles.headerTitle, themeStyles.text]}>Wishlist</Text>
+                <Text style={[styles.headerTitle, themeStyles.text]}>{t('wishlist.title')}</Text>
 
                 {/* Year Filter */}
                 <View style={styles.yearFilterContainer}>
@@ -222,7 +224,7 @@ export default function WishlistScreen() {
                 onEndReached={loadMore}
                 onEndReachedThreshold={0.5}
                 ListFooterComponent={loading && !refreshing ? <ActivityIndicator size="small" color="#366c6b" style={{ margin: 20 }} /> : null}
-                ListEmptyComponent={!loading ? <Text style={[styles.emptyText, themeStyles.subText]}>No wishes found for {year}.</Text> : null}
+                ListEmptyComponent={!loading ? <Text style={[styles.emptyText, themeStyles.subText]}>{t('wishlist.empty.title')}</Text> : null}
                 contentContainerStyle={{ paddingBottom: 100, paddingTop: 16 }}
             />
 
