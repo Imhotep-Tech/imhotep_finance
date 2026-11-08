@@ -9,7 +9,7 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "associatedDomains": [
-        "applinks:imhotep-finance.vercel.app"
+        "applinks:finance.imhotep-tech.com"
       ],
       "bundleIdentifier": "com.imhoteptech.imhotep_finance"
     },
@@ -30,12 +30,12 @@
           "data": [
             {
               "scheme": "https",
-              "host": "imhotep-finance.vercel.app",
+              "host": "finance.imhotep-tech.com",
               "pathPrefix": "/verify-email"
             },
             {
               "scheme": "https",
-              "host": "imhotep-finance.vercel.app",
+              "host": "finance.imhotep-tech.com",
               "pathPrefix": "/verify-email-change"
             }
           ],

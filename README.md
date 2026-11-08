@@ -41,7 +41,7 @@ You don't need to install anything to get started! A **free hosted version** of 
 
 <div align="center">
 
-### 🔗 **[Launch Imhotep Finance →](https://imhotep-finance.vercel.app/)**
+### 🔗 **[Launch Imhotep Finance →](https://finance.imhotep-tech.com/)**
 
 Sign up for a free account and start managing your finances immediately.
 
@@ -198,7 +198,7 @@ Choose the path that matches your goal:
 
 ### 🌐 I want to Use It Right Away
 
-- **[Launch the hosted version →](https://imhotep-finance.vercel.app/)** — no installation needed
+- **[Launch the hosted version →](https://finance.imhotep-tech.com/)** — no installation needed
 
 ### 🚀 I want to Self-Host (Production)
 
@@ -336,6 +336,6 @@ For commercial licensing inquiries, please contact **imhoteptech@outlook.com**.
 
 *"Take control of your finances. Achieve your goals."*
 
-[Live App](https://imhotep-finance.vercel.app/) • [Documentation](.docs/) • [Mobile App](https://github.com/Imhotep-Tech/imhotep_finance/releases/latest) • [API Docs](https://imhotep-finance.vercel.app/developer)
+[Live App](https://finance.imhotep-tech.com/) • [Documentation](.docs/) • [Mobile App](https://github.com/Imhotep-Tech/imhotep_finance/releases/latest) • [API Docs](https://finance.imhotep-tech.com/developer)
 
 </div>

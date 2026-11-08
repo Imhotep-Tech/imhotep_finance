@@ -198,7 +198,7 @@ Edit `app.json` to customize app settings:
 The app supports deep linking for email verification:
 
 - `imhotep-finance://verify-email?token=...`
-- `https://imhotep-finance.vercel.app/verify-email?token=...`
+- `https://finance.imhotep-tech.com/verify-email?token=...`
 
 Deep links are configured in `app.json`:
 
@@ -212,7 +212,7 @@ Deep links are configured in `app.json`:
         "data": [
           {
             "scheme": "https",
-            "host": "imhotep-finance.vercel.app",
+            "host": "finance.imhotep-tech.com",
             "pathPrefix": "/verify-email"
           }
         ]
