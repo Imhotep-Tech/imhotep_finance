@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { usePWA } from '../../hooks/usePWA';
 import { useTranslation } from '../../contexts/LanguageContext';
+import { versionEntries } from '../../utils/versionData';
 import Logo from '../../assets/Logo.jpeg';
 import TallyFeedbackLink from './TallyFeedbackLink';
 
@@ -67,7 +68,7 @@ function Footer() {
           </a>
           <TallyFeedbackLink />
           <Link to="/version-history" className="hover:underline">
-            Version 8.3.0
+            Version {versionEntries[0].version}
           </Link>
         </div>
 
