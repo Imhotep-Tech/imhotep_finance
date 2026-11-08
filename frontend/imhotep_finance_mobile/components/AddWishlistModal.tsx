@@ -40,7 +40,7 @@ const AddWishlistModal: React.FC<AddWishlistModalProps> = ({
     const isDark = colorScheme === 'dark';
 
     const [price, setPrice] = useState('');
-    const [currency, setCurrency] = useState('EGP'); // Default
+    const [currency, setCurrency] = useState(initialValues.currency || '');
     const [year, setYear] = useState(currentYear.toString());
     const [place, setPlace] = useState(initialValues.place || '');
     const [details, setDetails] = useState('');
@@ -51,7 +51,7 @@ const AddWishlistModal: React.FC<AddWishlistModalProps> = ({
         if (visible) {
             if (editMode && initialValues) {
                 setPrice(initialValues.price ? initialValues.price.toString() : '');
-                setCurrency(initialValues.currency || 'EGP');
+                setCurrency(initialValues.currency || '');
                 setYear(initialValues.year ? initialValues.year.toString() : currentYear.toString());
                 setDetails(initialValues.wish_details || '');
                 setPlace(initialValues.place || '');
@@ -59,11 +59,22 @@ const AddWishlistModal: React.FC<AddWishlistModalProps> = ({
             } else {
                 // Reset for add mode
                 setPrice('');
-                setCurrency('EGP');
+                setCurrency('');
                 setYear(currentYear.toString());
                 setDetails('');
                 setPlace('');
                 setLink('');
+
+                // Call the API to fetch user's default favorite currency like on web and transactions
+                api.get('/api/get-fav-currency/')
+                    .then(res => {
+                        if (res.data?.favorite_currency) {
+                            setCurrency(res.data.favorite_currency);
+                        }
+                    })
+                    .catch(err => {
+                        console.warn('Failed to fetch favorite currency for new wish:', err);
+                    });
             }
         }
     }, [visible, editMode, initialValues]);
