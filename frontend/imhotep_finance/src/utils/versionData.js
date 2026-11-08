@@ -1,8 +1,23 @@
 export const versionEntries = [
   {
-    version: '9.0.0',
+    version: '9.1.0',
     date: 'November 8, 2026',
     badge: { label: 'LATEST', color: 'green' },
+    summary: 'Case-Insensitive Category Architecture, Report Normalization & Interactive Modals',
+    bullets: [
+      'Enforced automated lowercase normalization and whitespace trimming across transaction and scheduled transaction categories on creation, update, and bulk CSV imports.',
+      'Made transaction category filtering and search fully case-insensitive across API endpoints and web/mobile views (e.g., searching "FOOD", "Food", or "food" matches identically).',
+      'Enhanced category suggestion system (/api/finance-management/get-category/) to consolidate frequency counters under unified lowercase keys.',
+      'Normalized financial analytics and reports (monthly snapshots, yearly aggregation, and recalculation) to lowercase category breakdowns and case-insensitive groupings.',
+      'Automated database migrations across Transactions, Scheduled Transactions, and User Reports to safely migrate existing historical category data to lowercase.',
+      'Added interactive multi-step creation modals with real-time balance validation and MoveMoneyModal component for smooth fund transfers between accounts.',
+      'Maintained 100% pass rate across the full backend test suite (246 tests) with zero regressions.'
+    ]
+  },
+  {
+    version: '9.0.0',
+    date: 'November 8, 2026',
+    badge: { label: 'MAJOR', color: 'yellow' },
     summary: 'Full-Stack Modular Multi-Language (i18n) Support & Mobile Currency Intelligence',
     bullets: [
       'Introduced a modular internationalization (i18n) architecture separating translations into domain JSON files (common, auth, dashboard, transactions, scheduled, wishlist, reports, profile, landing) with complete English and Arabic (RTL) parity.',
