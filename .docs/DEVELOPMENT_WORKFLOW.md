@@ -94,6 +94,25 @@ docker compose up --build
 
 ---
 
+## 6) Interactive Creation Modals & Validation UX Architecture
+
+Both web (`frontend/imhotep_finance`) and mobile (`frontend/imhotep_finance_mobile`) utilize multi-step guided wizard modals for adding and editing:
+1. **Transactions** (`AddTransactionModal`)
+2. **Wishlist items** (`AddWishModal` / `UpdateWishModal` / `AddWishlistModal`)
+3. **Scheduled transactions** (`AddScheduledTransactionModal`)
+
+### Core Features:
+- **Guided Multi-Step Flow**: Progress bar with step pills/dots, smooth slide & fade transitions between steps.
+- **Quick Preset Chips**: Quick-add buttons (`+10`, `+50`, `+100`, `+500`, etc.) for seamless amount input.
+- **Live Networth & Balance Verification**: Uses `useNetworthBalances` to query `/api/finance-management/get-networth-details/`.
+  - When withdrawing, verifies available balance in the selected account/place.
+  - Displays instant deficit warning card if attempting to withdraw more than available, with cross-account balance tips.
+  - Shows savings progress meters and completion status for wishlist goals.
+  - Warns about recurring balance sufficiency for scheduled transactions.
+- **Frontend Input Validations**: Field-level validation on positive amounts, decimal limits (max 2 decimals), valid URLs, and calendar day constraints before advancing steps.
+
+---
+
 ## 📚 Related Docs
 
 - [🤖 AI Agent Operating Manual](../AGENTS.md)

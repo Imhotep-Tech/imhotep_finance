@@ -73,7 +73,18 @@
     "requiredFieldsMobile": "Please fill in required fields (Price, Currency, Year).",
     "pricePositive": "Price must be greater than 0.",
     "validYear": "Please enter a valid year.",
-    "saveFailed": "Failed to save wish"
+    "saveFailed": "Failed to save wish",
+    "step": "Step {current} of {total}",
+    "step1Title": "Cost & Year",
+    "step1Desc": "Target price, currency, and goal year",
+    "step2Title": "Details & Link",
+    "step2Desc": "Item details, purchase link, and account",
+    "reviewTitle": "Review Wish",
+    "priceDecimals": "Price cannot exceed 2 decimal places.",
+    "currencyRequired": "Please choose a currency.",
+    "invalidUrl": "Link must start with http:// or https://",
+    "savingsReady": "🎉 You have enough savings ({balance} {currency}) to fulfill this wish!",
+    "savingsProgress": "Savings progress: {balance} {currency} available ({deficit} {currency} more needed to reach goal)."
   },
   "fields": {
     "name": "Wish Name",

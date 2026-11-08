@@ -73,7 +73,18 @@
     "requiredFieldsMobile": "يرجى ملء الحقول المطلوبة (السعر، العملة، السنة).",
     "pricePositive": "يجب أن يكون السعر أكبر من 0.",
     "validYear": "يرجى إدخال سنة صالحة.",
-    "saveFailed": "فشل حفظ الرغبة"
+    "saveFailed": "فشل حفظ الرغبة",
+    "step": "الخطوة {current} من {total}",
+    "step1Title": "التكلفة والسنة",
+    "step1Desc": "السعر المستهدف والعملة وسنة الهدف",
+    "step2Title": "التفاصيل والرابط",
+    "step2Desc": "تفاصيل العنصر، رابط الشراء، والحساب",
+    "reviewTitle": "مراجعة الرغبة",
+    "priceDecimals": "لا يمكن أن يحتوي السعر على أكثر من خانتين عشريتين.",
+    "currencyRequired": "يرجى اختيار العملة.",
+    "invalidUrl": "يجب أن يبدأ الرابط بـ http:// أو https://",
+    "savingsReady": "🎉 لديك مدخرات كافية ({balance} {currency}) لتحقيق هذه الرغبة!",
+    "savingsProgress": "تقدم الادخار: يتوفر {balance} {currency} (يلزم {deficit} {currency} إضافية لتحقيق الهدف)."
   },
   "fields": {
     "name": "اسم الرغبة",
