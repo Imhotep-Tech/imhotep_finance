@@ -8,6 +8,7 @@ import {
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from '@/contexts/LanguageContext';
 import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
 
@@ -18,6 +19,7 @@ interface AppLockOverlayProps {
 const { width } = Dimensions.get('window');
 
 export default function AppLockOverlay({ onUnlock }: AppLockOverlayProps) {
+  const { t } = useTranslation();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
 
@@ -59,10 +61,10 @@ export default function AppLockOverlay({ onUnlock }: AppLockOverlayProps) {
         {/* Title and Message */}
         <View style={styles.textContainer}>
           <ThemedText style={[styles.title, { color: colors.text }]} type="subtitle">
-            App Locked
+            {t('common.appLock.title')}
           </ThemedText>
           <ThemedText style={[styles.description, { color: colors.textSecondary }]}>
-            Your financial data is protected. Authenticate to unlock access.
+            {t('common.appLock.description')}
           </ThemedText>
         </View>
 
@@ -80,7 +82,7 @@ export default function AppLockOverlay({ onUnlock }: AppLockOverlayProps) {
             onPress={onUnlock}
           >
             <Ionicons name="finger-print-outline" size={20} color="#fff" style={styles.buttonIcon} />
-            <ThemedText style={styles.unlockButtonText}>Unlock App</ThemedText>
+            <ThemedText style={styles.unlockButtonText}>{t('common.appLock.unlock')}</ThemedText>
           </Pressable>
 
           <Pressable
@@ -91,7 +93,7 @@ export default function AppLockOverlay({ onUnlock }: AppLockOverlayProps) {
             onPress={onUnlock}
           >
             <ThemedText style={[styles.retryText, { color: colors.primary }]}>
-              Tap to authenticate with Passcode / PIN
+              {t('common.appLock.authenticatePin')}
             </ThemedText>
           </Pressable>
         </View>

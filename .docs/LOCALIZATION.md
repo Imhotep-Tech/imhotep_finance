@@ -116,7 +116,10 @@ export default function MyScreen() {
 }
 ```
 
-### 3. Dynamic Parameter Interpolation
+### 3. Modals and Shared Selectors
+Shared modal overlays and selector pickers (`AddTransactionModal`, `AddScheduledTransactionModal`, `CategorySelect`, `CurrencySelect`, `PlaceSelect`, `UserGuideModal`, `AppLockOverlay`, and net worth conversion/move dialogs) are fully integrated with `useTranslation()`, dynamically adapting text, placeholders, search inputs, and action buttons in real time.
+
+### 4. Dynamic Parameter Interpolation
 Placeholders in JSON formatted as `{variable}` are automatically replaced:
 ```json
 // dashboard.json

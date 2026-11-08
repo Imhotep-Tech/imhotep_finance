@@ -103,5 +103,34 @@
     "cta": "إضافة معاملة"
   },
   "loading": "جارٍ تحميل المعاملات...",
-  "noTransactionsFound": "لم يتم العثور على معاملات."
+  "noTransactionsFound": "لم يتم العثور على معاملات.",
+  "modal": {
+    "addTitle": "إضافة معاملة",
+    "editTitle": "تعديل المعاملة",
+    "income": "دخل",
+    "expense": "مصروف",
+    "amount": "المبلغ",
+    "amountPlaceholder": "0.00",
+    "currency": "العملة",
+    "category": "الفئة",
+    "place": "المكان",
+    "description": "الوصف",
+    "descriptionOptional": "الوصف (اختياري)",
+    "date": "التاريخ",
+    "save": "حفظ",
+    "add": "إضافة",
+    "deleteTitle": "حذف المعاملة",
+    "deleteConfirm": "هل أنت متأكد من رغبتك في حذف هذه المعاملة؟",
+    "deleteSuccess": "تم حذف المعاملة بنجاح!",
+    "deleteFailed": "فشل حذف المعاملة.",
+    "addSuccess": "تمت إضافة المعاملة بنجاح!",
+    "addFailed": "فشل إضافة المعاملة.",
+    "updateSuccess": "تم تحديث المعاملة بنجاح!",
+    "updateFailed": "فشل تحديث المعاملة.",
+    "requiredFields": "المبلغ والعملة مطلوبان."
+  },
+  "item": {
+    "noCategory": "بدون فئة",
+    "noDescription": "بدون وصف"
+  }
 }

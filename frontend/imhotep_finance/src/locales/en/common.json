@@ -15,6 +15,11 @@
     "expandSidebar": "Expand sidebar",
     "emailNotVerified": "Email not verified"
   },
+  "notFound": {
+    "title": "Oops!",
+    "message": "This screen doesn't exist.",
+    "backHome": "Go to home screen!"
+  },
   "actions": {
     "save": "Save",
     "saving": "Saving...",
@@ -98,5 +103,41 @@
     "builtFor": "Built for modern financial clarity.",
     "feedback": "Feedback",
     "version": "Version"
+  },
+  "select": {
+    "category": "Select Category",
+    "currency": "Select Currency",
+    "place": "Select Place",
+    "searchOrAdd": "Search or add new...",
+    "searchCurrency": "Search currency...",
+    "searchOrAddPlace": "Search or add new place...",
+    "noCategories": "No existing categories found.",
+    "noCurrencies": "No currencies found",
+    "noPlaces": "No places found.",
+    "addAsNew": "Add \"{name}\" as new",
+    "add": "Add \"{name}\"",
+    "general": "General",
+    "newPlace": "+ New Place"
+  },
+  "appLock": {
+    "title": "App Locked",
+    "description": "Your financial data is protected. Authenticate to unlock access.",
+    "unlock": "Unlock App",
+    "authenticatePin": "Tap to authenticate with Passcode / PIN"
+  },
+  "userGuide": {
+    "stepOf": "Step {current} of {total}",
+    "skip": "Skip",
+    "back": "Back",
+    "next": "Next",
+    "start": "Start",
+    "step1Title": "Welcome to Imhotep! 📈",
+    "step1Desc": "Your premium wealth manager. Keep track of your balances across different places and currencies, and achieve your financial targets.",
+    "step2Title": "Dashboard Overview ⚡",
+    "step2Desc": "See your net worth in your favorite currency, check your savings score, and use the floating plus button to log transactions quickly.",
+    "step3Title": "Toggles & Grouping 💼",
+    "step3Desc": "Deep-dive into details. View your holdings grouped by place or by currency with percentage share and progress bars. You can even move money or convert currencies.",
+    "step4Title": "Home Widgets & Targets 📊",
+    "step4Desc": "Setup native home screen widgets for fast balance checks and shortcuts. Define monthly savings targets in your Profile to track your performance."
   }
 }

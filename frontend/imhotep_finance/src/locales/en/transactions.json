@@ -103,5 +103,34 @@
     "cta": "Add Transaction"
   },
   "loading": "Loading transactions...",
-  "noTransactionsFound": "No transactions found."
+  "noTransactionsFound": "No transactions found.",
+  "modal": {
+    "addTitle": "Add Transaction",
+    "editTitle": "Edit Transaction",
+    "income": "Income",
+    "expense": "Expense",
+    "amount": "Amount",
+    "amountPlaceholder": "0.00",
+    "currency": "Currency",
+    "category": "Category",
+    "place": "Place",
+    "description": "Description",
+    "descriptionOptional": "Description (optional)",
+    "date": "Date",
+    "save": "Save",
+    "add": "Add",
+    "deleteTitle": "Delete Transaction",
+    "deleteConfirm": "Are you sure you want to delete this transaction?",
+    "deleteSuccess": "Transaction deleted successfully!",
+    "deleteFailed": "Failed to delete transaction.",
+    "addSuccess": "Transaction added successfully!",
+    "addFailed": "Failed to add transaction.",
+    "updateSuccess": "Transaction updated successfully!",
+    "updateFailed": "Failed to update transaction.",
+    "requiredFields": "Amount and currency are required."
+  },
+  "item": {
+    "noCategory": "No Category",
+    "noDescription": "No Description"
+  }
 }

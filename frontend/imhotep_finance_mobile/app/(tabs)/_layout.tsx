@@ -55,7 +55,7 @@ export default function TabLayout() {
           </View>
 
           <Text style={[styles.title, { color: colors.text }]}>Imhotep Finance</Text>
-          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Loading your workspace...</Text>
+          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>{t('common.actions.loading')}</Text>
 
           <ActivityIndicator size="large" color={colors.primary} style={styles.spinner} />
         </View>

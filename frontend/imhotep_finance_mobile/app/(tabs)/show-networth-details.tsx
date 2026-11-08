@@ -5,6 +5,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from '@/contexts/LanguageContext';
 import api from '@/constants/api';
 import { currencies as allCurrencies } from '@/constants/currencies';
 
@@ -36,6 +37,7 @@ const themes = {
 };
 
 export default function NetWorthDetailsScreen() {
+    const { t } = useTranslation();
     const colorScheme = useColorScheme();
     const isDark = colorScheme === 'dark';
     const colors = themes[isDark ? 'dark' : 'light'];
@@ -150,13 +152,13 @@ export default function NetWorthDetailsScreen() {
 
         const parsedAmount = parseFloat(amount);
         if (isNaN(parsedAmount) || parsedAmount <= 0) {
-            Alert.alert('Error', 'Amount must be greater than zero.');
+            Alert.alert(t('common.status.error'), 'Amount must be greater than zero.');
             return;
         }
 
         const maxAvailable = (details[sourcePlace] || []).find(item => item.currency === currency)?.amount || 0;
         if (parsedAmount > maxAvailable) {
-            Alert.alert('Error', `Insufficient funds in ${sourcePlace}. Maximum available is ${maxAvailable} ${currency}.`);
+            Alert.alert(t('common.status.error'), `Insufficient funds in ${sourcePlace}. Maximum available is ${maxAvailable} ${currency}.`);
             return;
         }
 
@@ -169,11 +171,11 @@ export default function NetWorthDetailsScreen() {
                 currency
             });
             setShowMoveModal(false);
-            Alert.alert('Success', 'Money moved successfully!');
+            Alert.alert(t('common.status.success'), t('dashboard.netWorthDetails.moveSuccess'));
             fetchDetails();
         } catch (err: any) {
             const errorMessage = err.response?.data?.error || err.response?.data?.detail || 'An error occurred during transfer.';
-            Alert.alert('Error', errorMessage);
+            Alert.alert(t('common.status.error'), errorMessage);
         } finally {
             setSubmitting(false);
         }
@@ -228,25 +230,25 @@ export default function NetWorthDetailsScreen() {
 
     const handleConvertSubmit = async () => {
         if (!convertPlace || !sourceCurrency || !targetCurrency || !convertAmount || !targetAmount) {
-            Alert.alert('Error', 'All fields are required.');
+            Alert.alert(t('common.status.error'), 'All fields are required.');
             return;
         }
 
         if (sourceCurrency === targetCurrency) {
-            Alert.alert('Error', 'Source and target currencies must be different.');
+            Alert.alert(t('common.status.error'), 'Source and target currencies must be different.');
             return;
         }
 
         const parsedAmount = parseFloat(convertAmount);
         const parsedTargetAmount = parseFloat(targetAmount);
         if (isNaN(parsedAmount) || parsedAmount <= 0 || isNaN(parsedTargetAmount) || parsedTargetAmount <= 0) {
-            Alert.alert('Error', 'Amounts must be greater than zero.');
+            Alert.alert(t('common.status.error'), 'Amounts must be greater than zero.');
             return;
         }
 
         const maxAvailable = (details[convertPlace] || []).find(item => item.currency === sourceCurrency)?.amount || 0;
         if (parsedAmount > maxAvailable) {
-            Alert.alert('Error', `Insufficient funds. Maximum available is ${maxAvailable} ${sourceCurrency}.`);
+            Alert.alert(t('common.status.error'), `Insufficient funds. Maximum available is ${maxAvailable} ${sourceCurrency}.`);
             return;
         }
 
@@ -260,11 +262,11 @@ export default function NetWorthDetailsScreen() {
                 target_amount: parsedTargetAmount
             });
             setShowConvertModal(false);
-            Alert.alert('Success', 'Currency converted successfully!');
+            Alert.alert(t('common.status.success'), t('dashboard.netWorthDetails.convertSuccess'));
             fetchDetails();
         } catch (err: any) {
             const errorMessage = err.response?.data?.error || err.response?.data?.detail || 'An error occurred during conversion.';
-            Alert.alert('Error', errorMessage);
+            Alert.alert(t('common.status.error'), errorMessage);
         } finally {
             setConvertSubmitting(false);
         }
@@ -272,23 +274,23 @@ export default function NetWorthDetailsScreen() {
 
     const handleDeleteNetWorth = (place: string, currency: string) => {
         Alert.alert(
-            'Confirm Delete',
-            `Are you sure you want to delete the ${currency} net worth record at ${place}?`,
+            t('dashboard.netWorthDetails.deleteConfirmTitle'),
+            t('dashboard.netWorthDetails.deleteConfirmMessage', { currency, place }),
             [
-                { text: 'Cancel', style: 'cancel' },
+                { text: t('common.actions.cancel'), style: 'cancel' },
                 {
-                    text: 'Delete',
+                    text: t('common.actions.delete'),
                     style: 'destructive',
                     onPress: async () => {
                         try {
                             await api.delete('/api/finance-management/delete-networth/', {
                                 data: { place, currency }
                             });
-                            Alert.alert('Success', 'Net worth record deleted successfully!');
+                            Alert.alert(t('common.status.success'), t('dashboard.netWorthDetails.deleteNetWorthSuccess'));
                             fetchDetails();
                         } catch (err: any) {
                             const errorMessage = err.response?.data?.error || err.response?.data?.detail || 'An error occurred while deleting the net worth record.';
-                            Alert.alert('Error', errorMessage);
+                            Alert.alert(t('common.status.error'), errorMessage);
                         }
                     }
                 }
@@ -300,7 +302,7 @@ export default function NetWorthDetailsScreen() {
         <>
             <Stack.Screen
                 options={{
-                    title: 'Net Worth Details',
+                    title: t('dashboard.netWorthDetails.title'),
                     headerStyle: {
                         backgroundColor: colors.background,
                     },
@@ -316,8 +318,8 @@ export default function NetWorthDetailsScreen() {
                     }
                 >
                     <View style={[styles.headerCard, { backgroundColor: colors.surface }]}>
-                        <Text style={[styles.title, { color: colors.text }]}>Net Worth Details</Text>
-                        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Breakdown by place & currency</Text>
+                        <Text style={[styles.title, { color: colors.text }]}>{t('dashboard.netWorthDetails.title')}</Text>
+                        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>{t('dashboard.netWorthDetails.subtitle')}</Text>
                     </View>
 
                     {/* View Type Toggle Selector */}
@@ -335,7 +337,7 @@ export default function NetWorthDetailsScreen() {
                                 { color: colors.textSecondary },
                                 viewType === 'place' && { color: colors.text, fontWeight: '700' }
                             ]}>
-                                By Place
+                                {t('dashboard.netWorthDetails.groupByPlace')}
                             </Text>
                         </TouchableOpacity>
                         <TouchableOpacity
@@ -351,7 +353,7 @@ export default function NetWorthDetailsScreen() {
                                 { color: colors.textSecondary },
                                 viewType === 'currency' && { color: colors.text, fontWeight: '700' }
                             ]}>
-                                By Currency
+                                {t('dashboard.netWorthDetails.groupByCurrency')}
                             </Text>
                         </TouchableOpacity>
                     </View>
@@ -359,14 +361,14 @@ export default function NetWorthDetailsScreen() {
                     {loading ? (
                         <View style={styles.loadingContainer}>
                             <ActivityIndicator size="large" color={colors.primary} />
-                            <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Loading...</Text>
+                            <Text style={[styles.loadingText, { color: colors.textSecondary }]}>{t('common.actions.loading')}</Text>
                         </View>
                     ) : Object.keys(details).length === 0 ? (
                         <View style={styles.emptyContainer}>
                             <Ionicons name="wallet-outline" size={64} color={colors.textSecondary} />
-                            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>No net worth details found.</Text>
+                            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>{t('dashboard.netWorthDetails.empty')}</Text>
                             <Text style={[styles.emptySubtext, { color: colors.textSecondary }]}>
-                                Add some transactions to see your net worth breakdown.
+                                {t('dashboard.netWorthDetails.emptySubtext')}
                             </Text>
                         </View>
                     ) : viewType === 'place' ? (
@@ -396,12 +398,12 @@ export default function NetWorthDetailsScreen() {
                                                     >
                                                         <Text style={styles.currencyLabel}>{item.currency}</Text>
                                                         <Text style={styles.currencyAmount}>
-                                                            {Number(item.amount || 0).toLocaleString(undefined, {
+                                                             {Number(item.amount || 0).toLocaleString(undefined, {
                                                                 minimumFractionDigits: 2,
                                                                 maximumFractionDigits: 2
                                                             })}
                                                         </Text>
-                                                        <Text style={styles.currencySubtext}>Total Amount</Text>
+                                                        <Text style={styles.currencySubtext}>{t('dashboard.netWorthDetails.totalAmount')}</Text>
                                                     </LinearGradient>
                                                 </TouchableOpacity>
                                                 {Number(item.amount || 0) === 0 && (
@@ -428,7 +430,7 @@ export default function NetWorthDetailsScreen() {
                                             <Text style={{ color: colors.primary, fontWeight: 'bold', fontSize: 16 }}>{currency}</Text>
                                         </View>
                                         <View style={{ alignItems: 'flex-end', flex: 1 }}>
-                                            <Text style={[styles.currencyTotalLabel, { color: colors.textSecondary }]}>Total Allocation</Text>
+                                            <Text style={[styles.currencyTotalLabel, { color: colors.textSecondary }]}>{t('dashboard.netWorthDetails.totalAllocation')}</Text>
                                             <Text style={[styles.currencyTotalAmount, { color: colors.text }]}>
                                                 {data.total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                             </Text>
@@ -486,7 +488,7 @@ export default function NetWorthDetailsScreen() {
                             }}
                         >
                             <Ionicons name="cash-outline" size={20} color="#fff" />
-                            <Text style={styles.backButtonText}>Convert Currencies</Text>
+                            <Text style={styles.backButtonText}>{t('dashboard.netWorthDetails.convertCurrencies')}</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity
@@ -502,7 +504,7 @@ export default function NetWorthDetailsScreen() {
                             }}
                         >
                             <Ionicons name="swap-horizontal-outline" size={20} color="#fff" />
-                            <Text style={styles.backButtonText}>Move Money</Text>
+                            <Text style={styles.backButtonText}>{t('dashboard.netWorthDetails.moveMoney')}</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity
@@ -510,7 +512,7 @@ export default function NetWorthDetailsScreen() {
                             onPress={() => router.back()}
                         >
                             <Ionicons name="home-outline" size={20} color={colors.primary} />
-                            <Text style={[styles.backButtonText, { color: colors.primary }]}>Dashboard</Text>
+                            <Text style={[styles.backButtonText, { color: colors.primary }]}>{t('common.navigation.dashboard')}</Text>
                         </TouchableOpacity>
                     </View>
 
@@ -532,7 +534,7 @@ export default function NetWorthDetailsScreen() {
                 <View style={styles.modalOverlay}>
                     <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
                         <View style={styles.modalHeader}>
-                            <Text style={[styles.modalTitle, { color: colors.text }]}>Move Money</Text>
+                            <Text style={[styles.modalTitle, { color: colors.text }]}>{t('dashboard.netWorthDetails.moveMoney')}</Text>
                             <TouchableOpacity onPress={() => setShowMoveModal(false)}>
                                 <Ionicons name="close" size={24} color={colors.text} />
                             </TouchableOpacity>
@@ -541,7 +543,7 @@ export default function NetWorthDetailsScreen() {
                         <ScrollView contentContainerStyle={{ gap: 20 }} keyboardShouldPersistTaps="handled">
                             {/* Source Place */}
                             <View>
-                                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Source Place</Text>
+                                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>{t('dashboard.netWorthDetails.sourcePlace')}</Text>
                                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsContainer}>
                                     {Object.keys(details).map(place => (
                                         <TouchableOpacity
@@ -568,7 +570,7 @@ export default function NetWorthDetailsScreen() {
                             {/* Currency */}
                             {sourcePlace ? (
                                 <View>
-                                    <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Currency</Text>
+                                    <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>{t('dashboard.netWorthDetails.currency')}</Text>
                                     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsContainer}>
                                         {(details[sourcePlace] || []).map(item => (
                                             <TouchableOpacity
@@ -591,7 +593,10 @@ export default function NetWorthDetailsScreen() {
                                     </ScrollView>
                                     {currency ? (
                                         <Text style={[styles.balanceText, { color: colors.textSecondary }]}>
-                                            Available: {Number((details[sourcePlace] || []).find(item => item.currency === currency)?.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
+                                            {t('dashboard.netWorthDetails.available', {
+                                                amount: Number((details[sourcePlace] || []).find(item => item.currency === currency)?.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+                                                currency
+                                            })}
                                         </Text>
                                     ) : null}
                                 </View>
@@ -599,7 +604,7 @@ export default function NetWorthDetailsScreen() {
 
                             {/* Target Place */}
                             <View>
-                                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Target Place</Text>
+                                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>{t('dashboard.netWorthDetails.targetPlace')}</Text>
                                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsContainer}>
                                     {Object.keys(details)
                                         .filter(place => place !== sourcePlace)
@@ -633,7 +638,7 @@ export default function NetWorthDetailsScreen() {
                                         }}
                                     >
                                         <Text style={[styles.chipText, { color: colors.text }, isCustomTarget && { color: '#fff', fontWeight: 'bold' }]}>
-                                            + New Place
+                                            {t('dashboard.netWorthDetails.newPlace')}
                                         </Text>
                                     </TouchableOpacity>
                                 </ScrollView>
@@ -641,7 +646,7 @@ export default function NetWorthDetailsScreen() {
                                 {isCustomTarget ? (
                                     <TextInput
                                         style={[styles.textInput, { borderColor: colors.border, color: colors.text, backgroundColor: isDark ? '#1F2937' : '#F9FAFB' }]}
-                                        placeholder="Enter new place name..."
+                                        placeholder={t('dashboard.netWorthDetails.newPlacePlaceholder')}
                                         placeholderTextColor={colors.textSecondary}
                                         value={targetPlaceInput}
                                         onChangeText={setTargetPlaceInput}
@@ -652,7 +657,7 @@ export default function NetWorthDetailsScreen() {
 
                             {/* Amount */}
                             <View>
-                                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Amount</Text>
+                                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>{t('dashboard.netWorthDetails.amount')}</Text>
                                 <TextInput
                                     style={[styles.textInput, { borderColor: colors.border, color: colors.text, backgroundColor: isDark ? '#1F2937' : '#F9FAFB' }]}
                                     placeholder="0.00"
@@ -669,7 +674,7 @@ export default function NetWorthDetailsScreen() {
                                     style={[styles.modalButton, { borderColor: colors.border, borderWidth: 1 }]}
                                     onPress={() => setShowMoveModal(false)}
                                 >
-                                    <Text style={{ color: colors.text, fontWeight: '600' }}>Cancel</Text>
+                                    <Text style={{ color: colors.text, fontWeight: '600' }}>{t('common.actions.cancel')}</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity
                                     style={[styles.modalButton, { backgroundColor: colors.primary }]}
@@ -679,7 +684,7 @@ export default function NetWorthDetailsScreen() {
                                     {submitting ? (
                                         <ActivityIndicator size="small" color="#fff" />
                                     ) : (
-                                        <Text style={{ color: '#fff', fontWeight: '600' }}>Move</Text>
+                                        <Text style={{ color: '#fff', fontWeight: '600' }}>{t('dashboard.netWorthDetails.move')}</Text>
                                     )}
                                 </TouchableOpacity>
                             </View>
@@ -703,7 +708,7 @@ export default function NetWorthDetailsScreen() {
                 <View style={styles.modalOverlay}>
                     <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
                         <View style={styles.modalHeader}>
-                            <Text style={[styles.modalTitle, { color: colors.text }]}>Convert Currency</Text>
+                            <Text style={[styles.modalTitle, { color: colors.text }]}>{t('dashboard.netWorthDetails.convertCurrencies')}</Text>
                             <TouchableOpacity onPress={() => setShowConvertModal(false)}>
                                 <Ionicons name="close" size={24} color={colors.text} />
                             </TouchableOpacity>
@@ -712,7 +717,7 @@ export default function NetWorthDetailsScreen() {
                         <ScrollView contentContainerStyle={{ gap: 20 }} keyboardShouldPersistTaps="handled">
                             {/* Place */}
                             <View>
-                                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Place</Text>
+                                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>{t('dashboard.netWorthDetails.place')}</Text>
                                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsContainer}>
                                     {Object.keys(details).map(place => (
                                         <TouchableOpacity
@@ -742,7 +747,7 @@ export default function NetWorthDetailsScreen() {
                                 <>
                                     {/* Source Currency */}
                                     <View>
-                                        <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Current Currency</Text>
+                                        <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>{t('dashboard.netWorthDetails.currentCurrency')}</Text>
                                         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsContainer}>
                                             {(details[convertPlace] || []).map(item => (
                                                 <TouchableOpacity
@@ -765,14 +770,17 @@ export default function NetWorthDetailsScreen() {
                                         </ScrollView>
                                         {sourceCurrency ? (
                                             <Text style={[styles.balanceText, { color: colors.textSecondary }]}>
-                                                Available: {Number((details[convertPlace] || []).find(item => item.currency === sourceCurrency)?.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {sourceCurrency}
+                                                {t('dashboard.netWorthDetails.available', {
+                                                    amount: Number((details[convertPlace] || []).find(item => item.currency === sourceCurrency)?.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+                                                    currency: sourceCurrency
+                                                })}
                                             </Text>
                                         ) : null}
                                     </View>
 
                                     {/* Target Currency */}
                                     <View>
-                                        <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Target Currency</Text>
+                                        <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>{t('dashboard.netWorthDetails.targetCurrency')}</Text>
                                         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsContainer}>
                                             {allCurrencies.map(c => (
                                                 <TouchableOpacity
@@ -799,7 +807,7 @@ export default function NetWorthDetailsScreen() {
 
                             {/* Rate */}
                             <View>
-                                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Rate</Text>
+                                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>{t('dashboard.netWorthDetails.rate')}</Text>
                                 <TextInput
                                     style={[styles.textInput, { borderColor: colors.border, color: colors.text, backgroundColor: isDark ? '#1F2937' : '#F9FAFB' }]}
                                     placeholder="0.00"
@@ -813,7 +821,7 @@ export default function NetWorthDetailsScreen() {
                             <View style={{ flexDirection: 'row', gap: 12 }}>
                                 {/* Amount */}
                                 <View style={{ flex: 1 }}>
-                                    <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Amount ({sourceCurrency || '...'})</Text>
+                                    <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>{t('dashboard.netWorthDetails.amount')} ({sourceCurrency || '...'})</Text>
                                     <TextInput
                                         style={[styles.textInput, { borderColor: colors.border, color: colors.text, backgroundColor: isDark ? '#1F2937' : '#F9FAFB' }]}
                                         placeholder="0.00"
@@ -826,7 +834,7 @@ export default function NetWorthDetailsScreen() {
                                 
                                 {/* Target Amount */}
                                 <View style={{ flex: 1 }}>
-                                    <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Target ({targetCurrency || '...'})</Text>
+                                    <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>{t('dashboard.netWorthDetails.target')} ({targetCurrency || '...'})</Text>
                                     <TextInput
                                         style={[styles.textInput, { borderColor: colors.border, color: colors.text, backgroundColor: isDark ? '#1F2937' : '#F9FAFB' }]}
                                         placeholder="0.00"
@@ -844,7 +852,7 @@ export default function NetWorthDetailsScreen() {
                                     style={[styles.modalButton, { borderColor: colors.border, borderWidth: 1 }]}
                                     onPress={() => setShowConvertModal(false)}
                                 >
-                                    <Text style={{ color: colors.text, fontWeight: '600' }}>Cancel</Text>
+                                    <Text style={{ color: colors.text, fontWeight: '600' }}>{t('common.actions.cancel')}</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity
                                     style={[styles.modalButton, { backgroundColor: '#2563EB' }]}
@@ -854,7 +862,7 @@ export default function NetWorthDetailsScreen() {
                                     {convertSubmitting ? (
                                         <ActivityIndicator size="small" color="#fff" />
                                     ) : (
-                                        <Text style={{ color: '#fff', fontWeight: '600' }}>Convert</Text>
+                                        <Text style={{ color: '#fff', fontWeight: '600' }}>{t('dashboard.netWorthDetails.convert')}</Text>
                                     )}
                                 </TouchableOpacity>
                             </View>

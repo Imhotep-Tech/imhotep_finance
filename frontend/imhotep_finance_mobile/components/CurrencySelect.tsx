@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Modal, TouchableOpacity, FlatList, StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from '@/contexts/LanguageContext';
 import api from '../constants/api'; // Use the configured api instance
 import { currencies } from '../constants/currencies';
 
@@ -13,6 +14,7 @@ interface CurrencySelectProps {
 }
 
 const CurrencySelect: React.FC<CurrencySelectProps> = ({ value, onChange, required, disabled = false }) => {
+    const { t } = useTranslation();
     const [modalVisible, setModalVisible] = useState(false);
     const [search, setSearch] = useState('');
     const [favoriteCurrency, setFavoriteCurrency] = useState('');
@@ -86,7 +88,7 @@ const CurrencySelect: React.FC<CurrencySelectProps> = ({ value, onChange, requir
                 onPress={() => !disabled && setModalVisible(true)}
                 disabled={disabled}
             >
-                <Text style={[styles.selectorText, themeStyles.text]}>{value || 'Select Currency'}</Text>
+                <Text style={[styles.selectorText, themeStyles.text]}>{value || t('common.select.currency')}</Text>
                 <Ionicons name="chevron-down" size={20} color={isDark ? '#94a3b8' : '#666'} />
             </TouchableOpacity>
 
@@ -103,7 +105,7 @@ const CurrencySelect: React.FC<CurrencySelectProps> = ({ value, onChange, requir
                     <View style={styles.modalOverlay}>
                         <View style={[styles.modalContent, themeStyles.modalContent]}>
                         <View style={styles.modalHeader}>
-                            <Text style={[styles.modalTitle, themeStyles.text]}>Select Currency</Text>
+                            <Text style={[styles.modalTitle, themeStyles.text]}>{t('common.select.currency')}</Text>
                             <TouchableOpacity onPress={() => setModalVisible(false)}>
                                 <Ionicons name="close" size={24} color={themeStyles.closeIcon} />
                             </TouchableOpacity>
@@ -111,7 +113,7 @@ const CurrencySelect: React.FC<CurrencySelectProps> = ({ value, onChange, requir
 
                         <TextInput
                             style={[styles.searchInput, themeStyles.searchInput]}
-                            placeholder="Search currency..."
+                            placeholder={t('common.select.searchCurrency')}
                             placeholderTextColor={isDark ? '#94a3b8' : '#999'}
                             value={search}
                             onChangeText={setSearch}
@@ -135,7 +137,7 @@ const CurrencySelect: React.FC<CurrencySelectProps> = ({ value, onChange, requir
                                     {item === value && <Ionicons name="checkmark" size={20} color="#fff" />}
                                 </TouchableOpacity>
                             )}
-                            ListEmptyComponent={<Text style={styles.emptyText}>No currencies found</Text>}
+                            ListEmptyComponent={<Text style={styles.emptyText}>{t('common.select.noCurrencies')}</Text>}
                         />
                         </View>
                     </View>

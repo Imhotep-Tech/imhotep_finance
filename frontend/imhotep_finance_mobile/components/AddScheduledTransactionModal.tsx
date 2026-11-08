@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from '@/contexts/LanguageContext';
 import api from '../constants/api';
 import CurrencySelect from './CurrencySelect';
 import CategorySelect from './CategorySelect';
@@ -38,6 +39,7 @@ const AddScheduledTransactionModal: React.FC<AddScheduledTransactionModalProps> 
     editMode = false,
     visible,
 }) => {
+    const { t } = useTranslation();
     const [status, setStatus] = useState<'deposit' | 'withdraw'>(initialType);
     const [amount, setAmount] = useState(initialValues.amount || '');
     const [desc, setDesc] = useState(initialValues.desc || '');
@@ -64,14 +66,14 @@ const AddScheduledTransactionModal: React.FC<AddScheduledTransactionModalProps> 
     const handleSubmit = async () => {
         setLoading(true);
         if (!amount || !currency || !dayOfMonth) {
-            Alert.alert('Error', 'Amount, currency, and day of month are required.');
+            Alert.alert(t('common.status.error'), t('scheduled.modal.requiredFields'));
             setLoading(false);
             return;
         }
 
         const day = parseInt(dayOfMonth, 10);
         if (isNaN(day) || day < 1 || day > 31) {
-            Alert.alert('Error', 'Day of month must be between 1 and 31.');
+            Alert.alert(t('common.status.error'), t('scheduled.modal.dayRangeError'));
             setLoading(false);
             return;
         }
@@ -93,16 +95,16 @@ const AddScheduledTransactionModal: React.FC<AddScheduledTransactionModalProps> 
                     `/api/finance-management/scheduled-trans/update-scheduled-trans/${initialValues.id}/`,
                     payload
                 );
-                Alert.alert('Success', 'Scheduled transaction updated successfully!');
+                Alert.alert(t('common.status.success'), t('scheduled.modal.updateSuccess'));
             } else {
                 await api.post('/api/finance-management/scheduled-trans/add-scheduled-trans/', payload);
-                Alert.alert('Success', 'Scheduled transaction added successfully!');
+                Alert.alert(t('common.status.success'), t('scheduled.modal.addSuccess'));
             }
             updateNetworthWidget();
             onSuccess();
         } catch (err: any) {
-            const errorMessage = err.response?.data?.error || (editMode ? 'Failed to update scheduled transaction.' : 'Failed to add scheduled transaction.');
-            Alert.alert('Error', errorMessage);
+            const errorMessage = err.response?.data?.error || (editMode ? t('scheduled.modal.updateFailed') : t('scheduled.modal.addFailed'));
+            Alert.alert(t('common.status.error'), errorMessage);
         } finally {
             setLoading(false);
         }
@@ -110,24 +112,24 @@ const AddScheduledTransactionModal: React.FC<AddScheduledTransactionModalProps> 
 
     const handleDelete = async () => {
         Alert.alert(
-            'Delete Scheduled Transaction',
-            'Are you sure you want to delete this scheduled transaction?',
+            t('scheduled.modal.deleteTitle'),
+            t('scheduled.modal.deleteConfirm'),
             [
-                { text: 'Cancel', style: 'cancel' },
+                { text: t('common.actions.cancel'), style: 'cancel' },
                 {
-                    text: 'Delete',
+                    text: t('common.actions.delete'),
                     style: 'destructive',
                     onPress: async () => {
                         setLoading(true);
                         try {
                             if (initialValues.id) {
                                 await api.delete(`/api/finance-management/scheduled-trans/delete-scheduled-trans/${initialValues.id}/`);
-                                Alert.alert('Success', 'Scheduled transaction deleted successfully!');
+                                Alert.alert(t('common.status.success'), t('scheduled.modal.deleteSuccess'));
                                 updateNetworthWidget();
                                 onSuccess();
                             }
                         } catch (err: any) {
-                            Alert.alert('Error', err.response?.data?.error || 'Failed to delete scheduled transaction.');
+                            Alert.alert(t('common.status.error'), err.response?.data?.error || t('scheduled.modal.deleteFailed'));
                         } finally {
                             setLoading(false);
                         }
@@ -177,7 +179,7 @@ const AddScheduledTransactionModal: React.FC<AddScheduledTransactionModalProps> 
             >
                 <View style={[styles.modalView, themeStyles.container]}>
                     <View style={styles.header}>
-                        <Text style={[styles.title, themeStyles.text]}>{editMode ? 'Edit Scheduled' : 'Add Scheduled'}</Text>
+                        <Text style={[styles.title, themeStyles.text]}>{editMode ? t('scheduled.modal.editTitle') : t('scheduled.modal.addTitle')}</Text>
                         <TouchableOpacity onPress={onClose}>
                             <Ionicons name="close" size={24} color={themeStyles.closeIcon} />
                         </TouchableOpacity>
@@ -194,7 +196,7 @@ const AddScheduledTransactionModal: React.FC<AddScheduledTransactionModalProps> 
                                 onPress={() => setStatus('deposit')}
                                 activeOpacity={0.7}
                             >
-                                <Text style={[styles.typeText, themeStyles.subText, status === 'deposit' && (isDark ? { color: '#10b981' } : styles.typeTextActive)]}>Income</Text>
+                                <Text style={[styles.typeText, themeStyles.subText, status === 'deposit' && (isDark ? { color: '#10b981' } : styles.typeTextActive)]}>{t('scheduled.modal.income')}</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={[
@@ -204,15 +206,15 @@ const AddScheduledTransactionModal: React.FC<AddScheduledTransactionModalProps> 
                                 onPress={() => setStatus('withdraw')}
                                 activeOpacity={0.7}
                             >
-                                <Text style={[styles.typeText, themeStyles.subText, status === 'withdraw' && (isDark ? { color: '#ef4444' } : styles.typeTextActive)]}>Expense</Text>
+                                <Text style={[styles.typeText, themeStyles.subText, status === 'withdraw' && (isDark ? { color: '#ef4444' } : styles.typeTextActive)]}>{t('scheduled.modal.expense')}</Text>
                             </TouchableOpacity>
                         </View>
 
                         {/* Day of Month */}
-                        <Text style={[styles.label, themeStyles.subText]}>Day of Month (1-31)</Text>
+                        <Text style={[styles.label, themeStyles.subText]}>{t('scheduled.modal.dayOfMonth')} (1-31)</Text>
                         <TextInput
                             style={[styles.input, themeStyles.input]}
-                            placeholder="e.g. 1, 15, 31"
+                            placeholder={t('scheduled.modal.dayPlaceholder')}
                             placeholderTextColor={isDark ? '#94a3b8' : '#aaa'}
                             keyboardType="numeric"
                             value={dayOfMonth}
@@ -221,10 +223,10 @@ const AddScheduledTransactionModal: React.FC<AddScheduledTransactionModalProps> 
                         />
 
                         {/* Amount */}
-                        <Text style={[styles.label, themeStyles.subText]}>Amount</Text>
+                        <Text style={[styles.label, themeStyles.subText]}>{t('scheduled.modal.amount')}</Text>
                         <TextInput
                             style={[styles.input, themeStyles.input]}
-                            placeholder="0.00"
+                            placeholder={t('scheduled.modal.amountPlaceholder')}
                             placeholderTextColor={isDark ? '#94a3b8' : '#aaa'}
                             keyboardType="numeric"
                             value={amount}
@@ -232,7 +234,7 @@ const AddScheduledTransactionModal: React.FC<AddScheduledTransactionModalProps> 
                         />
 
                         {/* Currency */}
-                        <Text style={[styles.label, themeStyles.subText]}>Currency</Text>
+                        <Text style={[styles.label, themeStyles.subText]}>{t('scheduled.modal.currency')}</Text>
                         <CurrencySelect
                             value={currency}
                             onChange={setCurrency}
@@ -240,7 +242,7 @@ const AddScheduledTransactionModal: React.FC<AddScheduledTransactionModalProps> 
                         />
 
                         {/* Category */}
-                        <Text style={[styles.label, themeStyles.subText]}>Category</Text>
+                        <Text style={[styles.label, themeStyles.subText]}>{t('scheduled.modal.category')}</Text>
                         <CategorySelect
                             value={category}
                             onChange={setCategory}
@@ -248,7 +250,7 @@ const AddScheduledTransactionModal: React.FC<AddScheduledTransactionModalProps> 
                         />
 
                         {/* Place */}
-                        <Text style={[styles.label, themeStyles.subText]}>Place</Text>
+                        <Text style={[styles.label, themeStyles.subText]}>{t('scheduled.modal.place')}</Text>
                         <PlaceSelect
                             value={place}
                             onChange={setPlace}
@@ -256,10 +258,10 @@ const AddScheduledTransactionModal: React.FC<AddScheduledTransactionModalProps> 
                         />
 
                         {/* Description */}
-                        <Text style={[styles.label, themeStyles.subText]}>Description</Text>
+                        <Text style={[styles.label, themeStyles.subText]}>{t('scheduled.modal.description')}</Text>
                         <TextInput
                             style={[styles.input, themeStyles.input]}
-                            placeholder="Description (optional)"
+                            placeholder={t('scheduled.modal.descriptionOptional')}
                             placeholderTextColor={isDark ? '#94a3b8' : '#aaa'}
                             value={desc}
                             onChangeText={setDesc}
@@ -267,7 +269,7 @@ const AddScheduledTransactionModal: React.FC<AddScheduledTransactionModalProps> 
 
                         {/* Status Toggle */}
                         <View style={styles.switchContainer}>
-                            <Text style={[styles.label, themeStyles.subText, { marginTop: 0, marginBottom: 0 }]}>Active Status</Text>
+                            <Text style={[styles.label, themeStyles.subText, { marginTop: 0, marginBottom: 0 }]}>{t('scheduled.modal.active')}</Text>
                             <Switch
                                 value={isActive}
                                 onValueChange={setIsActive}
@@ -288,7 +290,7 @@ const AddScheduledTransactionModal: React.FC<AddScheduledTransactionModalProps> 
                             {loading ? (
                                 <ActivityIndicator color="white" />
                             ) : (
-                                <Text style={styles.submitButtonText}>{editMode ? 'Save' : 'Add'}</Text>
+                                <Text style={styles.submitButtonText}>{editMode ? t('scheduled.modal.save') : t('scheduled.modal.add')}</Text>
                             )}
                         </TouchableOpacity>
 
@@ -299,7 +301,7 @@ const AddScheduledTransactionModal: React.FC<AddScheduledTransactionModalProps> 
                                 onPress={handleDelete}
                                 disabled={loading}
                             >
-                                <Text style={styles.deleteButtonText}>Delete Scheduled Transaction</Text>
+                                <Text style={styles.deleteButtonText}>{t('scheduled.modal.deleteTitle')}</Text>
                             </TouchableOpacity>
                         )}
                     </ScrollView>
